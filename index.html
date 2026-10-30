@@ -184,16 +184,16 @@
           </div>
 
           <!-- Logout Button -->
-          <button @click="logout" class="p-2 rounded-xl bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 transition-all" aria-label="Logout">
-            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-          </button>
-        </header>
+        <button @click="logout" class="p-2 rounded-xl bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 transition-all" aria-label="Logout">
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+        </button>
+      </header>
 
-        <!-- MAIN SCROLLABLE CONTENT BODY -->
-        <main class="flex-1 overflow-y-auto px-5 py-5 space-y-6 pb-24 relative">
+      <!-- MAIN SCROLLABLE CONTENT BODY -->
+      <main class="flex-1 overflow-y-auto px-5 py-5 space-y-6 pb-32 relative">
 
-          <!-- ==================== DASHBOARD ==================== -->
-          <div v-if="activeTab === 'dashboard'" class="space-y-6 animate-fadeIn">
+        <!-- ==================== DASHBOARD ==================== -->
+        <div v-if="activeTab === 'dashboard'" class="space-y-6 animate-fadeIn">
             
             <!-- QUOTE BANNER (Moved to top) -->
             <div class="bg-antracite rounded-2xl p-5 shadow-lg relative overflow-hidden">
