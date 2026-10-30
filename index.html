@@ -978,7 +978,8 @@
         };
 
         // Nutritional Plans Logic
-        const plans = ref([
+        const savedPlans = localStorage.getItem('still_plans');
+        const defaultPlans = [
           { 
             id: 2, name: 'Definizione Avanzata', status: 'active', results: 'In corso (-1.2kg)', 
             startDate: '2026-10-15', endDate: '2026-11-30',
@@ -989,7 +990,14 @@
                { id: 'pranzo', name: 'Pranzo', calories: 650, icon: '🍗', description: 'Pollo e riso.' }
             ] 
           }
-        ]);
+        ];
+        
+        const plans = ref(savedPlans ? JSON.parse(savedPlans) : defaultPlans);
+
+        // Auto-salvataggio dei piani nella memoria del telefono
+        watch(plans, (newPlans) => {
+          localStorage.setItem('still_plans', JSON.stringify(newPlans));
+        }, { deep: true });
         
         const selectedPlan = ref(null);
         
@@ -1442,9 +1450,16 @@
         const exportSelectedDates = ref([]);
         
         // Setup initial note for today to demonstrate the feature
+        const savedComments = localStorage.getItem('still_comments');
         const initComments = {};
         initComments[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`] = "Oggi mi sento pieno di energia, ricordiamoci di bere più acqua tra un pasto e l'altro!";
-        const commentsMap = ref(initComments);
+        
+        const commentsMap = ref(savedComments ? JSON.parse(savedComments) : initComments);
+
+        // Auto-salvataggio delle note nella memoria del telefono
+        watch(commentsMap, (newComments) => {
+          localStorage.setItem('still_comments', JSON.stringify(newComments));
+        }, { deep: true });
 
         const noteForToday = computed(() => {
           return commentsMap.value[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`];
