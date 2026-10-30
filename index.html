@@ -236,13 +236,17 @@
                 <h3 class="text-lg font-bold text-antracite">Il tuo menù di oggi</h3>
               </div>
               
-              <div ref="mealsContainer" id="meals-container" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-2 pt-1 px-1">
-                <div v-for="meal in meals" :key="meal.id" :id="'meal-' + meal.id" 
+              <div v-if="todayActiveMeals.length === 0" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft text-center mx-1">
+                <p class="text-sm text-gray-500 font-medium">Riposo o nessun pasto programmato per oggi.</p>
+              </div>
+
+              <div v-else ref="mealsContainer" id="meals-container" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-2 pt-1 px-1">
+                <div v-for="meal in todayActiveMeals" :key="meal.id" :id="'meal-' + meal.id" 
                      class="snap-center shrink-0 w-[85%] bg-white rounded-3xl p-5 border shadow-soft relative overflow-hidden flex flex-col justify-between transition-all"
-                     :class="currentMealId === meal.id ? 'border-salvia ring-4 ring-salvia/10' : 'border-gray-100'">
+                     :class="currentMealId === meal.id.split('_')[0] ? 'border-salvia ring-4 ring-salvia/10' : 'border-gray-100'">
                   
                   <!-- Etichetta Pasto Attuale -->
-                  <div v-if="currentMealId === meal.id" class="absolute top-0 right-0 bg-salvia text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                  <div v-if="currentMealId === meal.id.split('_')[0]" class="absolute top-0 right-0 bg-salvia text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
                     Ora
                   </div>
 
@@ -473,8 +477,8 @@
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
                 </button>
                 <div>
-                  <div class="text-[10px] font-bold text-viola tracking-widest uppercase">NUOVO INIZIO</div>
-                  <h2 class="text-2xl font-bold text-antracite leading-tight">Crea Piano</h2>
+                  <div class="text-[10px] font-bold text-viola tracking-widest uppercase">{{ editingPlanId ? 'MODIFICA' : 'NUOVO INIZIO' }}</div>
+                  <h2 class="text-2xl font-bold text-antracite leading-tight">{{ editingPlanId ? 'Modifica Piano' : 'Crea Piano' }}</h2>
                 </div>
               </div>
 
@@ -507,15 +511,111 @@
                 
               </div>
 
-              <!-- Button Salva -->
-              <button @click="saveNewPlan" class="w-full bg-viola text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                Salva e Crea Piano
+              <!-- Button Avanti -->
+              <button @click="goToBuilder" class="w-full bg-viola text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4">
+                Avanti
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </button>
 
             </div>
 
-            <!-- VISTA: DETTAGLIO PIANO -->
+            <!-- VISTA: BUILDER MENU (NEW) -->
+            <div v-if="nutritionView === 'builder'" class="space-y-5 animate-fadeIn">
+              <!-- Header -->
+              <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3">
+                  <button @click="nutritionView = 'create'" class="p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-viola hover:border-viola/30 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <div>
+                    <div class="text-[10px] font-bold text-viola tracking-widest uppercase">FASE 2</div>
+                    <h2 class="text-2xl font-bold text-antracite leading-tight">{{ editingPlanId ? 'Modifica Menù' : 'Costruisci Menù' }}</h2>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Settimane -->
+              <div class="flex items-center gap-2 overflow-x-auto hide-scrollbar pb-1">
+                <button v-for="(week, wIdx) in newPlanBuilder.weeks" :key="wIdx" 
+                        @click="newPlanBuilder.currentWeekIdx = wIdx"
+                        class="px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-colors"
+                        :class="newPlanBuilder.currentWeekIdx === wIdx ? 'bg-viola text-white shadow-md' : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50'">
+                  Settimana {{ wIdx + 1 }}
+                </button>
+                <button @click="addWeekToBuilder" class="px-3 py-2 rounded-xl text-xs font-bold bg-viola/10 text-viola whitespace-nowrap hover:bg-viola/20 transition-colors flex items-center gap-1">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                  Settimana
+                </button>
+              </div>
+
+              <!-- Giorni -->
+              <div class="bg-white rounded-3xl p-2 border border-gray-100 shadow-soft flex overflow-x-auto hide-scrollbar gap-1">
+                <button v-for="day in weekDays" :key="day"
+                        @click="newPlanBuilder.currentDay = day"
+                        class="flex-1 min-w-[45px] py-3 rounded-2xl flex flex-col items-center justify-center gap-1 transition-all"
+                        :class="newPlanBuilder.currentDay === day ? 'bg-viola/10 text-viola font-extrabold' : 'text-gray-400 font-bold hover:bg-gray-50'">
+                  <span class="text-xs">{{ day.substring(0,3) }}</span>
+                </button>
+              </div>
+
+              <!-- Pasti del giorno selezionato -->
+              <div class="space-y-4">
+                <div class="flex justify-between items-center px-1">
+                  <h3 class="text-sm font-bold text-antracite">Pasti di {{ newPlanBuilder.currentDay }}</h3>
+                </div>
+
+                <div v-if="currentBuilderMeals.length === 0" class="text-center py-6 bg-white rounded-3xl border border-dashed border-gray-200">
+                  <p class="text-xs text-gray-400 font-medium">Nessun pasto inserito.<br>Inizia ad aggiungere i pasti per questa giornata.</p>
+                </div>
+
+                <div v-for="(meal, mIdx) in currentBuilderMeals" :key="mIdx" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3 relative">
+                  <!-- Rimuovi Pasto -->
+                  <button @click="removeMealFromBuilder(mIdx)" class="absolute top-4 right-4 text-red-400 hover:text-red-500">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+
+                  <!-- Tipo Pasto -->
+                  <div class="pr-8">
+                    <select v-model="meal.type" class="w-full bg-gray-50 border border-gray-200 focus:border-viola rounded-xl p-2.5 text-sm font-bold text-antracite outline-none appearance-none">
+                      <option v-for="t in mealTypes" :key="t.id" :value="t.id">{{ t.icon }} {{ t.label }}</option>
+                    </select>
+                  </div>
+
+                  <!-- Slot Alimenti -->
+                  <div class="space-y-2">
+                    <div v-for="(item, iIdx) in meal.items" :key="iIdx" class="flex gap-2 items-center">
+                      <input type="text" v-model="meal.items[iIdx]" placeholder="Es: 50g Riso Basmati" 
+                             class="flex-1 bg-white border border-gray-200 focus:border-viola focus:ring-1 focus:ring-viola/20 rounded-xl p-2.5 text-xs font-medium text-antracite outline-none transition-all">
+                      <button v-if="meal.items.length > 1" @click="removeSlotFromMeal(meal, iIdx)" class="p-2 text-gray-400 hover:text-red-400">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  <button @click="addSlotToMeal(meal)" class="text-[10px] font-bold text-viola uppercase tracking-widest flex items-center gap-1 hover:opacity-80">
+                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Aggiungi Alimento
+                  </button>
+                </div>
+
+                <!-- Aggiungi Pasto Button -->
+              <button @click="addMealToBuilder" class="w-full py-3.5 border-2 border-dashed border-gray-200 bg-gray-50 rounded-2xl text-gray-500 font-bold text-xs hover:border-viola/40 hover:text-viola hover:bg-viola/5 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Nuovo Pasto
+              </button>
+            </div>
+
+            <!-- Button Salva Finale -->
+            <button @click="finalizeNewPlan" 
+                    :class="isPlanBuilderComplete ? 'bg-salvia text-white shadow-lg hover:bg-salvia/90' : 'bg-transparent text-salvia border-2 border-salvia hover:bg-salvia/5'"
+                    class="w-full font-bold py-4 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 mt-6">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+              {{ editingPlanId ? 'Salva Modifiche' : 'Salva Piano Definitivo' }}
+            </button>
+
+          </div>
+
+          <!-- VISTA: DETTAGLIO PIANO -->
             <div v-if="nutritionView === 'detail' && selectedPlan" class="space-y-5 animate-fadeIn">
               
               <!-- Header Dettaglio -->
@@ -579,7 +679,12 @@
               </div>
 
               <!-- PLAN ACTIONS -->
-              <div class="pt-6 pb-4">
+              <div class="pt-6 pb-4 space-y-3">
+                <button @click="editPlan(selectedPlan)" 
+                        class="w-full bg-white border-2 border-viola text-viola font-bold py-3.5 rounded-2xl shadow-sm hover:bg-viola/5 transition-all active:scale-95 flex justify-center items-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  Modifica Piano
+                </button>
                 <button v-if="selectedPlan.status === 'active'" 
                         @click="promptTerminatePlan" 
                         class="w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-sm hover:bg-viola/90 transition-all active:scale-95">
@@ -809,7 +914,7 @@
         const authLoading = ref(true); // Start loading while checking auth
 
         // Nutrition Feature States
-        const nutritionView = ref('list'); // 'list', 'detail', 'calendar', 'create'
+        const nutritionView = ref('list'); // 'list', 'detail', 'calendar', 'create', 'builder'
         
         // Modals State
         const customModal = ref({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
@@ -836,12 +941,20 @@
         const mealsContainer = ref(null);
         const currentMealId = ref(null);
 
+        const weekDays = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
+        const mealTypes = [
+          { id: 'colazione', label: 'Colazione', icon: '🥣' },
+          { id: 'spuntino_mattina', label: 'Spuntino Mattina', icon: '🍏' },
+          { id: 'pranzo', label: 'Pranzo', icon: '🍗' },
+          { id: 'spuntino_pomeriggio', label: 'Spuntino Pom.', icon: '🍌' },
+          { id: 'post_workout', label: 'Post Workout', icon: '💪' },
+          { id: 'cena', label: 'Cena', icon: '🐟' }
+        ];
+
+        // Legacy Fallback Meals (usati se non ci sono piani attivi custom)
         const meals = ref([
-          { id: 'colazione', name: 'Colazione', timeDisplay: '05:00 - 10:00', calories: 450, icon: '🥣', description: 'Porridge d\'avena, yogurt greco 0%, frutti di bosco e burro d\'arachidi.' },
-          { id: 'spuntino_mattina', name: 'Spuntino Mattina', timeDisplay: '10:00 - 12:00', calories: 150, icon: '🍏', description: 'Mela verde e 20g di mandorle sgusciate.' },
-          { id: 'pranzo', name: 'Pranzo', timeDisplay: '12:00 - 15:00', calories: 650, icon: '🍗', description: 'Riso basmati, petto di pollo ai ferri, zucchine grigliate.' },
-          { id: 'spuntino_pomeriggio', name: 'Spuntino Pomeriggio', timeDisplay: '15:00 - 19:00', calories: 250, icon: '🍌', description: 'Banana e shaker di proteine whey.' },
-          { id: 'cena', name: 'Cena', timeDisplay: '19:00+', calories: 500, icon: '🐟', description: 'Trancio di salmone al forno, patate e asparagi.' }
+          { id: 'colazione', name: 'Colazione', calories: 450, icon: '🥣', description: 'Porridge d\'avena, yogurt greco 0%, frutti di bosco.' },
+          { id: 'pranzo', name: 'Pranzo', calories: 650, icon: '🍗', description: 'Riso basmati, petto di pollo, zucchine grigliate.' }
         ]);
 
         const scrollToCurrentMeal = () => {
@@ -851,10 +964,12 @@
             else if (currentHour >= 10 && currentHour < 12) currentMealId.value = 'spuntino_mattina';
             else if (currentHour >= 12 && currentHour < 15) currentMealId.value = 'pranzo';
             else if (currentHour >= 15 && currentHour < 19) currentMealId.value = 'spuntino_pomeriggio';
-            else currentMealId.value = 'cena';
+            else if (currentHour >= 19 && currentHour < 21) currentMealId.value = 'cena';
+            else currentMealId.value = 'post_workout';
 
             if (!mealsContainer.value) return;
-            const targetElement = document.getElementById('meal-' + currentMealId.value);
+            // Tenta di scrollare al pasto con l'id (usando l'id standard se presente nel piano di oggi)
+            const targetElement = document.querySelector(`[id^='meal-${currentMealId.value}']`);
             if (targetElement) {
               const scrollPos = targetElement.offsetLeft - mealsContainer.value.offsetLeft - 20;
               mealsContainer.value.scrollTo({ left: scrollPos, behavior: 'smooth' });
@@ -867,94 +982,343 @@
           { 
             id: 2, name: 'Definizione Avanzata', status: 'active', results: 'In corso (-1.2kg)', 
             startDate: '2026-10-15', endDate: '2026-11-30',
-            grocery: ['Porridge', 'Yogurt Greco', 'Pollo', 'Riso Basmati', 'Salmone', 'Zucchine', 'Whey'],
-            meals: [...meals.value] // Copying default meals for prototype
-          },
-          { 
-            id: 1, name: 'Massa Pulita (Invernale)', status: 'inactive', results: '+3.5 kg', 
-            startDate: '2025-11-01', endDate: '2026-03-31',
-            grocery: ['Pasta', 'Carne Rossa', 'Uova', 'Burro Arachidi', 'Gallette'],
-            meals: [
-              { id: 'c', name: 'Colazione Max', calories: 800, icon: '🍳', description: 'Uova, bacon, pane tostato, succo d\'arancia.' },
-              { id: 'p', name: 'Pranzo Sostanzioso', calories: 1000, icon: '🍝', description: '200g Pasta al ragù, parmigiano, insalata.' }
-            ]
+            grocery: ['Porridge', 'Yogurt Greco', 'Pollo', 'Riso Basmati', 'Salmone'],
+            weeks: [], // Lasciamo vuoto per il fallback al legacy in dettaglio
+            meals: [ // Legacy array per mantenere compatibilità finché non crei un piano col builder
+               { id: 'colazione', name: 'Colazione', calories: 450, icon: '🥣', description: 'Porridge e yogurt.' },
+               { id: 'pranzo', name: 'Pranzo', calories: 650, icon: '🍗', description: 'Pollo e riso.' }
+            ] 
           }
         ]);
         
         const selectedPlan = ref(null);
         
-        // New Plan Data State
-        const newPlanData = ref({
-          name: '',
-          startDate: '',
-          endDate: '',
-          makeActive: true
-        });
+        // Builder Data State
+        const editingPlanId = ref(null);
+        const newPlanData = ref({ name: '', startDate: '', endDate: '', makeActive: true });
+        const newPlanBuilder = ref({ currentWeekIdx: 0, currentDay: 'Lunedì', weeks: [] });
+
+        const createEmptyWeek = () => {
+          const daysObj = {};
+          weekDays.forEach(d => daysObj[d] = []);
+          return { days: daysObj };
+        };
 
         const startNewPlan = () => {
+          editingPlanId.value = null;
           const today = new Date();
           const nextMonth = new Date(today);
           nextMonth.setMonth(today.getMonth() + 1);
 
           newPlanData.value = {
-            name: '',
-            startDate: today.toISOString().split('T')[0],
-            endDate: nextMonth.toISOString().split('T')[0],
-            makeActive: true
+            name: '', startDate: today.toISOString().split('T')[0], endDate: nextMonth.toISOString().split('T')[0], makeActive: true
           };
           nutritionView.value = 'create';
         };
 
-        const saveNewPlan = () => {
-          if (!newPlanData.value.name.trim()) {
-            showToastMessage("Dai un nome al tuo nuovo piano!");
-            return;
+        const editPlan = (plan) => {
+          editingPlanId.value = plan.id;
+          newPlanData.value = {
+            name: plan.name,
+            startDate: plan.startDate,
+            endDate: plan.endDate,
+            makeActive: plan.status === 'active'
+          };
+          
+          if (plan.weeks && plan.weeks.length > 0) {
+            // Carica la struttura esistente copiandola in profondità
+            newPlanBuilder.value = {
+              currentWeekIdx: 0,
+              currentDay: 'Lunedì',
+              weeks: JSON.parse(JSON.stringify(plan.weeks))
+            };
+          } else {
+            // Se si tenta di modificare un piano "legacy", inizializza vuoto
+            newPlanBuilder.value = {
+              currentWeekIdx: 0,
+              currentDay: 'Lunedì',
+              weeks: [createEmptyWeek()]
+            };
           }
-          if (!newPlanData.value.startDate || !newPlanData.value.endDate) {
-            showToastMessage("Inserisci una data di inizio e fine valide.");
-            return;
-          }
+          
+          nutritionView.value = 'create';
+        };
 
-          // Se vuole renderlo attivo, terminiamo l'attuale
+        const goToBuilder = () => {
+          if (!newPlanData.value.name.trim()) return showToastMessage("Dai un nome al tuo nuovo piano!");
+          if (!newPlanData.value.startDate || !newPlanData.value.endDate) return showToastMessage("Inserisci date valide.");
+          
+          // Inizializza il builder solo se stiamo creando un piano ex-novo, 
+          // se stiamo modificando (editingPlanId != null) manteniamo la struttura pre-caricata in editPlan()
+          if (editingPlanId.value === null && (!newPlanBuilder.value.weeks || newPlanBuilder.value.weeks.length === 0)) {
+            newPlanBuilder.value = {
+              currentWeekIdx: 0,
+              currentDay: 'Lunedì',
+              weeks: [createEmptyWeek()]
+            };
+          }
+          nutritionView.value = 'builder';
+        };
+
+        const addWeekToBuilder = () => newPlanBuilder.value.weeks.push(createEmptyWeek());
+        
+        const currentBuilderMeals = computed(() => {
+           return newPlanBuilder.value.weeks[newPlanBuilder.value.currentWeekIdx].days[newPlanBuilder.value.currentDay];
+        });
+
+        const addMealToBuilder = () => {
+           const currentDayMeals = newPlanBuilder.value.weeks[newPlanBuilder.value.currentWeekIdx].days[newPlanBuilder.value.currentDay];
+           let nextType = mealTypes[0].id; // Predefinito: Colazione
+           
+           // Se ci sono già pasti in questo giorno, trova il tipo dell'ultimo inserito
+           if (currentDayMeals.length > 0) {
+             const lastMealType = currentDayMeals[currentDayMeals.length - 1].type;
+             const lastIndex = mealTypes.findIndex(t => t.id === lastMealType);
+             
+             // Se non è l'ultimo tipo della lista, imposta quello successivo
+             if (lastIndex !== -1 && lastIndex < mealTypes.length - 1) {
+               nextType = mealTypes[lastIndex + 1].id;
+             }
+           }
+
+           currentDayMeals.push({
+             type: nextType, items: ['']
+           });
+        };
+
+        const removeMealFromBuilder = (idx) => {
+           newPlanBuilder.value.weeks[newPlanBuilder.value.currentWeekIdx].days[newPlanBuilder.value.currentDay].splice(idx, 1);
+        };
+
+        const addSlotToMeal = (meal) => {
+          meal.items.push('');
+        };
+
+        const removeSlotFromMeal = (meal, idx) => {
+          meal.items.splice(idx, 1);
+        };
+
+        const isPlanBuilderComplete = computed(() => {
+          if (!newPlanBuilder.value || !newPlanBuilder.value.weeks || newPlanBuilder.value.weeks.length === 0) return false;
+          
+          for (let wIdx = 0; wIdx < newPlanBuilder.value.weeks.length; wIdx++) {
+            const week = newPlanBuilder.value.weeks[wIdx];
+            for (let dIdx = 0; dIdx < weekDays.length; dIdx++) {
+              const day = weekDays[dIdx];
+              if (!week.days[day] || week.days[day].length === 0) {
+                return false;
+              }
+            }
+          }
+          return true;
+        });
+
+        const executeSavePlan = () => {
           if (newPlanData.value.makeActive) {
             plans.value.forEach(p => {
-              if (p.status === 'active') {
-                p.status = 'inactive';
-                p.results = 'Terminato';
-              }
+              if (p.status === 'active') { p.status = 'inactive'; p.results = 'Terminato'; }
             });
           }
 
-          const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
-
-          plans.value.unshift({
-            id: nextId,
-            name: newPlanData.value.name,
-            status: newPlanData.value.makeActive ? 'active' : 'inactive',
-            results: newPlanData.value.makeActive ? 'Appena Iniziato' : 'In Programma',
-            startDate: newPlanData.value.startDate,
-            endDate: newPlanData.value.endDate,
-            grocery: ['Acqua', 'Pollo', 'Riso', 'Verdure'], // Placeholder di base per la checklist
-            meals: [...meals.value] // Copia il menu base per ora
+          // [NUOVO] Generazione dinamica Lista della Spesa da tutti gli alimenti inseriti!
+          const uniqueItems = new Set();
+          newPlanBuilder.value.weeks.forEach(week => {
+            Object.values(week.days).forEach(dayMeals => {
+              dayMeals.forEach(meal => {
+                meal.items.forEach(item => {
+                  const trimmed = item.trim();
+                  if (trimmed) uniqueItems.add(trimmed);
+                });
+              });
+            });
           });
+          const generatedGroceryList = Array.from(uniqueItems);
 
-          showToastMessage(`Piano "${newPlanData.value.name}" creato con successo! 🚀`);
+          // Genera un menu "legacy compatibile" per il dettaglio prendendo i pasti del Lunedì della prima settimana
+          const mockMealsForDetail = [];
+          if (newPlanBuilder.value.weeks[0].days['Lunedì']) {
+             newPlanBuilder.value.weeks[0].days['Lunedì'].forEach((m, i) => {
+               const tInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
+               mockMealsForDetail.push({
+                 id: m.type + '_' + i, name: tInfo.label, icon: tInfo.icon, calories: '-', 
+                 description: m.items.filter(it => it.trim()!=='').join(', ') || 'Nessun dettaglio'
+               });
+             });
+          }
+
+          if (editingPlanId.value !== null) {
+            // Modifica piano esistente
+            const planToUpdate = plans.value.find(p => p.id === editingPlanId.value);
+            if (planToUpdate) {
+              planToUpdate.name = newPlanData.value.name;
+              if (newPlanData.value.makeActive) {
+                planToUpdate.status = 'active';
+                planToUpdate.results = 'In corso';
+              } else if (planToUpdate.status === 'active') {
+                planToUpdate.status = 'inactive';
+                planToUpdate.results = 'Terminato';
+              }
+              planToUpdate.startDate = newPlanData.value.startDate;
+              planToUpdate.endDate = newPlanData.value.endDate;
+              planToUpdate.grocery = generatedGroceryList.length > 0 ? generatedGroceryList : ['Nessun alimento inserito'];
+              planToUpdate.weeks = JSON.parse(JSON.stringify(newPlanBuilder.value.weeks));
+              planToUpdate.meals = mockMealsForDetail;
+            }
+            showToastMessage(`Piano "${newPlanData.value.name}" modificato con successo! ✏️`);
+            editingPlanId.value = null; // Resetta stato
+          } else {
+            // Creazione nuovo piano
+            const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
+            plans.value.unshift({
+              id: nextId,
+              name: newPlanData.value.name,
+              status: newPlanData.value.makeActive ? 'active' : 'inactive',
+              results: newPlanData.value.makeActive ? 'Appena Iniziato' : 'In Programma',
+              startDate: newPlanData.value.startDate,
+              endDate: newPlanData.value.endDate,
+              grocery: generatedGroceryList.length > 0 ? generatedGroceryList : ['Nessun alimento inserito'],
+              weeks: JSON.parse(JSON.stringify(newPlanBuilder.value.weeks)), // Salva struttura complessa
+              meals: mockMealsForDetail // Fallback per le vecchie viste
+            });
+            showToastMessage(`Piano "${newPlanData.value.name}" creato con successo! 🚀`);
+          }
+
           nutritionView.value = 'list';
         };
 
+        const finalizeNewPlan = () => {
+          // VALIDAZIONE: Controllo che tutti i giorni di tutte le settimane abbiano almeno un pasto
+          let hasEmptyDays = false;
+          let firstEmptyDayMsg = '';
+
+          for (let wIdx = 0; wIdx < newPlanBuilder.value.weeks.length; wIdx++) {
+            const week = newPlanBuilder.value.weeks[wIdx];
+            for (let dIdx = 0; dIdx < weekDays.length; dIdx++) {
+              const day = weekDays[dIdx];
+              if (!week.days[day] || week.days[day].length === 0) {
+                hasEmptyDays = true;
+                firstEmptyDayMsg = `Settimana ${wIdx + 1}: manca il menù di ${day}.`;
+                break;
+              }
+            }
+            if (hasEmptyDays) break;
+          }
+
+          if (hasEmptyDays) {
+            // Blocca il salvataggio se manca qualche giorno
+            showToastMessage(`Devi inserire i pasti per tutta la settimana prima di salvare! 🛑 ${firstEmptyDayMsg}`);
+            return;
+          }
+
+          // CONFERMA: Se tutto è compilato, chiedi conferma
+          const confirmTitle = editingPlanId.value ? "Salva Modifiche" : "Salva Piano Definitivo";
+          const confirmMsg = editingPlanId.value 
+             ? "Sei sicuro di voler salvare le modifiche a questo piano?" 
+             : "Hai completato l'inserimento? Sei sicuro di voler salvare e attivare questo nuovo piano?";
+             
+          showConfirm(confirmTitle, confirmMsg, () => {
+               executeSavePlan();
+          });
+        };
+
         const activePlan = computed(() => plans.value.find(p => p.status === 'active'));
+
+        // Computed per Dashboard: Prende i pasti di "oggi" reali dal piano attivo
+        const todayActiveMeals = computed(() => {
+          if (!activePlan.value) return meals.value; // Fallback generico
+
+          // Se il piano ha la struttura a settimane (creata dal nuovo builder)
+          if (activePlan.value.weeks && activePlan.value.weeks.length > 0) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Azzera l'ora per evitare calcoli errati
+            
+            const startDate = new Date(activePlan.value.startDate);
+            startDate.setHours(0, 0, 0, 0);
+
+            let weeksElapsed = 0;
+            // Calcola le settimane passate solo se il piano è già iniziato
+            if (today >= startDate) {
+               const diffTime = today.getTime() - startDate.getTime();
+               const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+               weeksElapsed = Math.floor(diffDays / 7);
+            }
+
+            const weekIdx = weeksElapsed % activePlan.value.weeks.length;
+            const dayOfWeek = today.getDay(); // 0 Domenica, 1 Lunedì...
+            const mappedDay = dayOfWeek === 0 ? 'Domenica' : weekDays[dayOfWeek - 1];
+
+            const dayMeals = activePlan.value.weeks[weekIdx].days[mappedDay] || [];
+            
+            return dayMeals.map((m, i) => {
+              const typeInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
+              return {
+                id: m.type + '_' + i,
+                name: typeInfo.label,
+                icon: typeInfo.icon,
+                calories: '-',
+                description: m.items.filter(it => it.trim() !== '').join(', ') || 'Nessun dettaglio.'
+              }
+            });
+          } 
+          
+          // Fallback ai mock del piano (vecchio formato)
+          return activePlan.value.meals || meals.value;
+        });
         
         const checklistItems = ref([]);
-        watch(activePlan, (newPlan) => {
-           if(newPlan) {
-              // Pre-fill checklist with unchecked status
-              checklistItems.value = newPlan.grocery.map(item => ({ name: item, checked: false }));
-           } else {
-              checklistItems.value = [];
-           }
-        }, { immediate: true });
+
+        // [NUOVO] Calcola solo la spesa di domani
+        const getTomorrowGrocery = (plan) => {
+          if (!plan) return [];
+          
+          if (plan.weeks && plan.weeks.length > 0) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            tomorrow.setHours(0, 0, 0, 0);
+            
+            const startDate = new Date(plan.startDate);
+            startDate.setHours(0, 0, 0, 0);
+
+            let weeksElapsed = 0;
+            if (tomorrow >= startDate) {
+               const diffTime = tomorrow.getTime() - startDate.getTime();
+               const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+               weeksElapsed = Math.floor(diffDays / 7);
+            }
+
+            const weekIdx = weeksElapsed % plan.weeks.length;
+            const dayOfWeek = tomorrow.getDay(); // 0 Domenica, 1 Lunedì...
+            const mappedDay = dayOfWeek === 0 ? 'Domenica' : weekDays[dayOfWeek - 1];
+
+            const tomorrowMeals = plan.weeks[weekIdx].days[mappedDay] || [];
+            const uniqueItems = new Set();
+            tomorrowMeals.forEach(meal => {
+               meal.items.forEach(item => {
+                  const trimmed = item.trim();
+                  if (trimmed) uniqueItems.add(trimmed);
+               });
+            });
+            return Array.from(uniqueItems);
+          }
+          return plan.grocery || []; // legacy fallback
+        };
 
         const openGroceryModal = () => {
+           const itemsForTomorrow = getTomorrowGrocery(activePlan.value);
+           
+           // Mantiene la spunta sugli elementi che avevi già checkato prima di chiudere la modale
+           const currentChecked = new Set(checklistItems.value.filter(i => i.checked).map(i => i.name));
+           
+           checklistItems.value = itemsForTomorrow.map(itemName => ({
+               name: itemName,
+               checked: currentChecked.has(itemName)
+           }));
+           
+           if(checklistItems.value.length === 0) {
+              showToastMessage("Nessun pasto programmato per domani. Giornata libera!");
+              return;
+           }
+
            groceryModal.value.isOpen = true;
         };
         
@@ -1183,17 +1547,30 @@
           isAuthenticated,
           authLoading,
           showGroceryReminder,
-          meals,
           mealsContainer,
           currentMealId,
+          todayActiveMeals,
           login,
           logout,
           nutritionView,
           sortedPlans,
           selectedPlan,
+          editingPlanId, // <-- Esportato per poterlo usare in HTML
           newPlanData,
           startNewPlan,
-          saveNewPlan,
+          editPlan,      // <-- Esportato per poterlo usare in HTML
+          goToBuilder,
+          newPlanBuilder,
+          weekDays,
+          mealTypes,
+          addWeekToBuilder,
+          currentBuilderMeals,
+          addMealToBuilder,
+          removeMealFromBuilder,
+          addSlotToMeal,
+          removeSlotFromMeal,
+          isPlanBuilderComplete,
+          finalizeNewPlan,
           selectedPlanTotalCalories,
           openPlan,
           formatDate,
