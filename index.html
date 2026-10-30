@@ -821,17 +821,8 @@
     </div>
   </div>
 
-  <!-- FIREBASE & VUE APPLICATION LOGIC -->
-  <script type="module">
-    // Firebase Imports
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-    // Firebase Initialization
-    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-
+  <!-- VUE APPLICATION LOGIC -->
+  <script>
     // Vue Application Setup
     const { createApp, ref, onMounted, watch, nextTick, computed } = Vue;
 
@@ -1195,60 +1186,24 @@
           }
         });
 
-        // Lifecycle Hooks
+        // Lifecycle Hooks: avvio diretto in modalità demo, senza autenticazione esterna
         onMounted(() => {
-          onAuthStateChanged(auth, (user) => {
-            if (user) {
-              isAuthenticated.value = true;
-              if (activeTab.value === 'dashboard') scrollToCurrentMeal();
-            } else {
-              isAuthenticated.value = false;
-            }
-            authLoading.value = false;
-          });
+          authLoading.value = false;
         });
 
-        // Methods
+        // Methods: accesso dimostrativo locale, senza account
         const login = async () => {
           authLoading.value = true;
-          try {
-            // Se Firebase non è configurato con le chiavi, simula il login per farti testare l'app
-            if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
-              console.warn("Firebase non configurato. Simulo l'accesso per il prototipo.");
-              setTimeout(() => {
-                isAuthenticated.value = true;
-                authLoading.value = false;
-                if (activeTab.value === 'dashboard') scrollToCurrentMeal();
-              }, 800);
-              return;
-            }
-
-            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
-            if (token) {
-                await signInWithCustomToken(auth, token);
-            } else {
-                await signInAnonymously(auth);
-            }
-          } catch (error) {
-            console.error("Errore durante il login Firebase:", error);
-            // Fallback in caso di errore di configurazione nel prototipo
+          setTimeout(() => {
             isAuthenticated.value = true;
             authLoading.value = false;
             if (activeTab.value === 'dashboard') scrollToCurrentMeal();
-          }
+          }, 300);
         };
 
         const logout = async () => {
-          try {
-            if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
-               await signOut(auth);
-            }
-            isAuthenticated.value = false;
-            activeTab.value = 'dashboard';
-          } catch (error) {
-            console.error("Errore durante il logout:", error);
-            isAuthenticated.value = false;
-          }
+          isAuthenticated.value = false;
+          activeTab.value = 'dashboard';
         };
 
         return {
