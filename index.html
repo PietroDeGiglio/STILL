@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="it" class="h-full bg-[#F6F5F2]">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>STILL - IERI. OGGI. DOMANI.</title>
+  
+  <!-- App Icon / Favicon (Versione Sfondo Nero) -->
+  <link rel="icon" href="image_aeb1b5.jpg" type="image/jpeg">
+  <link rel="apple-touch-icon" href="image_aeb1b5.jpg">
+  
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Vue 3 CDN -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            antracite: '#1D1D1D',
+            salvia: '#10B981', /* Verde più vivace e allegro (Smeraldo) */
+            viola: '#8B5CF6',  /* Viola più luminoso e vibrante */
+            arancione: '#F5A623',
+            bianco: '#F6F5F2'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif']
+          },
+          boxShadow: {
+            'soft': '0 4px 20px rgba(0, 0, 0, 0.05)',
+            'salvia-glow': '0 0 15px rgba(16, 185, 129, 0.4)'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #A8B69A; }
+    
+    button, a, input { -webkit-tap-highlight-color: transparent; }
+
+    .animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    /* Hide scrollbar for the horizontal slider */
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* Animazione Gradiente Cangiante per STILL & Pulsante */
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    .cangiante-text {
+      background: linear-gradient(135deg, #20C997, #F5A623, #7A4DF1, #20C997);
+      background-size: 300% 300%;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: gradientShift 6s ease infinite;
+    }
+    
+    .cangiante-btn {
+      background: linear-gradient(135deg, #20C997, #F5A623, #7A4DF1, #20C997);
+      background-size: 300% 300%;
+      animation: gradientShift 6s ease infinite;
+    }
+    
+    /* Animazioni fluttuanti (Soft & separate) per gli aloni */
+    @keyframes pulseSoft1 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+      50% { transform: translate(10px, 15px) scale(1.05); opacity: 0.9; }
+    }
+    @keyframes pulseSoft2 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+      50% { transform: translate(-15px, 10px) scale(1.05); opacity: 0.9; }
+    }
+    @keyframes pulseSoft3 {
+      0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+      50% { transform: translate(10px, -15px) scale(1.05); opacity: 0.9; }
+    }
+    .animate-float-1 { animation: pulseSoft1 8s ease-in-out infinite; }
+    .animate-float-2 { animation: pulseSoft2 9s ease-in-out infinite; }
+    .animate-float-3 { animation: pulseSoft3 10s ease-in-out infinite; }
+
+    /* Classe per la maschera del Logo (Sicura per GitHub) */
+    .logo-mask {
+      -webkit-mask-image: url('LOGO.svg');
+      mask-image: url('LOGO.svg');
+      -webkit-mask-size: contain;
+      mask-size: contain;
+      -webkit-mask-repeat: no-repeat;
+      mask-repeat: no-repeat;
+      -webkit-mask-position: center;
+      mask-position: center;
+    }
+  </style>
+</head>
+
+<body class="h-full font-sans text-antracite antialiased selection:bg-salvia selection:text-white flex flex-col justify-center items-center p-0 sm:p-4 bg-gray-100">
+
+  <div id="app" class="w-full h-full flex flex-col justify-center items-center">
+    
+    <!-- Top Display Switcher for Desktop Preview -->
+    <div class="hidden sm:flex items-center gap-3 mb-3 text-xs text-gray-500 bg-white px-4 py-2 rounded-full border border-gray-200 shadow-sm">
+      <span class="font-semibold text-antracite">STILL App Preview</span>
+      <span class="text-gray-300">|</span>
+      <button @click="frameMode = 'phone'" :class="frameMode === 'phone' ? 'text-salvia font-bold' : 'hover:text-antracite'" class="transition-colors">Vista Smartphone</button>
+      <span class="text-gray-300">•</span>
+      <button @click="frameMode = 'full'" :class="frameMode === 'full' ? 'text-salvia font-bold' : 'hover:text-antracite'" class="transition-colors">Schermo Intero</button>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <div :class="frameMode === 'phone' ? 'w-full max-w-[420px] h-[100vh] sm:h-[860px] sm:rounded-[44px] sm:border-[8px] border-gray-800 shadow-2xl overflow-hidden' : 'w-full max-w-4xl h-full min-h-[90vh] sm:rounded-3xl border border-gray-200 shadow-soft overflow-hidden'" 
+         class="bg-bianco relative flex flex-col transition-all duration-300">
+      
+      <!-- TOP STATUS BAR -->
+      <div class="bg-bianco px-6 pt-3 pb-1 flex justify-between items-center text-[11px] text-antracite font-medium tracking-wider select-none z-20">
+        <span>9:41</span>
+        <div v-if="frameMode === 'phone'" class="hidden sm:block w-24 h-4 bg-black rounded-full mx-auto"></div>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L4.35 19.4c-.39.39-.39 1.02 0 1.41.39.39 1.02.39 1.41 0l1.9-1.9C9.21 19.53 10.56 20 12 20c4.97 0 9-4.03 9-9s-4.03-9-9-9zm0 15c-3.31 0-6-2.69-6-6s2.69-6 6-6 6 2.69 6 6-2.69 6-6 6z"/></svg>
+          <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M12 3C6.48 3 2 7.48 2 13s4.48 10 10 10 10-4.48 10-10S17.52 3 12 3zm1 15h-2v-6h2v6zm0-8h-2V7h2v3z"/></svg>
+          <div class="w-5 h-2.5 border border-antracite rounded-sm p-0.5 flex items-center">
+            <div class="h-full w-full bg-antracite rounded-xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ==================== PUBLIC LANDING PAGE ==================== -->
+      <div v-if="!isAuthenticated && !authLoading" class="flex-1 flex flex-col items-center justify-center p-6 space-y-8 animate-fadeIn relative overflow-hidden bg-bianco">
+        <!-- Decorative Background (Aloni Soft, separati e non invasivi) -->
+        <div class="absolute -top-10 -left-10 w-64 h-64 bg-salvia/15 rounded-full blur-[80px] animate-float-1 pointer-events-none"></div>
+        <div class="absolute top-[35%] -right-10 w-64 h-64 bg-arancione/15 rounded-full blur-[80px] animate-float-2 pointer-events-none"></div>
+        <div class="absolute -bottom-10 -left-10 w-72 h-72 bg-viola/15 rounded-full blur-[80px] animate-float-3 pointer-events-none"></div>
+
+        <div class="relative z-10 flex flex-col items-center space-y-6 text-center w-full">
+          <!-- Logo SVG Vettoriale Standalone (Senza sfondo o contorno bianco) -->
+          <div class="w-36 h-36 flex items-center justify-center relative drop-shadow-md">
+            <div class="w-full h-full cangiante-btn logo-mask"></div>
+          </div>
+          
+          <div class="space-y-4 text-center w-full flex flex-col items-center justify-center">
+            <!-- Titolo STILL Cangiante e perfettamente centrato -->
+            <h1 class="text-4xl sm:text-5xl font-black tracking-[0.2em] text-center cangiante-text uppercase translate-x-[0.1em]">STILL</h1>
+            
+            <div class="font-extrabold space-y-2 text-center w-full flex flex-col items-center justify-center">
+              <div class="text-xl tracking-wider text-center flex items-center justify-center gap-2 cangiante-text font-black">
+                <span>IERI.</span> 
+                <span>OGGI.</span> 
+                <span>DOMANI.</span>
+              </div>
+              <div class="text-[12px] font-black uppercase tracking-widest text-center flex items-center justify-center gap-2 mt-1 cangiante-text">
+                <span>ANCORA.</span> 
+                <span>ANCORA.</span> 
+                <span>ANCORA.</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pulsante di Accedi Cangiante -->
+        <div class="w-full relative z-10 pt-4 max-w-xs sm:max-w-none">
+          <button @click="login" class="w-full cangiante-btn text-white font-extrabold py-4 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 hover:opacity-95">
+            <span>Accedi all'Area Privata</span>
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+          <p class="text-center text-[10px] font-bold text-gray-400 tracking-widest mt-4">Powered by Pietro De Giglio</p>
+        </div>
+      </div>
+
+      <!-- Loading State -->
+      <div v-else-if="authLoading" class="flex-1 flex items-center justify-center">
+        <div class="w-8 h-8 border-4 border-salvia border-t-transparent rounded-full animate-spin"></div>
+      </div>
+
+      <!-- ==================== PRIVATE APP AREA ==================== -->
+      <template v-else>
+        <!-- HEADER -->
+        <header class="bg-bianco/90 backdrop-blur-md px-5 py-3 flex items-center justify-between border-b border-gray-200 z-20 sticky top-0">
+          <!-- Profile/Menu Trigger -->
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-full bg-salvia/20 text-salvia flex items-center justify-center font-bold text-sm border border-salvia/30">
+              P
+            </div>
+          </div>
+
+          <!-- Brand Logo Mini Vettoriale (Senza box bianco) -->
+          <div class="flex items-center gap-2">
+            <div class="w-8 h-8 flex items-center justify-center">
+              <div class="w-full h-full cangiante-btn logo-mask"></div>
+            </div>
+            <span class="font-extrabold text-base tracking-[0.2em] text-antracite">STILL</span>
+          </div>
+
+          <!-- Logout Button -->
+          <button @click="logout" class="p-2 rounded-xl bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 transition-all" aria-label="Logout">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          </button>
+        </header>
+
+        <!-- MAIN SCROLLABLE CONTENT BODY -->
+        <main class="flex-1 overflow-y-auto px-5 py-5 space-y-6 pb-24 relative">
+
+          <!-- ==================== DASHBOARD ==================== -->
+          <div v-if="activeTab === 'dashboard'" class="space-y-6 animate-fadeIn">
+            
+            <!-- QUOTE BANNER (Moved to top) -->
+            <div class="bg-antracite rounded-2xl p-5 shadow-lg relative overflow-hidden">
+              <svg class="absolute right-0 top-0 w-32 h-32 text-white/5" fill="currentColor" viewBox="0 0 100 100"><path d="M 10 90 L 50 30 L 90 90 Z"/></svg>
+              <p class="relative z-10 text-sm font-semibold italic text-bianco leading-snug">
+                "NON CONTA DA DOVE PARTI. CONTA DOVE <span class="text-salvia font-bold uppercase not-italic">DECIDI DI ANDARE.</span>"
+              </p>
+            </div>
+
+            <!-- User Greeting -->
+            <div class="space-y-1">
+              <h1 class="text-3xl font-bold tracking-tight text-antracite">Ciao Pietro,</h1>
+              <p class="text-sm text-gray-500 font-medium">Ogni giorno è un passo avanti verso la vetta.</p>
+            </div>
+
+            <!-- APPUNTI DI OGGI (Visibile solo se c'è una nota) -->
+            <div v-if="noteForToday" class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4 flex gap-3 items-start shadow-sm mt-4 animate-fadeIn">
+              <div class="text-salvia text-xl pt-0.5">💡</div>
+              <div>
+                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest mb-1">La tua nota di oggi</div>
+                <p class="text-sm text-antracite font-medium leading-relaxed">{{ noteForToday }}</p>
+              </div>
+            </div>
+
+            <!-- GROCERY BANNER (DASHBOARD) -->
+            <div v-if="activePlan" @click="openGroceryModal" class="bg-viola/10 border border-viola/30 rounded-3xl p-4 flex gap-4 items-center shadow-sm cursor-pointer hover:bg-viola/15 transition-all mt-4 animate-fadeIn">
+              <div class="w-12 h-12 rounded-2xl bg-viola/20 flex items-center justify-center text-2xl flex-shrink-0">🛒</div>
+              <div class="flex-1">
+                <h4 class="text-sm font-extrabold text-viola leading-tight">Il tuo frigo è pronto per domani?</h4>
+                <p class="text-[11px] text-antracite font-medium mt-1 leading-snug">Tocca qui per la checklist e condividi quello che ti manca.</p>
+              </div>
+              <div class="text-viola">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              </div>
+            </div>
+
+            <!-- HORIZONTAL MEALS SLIDER -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center px-1">
+                <h3 class="text-lg font-bold text-antracite">Il tuo menù di oggi</h3>
+              </div>
+              
+              <div ref="mealsContainer" id="meals-container" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-2 pt-1 px-1">
+                <div v-for="meal in meals" :key="meal.id" :id="'meal-' + meal.id" 
+                     class="snap-center shrink-0 w-[85%] bg-white rounded-3xl p-5 border shadow-soft relative overflow-hidden flex flex-col justify-between transition-all"
+                     :class="currentMealId === meal.id ? 'border-salvia ring-4 ring-salvia/10' : 'border-gray-100'">
+                  
+                  <!-- Etichetta Pasto Attuale -->
+                  <div v-if="currentMealId === meal.id" class="absolute top-0 right-0 bg-salvia text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                    Ora
+                  </div>
+
+                  <div>
+                    <div class="flex items-center gap-3 mb-3">
+                      <div class="w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-2xl border border-salvia/20">{{ meal.icon }}</div>
+                      <div>
+                        <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
+                        <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">{{ meal.calories }} kcal</span>
+                      </div>
+                    </div>
+                    <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- ALLENAMENTO DI OGGI (NEW PREVIEW) -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center px-1">
+                <h3 class="text-lg font-bold text-antracite">Workout di oggi</h3>
+                <span class="text-xs font-bold text-arancione bg-arancione/10 px-2 py-1 rounded-md">Push Upper</span>
+              </div>
+              
+              <div @click="activeTab = 'allenamento'" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-colors flex items-center gap-4 relative overflow-hidden">
+                <div class="absolute right-0 top-0 bottom-0 w-12 bg-arancione/5 flex items-center justify-center text-arancione">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-antracite">Allenamento Forza</h4>
+                  <p class="text-xs text-gray-500 font-medium mt-0.5">4 Esercizi • 45 min stimati</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="grid grid-cols-2 gap-4">
+              <div @click="activeTab = 'progress'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-viola/50 transition-colors">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 leading-tight">Var. Peso Iniziale</div>
+                <div class="flex items-baseline gap-1 mt-1">
+                  <span class="text-2xl font-extrabold text-antracite">-4,2</span>
+                  <span class="text-sm font-semibold text-gray-500">kg</span>
+                </div>
+              </div>
+
+              <div @click="activeTab = 'nutrition'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-salvia/50 transition-colors flex flex-col justify-between">
+                <div>
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 leading-tight">Calorie Oggi</div>
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-xl font-extrabold text-antracite">1.850</span>
+                    <span class="text-xs font-semibold text-gray-500">/ 2.350</span>
+                  </div>
+                </div>
+                <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-salvia h-full rounded-full" style="width: 78%"></div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== ALLENAMENTO (NEW) ==================== -->
+          <div v-if="activeTab === 'allenamento'" class="space-y-6 animate-fadeIn">
+            <div>
+              <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">DISCIPLINA</div>
+              <h2 class="text-2xl font-bold text-antracite">Allenamento</h2>
+            </div>
+            
+            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center justify-center space-y-4">
+              <div class="w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+              </div>
+              <div>
+                <h3 class="font-bold text-antracite text-lg">Work in Progress</h3>
+                <p class="text-sm text-gray-500 mt-1">La sezione arancione dedicata ai tuoi workout sarà sviluppata qui a breve.</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- ==================== PROGRESSI ==================== -->
+          <div v-if="activeTab === 'progress'" class="space-y-6 animate-fadeIn">
+            
+            <div>
+              <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">RISULTATI</div>
+              <h2 class="text-2xl font-bold text-antracite">I tuoi Progressi</h2>
+            </div>
+
+            <!-- WEIGHT CHART -->
+            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-4">
+              <div class="flex justify-between items-end">
+                <div>
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PESO ATTUALE</span>
+                  <div class="text-3xl font-extrabold text-antracite mt-1">
+                    79,4 <span class="text-sm font-semibold text-gray-400">kg</span>
+                  </div>
+                </div>
+                <span class="px-2 py-1 bg-salvia/10 text-salvia text-xs font-bold rounded-lg">-3,2 kg</span>
+              </div>
+
+              <!-- SVG Line Chart (Light Theme) -->
+              <div class="relative h-40 w-full pt-4">
+                <svg class="w-full h-full overflow-visible" viewBox="0 0 300 150">
+                  <line x1="0" y1="30" x2="300" y2="30" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                  <line x1="0" y1="75" x2="300" y2="75" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                  <line x1="0" y1="120" x2="300" y2="120" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                  
+                  <defs>
+                    <linearGradient id="lightAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#A8B69A" stop-opacity="0.3"/>
+                      <stop offset="100%" stop-color="#A8B69A" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+
+                  <polygon points="20,140 20,20 80,45 140,65 200,80 270,100 270,140" fill="url(#lightAreaGrad)" />
+                  <polyline points="20,20 80,45 140,65 200,80 270,100" fill="none" stroke="#A8B69A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                  
+                  <!-- Data Points -->
+                  <g v-for="(pt, index) in [{x:20,y:20,w:82.6},{x:80,y:45,w:81.2},{x:140,y:65,w:80.5},{x:200,y:80,w:79.9},{x:270,y:100,w:79.4}]" :key="index">
+                    <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#A8B69A" stroke-width="3"/>
+                    <text :x="pt.x" :y="pt.y - 12" text-anchor="middle" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.w }}</text>
+                  </g>
+                </svg>
+              </div>
+            </div>
+
+            <!-- CIRCONFERENZE (New Section) -->
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Circonferenze</h4>
+              
+              <div class="space-y-2">
+                <!-- Petto -->
+                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">👕</div>
+                    <span class="text-sm font-bold text-antracite">Petto</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 line-through">102 cm</span>
+                    <span class="text-sm font-extrabold text-salvia flex items-center gap-1">
+                      98 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Braccia -->
+                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">💪</div>
+                    <span class="text-sm font-bold text-antracite">Braccia</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 line-through">38 cm</span>
+                    <span class="text-sm font-extrabold text-viola flex items-center gap-1">
+                      39 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
+                    </span>
+                  </div>
+                </div>
+
+                <!-- Vita -->
+                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">📏</div>
+                    <span class="text-sm font-bold text-antracite">Vita</span>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-400 line-through">84 cm</span>
+                    <span class="text-sm font-extrabold text-salvia flex items-center gap-1">
+                      81 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+
+          <!-- ==================== NUTRIZIONE ==================== -->
+          <div v-if="activeTab === 'nutrition'" class="space-y-6 animate-fadeIn">
+            
+            <!-- VISTA: LISTA DEI PIANI -->
+            <div v-if="nutritionView === 'list'" class="space-y-5 animate-fadeIn">
+              <div class="flex justify-between items-center">
+                <div>
+                  <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">ALIMENTAZIONE</div>
+                  <h2 class="text-2xl font-bold text-antracite">I tuoi Piani</h2>
+                </div>
+              </div>
+
+              <!-- Lista Piani -->
+              <div class="space-y-3">
+                <div v-for="plan in sortedPlans" :key="plan.id" 
+                     @click="openPlan(plan)"
+                     class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-salvia/50 transition-all flex items-center justify-between group">
+                  <div class="flex items-center gap-4">
+                    <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm"
+                         :class="plan.status === 'active' ? 'bg-salvia/10 text-salvia border border-salvia/20' : 'bg-gray-100 text-gray-400'">
+                      🍽️
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h4 class="font-extrabold text-antracite text-base group-hover:text-salvia transition-colors">{{ plan.name }}</h4>
+                        <span v-if="plan.status === 'active'" class="text-[9px] font-bold uppercase tracking-wider bg-salvia/10 text-salvia px-2 py-0.5 rounded-md">Attivo</span>
+                      </div>
+                      <p class="text-xs text-gray-500 font-medium mt-0.5">Dal {{ formatDate(plan.startDate) }} al {{ formatDate(plan.endDate) }}</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 group-hover:text-salvia transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Aggiungi nuovo piano -->
+              <button @click="startNewPlan" class="w-full py-4 border-2 border-dashed border-viola/40 bg-viola/5 rounded-3xl text-viola font-bold text-sm hover:border-viola hover:bg-viola/10 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                Crea Nuovo Piano
+              </button>
+            </div>
+
+            <!-- VISTA: CREA NUOVO PIANO -->
+            <div v-if="nutritionView === 'create'" class="space-y-5 animate-fadeIn">
+              <!-- Header -->
+              <div class="flex items-center gap-3 mb-2">
+                <button @click="nutritionView = 'list'" class="p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-viola hover:border-viola/30 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <div>
+                  <div class="text-[10px] font-bold text-viola tracking-widest uppercase">NUOVO INIZIO</div>
+                  <h2 class="text-2xl font-bold text-antracite leading-tight">Crea Piano</h2>
+                </div>
+              </div>
+
+              <!-- Form Creazione -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-5">
+                
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Nome del Piano</label>
+                  <input type="text" v-model="newPlanData.name" placeholder="Es: Definizione Estiva, Massa..." 
+                         class="w-full bg-gray-50 border border-gray-200 focus:border-viola focus:ring-2 focus:ring-viola/20 rounded-2xl p-3.5 text-sm font-semibold text-antracite outline-none transition-all placeholder:font-medium">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Data Inizio</label>
+                    <input type="date" v-model="newPlanData.startDate" 
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-viola focus:ring-2 focus:ring-viola/20 rounded-2xl p-3 text-sm font-semibold text-antracite outline-none transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Data Fine</label>
+                    <input type="date" v-model="newPlanData.endDate" 
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-viola focus:ring-2 focus:ring-viola/20 rounded-2xl p-3 text-sm font-semibold text-antracite outline-none transition-all">
+                  </div>
+                </div>
+
+                <label class="flex items-center gap-3 p-4 bg-viola/5 border border-viola/20 rounded-2xl cursor-pointer hover:bg-viola/10 transition-colors mt-2">
+                  <input type="checkbox" v-model="newPlanData.makeActive" class="w-5 h-5 text-viola rounded focus:ring-viola border-viola/30 accent-viola">
+                  <span class="text-sm font-bold text-viola">Imposta come piano attivo</span>
+                </label>
+                
+              </div>
+
+              <!-- Button Salva -->
+              <button @click="saveNewPlan" class="w-full bg-viola text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                Salva e Crea Piano
+              </button>
+
+            </div>
+
+            <!-- VISTA: DETTAGLIO PIANO -->
+            <div v-if="nutritionView === 'detail' && selectedPlan" class="space-y-5 animate-fadeIn">
+              
+              <!-- Header Dettaglio -->
+              <div class="flex justify-between items-start">
+                <div>
+                  <button @click="nutritionView = 'list'" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Torna ai piani
+                  </button>
+                  <h2 class="text-2xl font-bold text-antracite leading-tight">{{ selectedPlan.name }}</h2>
+                  <div class="text-[10px] font-bold text-gray-400 uppercase mt-1">
+                    {{ selectedPlan.status === 'active' ? 'Piano Attivo' : 'Piano Terminato' }}
+                  </div>
+                </div>
+                
+                <button @click="nutritionView = 'calendar'" class="p-2 bg-salvia/10 text-salvia rounded-xl hover:bg-salvia/20 transition-colors shadow-sm">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                </button>
+              </div>
+
+              <!-- NOTA DEL GIORNO IN NUTRIZIONE (Se presente) -->
+              <div v-if="noteForToday" class="bg-salvia/10 border border-salvia/30 p-4 rounded-3xl relative shadow-sm animate-fadeIn">
+                <div class="flex items-start gap-3 relative z-10">
+                  <div class="w-10 h-10 rounded-full bg-salvia/20 flex items-center justify-center text-xl flex-shrink-0">📝</div>
+                  <div class="space-y-1 w-full">
+                    <h4 class="text-sm font-extrabold text-salvia">La tua nota di oggi</h4>
+                    <p class="text-xs text-antracite font-medium leading-relaxed">
+                      {{ noteForToday }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- MACROS SUMMARY (Auto-calculated) -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft">
+                <div class="flex justify-between items-center mb-4">
+                  <span class="text-xs font-bold text-gray-500 uppercase">Obiettivo Oggi</span>
+                  <span class="text-lg font-extrabold text-antracite">{{ selectedPlanTotalCalories }} <span class="text-xs font-medium text-gray-400">kcal totali</span></span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4">
+                  <div class="bg-salvia h-full rounded-full" style="width: 100%"></div>
+                </div>
+              </div>
+
+              <!-- DAILY MEALS LIST -->
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">I Pasti del Piano</h4>
+                
+                <div v-for="meal in selectedPlan.meals" :key="meal.id" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-4">
+                  <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0 border border-gray-100">
+                    {{ meal.icon }}
+                  </div>
+                  <div class="flex-1">
+                    <div class="flex justify-between items-center mb-1">
+                      <h5 class="text-sm font-bold text-antracite">{{ meal.name }}</h5>
+                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories }} kcal</span>
+                    </div>
+                    <p class="text-xs text-gray-500 leading-relaxed">{{ meal.description }}</p>
+                  </div>
+                </div>
+              </div>
+
+              <!-- PLAN ACTIONS -->
+              <div class="pt-6 pb-4">
+                <button v-if="selectedPlan.status === 'active'" 
+                        @click="promptTerminatePlan" 
+                        class="w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-sm hover:bg-viola/90 transition-all active:scale-95">
+                  Termina Piano Attivo
+                </button>
+                <button v-else 
+                        @click="reactivatePlan(selectedPlan)" 
+                        class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95">
+                  Riattiva Piano
+                </button>
+              </div>
+
+            </div>
+
+            <!-- VISTA: CALENDARIO & EXPORT -->
+            <div v-if="nutritionView === 'calendar'" class="space-y-5 animate-fadeIn">
+              
+              <div class="flex justify-between items-center">
+                <button @click="nutritionView = 'detail'" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                  Indietro
+                </button>
+                <div class="flex items-center gap-2">
+                  <span class="text-xs font-bold text-antracite uppercase tracking-widest">Esporta Menù</span>
+                  <!-- Toggle Export Mode -->
+                  <div @click="exportMode = !exportMode; exportSelectedDates = []" 
+                       class="w-10 h-5 bg-gray-200 rounded-full relative cursor-pointer transition-colors"
+                       :class="exportMode ? 'bg-salvia' : 'bg-gray-300'">
+                    <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"
+                         :class="exportMode ? 'translate-x-5' : ''"></div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex justify-between items-center px-2 py-2">
+                <button @click="prevMonth" class="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-400 hover:text-salvia transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <h3 class="text-xl font-extrabold text-salvia capitalize">{{ currentMonthName }} {{ currentYear }}</h3>
+                <button @click="nextMonth" class="p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-400 hover:text-salvia transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </button>
+              </div>
+
+              <!-- Calendar Grid -->
+              <div class="bg-white p-4 rounded-3xl border border-gray-100 shadow-soft">
+                <div class="grid grid-cols-7 gap-1 text-center mb-2">
+                  <div v-for="day in ['L','M','M','G','V','S','D']" :key="day" :class="day === 'D' ? 'text-salvia' : 'text-gray-400'" class="text-[10px] font-bold">{{ day }}</div>
+                </div>
+                <div class="grid grid-cols-7 gap-1 text-center">
+                  <!-- Empty slots for alignment -->
+                  <div v-for="empty in firstDayOfMonth" :key="'empty-'+empty" class="p-2"></div>
+                  <!-- Days -->
+                  <div v-for="date in daysInMonth" :key="date" 
+                       @click="handleDayClick(date)"
+                       class="aspect-square p-1 flex items-center justify-center relative">
+                    
+                    <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer transition-all"
+                         :class="[
+                           exportMode && exportSelectedDates.includes(date) ? 'bg-salvia text-white shadow-md' : '',
+                           !exportMode && isToday(date) ? 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20' : '',
+                           !exportMode && !isToday(date) && !isSunday(date) ? 'text-gray-600 hover:bg-gray-50' : '',
+                           !exportMode && !isToday(date) && isSunday(date) ? 'text-salvia bg-salvia/5 hover:bg-salvia/10' : '',
+                           hasComment(date) && !exportMode ? 'ring-2 ring-viola/40' : ''
+                         ]">
+                      {{ date }}
+                    </div>
+                    <!-- Indicator dot for comment -->
+                    <div v-if="hasComment(date) && !exportMode" class="absolute bottom-1 w-1 h-1 bg-viola rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Export Button Container -->
+              <div v-if="exportMode" class="animate-fadeIn pt-4">
+                <button @click="exportSelectedMenu" 
+                        :disabled="exportSelectedDates.length === 0"
+                        class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                  Condividi {{ exportSelectedDates.length }} giorni
+                </button>
+              </div>
+
+            </div>
+
+          </div>
+
+        </main>
+
+        <!-- GLOBAL MODALS OVERLAY -->
+        <div v-if="customModal.isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <h3 class="text-xl font-bold text-antracite">{{ customModal.title }}</h3>
+            <p class="text-sm text-gray-500 font-medium">{{ customModal.message }}</p>
+            
+            <!-- Alert / Single Button -->
+            <div v-if="customModal.type === 'alert'" class="pt-2">
+              <button @click="customModal.isOpen = false" class="w-full bg-viola text-white font-bold py-3 rounded-xl hover:bg-viola/90">Ho capito</button>
+            </div>
+            
+            <!-- Confirm / Due Bottoni -->
+            <div v-if="customModal.type === 'confirm'" class="pt-2 flex gap-3">
+              <button @click="customModal.isOpen = false" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200">Annulla</button>
+              <button @click="executeConfirm" class="flex-1 bg-viola text-white font-bold py-3 rounded-xl hover:bg-viola/90">Conferma</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- COMMENT MODAL (Calendar) -->
+        <div v-if="commentModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 transition-transform transform flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0">
+              <h3 class="text-lg font-bold text-antracite">Dettaglio {{ commentModal.date }} {{ currentMonthName }}</h3>
+              <button @click="closeCommentModal" class="p-1 text-gray-400 hover:text-antracite">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            
+            <!-- Menu del Giorno -->
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div class="text-[10px] font-bold text-salvia uppercase tracking-widest mb-1">Menù Previsto</div>
+              <div v-for="meal in (selectedPlan ? selectedPlan.meals : meals)" :key="meal.id" class="flex items-center gap-3 bg-gray-50 p-2.5 rounded-2xl border border-gray-100">
+                <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-sm shadow-sm">{{ meal.icon }}</div>
+                <div class="flex-1">
+                  <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
+                  <p class="text-[10px] text-gray-500 line-clamp-1">{{ meal.description }}</p>
+                </div>
+                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories }} kcal</span>
+              </div>
+            </div>
+
+            <div class="shrink-0 space-y-3 pt-2 border-t border-gray-100">
+              <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">I Tuoi Appunti</div>
+              <textarea v-model="commentModal.text" rows="3" placeholder="Es: ho saltato lo spuntino, o mi sentivo debole..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-3 text-sm text-antracite focus:ring-2 focus:ring-salvia focus:border-salvia outline-none resize-none"></textarea>
+              <button @click="saveComment" class="w-full bg-salvia text-white font-bold py-3 rounded-xl shadow-md hover:bg-salvia/90 active:scale-95 transition-all">Salva</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- GROCERY CHECKLIST MODAL -->
+        <div v-if="groceryModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5 transition-transform transform flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-xl border border-viola/20">🛒</div>
+                <h3 class="text-lg font-bold text-antracite">Checklist Spesa</h3>
+              </div>
+              <button @click="groceryModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <p class="text-sm text-gray-500 font-medium leading-relaxed">Spunta quello che hai già in frigo o in dispensa. Condividi con un tap gli ingredienti mancanti!</p>
+
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <label v-for="(item, idx) in checklistItems" :key="idx" 
+                     class="flex items-center gap-3 p-3.5 bg-gray-50 rounded-2xl border cursor-pointer hover:bg-gray-100 transition-colors" 
+                     :class="item.checked ? 'border-viola/30 bg-viola/5' : 'border-gray-100'">
+                <input type="checkbox" v-model="item.checked" class="w-5 h-5 text-viola rounded focus:ring-viola border-gray-300 accent-viola">
+                <span class="text-sm font-bold transition-all" :class="item.checked ? 'text-gray-400 line-through' : 'text-antracite'">{{ item.name }}</span>
+              </label>
+            </div>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="sharePendingGrocery" class="w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+                Condividi cosa manca
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOTTOM NAVIGATION TABS -->
+        <nav class="bg-white/95 backdrop-blur-lg border-t border-gray-200 px-2 py-2.5 flex justify-between items-center z-20 absolute bottom-0 left-0 right-0 pb-6 sm:pb-2.5">
+          <!-- Dashboard (Viola) -->
+          <button @click="activeTab = 'dashboard'" :class="activeTab === 'dashboard' ? 'text-viola' : 'text-gray-400 hover:text-gray-500'" class="flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group">
+            <div :class="activeTab === 'dashboard' ? 'bg-viola/10 text-viola' : 'group-hover:bg-gray-100'" class="p-1.5 rounded-xl transition-colors">
+              <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 00-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+            </div>
+            <span class="text-[10px] font-bold">Dashboard</span>
+            <span v-if="activeTab === 'dashboard'" class="w-1.5 h-1.5 bg-viola rounded-full absolute bottom-0"></span>
+          </button>
+
+          <!-- Allenamento (Arancione) - NEW TAB -->
+          <button @click="activeTab = 'allenamento'" :class="activeTab === 'allenamento' ? 'text-arancione' : 'text-gray-400 hover:text-gray-500'" class="flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group">
+            <div :class="activeTab === 'allenamento' ? 'bg-arancione/10 text-arancione' : 'group-hover:bg-gray-100'" class="p-1.5 rounded-xl transition-colors">
+              <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+            </div>
+            <span class="text-[10px] font-bold">Allenamento</span>
+            <span v-if="activeTab === 'allenamento'" class="w-1.5 h-1.5 bg-arancione rounded-full absolute bottom-0"></span>
+          </button>
+
+          <!-- Nutrizione (Salvia) -->
+          <button @click="activeTab = 'nutrition'" :class="activeTab === 'nutrition' ? 'text-salvia' : 'text-gray-400 hover:text-gray-500'" class="flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group">
+            <div :class="activeTab === 'nutrition' ? 'bg-salvia/10 text-salvia' : 'group-hover:bg-gray-100'" class="p-1.5 rounded-xl transition-colors">
+              <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 16h14M4 12h16c0-3.314-3.582-6-8-6S4 8.686 4 12zm0 4h16c0 1.105-.895 2-2 2H6c-1.105 0-2-.895-2-2z"/></svg>
+            </div>
+            <span class="text-[10px] font-bold">Nutrizione</span>
+            <span v-if="activeTab === 'nutrition'" class="w-1.5 h-1.5 bg-salvia rounded-full absolute bottom-0"></span>
+          </button>
+          
+          <!-- Progressi (Viola) -->
+          <button @click="activeTab = 'progress'" :class="activeTab === 'progress' ? 'text-viola' : 'text-gray-400 hover:text-gray-500'" class="flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group">
+            <div :class="activeTab === 'progress' ? 'bg-viola/10 text-viola' : 'group-hover:bg-gray-100'" class="p-1.5 rounded-xl transition-colors">
+              <svg class="w-6 h-6" stroke="currentColor" fill="none" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+            </div>
+            <span class="text-[10px] font-bold">Progressi</span>
+            <span v-if="activeTab === 'progress'" class="w-1.5 h-1.5 bg-viola rounded-full absolute bottom-0"></span>
+          </button>
+        </nav>
+      </template>
+
+    </div>
+  </div>
+
+  <!-- FIREBASE & VUE APPLICATION LOGIC -->
+  <script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+    import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+    // Firebase Initialization
+    const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+
+    // Vue Application Setup
+    const { createApp, ref, onMounted, watch, nextTick, computed } = Vue;
+
+    createApp({
+      setup() {
+        // App State
+        const frameMode = ref('phone'); // 'phone' or 'full'
+        const activeTab = ref('dashboard');
+        
+        // Auth State
+        const isAuthenticated = ref(false);
+        const authLoading = ref(true); // Start loading while checking auth
+
+        // Nutrition Feature States
+        const nutritionView = ref('list'); // 'list', 'detail', 'calendar', 'create'
+        
+        // Modals State
+        const customModal = ref({ isOpen: false, type: 'alert', title: '', message: '', onConfirm: null });
+        const commentModal = ref({ isOpen: false, date: null, key: null, text: '' });
+        const groceryModal = ref({ isOpen: false });
+        
+        // Toast Notification State (Simple)
+        const showToastMessage = (msg) => {
+           // Replacing native alerts with a simple custom modal alert
+           customModal.value = { isOpen: true, type: 'alert', title: 'Notifica', message: msg, onConfirm: null };
+        };
+
+        const showConfirm = (title, message, onConfirmCallback) => {
+            customModal.value = { isOpen: true, type: 'confirm', title, message, onConfirm: onConfirmCallback };
+        }
+
+        const executeConfirm = () => {
+            if (customModal.value.onConfirm) customModal.value.onConfirm();
+            customModal.value.isOpen = false;
+        }
+
+        // App Features State
+        const showGroceryReminder = ref(true);
+        const mealsContainer = ref(null);
+        const currentMealId = ref(null);
+
+        const meals = ref([
+          { id: 'colazione', name: 'Colazione', timeDisplay: '05:00 - 10:00', calories: 450, icon: '🥣', description: 'Porridge d\'avena, yogurt greco 0%, frutti di bosco e burro d\'arachidi.' },
+          { id: 'spuntino_mattina', name: 'Spuntino Mattina', timeDisplay: '10:00 - 12:00', calories: 150, icon: '🍏', description: 'Mela verde e 20g di mandorle sgusciate.' },
+          { id: 'pranzo', name: 'Pranzo', timeDisplay: '12:00 - 15:00', calories: 650, icon: '🍗', description: 'Riso basmati, petto di pollo ai ferri, zucchine grigliate.' },
+          { id: 'spuntino_pomeriggio', name: 'Spuntino Pomeriggio', timeDisplay: '15:00 - 19:00', calories: 250, icon: '🍌', description: 'Banana e shaker di proteine whey.' },
+          { id: 'cena', name: 'Cena', timeDisplay: '19:00+', calories: 500, icon: '🐟', description: 'Trancio di salmone al forno, patate e asparagi.' }
+        ]);
+
+        const scrollToCurrentMeal = () => {
+          nextTick(() => {
+            const currentHour = new Date().getHours();
+            if (currentHour >= 5 && currentHour < 10) currentMealId.value = 'colazione';
+            else if (currentHour >= 10 && currentHour < 12) currentMealId.value = 'spuntino_mattina';
+            else if (currentHour >= 12 && currentHour < 15) currentMealId.value = 'pranzo';
+            else if (currentHour >= 15 && currentHour < 19) currentMealId.value = 'spuntino_pomeriggio';
+            else currentMealId.value = 'cena';
+
+            if (!mealsContainer.value) return;
+            const targetElement = document.getElementById('meal-' + currentMealId.value);
+            if (targetElement) {
+              const scrollPos = targetElement.offsetLeft - mealsContainer.value.offsetLeft - 20;
+              mealsContainer.value.scrollTo({ left: scrollPos, behavior: 'smooth' });
+            }
+          });
+        };
+
+        // Nutritional Plans Logic
+        const plans = ref([
+          { 
+            id: 2, name: 'Definizione Avanzata', status: 'active', results: 'In corso (-1.2kg)', 
+            startDate: '2026-10-15', endDate: '2026-11-30',
+            grocery: ['Porridge', 'Yogurt Greco', 'Pollo', 'Riso Basmati', 'Salmone', 'Zucchine', 'Whey'],
+            meals: [...meals.value] // Copying default meals for prototype
+          },
+          { 
+            id: 1, name: 'Massa Pulita (Invernale)', status: 'inactive', results: '+3.5 kg', 
+            startDate: '2025-11-01', endDate: '2026-03-31',
+            grocery: ['Pasta', 'Carne Rossa', 'Uova', 'Burro Arachidi', 'Gallette'],
+            meals: [
+              { id: 'c', name: 'Colazione Max', calories: 800, icon: '🍳', description: 'Uova, bacon, pane tostato, succo d\'arancia.' },
+              { id: 'p', name: 'Pranzo Sostanzioso', calories: 1000, icon: '🍝', description: '200g Pasta al ragù, parmigiano, insalata.' }
+            ]
+          }
+        ]);
+        
+        const selectedPlan = ref(null);
+        
+        // New Plan Data State
+        const newPlanData = ref({
+          name: '',
+          startDate: '',
+          endDate: '',
+          makeActive: true
+        });
+
+        const startNewPlan = () => {
+          const today = new Date();
+          const nextMonth = new Date(today);
+          nextMonth.setMonth(today.getMonth() + 1);
+
+          newPlanData.value = {
+            name: '',
+            startDate: today.toISOString().split('T')[0],
+            endDate: nextMonth.toISOString().split('T')[0],
+            makeActive: true
+          };
+          nutritionView.value = 'create';
+        };
+
+        const saveNewPlan = () => {
+          if (!newPlanData.value.name.trim()) {
+            showToastMessage("Dai un nome al tuo nuovo piano!");
+            return;
+          }
+          if (!newPlanData.value.startDate || !newPlanData.value.endDate) {
+            showToastMessage("Inserisci una data di inizio e fine valide.");
+            return;
+          }
+
+          // Se vuole renderlo attivo, terminiamo l'attuale
+          if (newPlanData.value.makeActive) {
+            plans.value.forEach(p => {
+              if (p.status === 'active') {
+                p.status = 'inactive';
+                p.results = 'Terminato';
+              }
+            });
+          }
+
+          const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
+
+          plans.value.unshift({
+            id: nextId,
+            name: newPlanData.value.name,
+            status: newPlanData.value.makeActive ? 'active' : 'inactive',
+            results: newPlanData.value.makeActive ? 'Appena Iniziato' : 'In Programma',
+            startDate: newPlanData.value.startDate,
+            endDate: newPlanData.value.endDate,
+            grocery: ['Acqua', 'Pollo', 'Riso', 'Verdure'], // Placeholder di base per la checklist
+            meals: [...meals.value] // Copia il menu base per ora
+          });
+
+          showToastMessage(`Piano "${newPlanData.value.name}" creato con successo! 🚀`);
+          nutritionView.value = 'list';
+        };
+
+        const activePlan = computed(() => plans.value.find(p => p.status === 'active'));
+        
+        const checklistItems = ref([]);
+        watch(activePlan, (newPlan) => {
+           if(newPlan) {
+              // Pre-fill checklist with unchecked status
+              checklistItems.value = newPlan.grocery.map(item => ({ name: item, checked: false }));
+           } else {
+              checklistItems.value = [];
+           }
+        }, { immediate: true });
+
+        const openGroceryModal = () => {
+           groceryModal.value.isOpen = true;
+        };
+        
+        const sortedPlans = computed(() => {
+          return [...plans.value].sort((a, b) => {
+            if (a.status === 'active') return -1;
+            if (b.status === 'active') return 1;
+            return b.id - a.id;
+          });
+        });
+
+        const selectedPlanTotalCalories = computed(() => {
+          if (!selectedPlan.value) return 0;
+          return selectedPlan.value.meals.reduce((sum, meal) => sum + meal.calories, 0);
+        });
+
+        const openPlan = (plan) => {
+          selectedPlan.value = plan;
+          nutritionView.value = 'detail';
+        };
+
+        const formatDate = (dateStr) => {
+          const d = new Date(dateStr);
+          return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+        };
+
+        // Clipboard Sharing
+        const copyToClipboard = async (text, successMsg) => {
+          try {
+            if (navigator.clipboard && window.isSecureContext) {
+              await navigator.clipboard.writeText(text);
+            } else {
+              let textArea = document.createElement("textarea");
+              textArea.value = text;
+              textArea.style.position = "fixed";
+              textArea.style.left = "-999999px";
+              textArea.style.top = "-999999px";
+              document.body.appendChild(textArea);
+              textArea.focus();
+              textArea.select();
+              document.execCommand('copy');
+              textArea.remove();
+            }
+            showToastMessage(successMsg);
+          } catch (err) {
+            console.error('Failed to copy: ', err);
+            showToastMessage("Errore durante la copia.");
+          }
+        };
+
+        const sharePendingGrocery = () => {
+          const pending = checklistItems.value.filter(item => !item.checked).map(item => item.name);
+          if(pending.length === 0) {
+             showToastMessage("Hai già tutto! Frigo al completo. 🚀");
+             groceryModal.value.isOpen = false;
+             return;
+          }
+          const text = `🛒 *Spesa STILL - Mancanti*\n\nMi manca da comprare:\n- ${pending.join('\n- ')}\n\nIl frigo piange, aiutiamolo! 🏃‍♂️💨`;
+          copyToClipboard(text, "Lista della spesa (da comprare) copiata negli appunti!");
+          groceryModal.value.isOpen = false;
+        };
+
+        // Plan Actions
+        const promptTerminatePlan = () => {
+          showConfirm("Termina Piano", "Sei sicuro di voler terminare il piano attualmente attivo?", () => {
+             selectedPlan.value.status = 'inactive';
+             selectedPlan.value.results = 'Terminato';
+             showToastMessage("Piano terminato con successo.");
+          });
+        };
+
+        const reactivatePlan = (planToActivate) => {
+          const currentActive = plans.value.find(p => p.status === 'active');
+          if (currentActive) {
+            showToastMessage("C'è un piano già attivo. Disattivalo prima di poterne attivare uno nuovo.");
+            return;
+          }
+          planToActivate.status = 'active';
+          planToActivate.results = 'In corso';
+          showToastMessage(`Piano "${planToActivate.name}" riattivato.`);
+        };
+
+
+        // Calendar Logic
+        const todayDate = new Date();
+        const currentYear = ref(todayDate.getFullYear());
+        const currentMonth = ref(todayDate.getMonth());
+        
+        const currentMonthName = computed(() => {
+          return new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(currentYear.value, currentMonth.value, 1));
+        });
+        
+        const daysInMonth = computed(() => {
+          return new Date(currentYear.value, currentMonth.value + 1, 0).getDate();
+        });
+        
+        const firstDayOfMonth = computed(() => {
+          let firstDay = new Date(currentYear.value, currentMonth.value, 1).getDay();
+          return firstDay === 0 ? 6 : firstDay - 1; 
+        });
+
+        const nextMonth = () => {
+          if (currentMonth.value === 11) {
+            currentMonth.value = 0;
+            currentYear.value++;
+          } else {
+            currentMonth.value++;
+          }
+        };
+
+        const prevMonth = () => {
+          if (currentMonth.value === 0) {
+            currentMonth.value = 11;
+            currentYear.value--;
+          } else {
+            currentMonth.value--;
+          }
+        };
+
+        const exportMode = ref(false);
+        const exportSelectedDates = ref([]);
+        
+        // Setup initial note for today to demonstrate the feature
+        const initComments = {};
+        initComments[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`] = "Oggi mi sento pieno di energia, ricordiamoci di bere più acqua tra un pasto e l'altro!";
+        const commentsMap = ref(initComments);
+
+        const noteForToday = computed(() => {
+          return commentsMap.value[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`];
+        });
+
+        const isToday = (day) => {
+          return day === todayDate.getDate() && currentMonth.value === todayDate.getMonth() && currentYear.value === todayDate.getFullYear();
+        };
+
+        const isSunday = (day) => {
+          return new Date(currentYear.value, currentMonth.value, day).getDay() === 0;
+        };
+
+        const hasComment = (day) => !!commentsMap.value[`${currentYear.value}-${currentMonth.value}-${day}`];
+
+        const handleDayClick = (day) => {
+          if (exportMode.value) {
+            const index = exportSelectedDates.value.indexOf(day);
+            if (index > -1) {
+              exportSelectedDates.value.splice(index, 1);
+            } else {
+              exportSelectedDates.value.push(day);
+              exportSelectedDates.value.sort((a,b) => a - b);
+            }
+          } else {
+            commentModal.value.date = day;
+            commentModal.value.key = `${currentYear.value}-${currentMonth.value}-${day}`;
+            commentModal.value.text = commentsMap.value[commentModal.value.key] || '';
+            commentModal.value.isOpen = true;
+          }
+        };
+
+        const closeCommentModal = () => {
+          commentModal.value.isOpen = false;
+        };
+
+        const saveComment = () => {
+          if (commentModal.value.text.trim() === '') {
+            delete commentsMap.value[commentModal.value.key];
+          } else {
+            commentsMap.value[commentModal.value.key] = commentModal.value.text;
+          }
+          closeCommentModal();
+        };
+
+        const exportSelectedMenu = () => {
+           if(exportSelectedDates.value.length === 0 || !selectedPlan.value) return;
+           
+           let text = `🗓️ *Menù STILL - Esportazione Giornate*\n\n`;
+           
+           exportSelectedDates.value.forEach(day => {
+              text += `--- Giorno ${day} ${currentMonthName.value} ---\n`;
+              selectedPlan.value.meals.forEach(m => {
+                text += `🔸 ${m.name} (${m.calories} kcal)\n   ${m.description}\n`;
+              });
+              const key = `${currentYear.value}-${currentMonth.value}-${day}`;
+              if(commentsMap.value[key]) {
+                 text += `💡 Nota: ${commentsMap.value[key]}\n`;
+              }
+              text += `\n`;
+           });
+
+           text += `Totale giornaliero: ${selectedPlanTotalCalories.value} kcal\n`;
+           text += `STILL App. Ancora in movimento.`;
+
+           copyToClipboard(text, `Menù di ${exportSelectedDates.value.length} giorni copiato negli appunti!`);
+           exportMode.value = false;
+           exportSelectedDates.value = [];
+        };
+
+        // Watchers
+        watch(activeTab, (newTab) => {
+          if (newTab === 'dashboard') {
+            scrollToCurrentMeal();
+          }
+        });
+
+        // Lifecycle Hooks
+        onMounted(() => {
+          onAuthStateChanged(auth, (user) => {
+            if (user) {
+              isAuthenticated.value = true;
+              if (activeTab.value === 'dashboard') scrollToCurrentMeal();
+            } else {
+              isAuthenticated.value = false;
+            }
+            authLoading.value = false;
+          });
+        });
+
+        // Methods
+        const login = async () => {
+          authLoading.value = true;
+          try {
+            // Se Firebase non è configurato con le chiavi, simula il login per farti testare l'app
+            if (Object.keys(firebaseConfig).length === 0 || !firebaseConfig.apiKey) {
+              console.warn("Firebase non configurato. Simulo l'accesso per il prototipo.");
+              setTimeout(() => {
+                isAuthenticated.value = true;
+                authLoading.value = false;
+                if (activeTab.value === 'dashboard') scrollToCurrentMeal();
+              }, 800);
+              return;
+            }
+
+            const token = typeof __initial_auth_token !== 'undefined' ? __initial_auth_token : null;
+            if (token) {
+                await signInWithCustomToken(auth, token);
+            } else {
+                await signInAnonymously(auth);
+            }
+          } catch (error) {
+            console.error("Errore durante il login Firebase:", error);
+            // Fallback in caso di errore di configurazione nel prototipo
+            isAuthenticated.value = true;
+            authLoading.value = false;
+            if (activeTab.value === 'dashboard') scrollToCurrentMeal();
+          }
+        };
+
+        const logout = async () => {
+          try {
+            if (Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey) {
+               await signOut(auth);
+            }
+            isAuthenticated.value = false;
+            activeTab.value = 'dashboard';
+          } catch (error) {
+            console.error("Errore durante il logout:", error);
+            isAuthenticated.value = false;
+          }
+        };
+
+        return {
+          frameMode,
+          activeTab,
+          isAuthenticated,
+          authLoading,
+          showGroceryReminder,
+          meals,
+          mealsContainer,
+          currentMealId,
+          login,
+          logout,
+          nutritionView,
+          sortedPlans,
+          selectedPlan,
+          newPlanData,
+          startNewPlan,
+          saveNewPlan,
+          selectedPlanTotalCalories,
+          openPlan,
+          formatDate,
+          sharePendingGrocery,
+          promptTerminatePlan,
+          reactivatePlan,
+          currentYear,
+          currentMonth,
+          currentMonthName,
+          daysInMonth,
+          firstDayOfMonth,
+          nextMonth,
+          prevMonth,
+          exportMode,
+          exportSelectedDates,
+          isToday,
+          isSunday,
+          hasComment,
+          handleDayClick,
+          exportSelectedMenu,
+          noteForToday,
+          customModal,
+          executeConfirm,
+          commentModal,
+          closeCommentModal,
+          saveComment,
+          activePlan,
+          groceryModal,
+          openGroceryModal,
+          checklistItems
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
