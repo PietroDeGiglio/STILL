@@ -255,11 +255,68 @@
                       <div class="w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-2xl border border-salvia/20">{{ meal.icon }}</div>
                       <div>
                         <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
-                        <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">{{ meal.calories }} kcal</span>
+                        <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
+                          {{ meal.calories !== null ? meal.calories + ' kcal' : 'Calorie n.d.' }}
+                        </span>
                       </div>
                     </div>
                     <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
                   </div>
+
+                  <!-- CHECK / X PASTO -->
+                  <div class="mt-4 space-y-2">
+                    <div class="flex items-center gap-2">
+                      <button @click="setMealDone(todayDateKey, meal)"
+                              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-[11px] font-bold transition-all active:scale-95"
+                              :class="todayMealLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white border-salvia shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-salvia/50'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        Eseguito
+                      </button>
+                      <button @click="promptSkipMeal(todayDateKey, meal)"
+                              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-[11px] font-bold transition-all active:scale-95"
+                              :class="todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white border-red-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-red-300'">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Saltato
+                      </button>
+                    </div>
+                    <div v-if="todayMealLogs[meal.id]?.status === 'skipped'" class="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
+                      <span class="text-xs leading-none pt-0.5">💬</span>
+                      <p class="text-[11px] font-medium text-red-500 leading-snug flex-1">
+                        {{ todayMealLogs[meal.id]?.comment || 'Nessun commento. Tocca "Saltato" per aggiungerlo.' }}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- QUICK STATS -->
+            <div class="grid grid-cols-2 gap-4">
+              <div @click="activeTab = 'progress'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-viola/50 transition-colors">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 leading-tight">Variazione Peso</div>
+                <template v-if="weightDelta">
+                  <div class="flex items-baseline gap-1 mt-1">
+                    <span class="text-2xl font-extrabold" :class="weightDelta.value <= 0 ? 'text-salvia' : 'text-arancione'">{{ formatNumber(weightDelta.value) }}</span>
+                    <span class="text-sm font-semibold text-gray-500">kg</span>
+                  </div>
+                  <p class="text-[10px] font-bold text-gray-400 mt-1">{{ weightDelta.days }} giorni</p>
+                </template>
+                <template v-else>
+                  <div class="text-sm font-bold text-gray-400 mt-2">Dati insufficienti</div>
+                  <p class="text-[10px] font-bold text-gray-400 mt-1">Servono 2 misurazioni</p>
+                </template>
+              </div>
+
+              <div @click="goToTodayNutrition()" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-salvia/50 transition-colors flex flex-col justify-between">
+                <div>
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 leading-tight">Calorie Oggi</div>
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-xl font-extrabold text-antracite">{{ todayConsumedCalories }}</span>
+                    <span class="text-xs font-semibold text-gray-500">/ {{ todayTargetCalories }}</span>
+                  </div>
+                </div>
+                <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                  <div class="bg-salvia h-full rounded-full transition-all" :style="{ width: todayCaloriesPct + '%' }"></div>
                 </div>
               </div>
             </div>
@@ -285,26 +342,51 @@
               </div>
             </div>
 
-            <!-- QUICK STATS -->
-            <div class="grid grid-cols-2 gap-4">
-              <div @click="activeTab = 'progress'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-viola/50 transition-colors">
-                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 leading-tight">Var. Peso Iniziale</div>
-                <div class="flex items-baseline gap-1 mt-1">
-                  <span class="text-2xl font-extrabold text-antracite">-4,2</span>
-                  <span class="text-sm font-semibold text-gray-500">kg</span>
+            <!-- CALENDARIO PASTI -->
+            <div class="space-y-3">
+              <div class="flex justify-between items-center px-1 gap-2">
+                <h3 class="text-lg font-bold text-antracite">Calendario pasti</h3>
+                <div class="flex items-center gap-1.5 flex-shrink-0">
+                  <button @click="dashPrevMonth" class="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <span class="text-xs font-bold text-antracite capitalize min-w-[92px] text-center">{{ dashMonthName }} {{ dashYear }}</span>
+                  <button @click="dashNextMonth" class="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </button>
                 </div>
               </div>
 
-              <div @click="activeTab = 'nutrition'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-salvia/50 transition-colors flex flex-col justify-between">
-                <div>
-                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 leading-tight">Calorie Oggi</div>
-                  <div class="flex items-baseline gap-1">
-                    <span class="text-xl font-extrabold text-antracite">1.850</span>
-                    <span class="text-xs font-semibold text-gray-500">/ 2.350</span>
-                  </div>
+              <div class="bg-white rounded-3xl p-4 border border-gray-100 shadow-soft">
+                <div class="grid grid-cols-7 gap-1 mb-1.5">
+                  <div v-for="(label, idx) in ['L','M','M','G','V','S','D']" :key="'dow-' + idx" class="text-center text-[10px] font-bold text-gray-400 uppercase">{{ label }}</div>
                 </div>
-                <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div class="bg-salvia h-full rounded-full" style="width: 78%"></div>
+                <div class="grid grid-cols-7 gap-1">
+                  <div v-for="n in dashFirstDayOfMonth" :key="'empty-' + n"></div>
+                  <button v-for="day in dashDaysInMonth" :key="day" @click="openDayMenu(day)"
+                          class="aspect-square rounded-xl text-xs font-bold transition-all flex items-center justify-center"
+                          :class="dashboardDayClasses(day)">
+                    {{ day }}
+                  </button>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 pt-4 border-t border-gray-100">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-salvia"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Perfetta</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Sgarro</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-viola"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Piccolo sgarro</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Non tracciata</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -331,99 +413,159 @@
 
           <!-- ==================== PROGRESSI ==================== -->
           <div v-if="activeTab === 'progress'" class="space-y-6 animate-fadeIn">
-            
-            <div>
-              <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">RISULTATI</div>
-              <h2 class="text-2xl font-bold text-antracite">I tuoi Progressi</h2>
+
+            <div class="flex justify-between items-end gap-3">
+              <div>
+                <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">RISULTATI</div>
+                <h2 class="text-2xl font-bold text-antracite">I tuoi Progressi</h2>
+              </div>
+              <button v-if="measurements.length > 0" @click="openMeasurementModal()" class="bg-salvia text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-salvia/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Aggiungi
+              </button>
             </div>
 
-            <!-- WEIGHT CHART -->
-            <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-4">
-              <div class="flex justify-between items-end">
-                <div>
-                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PESO ATTUALE</span>
-                  <div class="text-3xl font-extrabold text-antracite mt-1">
-                    79,4 <span class="text-sm font-semibold text-gray-400">kg</span>
-                  </div>
-                </div>
-                <span class="px-2 py-1 bg-salvia/10 text-salvia text-xs font-bold rounded-lg">-3,2 kg</span>
+            <!-- EMPTY STATE -->
+            <div v-if="measurements.length === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
+              <div class="w-16 h-16 rounded-full bg-salvia/10 border border-salvia/20 flex items-center justify-center text-salvia">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               </div>
-
-              <!-- SVG Line Chart (Light Theme) -->
-              <div class="relative h-40 w-full pt-4">
-                <svg class="w-full h-full overflow-visible" viewBox="0 0 300 150">
-                  <line x1="0" y1="30" x2="300" y2="30" stroke="#E5E7EB" stroke-dasharray="3,3"/>
-                  <line x1="0" y1="75" x2="300" y2="75" stroke="#E5E7EB" stroke-dasharray="3,3"/>
-                  <line x1="0" y1="120" x2="300" y2="120" stroke="#E5E7EB" stroke-dasharray="3,3"/>
-                  
-                  <defs>
-                    <linearGradient id="lightAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stop-color="#A8B69A" stop-opacity="0.3"/>
-                      <stop offset="100%" stop-color="#A8B69A" stop-opacity="0"/>
-                    </linearGradient>
-                  </defs>
-
-                  <polygon points="20,140 20,20 80,45 140,65 200,80 270,100 270,140" fill="url(#lightAreaGrad)" />
-                  <polyline points="20,20 80,45 140,65 200,80 270,100" fill="none" stroke="#A8B69A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
-                  
-                  <!-- Data Points -->
-                  <g v-for="(pt, index) in [{x:20,y:20,w:82.6},{x:80,y:45,w:81.2},{x:140,y:65,w:80.5},{x:200,y:80,w:79.9},{x:270,y:100,w:79.4}]" :key="index">
-                    <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#A8B69A" stroke-width="3"/>
-                    <text :x="pt.x" :y="pt.y - 12" text-anchor="middle" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.w }}</text>
-                  </g>
-                </svg>
+              <div>
+                <h3 class="font-bold text-antracite text-lg">Ancora nessun progresso</h3>
+                <p class="text-sm text-gray-500 mt-1.5 leading-relaxed">Registra peso e circonferenze per vedere i tuoi miglioramenti. I carichi arrivano automaticamente dalle schede di allenamento.</p>
               </div>
+              <button @click="openMeasurementModal()" class="w-full bg-salvia text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Aggiungi la prima misurazione
+              </button>
             </div>
 
-            <!-- CIRCONFERENZE (New Section) -->
-            <div class="space-y-3">
-              <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Circonferenze</h4>
-              
-              <div class="space-y-2">
-                <!-- Petto -->
-                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">👕</div>
-                    <span class="text-sm font-bold text-antracite">Petto</span>
+            <template v-else>
+
+              <!-- WEIGHT CHART -->
+              <div v-if="weightEntries.length > 0" @click="openHistory('weight')" role="button"
+                   class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-4 cursor-pointer hover:border-salvia/40 transition-colors active:scale-[0.995]">
+                <div class="flex justify-between items-end">
+                  <div>
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">PESO ATTUALE</span>
+                    <div class="text-3xl font-extrabold text-antracite mt-1">
+                      {{ formatNumber(latestWeight.weight) }} <span class="text-sm font-semibold text-gray-400">kg</span>
+                    </div>
+                    <p class="text-[10px] font-medium text-gray-400 mt-1">Ultima misurazione: {{ formatDate(latestWeight.date) }}</p>
                   </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-400 line-through">102 cm</span>
-                    <span class="text-sm font-extrabold text-salvia flex items-center gap-1">
-                      98 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+                  <div class="flex flex-col items-end gap-2">
+                    <span v-if="weightDelta" class="px-2 py-1 text-xs font-bold rounded-lg" :class="weightDelta.classes">{{ weightDelta.text }}</span>
+                    <span class="text-[10px] font-bold text-salvia flex items-center gap-0.5">
+                      Storico
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
                     </span>
                   </div>
                 </div>
 
-                <!-- Braccia -->
-                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">💪</div>
-                    <span class="text-sm font-bold text-antracite">Braccia</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-400 line-through">38 cm</span>
-                    <span class="text-sm font-extrabold text-viola flex items-center gap-1">
-                      39 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                    </span>
-                  </div>
+                <!-- SVG Line Chart (Light Theme) -->
+                <div class="relative h-40 w-full pt-4">
+                  <svg class="w-full h-full overflow-visible" viewBox="0 0 300 150">
+                    <line x1="0" y1="30" x2="300" y2="30" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                    <line x1="0" y1="75" x2="300" y2="75" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                    <line x1="0" y1="120" x2="300" y2="120" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+
+                    <defs>
+                      <linearGradient id="lightAreaGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="#A8B69A" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#A8B69A" stop-opacity="0"/>
+                      </linearGradient>
+                    </defs>
+
+                    <polygon :points="weightChart.area" fill="url(#lightAreaGrad)" />
+                    <polyline :points="weightChart.line" fill="none" stroke="#A8B69A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+
+                    <!-- Data Points -->
+                    <g v-for="(pt, index) in weightChart.points" :key="index">
+                      <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#A8B69A" stroke-width="3"/>
+                      <text v-if="pt.showLabel" :x="pt.x" :y="pt.y - 12" text-anchor="middle" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.label }}</text>
+                    </g>
+                  </svg>
                 </div>
 
-                <!-- Vita -->
-                <div class="flex items-center justify-between p-4 bg-white border border-gray-100 shadow-sm rounded-2xl">
-                  <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg">📏</div>
-                    <span class="text-sm font-bold text-antracite">Vita</span>
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <span class="text-xs text-gray-400 line-through">84 cm</span>
-                    <span class="text-sm font-extrabold text-salvia flex items-center gap-1">
-                      81 cm <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
-                    </span>
+                <p class="text-[11px] text-gray-400 font-medium text-center">
+                  Dal {{ formatDate(weightEntries[0].date) }} al {{ formatDate(weightEntries[weightEntries.length - 1].date) }}
+                  <span v-if="weightDelta && weightDelta.days > 0"> • {{ weightDelta.days }} giorni</span>
+                </p>
+              </div>
+
+              <!-- CIRCONFERENZE -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                  <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Circonferenze</h4>
+                  <span v-if="circumferenceRows.length === 0" class="text-[10px] font-medium text-gray-400">Nessuna misura</span>
+                </div>
+
+                <div v-if="circumferenceRows.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-4 text-center text-xs text-gray-400 font-medium">
+                  Aggiungi petto, braccia e vita dalla scheda di misurazione.
+                </div>
+
+                <div class="space-y-2">
+                  <div v-for="row in circumferenceRows" :key="row.key" @click="openHistory(row.key)" role="button"
+                       class="flex items-center justify-between gap-2 p-4 bg-white border border-gray-100 shadow-sm rounded-2xl cursor-pointer hover:border-salvia/40 transition-colors active:scale-[0.99]">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">{{ row.icon }}</div>
+                      <div class="min-w-0">
+                        <span class="text-sm font-bold text-antracite block truncate">{{ row.label }}</span>
+                        <span class="text-[10px] font-medium text-gray-400">{{ row.count }} misur{{ row.count === 1 ? 'azione' : 'azioni' }}</span>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-shrink-0">
+                      <div class="text-right">
+                        <div class="flex items-baseline justify-end gap-1.5">
+                          <span class="text-xs font-bold text-gray-400">{{ formatNumber(row.initial) }} cm</span>
+                          <svg class="w-3 h-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                          <span class="text-sm font-extrabold" :class="row.currentColor">{{ formatNumber(row.current) }} cm</span>
+                        </div>
+                        <div v-if="row.count > 1" class="text-[10px] font-bold mt-0.5" :class="row.deltaColor">
+                          {{ row.deltaText }}<span v-if="row.days > 0"> in {{ row.days }} gg</span>
+                        </div>
+                        <div v-else class="text-[10px] font-medium text-gray-400 mt-0.5">Prima misurazione</div>
+                      </div>
+                      <svg class="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
 
+              <!-- PROGRESSI ALLENAMENTO -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                  <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Progressi Allenamento</h4>
+                  <span v-if="workoutGroups.length === 0" class="text-[10px] font-medium text-gray-400">Nessun carico</span>
+                </div>
+
+                <div v-if="workoutGroups.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-4 text-center text-xs text-gray-400 font-medium">
+                  I progressi appariranno qui automaticamente quando registrerai le tue schede nella sezione Allenamento.
+                </div>
+
+                <div v-for="group in workoutGroups" :key="group.name" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                  <div class="flex justify-between items-start gap-3">
+                    <div>
+                      <h5 class="text-sm font-extrabold text-antracite">{{ group.name }}</h5>
+                      <p class="text-[10px] text-gray-400 font-medium mt-0.5">{{ group.sessions }} session{{ group.sessions === 1 ? 'e' : 'i' }} • ultima {{ formatDate(group.lastDate) }}</p>
+                    </div>
+                    <span class="text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap" :class="group.classes">{{ group.deltaText }}</span>
+                  </div>
+                  <div class="mt-3 flex items-end justify-between">
+                    <div class="flex items-baseline gap-1">
+                      <span class="text-xl font-extrabold text-arancione">{{ formatNumber(group.lastLoad) }}</span>
+                      <span class="text-xs font-semibold text-gray-400">kg</span>
+                      <span v-if="group.lastReps" class="text-[10px] text-gray-400 font-medium">× {{ formatNumber(group.lastReps) }}</span>
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-400">da {{ formatNumber(group.firstLoad) }} kg</span>
+                  </div>
+                  <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
+                    <div class="bg-arancione h-full rounded-full transition-all" :style="{ width: group.progressPct + '%' }"></div>
+                  </div>
+                </div>
+              </div>
+
+            </template>
           </div>
 
           <!-- ==================== NUTRIZIONE ==================== -->
@@ -587,6 +729,14 @@
                     </select>
                   </div>
 
+                  <!-- Calorie del pasto -->
+                  <div class="flex items-center gap-2">
+                    <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Calorie</span>
+                    <input type="text" inputmode="numeric" v-model="meal.calories" placeholder="Es: 450"
+                           class="flex-1 bg-white border border-gray-200 focus:border-viola focus:ring-1 focus:ring-viola/20 rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:font-medium">
+                    <span class="text-[10px] font-bold text-gray-400">kcal</span>
+                  </div>
+
                   <!-- Slot Alimenti -->
                   <div class="space-y-2">
                     <div v-for="(item, iIdx) in meal.items" :key="iIdx" class="flex gap-2 items-center">
@@ -677,7 +827,7 @@
                   <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
                       <h5 class="text-sm font-bold text-antracite">{{ meal.name }}</h5>
-                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories }} kcal</span>
+                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? meal.calories + ' kcal' : 'kcal n.d.' }}</span>
                     </div>
                     <p class="text-xs text-gray-500 leading-relaxed">{{ meal.description }}</p>
                   </div>
@@ -781,7 +931,7 @@
         </main>
 
         <!-- GLOBAL MODALS OVERLAY -->
-        <div v-if="customModal.isOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+        <div v-if="customModal.isOpen" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
           <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
             <h3 class="text-xl font-bold text-antracite">{{ customModal.title }}</h3>
             <p class="text-sm text-gray-500 font-medium">{{ customModal.message }}</p>
@@ -818,7 +968,7 @@
                   <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
                   <p class="text-[10px] text-gray-500 line-clamp-1">{{ meal.description }}</p>
                 </div>
-                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories }} kcal</span>
+                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? meal.calories + ' kcal' : 'kcal n.d.' }}</span>
               </div>
             </div>
 
@@ -826,6 +976,97 @@
               <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">I Tuoi Appunti</div>
               <textarea v-model="commentModal.text" rows="3" placeholder="Es: ho saltato lo spuntino, o mi sentivo debole..." class="w-full bg-gray-50 border border-gray-200 rounded-2xl p-3 text-sm text-antracite focus:ring-2 focus:ring-salvia focus:border-salvia outline-none resize-none"></textarea>
               <button @click="saveComment" class="w-full bg-salvia text-white font-bold py-3 rounded-xl shadow-md hover:bg-salvia/90 active:scale-95 transition-all">Salva</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DAY MENU MODAL (Calendario Dashboard) -->
+        <div v-if="dayMenuModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-start shrink-0 gap-3">
+              <div>
+                <h3 class="text-lg font-bold text-antracite capitalize leading-tight">{{ formatDayLabel(dayMenuModal.dateKey) }}</h3>
+                <span class="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold" :class="dayStatusClasses(dayMenuStatus)">
+                  {{ dayStatusLabel(dayMenuStatus) }}
+                </span>
+              </div>
+              <button @click="closeDayMenu" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-if="dayMenuMeals.length === 0" class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                <p class="text-sm font-medium text-gray-400">Nessun pasto programmato per questo giorno.</p>
+              </div>
+
+              <div v-for="meal in dayMenuMeals" :key="meal.id" class="bg-gray-50 rounded-2xl border border-gray-100 p-3 space-y-2.5">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shadow-sm flex-shrink-0">{{ meal.icon }}</div>
+                  <div class="flex-1 min-w-0">
+                    <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
+                    <p class="text-[10px] text-gray-500 line-clamp-2 leading-snug">{{ meal.description }}</p>
+                  </div>
+                  <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? meal.calories + ' kcal' : '—' }}</span>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <button @click="setMealDone(dayMenuModal.dateKey, meal)"
+                          class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[10px] font-bold transition-all active:scale-95"
+                          :class="dayMenuLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200 hover:border-salvia/50'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    Eseguito
+                  </button>
+                  <button @click="promptSkipMeal(dayMenuModal.dateKey, meal)"
+                          class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[10px] font-bold transition-all active:scale-95"
+                          :class="dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500 border-gray-200 hover:border-red-300'">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    Saltato
+                  </button>
+                </div>
+
+                <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
+                   class="text-[10px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 leading-snug">
+                  💬 {{ dayMenuLogs[meal.id].comment }}
+                </p>
+              </div>
+            </div>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="closeDayMenu" class="w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- MEAL COMMENT MODAL (Pasto saltato) -->
+        <div v-if="mealCommentModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-red-500 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Pasto saltato</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ mealCommentModal.mealName }}</p>
+                </div>
+              </div>
+              <button @click="mealCommentModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <p class="text-xs font-bold text-gray-400 capitalize">{{ mealCommentModal.dateLabel }}</p>
+
+            <div>
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Perché l'hai saltato?</label>
+              <textarea v-model="mealCommentModal.text" rows="3" placeholder="Es: ero fuori casa, non avevo fame..."
+                        class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none transition-all"></textarea>
+            </div>
+
+            <div class="space-y-2">
+              <button @click="saveMealSkip" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-red-600 active:scale-95 transition-all">Salva</button>
+              <button v-if="mealCommentModal.hasExisting" @click="clearMealStatus" class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Rimuovi stato</button>
             </div>
           </div>
         </div>
@@ -860,6 +1101,142 @@
                 Condividi cosa manca
               </button>
             </div>
+          </div>
+        </div>
+
+        <!-- MEASUREMENT MODAL (Progressi) -->
+        <div v-if="measurementModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5 flex flex-col max-h-[92vh]">
+
+            <div class="flex justify-between items-center shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                </div>
+                <div>
+                  <h3 class="text-lg font-bold text-antracite leading-tight">{{ editingMeasurementId !== null ? 'Modifica misurazione' : 'Nuova misurazione' }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Progressi</p>
+                </div>
+              </div>
+              <button @click="measurementModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-4 pr-1 hide-scrollbar">
+
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Data</label>
+                <input type="date" v-model="newMeasurement.date"
+                       class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm font-semibold text-antracite outline-none transition-all">
+              </div>
+
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Peso (kg)</label>
+                <input type="text" inputmode="decimal" v-model="newMeasurement.weight" placeholder="Es: 79,4"
+                       class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm font-semibold text-antracite outline-none transition-all placeholder:font-medium">
+              </div>
+
+              <div>
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Circonferenze (cm)</div>
+                <div class="grid grid-cols-3 gap-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 text-center">Petto</label>
+                    <input type="text" inputmode="decimal" v-model="newMeasurement.chest" placeholder="—"
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-semibold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 text-center">Braccia</label>
+                    <input type="text" inputmode="decimal" v-model="newMeasurement.arms" placeholder="—"
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-semibold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 text-center">Vita</label>
+                    <input type="text" inputmode="decimal" v-model="newMeasurement.waist" placeholder="—"
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-semibold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                  </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mt-2">
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 text-center">Cosce</label>
+                    <input type="text" inputmode="decimal" v-model="newMeasurement.thighs" placeholder="—"
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-semibold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-bold text-gray-500 mb-1 text-center">Pancia</label>
+                    <input type="text" inputmode="decimal" v-model="newMeasurement.belly" placeholder="—"
+                           class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-semibold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="shrink-0 space-y-2 pt-2 border-t border-gray-100">
+              <p v-if="measurementModal.error" class="text-xs font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl px-3 py-2">{{ measurementModal.error }}</p>
+              <button @click="saveMeasurement" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                {{ editingMeasurementId !== null ? 'Aggiorna misurazione' : 'Salva misurazione' }}
+              </button>
+              <button v-if="editingMeasurementId !== null" @click="promptDeleteEditingMeasurement"
+                      class="w-full bg-white border border-red-200 text-red-500 font-bold py-3 rounded-2xl hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                Elimina misurazione
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- HISTORY MODAL (Peso / Circonferenze) -->
+        <div v-if="historyModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+
+            <div class="flex justify-between items-center shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-xl border border-salvia/20">{{ historyIcon }}</div>
+                <div>
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Storico {{ historyLabel }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ historyRows.length }} misurazion{{ historyRows.length === 1 ? 'e' : 'i' }}</p>
+                </div>
+              </div>
+              <button @click="closeHistory" class="p-1 text-gray-400 hover:text-antracite">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div v-if="historyRows.length === 0" class="py-8 text-center text-sm text-gray-400 font-medium">
+              Nessuna misurazione registrata.
+            </div>
+
+            <div v-else class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="row in historyRows" :key="row.entry.id" class="flex items-center justify-between gap-2 p-3 bg-gray-50 border border-gray-100 rounded-2xl">
+                <div class="min-w-0">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ formatDate(row.entry.date) }}</div>
+                  <div class="text-base font-extrabold text-antracite">{{ formatNumber(row.value) }} <span class="text-[10px] font-semibold text-gray-400">{{ historyUnit }}</span></div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <div v-if="row.delta !== null" class="text-xs font-bold" :class="row.deltaColor">{{ row.deltaText }}</div>
+                  <div v-else class="text-[10px] font-medium text-gray-400">Inizio</div>
+                </div>
+                <div class="flex items-center gap-1 flex-shrink-0">
+                  <button @click.stop="editMeasurement(row.entry)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-viola hover:border-viola/30 transition-colors" aria-label="Modifica misurazione">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  </button>
+                  <button @click.stop="confirmDeleteMeasurement(row.entry)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 transition-colors" aria-label="Elimina misurazione">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="closeHistory(); openMeasurementModal()" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Aggiungi misurazione
+              </button>
+            </div>
+
           </div>
         </div>
 
@@ -914,6 +1291,12 @@
       setup() {
         // App State
         const activeTab = ref('dashboard');
+
+        // Data locale in formato YYYY-MM-DD (usata da pasti, progressi e calendario)
+        const toISODate = (date = new Date()) => {
+          const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
+          return local.toISOString().split('T')[0];
+        };
         
         // Auth State
         const isAuthenticated = ref(false);
@@ -1096,7 +1479,7 @@
            }
 
            currentDayMeals.push({
-             type: nextType, items: ['']
+             type: nextType, items: [''], calories: ''
            });
         };
 
@@ -1154,7 +1537,8 @@
              newPlanBuilder.value.weeks[0].days['Lunedì'].forEach((m, i) => {
                const tInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
                mockMealsForDetail.push({
-                 id: m.type + '_' + i, name: tInfo.label, icon: tInfo.icon, calories: '-', 
+                 id: m.type + '_' + i, name: tInfo.label, icon: tInfo.icon,
+                 calories: normalizeCalories(m.calories) !== null ? normalizeCalories(m.calories) : '-',
                  description: m.items.filter(it => it.trim()!=='').join(', ') || 'Nessun dettaglio'
                });
              });
@@ -1224,6 +1608,21 @@
             return;
           }
 
+          // VALIDAZIONE: le calorie sono opzionali, ma se inserite devono essere numeriche
+          for (let wIdx = 0; wIdx < newPlanBuilder.value.weeks.length; wIdx++) {
+            const week = newPlanBuilder.value.weeks[wIdx];
+            for (let dIdx = 0; dIdx < weekDays.length; dIdx++) {
+              const day = weekDays[dIdx];
+              const dayMeals = week.days[day] || [];
+              for (let mIdx = 0; mIdx < dayMeals.length; mIdx++) {
+                if (isInvalidNumber(dayMeals[mIdx].calories)) {
+                  showToastMessage(`Settimana ${wIdx + 1}, ${day}: calorie non valide nel pasto ${mIdx + 1}.`);
+                  return;
+                }
+              }
+            }
+          }
+
           // CONFERMA: Se tutto è compilato, chiedi conferma
           const confirmTitle = editingPlanId.value ? "Salva Modifiche" : "Salva Piano Definitivo";
           const confirmMsg = editingPlanId.value 
@@ -1255,47 +1654,283 @@
 
         const activePlan = computed(() => plans.value.find(p => p.status === 'active'));
 
-        // Computed per Dashboard: Prende i pasti di "oggi" reali dal piano attivo
-        const todayActiveMeals = computed(() => {
-          if (!activePlan.value) return meals.value; // Fallback generico
+        const normalizeCalories = (value) => {
+          if (value === null || value === undefined || value === '') return null;
+          const parsed = parseFloat(String(value).replace(',', '.'));
+          return Number.isFinite(parsed) ? parsed : null;
+        };
 
-          // Se il piano ha la struttura a settimane (creata dal nuovo builder)
-          if (activePlan.value.weeks && activePlan.value.weeks.length > 0) {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Azzera l'ora per evitare calcoli errati
-            
-            const startDate = new Date(activePlan.value.startDate);
-            startDate.setHours(0, 0, 0, 0);
+        // Trasforma i pasti del builder nel formato usato da dashboard e calendario
+        const mapDayMeals = (dayMeals) => {
+          return (dayMeals || []).map((m, i) => {
+            const typeInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
+            return {
+              id: m.type + '_' + i,
+              type: m.type,
+              name: typeInfo.label,
+              icon: typeInfo.icon,
+              calories: normalizeCalories(m.calories),
+              description: (m.items || []).filter(it => it && it.trim() !== '').join(', ') || 'Nessun dettaglio.'
+            };
+          });
+        };
 
-            let weeksElapsed = 0;
-            // Calcola le settimane passate solo se il piano è già iniziato
-            if (today >= startDate) {
-               const diffTime = today.getTime() - startDate.getTime();
-               const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-               weeksElapsed = Math.floor(diffDays / 7);
+        // Menu del giorno per una data specifica del piano attivo
+        const getMealsForDate = (date = new Date()) => {
+          const plan = activePlan.value;
+          if (!plan) return [];
+
+          if (plan.weeks && plan.weeks.length > 0) {
+            const day = new Date(date);
+            day.setHours(0, 0, 0, 0);
+
+            const startDate = new Date(plan.startDate + 'T00:00:00');
+            if (Number.isNaN(startDate.getTime())) return [];
+            if (day < startDate) return [];
+
+            if (plan.endDate) {
+              const endDate = new Date(plan.endDate + 'T00:00:00');
+              if (!Number.isNaN(endDate.getTime()) && day > endDate) return [];
             }
 
-            const weekIdx = weeksElapsed % activePlan.value.weeks.length;
-            const dayOfWeek = today.getDay(); // 0 Domenica, 1 Lunedì...
+            const diffDays = Math.floor((day.getTime() - startDate.getTime()) / 86400000);
+            const weekIdx = Math.floor(diffDays / 7) % plan.weeks.length;
+            const dayOfWeek = day.getDay();
             const mappedDay = dayOfWeek === 0 ? 'Domenica' : weekDays[dayOfWeek - 1];
+            const dayMeals = plan.weeks[weekIdx]?.days?.[mappedDay] || [];
+            return mapDayMeals(dayMeals);
+          }
 
-            const dayMeals = activePlan.value.weeks[weekIdx].days[mappedDay] || [];
-            
-            return dayMeals.map((m, i) => {
-              const typeInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
-              return {
-                id: m.type + '_' + i,
-                name: typeInfo.label,
-                icon: typeInfo.icon,
-                calories: '-',
-                description: m.items.filter(it => it.trim() !== '').join(', ') || 'Nessun dettaglio.'
-              }
-            });
-          } 
-          
-          // Fallback ai mock del piano (vecchio formato)
-          return activePlan.value.meals || meals.value;
+          // Fallback ai piani nel vecchio formato
+          return (plan.meals || []).map((m, i) => ({
+            id: m.id || 'pasto_' + i,
+            type: m.id ? String(m.id).split('_')[0] : 'pasto',
+            name: m.name || 'Pasto',
+            icon: m.icon || '🍽️',
+            calories: normalizeCalories(m.calories),
+            description: m.description || ''
+          }));
+        };
+
+        // Computed per Dashboard: pasti di oggi
+        const todayActiveMeals = computed(() => getMealsForDate(new Date()));
+
+        // ---------------------------------------------------------------
+        // PASTI: check giornaliero, commenti e calendario dashboard
+        // ---------------------------------------------------------------
+        const savedMealLogs = localStorage.getItem('still_meal_logs');
+        const mealLogs = ref(savedMealLogs ? JSON.parse(savedMealLogs) : {});
+
+        watch(mealLogs, (logs) => {
+          localStorage.setItem('still_meal_logs', JSON.stringify(logs));
+        }, { deep: true });
+
+        const todayDateKey = computed(() => toISODate(new Date()));
+        const todayMealLogs = computed(() => mealLogs.value[todayDateKey.value] || {});
+
+        const cleanupMealLogsDay = (dateKey) => {
+          const dayLogs = mealLogs.value[dateKey];
+          if (dayLogs && Object.keys(dayLogs).length === 0) delete mealLogs.value[dateKey];
+        };
+
+        const mealLogFor = (dateKey, mealId) => mealLogs.value[dateKey]?.[mealId] || null;
+
+        const setMealDone = (dateKey, meal) => {
+          const dayLogs = mealLogs.value[dateKey] || {};
+          if (dayLogs[meal.id]?.status === 'done') {
+            delete dayLogs[meal.id];
+          } else {
+            dayLogs[meal.id] = { status: 'done', comment: '' };
+          }
+          mealLogs.value[dateKey] = dayLogs;
+          cleanupMealLogsDay(dateKey);
+        };
+
+        const mealCommentModal = ref({
+          isOpen: false, dateKey: '', mealId: '', mealName: '', dateLabel: '', text: '', hasExisting: false
         });
+
+        const formatDayLabel = (dateKey) => {
+          const [year, month, day] = dateKey.split('-').map(Number);
+          return new Date(year, month - 1, day).toLocaleDateString('it-IT', {
+            weekday: 'long', day: 'numeric', month: 'long'
+          });
+        };
+
+        const promptSkipMeal = (dateKey, meal) => {
+          const existing = mealLogFor(dateKey, meal.id);
+          mealCommentModal.value = {
+            isOpen: true,
+            dateKey,
+            mealId: meal.id,
+            mealName: meal.name,
+            dateLabel: formatDayLabel(dateKey),
+            text: existing?.comment || '',
+            hasExisting: existing?.status === 'skipped'
+          };
+        };
+
+        const saveMealSkip = () => {
+          const modal = mealCommentModal.value;
+          const dayLogs = mealLogs.value[modal.dateKey] || {};
+          dayLogs[modal.mealId] = { status: 'skipped', comment: modal.text.trim() };
+          mealLogs.value[modal.dateKey] = dayLogs;
+          mealCommentModal.value.isOpen = false;
+        };
+
+        const clearMealStatus = () => {
+          const modal = mealCommentModal.value;
+          if (mealLogs.value[modal.dateKey]) {
+            delete mealLogs.value[modal.dateKey][modal.mealId];
+            cleanupMealLogsDay(modal.dateKey);
+          }
+          mealCommentModal.value.isOpen = false;
+        };
+
+        const dayStatusFor = (date) => {
+          const mealsForDay = getMealsForDate(date);
+          if (mealsForDay.length === 0) return 'empty';
+
+          const dayLogs = mealLogs.value[toISODate(date)] || {};
+          const statuses = mealsForDay.map(meal => dayLogs[meal.id]?.status).filter(Boolean);
+          if (statuses.length === 0) return 'empty';
+
+          const done = statuses.filter(status => status === 'done').length;
+          const skipped = statuses.filter(status => status === 'skipped').length;
+
+          if (skipped === 0 && done === mealsForDay.length) return 'perfect';
+          if (skipped === 1) return 'small_cheat';
+          if (skipped >= 2) return 'cheat';
+          return 'partial';
+        };
+
+        const dayStatusLabel = (status) => {
+          return {
+            perfect: 'Giornata perfetta',
+            small_cheat: 'Piccolo sgarro',
+            cheat: 'Giornata di sgarro',
+            partial: 'Giornata parziale',
+            empty: 'Non tracciata'
+          }[status] || 'Non tracciata';
+        };
+
+        const dayStatusClasses = (status) => {
+          return {
+            perfect: 'bg-salvia/10 text-salvia',
+            small_cheat: 'bg-viola/10 text-viola',
+            cheat: 'bg-red-50 text-red-500',
+            partial: 'bg-gray-100 text-gray-400',
+            empty: 'bg-gray-100 text-gray-400'
+          }[status] || 'bg-gray-100 text-gray-400';
+        };
+
+        // Calorie reali: somma dei pasti segnati come eseguiti
+        const todayConsumedCalories = computed(() => {
+          return todayActiveMeals.value.reduce((sum, meal) => {
+            if (meal.calories === null) return sum;
+            return todayMealLogs.value[meal.id]?.status === 'done' ? sum + meal.calories : sum;
+          }, 0);
+        });
+
+        const todayTargetCalories = computed(() => {
+          return todayActiveMeals.value.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+        });
+
+        const todayCaloriesPct = computed(() => {
+          if (todayTargetCalories.value <= 0) return 0;
+          return Math.min(100, Math.round((todayConsumedCalories.value / todayTargetCalories.value) * 100));
+        });
+
+        // Calendario dashboard (mese indipendente da quello della nutrizione)
+        const dashToday = new Date();
+        const dashYear = ref(dashToday.getFullYear());
+        const dashMonth = ref(dashToday.getMonth());
+
+        const dashMonthName = computed(() => {
+          return new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(dashYear.value, dashMonth.value, 1));
+        });
+
+        const dashDaysInMonth = computed(() => new Date(dashYear.value, dashMonth.value + 1, 0).getDate());
+
+        const dashFirstDayOfMonth = computed(() => {
+          const firstDay = new Date(dashYear.value, dashMonth.value, 1).getDay();
+          return firstDay === 0 ? 6 : firstDay - 1;
+        });
+
+        const dashPrevMonth = () => {
+          if (dashMonth.value === 0) { dashMonth.value = 11; dashYear.value--; }
+          else dashMonth.value--;
+        };
+
+        const dashNextMonth = () => {
+          if (dashMonth.value === 11) { dashMonth.value = 0; dashYear.value++; }
+          else dashMonth.value++;
+        };
+
+        const dashIsToday = (day) => {
+          return day === dashToday.getDate()
+            && dashMonth.value === dashToday.getMonth()
+            && dashYear.value === dashToday.getFullYear();
+        };
+
+        const dashboardDayStatus = (day) => dayStatusFor(new Date(dashYear.value, dashMonth.value, day));
+
+        const dashboardDayClasses = (day) => {
+          const status = dashboardDayStatus(day);
+          if (status === 'perfect') return 'bg-salvia text-white shadow-sm';
+          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm';
+          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm';
+          if (dashIsToday(day)) return 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20';
+          return 'text-gray-600 hover:bg-gray-50';
+        };
+
+        // Modale con il menu di uno specifico giorno
+        const dayMenuModal = ref({ isOpen: false, date: null, dateKey: '' });
+
+        const openDayMenuForDate = (date) => {
+          const normalized = new Date(date);
+          normalized.setHours(0, 0, 0, 0);
+          dayMenuModal.value = {
+            isOpen: true,
+            date: normalized,
+            dateKey: toISODate(normalized)
+          };
+        };
+
+        const openDayMenu = (day) => {
+          openDayMenuForDate(new Date(dashYear.value, dashMonth.value, day));
+        };
+
+        const closeDayMenu = () => {
+          dayMenuModal.value.isOpen = false;
+        };
+
+        const dayMenuMeals = computed(() => {
+          if (!dayMenuModal.value.isOpen || !dayMenuModal.value.date) return [];
+          return getMealsForDate(dayMenuModal.value.date);
+        });
+
+        const dayMenuLogs = computed(() => {
+          if (!dayMenuModal.value.isOpen) return {};
+          return mealLogs.value[dayMenuModal.value.dateKey] || {};
+        });
+
+        const dayMenuStatus = computed(() => {
+          if (!dayMenuModal.value.isOpen || !dayMenuModal.value.date) return 'empty';
+          return dayStatusFor(dayMenuModal.value.date);
+        });
+
+        const goToTodayNutrition = () => {
+          activeTab.value = 'nutrition';
+          if (!activePlan.value) {
+            nutritionView.value = 'list';
+            showToastMessage("Nessun piano attivo. Crea o attiva un piano alimentare.");
+            return;
+          }
+          selectedPlan.value = activePlan.value;
+          nutritionView.value = 'detail';
+          openDayMenuForDate(new Date());
+        };
         
         const checklistItems = ref([]);
 
@@ -1364,7 +1999,10 @@
 
         const selectedPlanTotalCalories = computed(() => {
           if (!selectedPlan.value) return 0;
-          return selectedPlan.value.meals.reduce((sum, meal) => sum + meal.calories, 0);
+          return (selectedPlan.value.meals || []).reduce((sum, meal) => {
+            const calories = Number(meal.calories);
+            return sum + (Number.isFinite(calories) ? calories : 0);
+          }, 0);
         });
 
         const openPlan = (plan) => {
@@ -1432,6 +2070,385 @@
           planToActivate.results = 'In corso';
           showToastMessage(`Piano "${planToActivate.name}" riattivato.`);
         };
+
+
+        // ---------------------------------------------------------------
+        // PROGRESSI: misurazioni corpo + carichi allenamento
+        // ---------------------------------------------------------------
+        const savedMeasurements = localStorage.getItem('still_measurements');
+        const measurements = ref(savedMeasurements ? JSON.parse(savedMeasurements) : []);
+
+        // Auto-salvataggio delle misurazioni nella memoria del telefono
+        watch(measurements, (newMeasurements) => {
+          localStorage.setItem('still_measurements', JSON.stringify(newMeasurements));
+        }, { deep: true });
+
+        // Log allenamenti: la sezione Allenamento scriverà qui le sessioni delle schede.
+        // Formato consigliato: { id, date, sheetId, sheetName, exerciseId, exerciseName, weight, reps }
+        const savedWorkoutLogs = localStorage.getItem('still_workout_logs');
+        const workoutLogs = ref(savedWorkoutLogs ? JSON.parse(savedWorkoutLogs) : []);
+
+        watch(workoutLogs, (newLogs) => {
+          localStorage.setItem('still_workout_logs', JSON.stringify(newLogs));
+        }, { deep: true });
+
+        // Migrazione: i vecchi carichi inseriti dalla scheda misurazione diventano log allenamento
+        const legacyWorkoutEntries = measurements.value.filter(m => m.exercise && m.load !== null && m.load !== undefined);
+        if (legacyWorkoutEntries.length > 0) {
+          const existingLogIds = new Set(workoutLogs.value.map(log => log.id));
+          legacyWorkoutEntries.forEach(entry => {
+            if (!existingLogIds.has('legacy_' + entry.id)) {
+              workoutLogs.value.push({
+                id: 'legacy_' + entry.id,
+                date: entry.date,
+                exerciseName: entry.exercise,
+                weight: entry.load,
+                reps: entry.reps
+              });
+            }
+            entry.exercise = '';
+            entry.load = null;
+            entry.reps = null;
+          });
+        }
+
+        const measurementModal = ref({ isOpen: false, error: '' });
+        const editingMeasurementId = ref(null);
+        const historyModal = ref({ isOpen: false, type: 'weight' });
+
+        const emptyMeasurementForm = () => ({
+          date: toISODate(), weight: '', chest: '', arms: '', waist: '', thighs: '', belly: ''
+        });
+
+        const newMeasurement = ref(emptyMeasurementForm());
+
+        const openMeasurementModal = (entry = null) => {
+          editingMeasurementId.value = entry ? entry.id : null;
+          newMeasurement.value = entry ? {
+            date: entry.date,
+            weight: entry.weight ?? '',
+            chest: entry.chest ?? '',
+            arms: entry.arms ?? '',
+            waist: entry.waist ?? '',
+            thighs: entry.thighs ?? '',
+            belly: entry.belly ?? ''
+          } : emptyMeasurementForm();
+          measurementModal.value = { isOpen: true, error: '' };
+        };
+
+        const editMeasurement = (entry) => {
+          historyModal.value.isOpen = false;
+          openMeasurementModal(entry);
+        };
+
+        const parseOptionalNumber = (value) => {
+          const parsed = parseFloat(String(value).replace(',', '.'));
+          return Number.isFinite(parsed) ? parsed : null;
+        };
+
+        // Un campo vuoto è valido; se contiene testo deve essere segnalato all'utente
+        const isInvalidNumber = (value) => {
+          const trimmed = String(value ?? '').trim();
+          if (trimmed === '') return false;
+          return !/^\d+(?:[.,]\d+)?$/.test(trimmed);
+        };
+
+        const formatNumber = (value) => {
+          if (value === null || value === undefined || Number.isNaN(Number(value))) return '-';
+          return Number(value).toLocaleString('it-IT', { maximumFractionDigits: 1 });
+        };
+
+        const daysBetween = (fromDate, toDate) => {
+          const from = new Date(fromDate + 'T00:00:00');
+          const to = new Date(toDate + 'T00:00:00');
+          return Math.max(0, Math.round((to - from) / 86400000));
+        };
+
+        const saveMeasurement = () => {
+          const data = newMeasurement.value;
+
+          const numericFields = [
+            { label: 'Peso', value: data.weight },
+            { label: 'Petto', value: data.chest },
+            { label: 'Braccia', value: data.arms },
+            { label: 'Vita', value: data.waist },
+            { label: 'Cosce', value: data.thighs },
+            { label: 'Pancia', value: data.belly }
+          ];
+
+          const invalidField = numericFields.find(field => isInvalidNumber(field.value));
+          if (invalidField) {
+            measurementModal.value.error = `${invalidField.label}: inserisci un numero valido (es. 79,4).`;
+            return;
+          }
+
+          const entry = {
+            date: data.date || toISODate(),
+            weight: parseOptionalNumber(data.weight),
+            chest: parseOptionalNumber(data.chest),
+            arms: parseOptionalNumber(data.arms),
+            waist: parseOptionalNumber(data.waist),
+            thighs: parseOptionalNumber(data.thighs),
+            belly: parseOptionalNumber(data.belly)
+          };
+
+          const hasBodyMeasurement = [entry.weight, entry.chest, entry.arms, entry.waist, entry.thighs, entry.belly].some(v => v !== null);
+
+          if (!hasBodyMeasurement) {
+            measurementModal.value.error = "Inserisci almeno una misurazione.";
+            return;
+          }
+
+          if (editingMeasurementId.value !== null) {
+            const index = measurements.value.findIndex(m => m.id === editingMeasurementId.value);
+            if (index > -1) {
+              measurements.value[index] = { ...measurements.value[index], ...entry };
+            }
+            editingMeasurementId.value = null;
+            measurementModal.value.isOpen = false;
+            showToastMessage("Misurazione aggiornata! ✏️");
+            return;
+          }
+
+          measurements.value.push({ id: Date.now(), ...entry });
+          measurementModal.value.isOpen = false;
+          showToastMessage("Misurazione salvata! 📈");
+        };
+
+        const removeMeasurement = (entry) => {
+          const index = measurements.value.findIndex(m => m.id === entry.id);
+          if (index > -1) measurements.value.splice(index, 1);
+        };
+
+        const confirmDeleteMeasurement = (entry) => {
+          showConfirm(
+            "Elimina misurazione",
+            `Vuoi eliminare la misurazione del ${formatDate(entry.date)}? Verranno rimosse tutte le misure registrate in quella scheda.`,
+            () => {
+              removeMeasurement(entry);
+              showToastMessage("Misurazione eliminata. 🗑️");
+            }
+          );
+        };
+
+        const promptDeleteEditingMeasurement = () => {
+          const entry = measurements.value.find(m => m.id === editingMeasurementId.value);
+          if (!entry) return;
+
+          showConfirm(
+            "Elimina misurazione",
+            `Vuoi eliminare la misurazione del ${formatDate(entry.date)}? Verranno rimosse tutte le misure registrate in quella scheda.`,
+            () => {
+              removeMeasurement(entry);
+              measurementModal.value.isOpen = false;
+              editingMeasurementId.value = null;
+              showToastMessage("Misurazione eliminata. 🗑️");
+            }
+          );
+        };
+
+        const sortedMeasurements = computed(() => {
+          return [...measurements.value].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+        });
+
+        const weightEntries = computed(() => {
+          return sortedMeasurements.value.filter(m => m.weight !== null && m.weight !== undefined);
+        });
+
+        const latestWeight = computed(() => {
+          const entries = weightEntries.value;
+          return entries.length > 0 ? entries[entries.length - 1] : null;
+        });
+
+        const weightDelta = computed(() => {
+          const entries = weightEntries.value;
+          if (entries.length < 2) return null;
+
+          const first = entries[0];
+          const last = entries[entries.length - 1];
+          const diff = last.weight - first.weight;
+
+          return {
+            value: diff,
+            days: daysBetween(first.date, last.date),
+            text: `${diff > 0 ? '+' : ''}${formatNumber(diff)} kg`,
+            classes: diff <= 0 ? 'bg-salvia/10 text-salvia' : 'bg-arancione/10 text-arancione'
+          };
+        });
+
+        const weightChart = computed(() => {
+          const entries = weightEntries.value;
+          if (entries.length === 0) return { points: [], line: '', area: '' };
+
+          const values = entries.map(entry => entry.weight);
+          const min = Math.min(...values);
+          const max = Math.max(...values);
+          const range = Math.max(max - min, 1);
+
+          const xStart = 20;
+          const xEnd = 270;
+          const yTop = 25;
+          const yBottom = 120;
+          const labelStep = Math.ceil(entries.length / 6);
+
+          const points = entries.map((entry, index) => {
+            const x = entries.length === 1
+              ? (xStart + xEnd) / 2
+              : xStart + (index * (xEnd - xStart)) / (entries.length - 1);
+            const y = entries.length === 1
+              ? (yTop + yBottom) / 2
+              : yBottom - ((entry.weight - min) / range) * (yBottom - yTop);
+
+            return {
+              x: Number(x.toFixed(1)),
+              y: Number(y.toFixed(1)),
+              label: formatNumber(entry.weight),
+              showLabel: entries.length <= 7 || index === 0 || index === entries.length - 1 || index % labelStep === 0
+            };
+          });
+
+          const line = points.map(point => `${point.x},${point.y}`).join(' ');
+          const area = `${points[0].x},140 ${line} ${points[points.length - 1].x},140`;
+
+          return { points, line, area };
+        });
+
+        const circumferenceFields = [
+          { key: 'chest', label: 'Petto', icon: '👕', betterDown: true, improvementColor: 'text-salvia' },
+          { key: 'arms', label: 'Braccia', icon: '💪', betterDown: false, improvementColor: 'text-viola' },
+          { key: 'waist', label: 'Vita', icon: '📏', betterDown: true, improvementColor: 'text-salvia' },
+          { key: 'thighs', label: 'Cosce', icon: '🦵', betterDown: true, improvementColor: 'text-salvia' },
+          { key: 'belly', label: 'Pancia', icon: '🧍', betterDown: true, improvementColor: 'text-salvia' }
+        ];
+
+        const circumferenceRows = computed(() => {
+          return circumferenceFields.map(field => {
+            const entries = sortedMeasurements.value.filter(m => m[field.key] !== null && m[field.key] !== undefined);
+            if (entries.length === 0) return null;
+
+            const first = entries[0];
+            const last = entries[entries.length - 1];
+            const delta = last[field.key] - first[field.key];
+            const days = daysBetween(first.date, last.date);
+            const isImprovement = field.betterDown ? delta <= 0 : delta >= 0;
+
+            return {
+              key: field.key,
+              label: field.label,
+              icon: field.icon,
+              initial: first[field.key],
+              initialDate: first.date,
+              current: last[field.key],
+              date: last.date,
+              count: entries.length,
+              delta,
+              days,
+              arrowUp: delta > 0,
+              deltaText: `${delta > 0 ? '+' : ''}${formatNumber(delta)} cm`,
+              currentColor: isImprovement ? field.improvementColor : 'text-arancione',
+              deltaColor: delta === 0 ? 'text-gray-400' : (isImprovement ? field.improvementColor : 'text-arancione')
+            };
+          }).filter(Boolean);
+        });
+
+        // Storico dettagliato (peso o singola circonferenza)
+        const historyRows = computed(() => {
+          const type = historyModal.value.type;
+          const list = type === 'weight'
+            ? weightEntries.value
+            : sortedMeasurements.value.filter(m => m[type] !== null && m[type] !== undefined);
+
+          const rows = list.map((entry, index) => {
+            const value = type === 'weight' ? entry.weight : entry[type];
+            const previousEntry = index > 0 ? list[index - 1] : null;
+            const previousValue = previousEntry
+              ? (type === 'weight' ? previousEntry.weight : previousEntry[type])
+              : null;
+            const delta = previousValue !== null ? value - previousValue : null;
+            const isImprovement = type === 'arms' ? delta !== null && delta >= 0 : delta !== null && delta <= 0;
+
+            return {
+              entry,
+              value,
+              delta,
+              deltaText: delta === null
+                ? ''
+                : `${delta > 0 ? '+' : ''}${formatNumber(delta)} ${type === 'weight' ? 'kg' : 'cm'}`,
+              deltaColor: delta === null || delta === 0
+                ? 'text-gray-400'
+                : (isImprovement ? (type === 'arms' ? 'text-viola' : 'text-salvia') : 'text-arancione')
+            };
+          });
+
+          return rows.reverse();
+        });
+
+        const historyField = computed(() => {
+          if (historyModal.value.type === 'weight') {
+            return { label: 'Peso', icon: '⚖️', unit: 'kg' };
+          }
+          return circumferenceFields.find(f => f.key === historyModal.value.type) || circumferenceFields[0];
+        });
+
+        const historyIcon = computed(() => historyField.value.icon);
+        const historyLabel = computed(() => historyField.value.label);
+        const historyUnit = computed(() => historyField.value.unit || 'cm');
+
+        const openHistory = (type) => {
+          historyModal.value = { isOpen: true, type };
+        };
+
+        const closeHistory = () => {
+          historyModal.value.isOpen = false;
+        };
+
+        // I progressi allenamento derivano automaticamente dai log scritti nella sezione Allenamento
+        const workoutGroups = computed(() => {
+          const byExercise = {};
+
+          workoutLogs.value.forEach(log => {
+            const name = (log.exerciseName || log.exercise || '').trim();
+            const load = parseOptionalNumber(log.weight ?? log.load);
+            if (!name || load === null || !log.date) return;
+
+            const key = name.toLowerCase();
+            if (!byExercise[key]) byExercise[key] = { name, entries: [] };
+            byExercise[key].entries.push({
+              date: log.date,
+              load,
+              reps: parseOptionalNumber(log.reps)
+            });
+          });
+
+          return Object.values(byExercise).map(group => {
+            // Prende il miglior set di ogni giornata
+            const bestByDate = {};
+            group.entries.forEach(entry => {
+              if (!bestByDate[entry.date] || entry.load > bestByDate[entry.date].load) {
+                bestByDate[entry.date] = entry;
+              }
+            });
+
+            const sessions = Object.values(bestByDate).sort((a, b) => a.date.localeCompare(b.date));
+            const first = sessions[0];
+            const last = sessions[sessions.length - 1];
+            const delta = last.load - first.load;
+            const gainPct = first.load > 0 ? (delta / first.load) * 100 : 0;
+
+            return {
+              name: group.name,
+              sessions: sessions.length,
+              firstLoad: first.load,
+              lastLoad: last.load,
+              lastReps: last.reps,
+              lastDate: last.date,
+              delta,
+              deltaText: delta === 0 ? 'Stabile' : `${delta > 0 ? '+' : ''}${formatNumber(delta)} kg`,
+              classes: delta > 0 ? 'bg-salvia/10 text-salvia' : (delta < 0 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400'),
+              progressPct: Math.min(100, Math.max(8, Math.round(50 + gainPct / 2)))
+            };
+          }).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
+        });
 
 
         // Calendar Logic
@@ -1537,7 +2554,10 @@
            exportSelectedDates.value.forEach(day => {
               text += `--- Giorno ${day} ${currentMonthName.value} ---\n`;
               selectedPlan.value.meals.forEach(m => {
-                text += `🔸 ${m.name} (${m.calories} kcal)\n   ${m.description}\n`;
+                const kcal = m.calories !== null && m.calories !== undefined && m.calories !== '-'
+                  ? `${m.calories} kcal`
+                  : 'kcal n.d.';
+                text += `🔸 ${m.name} (${kcal})\n   ${m.description}\n`;
               });
               const key = `${currentYear.value}-${currentMonth.value}-${day}`;
               if(commentsMap.value[key]) {
@@ -1589,6 +2609,35 @@
           mealsContainer,
           currentMealId,
           todayActiveMeals,
+          todayDateKey,
+          todayMealLogs,
+          setMealDone,
+          promptSkipMeal,
+          mealCommentModal,
+          saveMealSkip,
+          clearMealStatus,
+          todayConsumedCalories,
+          todayTargetCalories,
+          todayCaloriesPct,
+          dashYear,
+          dashMonth,
+          dashMonthName,
+          dashDaysInMonth,
+          dashFirstDayOfMonth,
+          dashPrevMonth,
+          dashNextMonth,
+          dashboardDayStatus,
+          dashboardDayClasses,
+          openDayMenu,
+          dayMenuModal,
+          closeDayMenu,
+          dayMenuMeals,
+          dayMenuLogs,
+          dayMenuStatus,
+          dayStatusLabel,
+          dayStatusClasses,
+          formatDayLabel,
+          goToTodayNutrition,
           login,
           logout,
           nutritionView,
@@ -1632,6 +2681,30 @@
           handleDayClick,
           exportSelectedMenu,
           noteForToday,
+          measurements,
+          measurementModal,
+          newMeasurement,
+          editingMeasurementId,
+          openMeasurementModal,
+          editMeasurement,
+          saveMeasurement,
+          confirmDeleteMeasurement,
+          promptDeleteEditingMeasurement,
+          historyModal,
+          historyRows,
+          historyIcon,
+          historyLabel,
+          historyUnit,
+          openHistory,
+          closeHistory,
+          formatNumber,
+          weightEntries,
+          latestWeight,
+          weightDelta,
+          weightChart,
+          circumferenceRows,
+          workoutLogs,
+          workoutGroups,
           customModal,
           executeConfirm,
           commentModal,
