@@ -48,7 +48,7 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: #A8B69A; }
+    ::-webkit-scrollbar-thumb:hover { background: #10B981; }
     
     button, a, input { -webkit-tap-highlight-color: transparent; }
 
@@ -210,22 +210,30 @@
             </div>
 
             <!-- APPUNTI DI OGGI (Visibile solo se c'è una nota) -->
-            <div v-if="noteForToday" class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4 flex gap-3 items-start shadow-sm mt-4 animate-fadeIn">
-              <div class="text-salvia text-xl pt-0.5">💡</div>
+            <div v-if="noteForToday" class="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 flex gap-3 items-start shadow-sm mt-4 animate-fadeIn">
+              <div class="text-sky-600 text-xl pt-0.5">💡</div>
               <div>
-                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest mb-1">La tua nota di oggi</div>
+                <div class="text-[10px] font-bold text-sky-600 uppercase tracking-widest mb-1">La tua nota di oggi</div>
                 <p class="text-sm text-antracite font-medium leading-relaxed">{{ noteForToday }}</p>
               </div>
             </div>
 
             <!-- GROCERY BANNER (DASHBOARD) -->
-            <div v-if="activePlan" @click="openGroceryModal" class="bg-viola/10 border border-viola/30 rounded-3xl p-4 flex gap-4 items-center shadow-sm cursor-pointer hover:bg-viola/15 transition-all mt-4 animate-fadeIn">
-              <div class="w-12 h-12 rounded-2xl bg-viola/20 flex items-center justify-center text-2xl flex-shrink-0">🛒</div>
+            <div v-if="activePlan" @click="openGroceryModal"
+                 class="rounded-3xl p-4 flex gap-4 items-center shadow-sm cursor-pointer transition-all mt-4 animate-fadeIn border"
+                 :class="allGroceryChecked ? 'bg-salvia/10 border-salvia/30 hover:bg-salvia/15' : 'bg-viola/10 border-viola/30 hover:bg-viola/15'">
+              <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl flex-shrink-0"
+                   :class="allGroceryChecked ? 'bg-salvia/20' : 'bg-viola/20'">🛒</div>
               <div class="flex-1">
-                <h4 class="text-sm font-extrabold text-viola leading-tight">Il tuo frigo è pronto per domani?</h4>
-                <p class="text-[11px] text-antracite font-medium mt-1 leading-snug">Tocca qui per la checklist e condividi quello che ti manca.</p>
+                <h4 class="text-sm font-extrabold leading-tight"
+                    :class="allGroceryChecked ? 'text-salvia' : 'text-viola'">
+                  {{ allGroceryChecked ? 'Il tuo frigo è pronto!' : 'Il tuo frigo è pronto per domani?' }}
+                </h4>
+                <p class="text-[11px] text-antracite font-medium mt-1 leading-snug">
+                  {{ allGroceryChecked ? 'Tocca qui se hai dimenticato qualcosa o per correggere la checklist.' : 'Tocca qui per la checklist e condividi quello che ti manca.' }}
+                </p>
               </div>
-              <div class="text-viola">
+              <div :class="allGroceryChecked ? 'text-salvia' : 'text-viola'">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
               </div>
             </div>
@@ -241,50 +249,43 @@
               </div>
 
               <div v-else ref="mealsContainer" id="meals-container" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-2 pt-1 px-1">
-                <div v-for="meal in todayActiveMeals" :key="meal.id" :id="'meal-' + meal.id" 
-                     class="snap-center shrink-0 w-[85%] bg-white rounded-3xl p-5 border shadow-soft relative overflow-hidden flex flex-col justify-between transition-all"
+                <div v-for="meal in todayActiveMeals" :key="meal.id" :id="'meal-' + meal.id"
+                     class="snap-center shrink-0 w-[85%] bg-white rounded-3xl border shadow-soft relative overflow-hidden flex items-stretch transition-all"
                      :class="currentMealId === meal.id.split('_')[0] ? 'border-salvia ring-4 ring-salvia/10' : 'border-gray-100'">
-                  
+
                   <!-- Etichetta Pasto Attuale -->
-                  <div v-if="currentMealId === meal.id.split('_')[0]" class="absolute top-0 right-0 bg-salvia text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
+                  <div v-if="currentMealId === meal.id.split('_')[0]" class="absolute top-0 right-12 bg-salvia text-white text-[9px] font-bold uppercase tracking-wider px-3 py-1 rounded-bl-xl">
                     Ora
                   </div>
 
-                  <div>
-                    <div class="flex items-center gap-3 mb-3">
-                      <div class="w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-2xl border border-salvia/20">{{ meal.icon }}</div>
-                      <div>
-                        <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
-                        <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
-                          {{ meal.calories !== null ? meal.calories + ' kcal' : 'Calorie n.d.' }}
-                        </span>
+                  <!-- CONTENUTO PASTO -->
+                  <div class="flex-1 min-w-0 p-5 pr-2 flex flex-col justify-between">
+                    <div :class="currentMealId === meal.id.split('_')[0] ? 'pt-4' : ''">
+                      <div class="flex items-center gap-3 mb-3">
+                        <div class="w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-2xl border border-salvia/20">{{ meal.icon }}</div>
+                        <div>
+                          <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
+                          <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
+                            {{ meal.calories !== null ? meal.calories + ' kcal' : 'Calorie n.d.' }}
+                          </span>
+                        </div>
                       </div>
+                      <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
                     </div>
-                    <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
                   </div>
 
-                  <!-- CHECK / X PASTO -->
-                  <div class="mt-4 space-y-2">
-                    <div class="flex items-center gap-2">
-                      <button @click="setMealDone(todayDateKey, meal)"
-                              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-[11px] font-bold transition-all active:scale-95"
-                              :class="todayMealLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white border-salvia shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-salvia/50'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                        Eseguito
-                      </button>
-                      <button @click="promptSkipMeal(todayDateKey, meal)"
-                              class="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl border text-[11px] font-bold transition-all active:scale-95"
-                              :class="todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white border-red-500 shadow-sm' : 'bg-white text-gray-500 border-gray-200 hover:border-red-300'">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                        Saltato
-                      </button>
-                    </div>
-                    <div v-if="todayMealLogs[meal.id]?.status === 'skipped'" class="flex items-start gap-2 bg-red-50 border border-red-100 rounded-xl px-3 py-2">
-                      <span class="text-xs leading-none pt-0.5">💬</span>
-                      <p class="text-[11px] font-medium text-red-500 leading-snug flex-1">
-                        {{ todayMealLogs[meal.id]?.comment || 'Nessun commento. Tocca "Saltato" per aggiungerlo.' }}
-                      </p>
-                    </div>
+                  <!-- BARRA LATERALE: Eseguito / Saltato -->
+                  <div class="w-12 flex-shrink-0 flex flex-col items-center justify-center gap-2.5 border-l border-gray-100">
+                    <button @click="setMealDone(todayDateKey, meal)" aria-label="Pasto eseguito"
+                            class="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                            :class="todayMealLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white shadow-sm' : 'bg-salvia/10 text-salvia/60 hover:bg-salvia/20 hover:text-salvia'">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                    </button>
+                    <button @click="promptSkipMeal(todayDateKey, meal)" aria-label="Pasto saltato"
+                            class="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
+                            :class="todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
+                      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -364,9 +365,10 @@
                 <div class="grid grid-cols-7 gap-1">
                   <div v-for="n in dashFirstDayOfMonth" :key="'empty-' + n"></div>
                   <button v-for="day in dashDaysInMonth" :key="day" @click="openDayMenu(day)"
-                          class="aspect-square rounded-xl text-xs font-bold transition-all flex items-center justify-center"
+                          class="aspect-square rounded-xl text-xs font-bold transition-all flex items-center justify-center relative"
                           :class="dashboardDayClasses(day)">
                     {{ day }}
+                    <div v-if="dashHasComment(day)" class="absolute bottom-1 w-1.5 h-1.5 bg-sky-500 rounded-full ring-1 ring-white/80 shadow-sm"></div>
                   </button>
                 </div>
 
@@ -384,8 +386,8 @@
                     <span class="text-[10px] font-bold text-gray-500">Piccolo sgarro</span>
                   </div>
                   <div class="flex items-center gap-1.5">
-                    <span class="w-2.5 h-2.5 rounded-full bg-gray-200"></span>
-                    <span class="text-[10px] font-bold text-gray-500">Non tracciata</span>
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Nota</span>
                   </div>
                 </div>
               </div>
@@ -471,17 +473,17 @@
 
                     <defs>
                       <linearGradient id="lightAreaGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stop-color="#A8B69A" stop-opacity="0.3"/>
-                        <stop offset="100%" stop-color="#A8B69A" stop-opacity="0"/>
+                        <stop offset="0%" stop-color="#10B981" stop-opacity="0.3"/>
+                        <stop offset="100%" stop-color="#10B981" stop-opacity="0"/>
                       </linearGradient>
                     </defs>
 
                     <polygon :points="weightChart.area" fill="url(#lightAreaGrad)" />
-                    <polyline :points="weightChart.line" fill="none" stroke="#A8B69A" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                    <polyline :points="weightChart.line" fill="none" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
 
                     <!-- Data Points -->
                     <g v-for="(pt, index) in weightChart.points" :key="index">
-                      <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#A8B69A" stroke-width="3"/>
+                      <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#10B981" stroke-width="3"/>
                       <text v-if="pt.showLabel" :x="pt.x" :y="pt.y - 12" text-anchor="middle" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.label }}</text>
                     </g>
                   </svg>
@@ -792,12 +794,21 @@
                 </button>
               </div>
 
+              <!-- GIORNI DELLA SETTIMANA (Cliccabili: mostrano il menu del giorno) -->
+              <div class="flex items-center gap-1 bg-white rounded-2xl border border-gray-100 shadow-sm p-1.5">
+                <button v-for="(dayName, idx) in weekDays" :key="'nutri-day-' + idx" @click="selectedNutritionDay = dayName"
+                        class="flex-1 py-2 rounded-xl text-[11px] font-bold transition-all"
+                        :class="selectedNutritionDay === dayName ? 'bg-salvia text-white shadow-sm' : (dayName === todayWeekDay ? 'bg-salvia/10 text-salvia hover:bg-salvia/20' : 'text-gray-400 hover:bg-gray-50')">
+                  {{ shortDayLabels[idx] }}
+                </button>
+              </div>
+
               <!-- NOTA DEL GIORNO IN NUTRIZIONE (Se presente) -->
-              <div v-if="noteForToday" class="bg-salvia/10 border border-salvia/30 p-4 rounded-3xl relative shadow-sm animate-fadeIn">
+              <div v-if="noteForToday" class="bg-sky-500/10 border border-sky-500/30 p-4 rounded-3xl relative shadow-sm animate-fadeIn">
                 <div class="flex items-start gap-3 relative z-10">
-                  <div class="w-10 h-10 rounded-full bg-salvia/20 flex items-center justify-center text-xl flex-shrink-0">📝</div>
+                  <div class="w-10 h-10 rounded-full bg-sky-500/20 flex items-center justify-center text-xl flex-shrink-0">📝</div>
                   <div class="space-y-1 w-full">
-                    <h4 class="text-sm font-extrabold text-salvia">La tua nota di oggi</h4>
+                    <h4 class="text-sm font-extrabold text-sky-600">La tua nota di oggi</h4>
                     <p class="text-xs text-antracite font-medium leading-relaxed">
                       {{ noteForToday }}
                     </p>
@@ -808,8 +819,8 @@
               <!-- MACROS SUMMARY (Auto-calculated) -->
               <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft">
                 <div class="flex justify-between items-center mb-4">
-                  <span class="text-xs font-bold text-gray-500 uppercase">Obiettivo Oggi</span>
-                  <span class="text-lg font-extrabold text-antracite">{{ selectedPlanTotalCalories }} <span class="text-xs font-medium text-gray-400">kcal totali</span></span>
+                  <span class="text-xs font-bold text-gray-500 uppercase">Obiettivo {{ selectedNutritionDay }}</span>
+                  <span class="text-lg font-extrabold text-antracite">{{ selectedPlanDayCalories }} <span class="text-xs font-medium text-gray-400">kcal totali</span></span>
                 </div>
                 <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4">
                   <div class="bg-salvia h-full rounded-full" style="width: 100%"></div>
@@ -818,9 +829,9 @@
 
               <!-- DAILY MEALS LIST -->
               <div class="space-y-3">
-                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">I Pasti del Piano</h4>
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest pl-1">Pasti di {{ selectedNutritionDay }}</h4>
                 
-                <div v-for="meal in selectedPlan.meals" :key="meal.id" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-4">
+                <div v-for="meal in selectedPlanDayMeals" :key="meal.id" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-4">
                   <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-xl flex-shrink-0 border border-gray-100">
                     {{ meal.icon }}
                   </div>
@@ -901,15 +912,31 @@
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold cursor-pointer transition-all"
                          :class="[
                            exportMode && exportSelectedDates.includes(date) ? 'bg-salvia text-white shadow-md' : '',
-                           !exportMode && isToday(date) ? 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20' : '',
-                           !exportMode && !isToday(date) && !isSunday(date) ? 'text-gray-600 hover:bg-gray-50' : '',
-                           !exportMode && !isToday(date) && isSunday(date) ? 'text-salvia bg-salvia/5 hover:bg-salvia/10' : '',
-                           hasComment(date) && !exportMode ? 'ring-2 ring-viola/40' : ''
+                           !exportMode && nutritionDayClasses(date)
                          ]">
                       {{ date }}
                     </div>
-                    <!-- Indicator dot for comment -->
-                    <div v-if="hasComment(date) && !exportMode" class="absolute bottom-1 w-1 h-1 bg-viola rounded-full"></div>
+                    <!-- Indicator dot for comment (sempre visibile) -->
+                    <div v-if="hasComment(date) && !exportMode" class="absolute bottom-1 w-1.5 h-1.5 bg-sky-500 rounded-full ring-1 ring-white/80 shadow-sm"></div>
+                  </div>
+                </div>
+              </div>
+                <div class="flex flex-wrap items-center gap-x-4 gap-y-2 mt-4 pt-4 border-t border-gray-100">
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-salvia"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Perfetta</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-500"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Sgarro</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-viola"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Piccolo sgarro</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Nota</span>
                   </div>
                 </div>
               </div>
@@ -953,7 +980,12 @@
         <div v-if="commentModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
           <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 transition-transform transform flex flex-col max-h-[90vh]">
             <div class="flex justify-between items-center shrink-0">
-              <h3 class="text-lg font-bold text-antracite">Dettaglio {{ commentModal.date }} {{ currentMonthName }}</h3>
+              <div>
+                <h3 class="text-lg font-bold text-antracite leading-tight">Dettaglio {{ commentModal.date }} {{ currentMonthName }}</h3>
+                <span class="inline-flex items-center gap-1.5 mt-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold" :class="dayStatusClasses(commentModalStatus)">
+                  {{ dayStatusLabel(commentModalStatus) }}
+                </span>
+              </div>
               <button @click="closeCommentModal" class="p-1 text-gray-400 hover:text-antracite">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
@@ -962,7 +994,7 @@
             <!-- Menu del Giorno -->
             <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
               <div class="text-[10px] font-bold text-salvia uppercase tracking-widest mb-1">Menù Previsto</div>
-              <div v-for="meal in (selectedPlan ? selectedPlan.meals : meals)" :key="meal.id" class="flex items-center gap-3 bg-gray-50 p-2.5 rounded-2xl border border-gray-100">
+              <div v-for="meal in commentModalMeals" :key="meal.id" class="flex items-center gap-3 bg-gray-50 p-2.5 rounded-2xl border border-gray-100">
                 <div class="w-8 h-8 rounded-lg bg-white flex items-center justify-center text-sm shadow-sm">{{ meal.icon }}</div>
                 <div class="flex-1">
                   <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
@@ -995,40 +1027,55 @@
               </button>
             </div>
 
+            <p v-if="isFutureDateKey(dayMenuModal.dateKey)" class="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2 leading-snug">
+              Puoi segnare i pasti solo per oggi e per i giorni passati.
+            </p>
+
             <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-if="dayMenuNote" class="bg-sky-500/10 border border-sky-500/30 rounded-2xl px-3.5 py-3 flex items-start gap-2.5">
+                <div class="w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sm flex-shrink-0">📝</div>
+                <div class="flex-1">
+                  <div class="text-[10px] font-bold text-sky-600 uppercase tracking-widest mb-1">Nota del giorno</div>
+                  <p class="text-[11px] text-antracite font-medium leading-snug">{{ dayMenuNote }}</p>
+                </div>
+              </div>
+
               <div v-if="dayMenuMeals.length === 0" class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
                 <p class="text-sm font-medium text-gray-400">Nessun pasto programmato per questo giorno.</p>
               </div>
 
-              <div v-for="meal in dayMenuMeals" :key="meal.id" class="bg-gray-50 rounded-2xl border border-gray-100 p-3 space-y-2.5">
-                <div class="flex items-center gap-3">
-                  <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shadow-sm flex-shrink-0">{{ meal.icon }}</div>
-                  <div class="flex-1 min-w-0">
-                    <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
-                    <p class="text-[10px] text-gray-500 line-clamp-2 leading-snug">{{ meal.description }}</p>
+              <div v-for="meal in dayMenuMeals" :key="meal.id" class="bg-gray-50 rounded-2xl border border-gray-100 p-3 flex items-stretch gap-2.5">
+                <div class="flex-1 min-w-0 space-y-2">
+                  <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shadow-sm flex-shrink-0">{{ meal.icon }}</div>
+                    <div class="flex-1 min-w-0">
+                      <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
+                      <p class="text-[10px] text-gray-500 line-clamp-2 leading-snug">{{ meal.description }}</p>
+                    </div>
+                    <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? meal.calories + ' kcal' : '—' }}</span>
                   </div>
-                  <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? meal.calories + ' kcal' : '—' }}</span>
+
+                  <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
+                     class="text-[10px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 leading-snug">
+                    💬 {{ dayMenuLogs[meal.id].comment }}
+                  </p>
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <button @click="setMealDone(dayMenuModal.dateKey, meal)"
-                          class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[10px] font-bold transition-all active:scale-95"
-                          :class="dayMenuLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200 hover:border-salvia/50'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
-                    Eseguito
+                <!-- Barra laterale: Eseguito / Saltato (cerchietti) -->
+                <div class="flex flex-col justify-center gap-2 border-l border-gray-200 pl-1.5 flex-shrink-0">
+                  <button @click="setMealDone(dayMenuModal.dateKey, meal)" aria-label="Pasto eseguito"
+                          :disabled="isFutureDateKey(dayMenuModal.dateKey)"
+                          class="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+                          :class="dayMenuLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white shadow-sm' : 'bg-salvia/10 text-salvia/60 hover:bg-salvia/20 hover:text-salvia'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                   </button>
-                  <button @click="promptSkipMeal(dayMenuModal.dateKey, meal)"
-                          class="flex-1 flex items-center justify-center gap-1 py-1.5 rounded-lg border text-[10px] font-bold transition-all active:scale-95"
-                          :class="dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-500 border-gray-200 hover:border-red-300'">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                    Saltato
+                  <button @click="promptSkipMeal(dayMenuModal.dateKey, meal)" aria-label="Pasto saltato"
+                          :disabled="isFutureDateKey(dayMenuModal.dateKey)"
+                          class="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
+                          :class="dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
                 </div>
-
-                <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
-                   class="text-[10px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 leading-snug">
-                  💬 {{ dayMenuLogs[meal.id].comment }}
-                </p>
               </div>
             </div>
 
@@ -1096,8 +1143,14 @@
             </div>
 
             <div class="shrink-0 pt-2 border-t border-gray-100">
-              <button @click="sharePendingGrocery" class="w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+              <button v-if="allGroceryChecked" @click="shareGroceryReady"
+                      class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Il frigo è pronto
+              </button>
+              <button v-else @click="sharePendingGrocery"
+                      class="w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                 Condividi cosa manca
               </button>
             </div>
@@ -1389,6 +1442,11 @@
         }, { deep: true });
         
         const selectedPlan = ref(null);
+
+        // Selettore dei giorni nel dettaglio del piano (parte da oggi)
+        const shortDayLabels = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
+        const todayWeekDay = weekDays[(new Date().getDay() + 6) % 7];
+        const selectedNutritionDay = ref(todayWeekDay);
         
         // Builder Data State
         const editingPlanId = ref(null);
@@ -1728,6 +1786,9 @@
         const todayDateKey = computed(() => toISODate(new Date()));
         const todayMealLogs = computed(() => mealLogs.value[todayDateKey.value] || {});
 
+        // Si possono segnare solo pasti di oggi o dei giorni passati
+        const isFutureDateKey = (dateKey) => !!dateKey && dateKey > todayDateKey.value;
+
         const cleanupMealLogsDay = (dateKey) => {
           const dayLogs = mealLogs.value[dateKey];
           if (dayLogs && Object.keys(dayLogs).length === 0) delete mealLogs.value[dateKey];
@@ -1736,6 +1797,10 @@
         const mealLogFor = (dateKey, mealId) => mealLogs.value[dateKey]?.[mealId] || null;
 
         const setMealDone = (dateKey, meal) => {
+          if (isFutureDateKey(dateKey)) {
+            showToastMessage('Non puoi segnare pasti futuri. Puoi modificare solo oggi e i giorni passati.');
+            return;
+          }
           const dayLogs = mealLogs.value[dateKey] || {};
           if (dayLogs[meal.id]?.status === 'done') {
             delete dayLogs[meal.id];
@@ -1758,6 +1823,10 @@
         };
 
         const promptSkipMeal = (dateKey, meal) => {
+          if (isFutureDateKey(dateKey)) {
+            showToastMessage('Non puoi segnare pasti futuri. Puoi modificare solo oggi e i giorni passati.');
+            return;
+          }
           const existing = mealLogFor(dateKey, meal.id);
           mealCommentModal.value = {
             isOpen: true,
@@ -1884,6 +1953,22 @@
           return 'text-gray-600 hover:bg-gray-50';
         };
 
+        // Calendario nutrizione: sincronizzato con il calendario dashboard
+        const nutritionDayStatus = (day) => dayStatusFor(new Date(currentYear.value, currentMonth.value, day));
+
+        const nutritionDayClasses = (day) => {
+          const status = nutritionDayStatus(day);
+          if (status === 'perfect') return 'bg-salvia text-white shadow-sm';
+          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm';
+          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm';
+          if (isToday(day)) return 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20';
+          if (isSunday(day)) return 'text-salvia bg-salvia/5 hover:bg-salvia/10';
+          return 'text-gray-600 hover:bg-gray-50';
+        };
+
+        // Nota su un giorno del calendario dashboard (stesso archivio del calendario nutrizione)
+        const dashHasComment = (day) => !!commentsMap.value[`${dashYear.value}-${dashMonth.value}-${day}`];
+
         // Modale con il menu di uno specifico giorno
         const dayMenuModal = ref({ isOpen: false, date: null, dateKey: '' });
 
@@ -1910,6 +1995,13 @@
           return getMealsForDate(dayMenuModal.value.date);
         });
 
+        // Nota del giorno selezionato: stesso archivio del calendario nutrizione
+        const dayMenuNote = computed(() => {
+          if (!dayMenuModal.value.isOpen || !dayMenuModal.value.date) return '';
+          const d = dayMenuModal.value.date;
+          return commentsMap.value[`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`] || '';
+        });
+
         const dayMenuLogs = computed(() => {
           if (!dayMenuModal.value.isOpen) return {};
           return mealLogs.value[dayMenuModal.value.dateKey] || {};
@@ -1928,6 +2020,7 @@
             return;
           }
           selectedPlan.value = activePlan.value;
+          selectedNutritionDay.value = todayWeekDay;
           nutritionView.value = 'detail';
           openDayMenuForDate(new Date());
         };
@@ -1958,16 +2051,21 @@
             const mappedDay = dayOfWeek === 0 ? 'Domenica' : weekDays[dayOfWeek - 1];
 
             const tomorrowMeals = plan.weeks[weekIdx].days[mappedDay] || [];
-            const uniqueItems = new Set();
+            const seenItems = new Set();
+            const items = [];
             tomorrowMeals.forEach(meal => {
-               meal.items.forEach(item => {
+               const typeInfo = mealTypes.find(t => t.id === meal.type) || mealTypes[0];
+               (meal.items || []).forEach(item => {
                   const trimmed = item.trim();
-                  if (trimmed) uniqueItems.add(trimmed);
+                  if (trimmed && !seenItems.has(trimmed)) {
+                     seenItems.add(trimmed);
+                     items.push({ name: trimmed, icon: typeInfo.icon });
+                  }
                });
             });
-            return Array.from(uniqueItems);
+            return items;
           }
-          return plan.grocery || []; // legacy fallback
+          return (plan.grocery || []).map(name => ({ name, icon: '🍽️' })); // legacy fallback
         };
 
         const openGroceryModal = () => {
@@ -1976,9 +2074,10 @@
            // Mantiene la spunta sugli elementi che avevi già checkato prima di chiudere la modale
            const currentChecked = new Set(checklistItems.value.filter(i => i.checked).map(i => i.name));
            
-           checklistItems.value = itemsForTomorrow.map(itemName => ({
-               name: itemName,
-               checked: currentChecked.has(itemName)
+           checklistItems.value = itemsForTomorrow.map(item => ({
+               name: item.name,
+               icon: item.icon,
+               checked: currentChecked.has(item.name)
            }));
            
            if(checklistItems.value.length === 0) {
@@ -2005,8 +2104,33 @@
           }, 0);
         });
 
+        // Pasti del giorno selezionato nella vista dettaglio (usa la settimana in rotazione odierna)
+        const selectedPlanDayMeals = computed(() => {
+          const plan = selectedPlan.value;
+          if (!plan) return [];
+          if (plan.weeks && plan.weeks.length > 0) {
+            const now = new Date(); now.setHours(0, 0, 0, 0);
+            const startDate = new Date((plan.startDate || '') + 'T00:00:00');
+            let weekIdx = 0;
+            if (!Number.isNaN(startDate.getTime()) && now >= startDate) {
+              const diffDays = Math.floor((now.getTime() - startDate.getTime()) / 86400000);
+              weekIdx = Math.floor(diffDays / 7) % plan.weeks.length;
+            }
+            return mapDayMeals(plan.weeks[weekIdx]?.days?.[selectedNutritionDay.value] || []);
+          }
+          return plan.meals || [];
+        });
+
+        const selectedPlanDayCalories = computed(() => {
+          return selectedPlanDayMeals.value.reduce((sum, meal) => {
+            const calories = Number(meal.calories);
+            return sum + (Number.isFinite(calories) ? calories : 0);
+          }, 0);
+        });
+
         const openPlan = (plan) => {
           selectedPlan.value = plan;
+          selectedNutritionDay.value = todayWeekDay;
           nutritionView.value = 'detail';
         };
 
@@ -2040,7 +2164,7 @@
         };
 
         const sharePendingGrocery = () => {
-          const pending = checklistItems.value.filter(item => !item.checked).map(item => item.name);
+          const pending = checklistItems.value.filter(item => !item.checked).map(item => `${item.icon || '🍽️'} ${item.name}`);
           if(pending.length === 0) {
              showToastMessage("Hai già tutto! Frigo al completo. 🚀");
              groceryModal.value.isOpen = false;
@@ -2049,6 +2173,15 @@
           const text = `🛒 *Spesa STILL - Mancanti*\n\nMi manca da comprare:\n- ${pending.join('\n- ')}\n\nIl frigo piange, aiutiamolo! 🏃‍♂️💨`;
           copyToClipboard(text, "Lista della spesa (da comprare) copiata negli appunti!");
           groceryModal.value.isOpen = false;
+        };
+
+        // Tasto "Il frigo è pronto": quando tutta la checklist è spuntata
+        const allGroceryChecked = computed(() => checklistItems.value.length > 0 && checklistItems.value.every(item => item.checked));
+
+        const shareGroceryReady = () => {
+          // Nessuna copia: frigo al completo, si chiude solo la checklist
+          groceryModal.value.isOpen = false;
+          showToastMessage("Il tuo frigo è pronto! 🧊");
         };
 
         // Plan Actions
@@ -2314,12 +2447,35 @@
         });
 
         const circumferenceFields = [
-          { key: 'chest', label: 'Petto', icon: '👕', betterDown: true, improvementColor: 'text-salvia' },
-          { key: 'arms', label: 'Braccia', icon: '💪', betterDown: false, improvementColor: 'text-viola' },
-          { key: 'waist', label: 'Vita', icon: '📏', betterDown: true, improvementColor: 'text-salvia' },
-          { key: 'thighs', label: 'Cosce', icon: '🦵', betterDown: true, improvementColor: 'text-salvia' },
-          { key: 'belly', label: 'Pancia', icon: '🧍', betterDown: true, improvementColor: 'text-salvia' }
+          { key: 'chest', label: 'Petto', icon: '👕' },
+          { key: 'arms', label: 'Braccia', icon: '💪' },
+          { key: 'waist', label: 'Vita', icon: '📏' },
+          { key: 'thighs', label: 'Cosce', icon: '🦵' },
+          { key: 'belly', label: 'Pancia', icon: '🧍' }
         ];
+
+        // Regola colori circonferenze (vale per tutte le misure):
+        // verde  = sotto la partenza e sotto l'ultima misurazione
+        // giallo = sotto la partenza ma sopra l'ultima misurazione
+        // viola  = sotto la partenza ma sopra le ultime 2 misurazioni
+        // rosso  = sopra la misurazione di partenza
+        const circumferenceTrendColor = (entries, key) => {
+          if (!entries || entries.length < 2) return 'text-gray-400';
+          const values = entries.map(entry => entry[key]);
+          const start = values[0];
+          const current = values[values.length - 1];
+          const last = values[values.length - 2];
+          const beforeLast = values.length >= 3 ? values[values.length - 3] : null;
+
+          if (current > start) return 'text-red-500';
+          if (current < start) {
+            if (current < last) return 'text-salvia';
+            if (current === last) return 'text-gray-400';
+            if (beforeLast !== null && current > beforeLast) return 'text-viola';
+            return 'text-arancione';
+          }
+          return 'text-gray-400';
+        };
 
         const circumferenceRows = computed(() => {
           return circumferenceFields.map(field => {
@@ -2330,7 +2486,7 @@
             const last = entries[entries.length - 1];
             const delta = last[field.key] - first[field.key];
             const days = daysBetween(first.date, last.date);
-            const isImprovement = field.betterDown ? delta <= 0 : delta >= 0;
+            const color = circumferenceTrendColor(entries, field.key);
 
             return {
               key: field.key,
@@ -2345,8 +2501,8 @@
               days,
               arrowUp: delta > 0,
               deltaText: `${delta > 0 ? '+' : ''}${formatNumber(delta)} cm`,
-              currentColor: isImprovement ? field.improvementColor : 'text-arancione',
-              deltaColor: delta === 0 ? 'text-gray-400' : (isImprovement ? field.improvementColor : 'text-arancione')
+              currentColor: color,
+              deltaColor: color
             };
           }).filter(Boolean);
         });
@@ -2365,7 +2521,9 @@
               ? (type === 'weight' ? previousEntry.weight : previousEntry[type])
               : null;
             const delta = previousValue !== null ? value - previousValue : null;
-            const isImprovement = type === 'arms' ? delta !== null && delta >= 0 : delta !== null && delta <= 0;
+            const trendColor = type === 'weight'
+              ? (delta === null || delta === 0 ? 'text-gray-400' : (delta <= 0 ? 'text-salvia' : 'text-arancione'))
+              : circumferenceTrendColor(list.slice(0, index + 1), type);
 
             return {
               entry,
@@ -2374,9 +2532,7 @@
               deltaText: delta === null
                 ? ''
                 : `${delta > 0 ? '+' : ''}${formatNumber(delta)} ${type === 'weight' ? 'kg' : 'cm'}`,
-              deltaColor: delta === null || delta === 0
-                ? 'text-gray-400'
-                : (isImprovement ? (type === 'arms' ? 'text-viola' : 'text-salvia') : 'text-arancione')
+              deltaColor: trendColor
             };
           });
 
@@ -2546,6 +2702,18 @@
           closeCommentModal();
         };
 
+        // Modale commenti (calendario nutrizione): menu e stato sincronizzati col calendario dashboard
+        const commentModalMeals = computed(() => {
+          if (!commentModal.value.isOpen || commentModal.value.date === null) return [];
+          const planMeals = getMealsForDate(new Date(currentYear.value, currentMonth.value, commentModal.value.date));
+          return planMeals.length > 0 ? planMeals : (selectedPlan.value?.meals || meals.value);
+        });
+
+        const commentModalStatus = computed(() => {
+          if (!commentModal.value.isOpen || commentModal.value.date === null) return 'empty';
+          return nutritionDayStatus(commentModal.value.date);
+        });
+
         const exportSelectedMenu = () => {
            if(exportSelectedDates.value.length === 0 || !selectedPlan.value) return;
            
@@ -2557,7 +2725,7 @@
                 const kcal = m.calories !== null && m.calories !== undefined && m.calories !== '-'
                   ? `${m.calories} kcal`
                   : 'kcal n.d.';
-                text += `🔸 ${m.name} (${kcal})\n   ${m.description}\n`;
+                text += `${m.icon || '🍽️'} ${m.name} (${kcal})\n   ${m.description}\n`;
               });
               const key = `${currentYear.value}-${currentMonth.value}-${day}`;
               if(commentsMap.value[key]) {
@@ -2611,6 +2779,7 @@
           todayActiveMeals,
           todayDateKey,
           todayMealLogs,
+          isFutureDateKey,
           setMealDone,
           promptSkipMeal,
           mealCommentModal,
@@ -2628,11 +2797,15 @@
           dashNextMonth,
           dashboardDayStatus,
           dashboardDayClasses,
+          nutritionDayStatus,
+          nutritionDayClasses,
+          dashHasComment,
           openDayMenu,
           dayMenuModal,
           closeDayMenu,
           dayMenuMeals,
           dayMenuLogs,
+          dayMenuNote,
           dayMenuStatus,
           dayStatusLabel,
           dayStatusClasses,
@@ -2661,6 +2834,11 @@
           finalizeNewPlan,
           promptDeletePlan,
           selectedPlanTotalCalories,
+          shortDayLabels,
+          todayWeekDay,
+          selectedNutritionDay,
+          selectedPlanDayMeals,
+          selectedPlanDayCalories,
           openPlan,
           formatDate,
           sharePendingGrocery,
@@ -2678,6 +2856,8 @@
           isToday,
           isSunday,
           hasComment,
+          commentModalMeals,
+          commentModalStatus,
           handleDayClick,
           exportSelectedMenu,
           noteForToday,
@@ -2713,7 +2893,9 @@
           activePlan,
           groceryModal,
           openGroceryModal,
-          checklistItems
+          checklistItems,
+          allGroceryChecked,
+          shareGroceryReady
         };
       }
     }).mount('#app');
