@@ -389,28 +389,432 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                     <span class="text-[10px] font-bold text-gray-500">Nota</span>
                   </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full border-2 border-arancione"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Allenamento</span>
+                  </div>
                 </div>
               </div>
             </div>
 
           </div>
 
-          <!-- ==================== ALLENAMENTO (NEW) ==================== -->
+          <!-- ==================== ALLENAMENTO ==================== -->
           <div v-if="activeTab === 'allenamento'" class="space-y-6 animate-fadeIn">
-            <div>
-              <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">DISCIPLINA</div>
-              <h2 class="text-2xl font-bold text-antracite">Allenamento</h2>
+
+            <!-- SWITCH SCHEDE / CALENDARIO -->
+            <div v-if="workoutView === 'list' || workoutView === 'calendar'" class="flex bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
+              <button @click="workoutView = 'list'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="workoutView === 'list' ? 'bg-arancione text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+                Schede
+              </button>
+              <button @click="workoutView = 'calendar'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="workoutView === 'calendar' ? 'bg-arancione text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
+                Calendario
+              </button>
             </div>
-            
-            <div class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center justify-center space-y-4">
-              <div class="w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20">
-                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+
+            <!-- VISTA: LISTA SCHEDE -->
+            <div v-if="workoutView === 'list'" class="space-y-5 animate-fadeIn">
+              <div class="flex justify-between items-end gap-3">
+                <div>
+                  <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">DISCIPLINA</div>
+                  <h2 class="text-2xl font-bold text-antracite">Le tue Schede</h2>
+                </div>
+                <button @click="startNewSheet" class="bg-arancione text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-arancione/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Nuova
+                </button>
               </div>
-              <div>
-                <h3 class="font-bold text-antracite text-lg">Work in Progress</h3>
-                <p class="text-sm text-gray-500 mt-1">La sezione arancione dedicata ai tuoi workout sarà sviluppata qui a breve.</p>
+
+              <!-- EMPTY STATE -->
+              <div v-if="workoutSheets.length === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
+                <div class="w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20">
+                  <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+                </div>
+                <div>
+                  <h3 class="font-bold text-antracite text-lg">Ancora nessuna scheda</h3>
+                  <p class="text-sm text-gray-500 mt-1.5 leading-relaxed">Crea la tua prima scheda: puoi dividerla in più giorni, inserire superserie e registrare i carichi di ogni esercizio.</p>
+                </div>
+                <button @click="startNewSheet" class="w-full bg-arancione text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-arancione/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Crea la prima scheda
+                </button>
+              </div>
+
+              <!-- LISTA -->
+              <div v-else class="space-y-3">
+                <div v-for="sheet in workoutSheets" :key="sheet.id" @click="openSheet(sheet)"
+                     class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-all flex items-center justify-between gap-3 group">
+                  <div class="flex items-center gap-4 min-w-0">
+                    <div class="w-12 h-12 rounded-2xl bg-arancione/10 text-arancione border border-arancione/20 flex items-center justify-center flex-shrink-0">
+                      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+                    </div>
+                    <div class="min-w-0">
+                      <h4 class="font-extrabold text-antracite text-base group-hover:text-arancione transition-colors truncate">{{ sheet.name }}</h4>
+                      <p class="text-xs text-gray-500 font-medium mt-0.5">{{ sheet.days.length }} {{ sheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sheet) }} esercizi</p>
+                      <p class="text-[10px] font-bold text-gray-400 mt-1">{{ sheetLastSessionDate(sheet) ? 'Ultima sessione: ' + formatDate(sheetLastSessionDate(sheet)) : 'Mai allenata' }}</p>
+                    </div>
+                  </div>
+                  <div class="text-gray-400 group-hover:text-arancione transition-colors flex-shrink-0">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                  </div>
+                </div>
               </div>
             </div>
+
+            <!-- VISTA: CALENDARIO ALLENAMENTI -->
+            <div v-if="workoutView === 'calendar'" class="space-y-5 animate-fadeIn">
+              <div class="flex justify-between items-end gap-3">
+                <div>
+                  <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">AGENDA</div>
+                  <h2 class="text-2xl font-bold text-antracite">Calendario</h2>
+                </div>
+                <button @click="openTrainingForm()" class="bg-arancione text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-arancione/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Aggiungi
+                </button>
+              </div>
+
+              <div class="bg-white rounded-3xl p-4 border border-gray-100 shadow-soft">
+                <div class="flex justify-between items-center mb-3">
+                  <button @click="trainingPrevMonth" class="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <span class="text-sm font-bold text-antracite capitalize">{{ trainingMonthName }} {{ trainingYear }}</span>
+                  <button @click="trainingNextMonth" class="p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 mb-1.5">
+                  <div v-for="(label, idx) in ['L','M','M','G','V','S','D']" :key="'tr-dow-' + idx" class="text-center text-[10px] font-bold text-gray-400 uppercase">{{ label }}</div>
+                </div>
+                <div class="grid grid-cols-7 gap-1">
+                  <div v-for="n in trainingFirstDayOfMonth" :key="'tr-empty-' + n"></div>
+                  <button v-for="day in trainingDaysInMonth" :key="'tr-day-' + day" @click="openTrainingDay(day)"
+                          class="aspect-square rounded-xl text-xs font-bold transition-all flex items-center justify-center relative"
+                          :class="trainingDayClasses(day)">
+                    {{ day }}
+                    <div v-if="trainingSessionsForDay(day).length" class="absolute bottom-1 flex items-center gap-0.5">
+                      <span v-for="(session, sIdx) in trainingSessionsForDay(day).slice(0, 3)" :key="'tr-dot-' + sIdx" class="w-1 h-1 rounded-full bg-white/90"></span>
+                    </div>
+                  </button>
+                </div>
+
+                <div class="flex items-center gap-2 mt-4 pt-4 border-t border-gray-100">
+                  <span class="w-2.5 h-2.5 rounded-full bg-arancione"></span>
+                  <span class="text-[10px] font-bold text-gray-500">Giorno di allenamento</span>
+                </div>
+              </div>
+
+              <div class="space-y-2">
+                <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest px-1">Prossimi allenamenti</h4>
+                <div v-if="upcomingTrainingSessions.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-4 text-center text-xs text-gray-400 font-medium">
+                  Nessun allenamento in programma. Tocca un giorno del calendario per aggiungerne uno.
+                </div>
+                <div v-for="session in upcomingTrainingSessions" :key="session.id + session.occurrenceDate" class="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border"
+                       :class="session.kind === 'gym' ? 'bg-arancione/10 text-arancione border-arancione/20' : 'bg-sky-500/10 text-sky-600 border-sky-200'">
+                    <svg v-if="session.kind === 'gym'" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
+                    <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-xs font-extrabold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
+                    <div class="text-[10px] font-medium text-gray-400 truncate">
+                      {{ formatDate(session.occurrenceDate) }}<span v-if="session.time"> • {{ session.time }}</span> • {{ trainingSessionSubtitle(session) }}
+                    </div>
+                  </div>
+                  <button @click="removeTrainingSession(session)" class="p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina allenamento">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- VISTA: BUILDER -->
+            <div v-if="workoutView === 'builder'" class="space-y-5 animate-fadeIn">
+              <div class="flex items-center gap-3 mb-2">
+                <button @click="workoutView = 'list'" class="p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                </button>
+                <div>
+                  <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">{{ editingSheetId ? 'MODIFICA' : 'NUOVA' }}</div>
+                  <h2 class="text-2xl font-bold text-antracite leading-tight">{{ editingSheetId ? 'Modifica Scheda' : 'Crea Scheda' }}</h2>
+                </div>
+              </div>
+
+              <!-- Nome scheda -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Nome della scheda</label>
+                <input type="text" v-model="newSheet.name" placeholder="Es: Push Pull Legs, Full Body..."
+                       class="w-full bg-gray-50 border border-gray-200 focus:border-arancione focus:ring-2 focus:ring-arancione/20 rounded-2xl p-3.5 text-sm font-semibold text-antracite outline-none transition-all placeholder:font-medium">
+              </div>
+
+              <!-- Giorni -->
+              <div v-for="(day, dIdx) in newSheet.days" :key="'day-' + dIdx" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-4">
+                <div class="flex items-center gap-2">
+                  <div class="w-8 h-8 rounded-xl bg-arancione/10 text-arancione border border-arancione/20 flex items-center justify-center text-xs font-extrabold flex-shrink-0">{{ dIdx + 1 }}</div>
+                  <input type="text" v-model="day.name" placeholder="Es: Giorno A - Push"
+                         class="flex-1 min-w-0 bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-sm font-extrabold text-antracite outline-none transition-all">
+                  <button v-if="newSheet.days.length > 1" @click="removeSheetDay(dIdx)" class="p-2 text-gray-400 hover:text-red-500 flex-shrink-0" aria-label="Rimuovi giorno">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+
+                <!-- Esercizi del giorno -->
+                <div v-for="(ex, eIdx) in day.exercises" :key="'ex-' + dIdx + '-' + eIdx" class="rounded-2xl p-3 space-y-3 border transition-colors"
+                       :class="ex.superset && supersetPairCount(day, ex) >= 2 ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-100'">
+                  <div class="flex items-center gap-2">
+                    <div class="flex bg-white rounded-lg border border-gray-200 p-0.5 flex-shrink-0">
+                      <button @click="ex.type = 'strength'" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors" :class="ex.type === 'strength' ? 'bg-arancione text-white' : 'text-gray-400'">Forza</button>
+                      <button @click="ex.type = 'cardio'" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors" :class="ex.type === 'cardio' ? 'bg-arancione text-white' : 'text-gray-400'">Cardio</button>
+                    </div>
+                    <input type="text" v-model="ex.name" placeholder="Nome esercizio"
+                           class="flex-1 min-w-0 bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
+                    <button @click="removeExercise(day, eIdx)" class="p-1.5 text-gray-400 hover:text-red-500 flex-shrink-0" aria-label="Rimuovi esercizio">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
+                  </div>
+
+                  <!-- Toggle piramidale -->
+                  <div v-if="ex.type === 'strength'" class="flex items-center justify-between gap-2">
+                    <label class="flex items-center gap-2 text-[10px] font-bold text-gray-500 uppercase tracking-wider cursor-pointer select-none">
+                      <input type="checkbox" :checked="ex.pyramid" @change="togglePyramid(ex, dIdx, eIdx)" class="w-4 h-4 rounded border-gray-300 text-amber-500 focus:ring-amber-400">
+                      Piramidale
+                    </label>
+                    <span class="text-[9px] font-medium text-gray-400">peso e rip. per serie</span>
+                  </div>
+
+                  <!-- Campi Forza (piramidale) -->
+                  <div v-if="ex.type === 'strength' && ex.pyramid" class="space-y-2">
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Recupero (s)</label>
+                        <input type="text" inputmode="numeric" v-model="ex.rest" placeholder="90"
+                               class="w-full bg-white border border-gray-200 focus:border-amber-400 rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                      </div>
+                      <div>
+                        <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Serie</label>
+                        <button @click="openPyramidModal(dIdx, eIdx)" class="w-full bg-white border border-amber-300 text-amber-700 rounded-xl p-2.5 text-xs font-bold text-center hover:bg-amber-50 transition-colors">
+                          {{ (ex.setsDetail || []).length }} serie · Modifica
+                        </button>
+                      </div>
+                    </div>
+                    <p class="text-[10px] font-medium text-amber-800 bg-amber-50 border border-amber-200 rounded-xl px-2.5 py-2 leading-snug break-words">{{ pyramidSummary(ex) }}</p>
+                  </div>
+
+                  <!-- Campi Forza (normale) -->
+                  <div v-else-if="ex.type === 'strength'" class="grid grid-cols-3 gap-2">
+                    <div>
+                      <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Peso (kg)</label>
+                      <input type="text" inputmode="decimal" v-model="ex.weight" placeholder="60"
+                             class="w-full bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                    </div>
+                    <div>
+                      <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Recupero (s)</label>
+                      <input type="text" inputmode="numeric" v-model="ex.rest" placeholder="90"
+                             class="w-full bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                    </div>
+                    <div>
+                      <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Serie × Rip.</label>
+                      <div class="flex gap-1">
+                        <input type="text" inputmode="numeric" v-model="ex.sets" placeholder="4"
+                               class="w-1/2 min-w-0 bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                        <input type="text" v-model="ex.reps" placeholder="8-10"
+                               class="w-1/2 min-w-0 bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Campi Cardio -->
+                  <div v-else class="grid grid-cols-2 gap-2">
+                    <div>
+                      <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Durata (min)</label>
+                      <input type="text" inputmode="numeric" v-model="ex.duration" placeholder="20"
+                             class="w-full bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                    </div>
+                    <div>
+                      <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1 text-center">Intensità / Velocità</label>
+                      <input type="text" v-model="ex.intensity" placeholder="Livello 8 / 10 km/h"
+                             class="w-full bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                    </div>
+                  </div>
+
+                  <!-- Superserie: coppia di 2 esercizi diversi -->
+                  <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-gray-100">
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <span v-if="ex.superset && supersetPairCount(day, ex) >= 2" class="text-[9px] font-black uppercase tracking-widest bg-amber-300 text-amber-900 px-1.5 py-0.5 rounded-md flex-shrink-0">Superserie</span>
+                      <span class="text-[10px] font-medium text-gray-400 truncate">{{ ex.superset && supersetPairCount(day, ex) >= 2 ? "Senza pausa con l'altro esercizio" : 'Abbina un secondo esercizio' }}</span>
+                    </div>
+                    <button v-if="ex.superset && supersetPairCount(day, ex) >= 2" @click="removeSuperset(day, eIdx)" class="text-[10px] font-bold text-red-500 hover:text-red-600 flex-shrink-0">Rimuovi</button>
+                    <button v-else @click="addSupersetPair(day, eIdx)" class="text-[10px] font-bold text-amber-700 hover:text-amber-800 flex-shrink-0 flex items-center gap-1">
+                      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                      Aggiungi superserie
+                    </button>
+                  </div>
+                </div>
+
+                <button @click="addExercise(day)" class="w-full py-2.5 border-2 border-dashed border-gray-200 bg-white rounded-xl text-gray-500 font-bold text-xs hover:border-arancione/40 hover:text-arancione transition-colors flex items-center justify-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                  Aggiungi esercizio
+                </button>
+              </div>
+
+              <p class="text-[10px] font-medium text-gray-400 leading-relaxed px-1">💡 Tocca <b>Aggiungi superserie</b> su un esercizio: viene creato il secondo esercizio della coppia (in giallo) e i due si eseguono uno dietro l'altro, senza pausa.</p>
+
+              <button @click="addSheetDay" class="w-full py-3.5 border-2 border-dashed border-arancione/40 bg-arancione/5 rounded-2xl text-arancione font-bold text-xs hover:border-arancione hover:bg-arancione/10 transition-colors flex items-center justify-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Aggiungi giorno
+              </button>
+
+              <div class="flex flex-col gap-3 pt-2">
+                <button @click="saveSheet" class="w-full bg-salvia text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  {{ editingSheetId ? 'Salva Modifiche' : 'Salva Scheda' }}
+                </button>
+                <button v-if="editingSheetId" @click="promptDeleteSheet" class="w-full bg-white border border-red-200 text-red-500 font-bold py-3.5 rounded-2xl shadow-sm hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  Elimina Scheda
+                </button>
+              </div>
+            </div>
+
+            <!-- VISTA: DETTAGLIO SCHEDA -->
+            <div v-if="workoutView === 'detail' && selectedSheet" class="space-y-5 animate-fadeIn">
+
+              <!-- Header -->
+              <div class="flex justify-between items-start gap-3">
+                <div class="min-w-0">
+                  <button @click="workoutView = 'list'" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors mb-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                    Torna alle schede
+                  </button>
+                  <h2 class="text-2xl font-bold text-antracite leading-tight truncate">{{ selectedSheet.name }}</h2>
+                  <div class="text-[10px] font-bold text-gray-400 uppercase mt-1">{{ selectedSheet.days.length }} {{ selectedSheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(selectedSheet) }} esercizi</div>
+                </div>
+                <div class="flex items-center gap-2 flex-shrink-0">
+                  <button @click="editSheet(selectedSheet)" class="p-2 bg-arancione/10 text-arancione rounded-xl hover:bg-arancione/20 transition-colors shadow-sm" aria-label="Modifica scheda">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+                  </button>
+                  <button @click="promptDeleteSelectedSheet" class="p-2 bg-white border border-gray-200 text-gray-400 rounded-xl hover:text-red-500 hover:border-red-200 transition-colors shadow-sm" aria-label="Elimina scheda">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Giorni -->
+              <div class="bg-white rounded-3xl p-2 border border-gray-100 shadow-soft flex overflow-x-auto hide-scrollbar gap-1">
+                <button v-for="(day, idx) in selectedSheet.days" :key="'sheet-day-' + idx" @click="selectedSheetDayIdx = idx"
+                        class="flex-1 min-w-[80px] py-3 px-2 rounded-2xl text-[11px] font-bold transition-all truncate"
+                        :class="selectedSheetDayIdx === idx ? 'bg-arancione/10 text-arancione' : 'text-gray-400 hover:bg-gray-50'">
+                  {{ day.name }}
+                </button>
+              </div>
+
+              <!-- Stats -->
+              <div class="grid grid-cols-2 gap-3">
+                <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sessioni</div>
+                  <div class="text-2xl font-extrabold text-antracite">{{ sheetSessionDates.length }}</div>
+                  <p class="text-[10px] font-bold text-gray-400 mt-1">{{ sheetLastSessionDate(selectedSheet) ? 'Ultima: ' + formatDate(sheetLastSessionDate(selectedSheet)) : 'Nessuna ancora' }}</p>
+                </div>
+                <button @click="sheetHistoryModal.isOpen = true" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm text-left hover:border-arancione/40 transition-colors flex flex-col justify-between">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Storico scheda</div>
+                  <div class="flex items-center gap-1 text-arancione text-xs font-bold mt-2">
+                    Consulta i progressi
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </div>
+                </button>
+              </div>
+
+              <!-- Avvia sessione -->
+              <button @click="openSessionPreview" class="w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-arancione/90 transition-all active:scale-95 flex items-center justify-center gap-2">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                Avvia sessione{{ currentSheetDay ? ' · ' + currentSheetDay.name : '' }}
+              </button>
+
+              <!-- Esercizi del giorno -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                  <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ currentSheetDay ? currentSheetDay.name : 'Esercizi' }}</h4>
+                  <span class="text-[10px] font-medium text-gray-400">{{ currentSheetDay ? currentSheetDay.exercises.length : 0 }} esercizi</span>
+                </div>
+
+                <div v-if="!currentSheetDay || currentSheetDay.exercises.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-5 text-center text-xs text-gray-400 font-medium">
+                  Nessun esercizio in questo giorno. Modifica la scheda per aggiungerne.
+                </div>
+
+                <div v-for="group in selectedDayGroups" :key="group.key" class="space-y-2">
+                  <div v-if="group.label" class="flex items-center gap-2 px-1">
+                    <span class="text-[9px] font-black uppercase tracking-widest bg-amber-300 text-amber-900 px-2 py-0.5 rounded-md">{{ group.label }}</span>
+                    <span class="text-[10px] font-medium text-gray-400">senza pausa tra gli esercizi</span>
+                  </div>
+                  <div class="space-y-2" :class="group.label ? 'border-l-2 border-amber-300 pl-2.5' : ''">
+                    <div v-for="ex in group.exercises" :key="ex.id" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm">
+                      <div class="flex justify-between gap-2">
+                        <div class="min-w-0">
+                          <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-sm font-extrabold text-antracite">{{ ex.name }}</span>
+                            <span class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md" :class="ex.type === 'cardio' ? 'bg-sky-500/10 text-sky-600' : 'bg-arancione/10 text-arancione'">{{ ex.type === 'cardio' ? 'Cardio' : 'Forza' }}</span>
+                          </div>
+                          <p class="text-[10px] text-gray-400 font-medium mt-1">
+                            <template v-if="ex.type === 'cardio'">{{ ex.duration || '—' }} min • {{ ex.intensity || 'intensità n.d.' }}</template>
+                            <template v-else-if="ex.pyramid">Piramidale • {{ (ex.setsDetail || []).length }} serie • rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
+                            <template v-else>{{ ex.sets ? ex.sets + '×' + (ex.reps || '—') + ' • ' : '' }}rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
+                          </p>
+                          <p v-if="ex.type === 'strength' && ex.pyramid" class="text-[10px] text-amber-700 font-medium mt-1 leading-snug break-words">{{ pyramidSummary(ex) }}</p>
+                        </div>
+                        <button @click="openExerciseHistory(ex)" class="p-1.5 text-gray-400 hover:text-arancione flex-shrink-0" aria-label="Storico esercizio">
+                          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </button>
+                      </div>
+
+                      <!-- Tracking -->
+                      <div class="mt-3 flex items-center justify-between gap-2 bg-gray-50 rounded-xl px-3 py-2">
+                        <div class="min-w-0">
+                          <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{{ ex.type === 'cardio' ? 'Durata attuale' : 'Peso attuale' }}</div>
+                          <div class="flex items-baseline gap-1.5 flex-wrap">
+                            <template v-if="exerciseDeltaValue(ex) !== null && exerciseDeltaValue(ex) !== 0">
+                              <span class="text-sm font-bold text-gray-400 line-through">{{ formatNumber(exerciseStartValue(ex)) }}</span>
+                              <span class="text-[10px] text-gray-400">→</span>
+                            </template>
+                            <span class="text-lg font-extrabold" :class="ex.type === 'cardio' ? 'text-sky-600' : 'text-arancione'">
+                              {{ formatNumber(exerciseCurrentValue(ex)) }} {{ exerciseUnit(ex) }}
+                            </span>
+                            <span v-if="exerciseDeltaValue(ex) !== null && exerciseDeltaValue(ex) !== 0" class="text-[10px] font-bold" :class="exerciseDeltaValue(ex) > 0 ? 'text-salvia' : 'text-red-500'">
+                              {{ exerciseDeltaValue(ex) > 0 ? '+' : '' }}{{ formatNumber(exerciseDeltaValue(ex)) }} {{ exerciseUnit(ex) }}
+                            </span>
+                          </div>
+                          <p class="text-[9px] font-medium text-gray-400 mt-0.5">{{ lastExerciseLog(ex) ? 'Ultima: ' + formatDate(lastExerciseLog(ex).date) : 'Nessun dato registrato' }}</p>
+                        </div>
+                        <div class="flex items-center gap-1.5 flex-shrink-0">
+                          <template v-if="ex.type === 'strength' && ex.pyramid">
+                            <button @click="openPyramidLogModal(ex)" class="h-9 px-3 rounded-xl bg-amber-500 text-white text-[10px] font-bold shadow-sm flex items-center gap-1 active:scale-95 transition-all">
+                              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l8 16H4L12 4z"/></svg>
+                              Registra serie
+                            </button>
+                          </template>
+                          <template v-else>
+                            <input type="text" inputmode="decimal" v-model="exerciseInputs[ex.id]" :placeholder="exerciseUnit(ex)"
+                                   @keyup.enter="setExerciseValue(ex)"
+                                   class="w-16 bg-white border border-gray-200 focus:border-arancione focus:ring-2 focus:ring-arancione/20 rounded-xl px-2 py-2 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                            <button @click="setExerciseValue(ex)" class="w-9 h-9 rounded-full bg-arancione text-white shadow-sm flex items-center justify-center active:scale-90 transition-all" aria-label="Conferma e registra nuovo valore" title="Conferma e registra">
+                              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                            </button>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <p class="text-[10px] font-medium text-gray-400 text-center px-4">Scrivi il nuovo peso (o la nuova durata) e tocca ✓ per confermare. Per i piramidali usa <b>Registra serie</b>: inserisci il peso di ogni serie, nei progressi conta quello maggiore.</p>
+              </div>
+            </div>
+
           </div>
 
           <!-- ==================== PROGRESSI ==================== -->
@@ -560,9 +964,6 @@
                       <span v-if="group.lastReps" class="text-[10px] text-gray-400 font-medium">× {{ formatNumber(group.lastReps) }}</span>
                     </div>
                     <span class="text-[10px] font-bold text-gray-400">da {{ formatNumber(group.firstLoad) }} kg</span>
-                  </div>
-                  <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                    <div class="bg-arancione h-full rounded-full transition-all" :style="{ width: group.progressPct + '%' }"></div>
                   </div>
                 </div>
               </div>
@@ -938,6 +1339,10 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                     <span class="text-[10px] font-bold text-gray-500">Nota</span>
                   </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full border-2 border-arancione"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Allenamento</span>
+                  </div>
                 </div>
               </div>
 
@@ -1290,6 +1695,484 @@
               </button>
             </div>
 
+          </div>
+        </div>
+
+        <!-- WORKOUT EXERCISE HISTORY MODAL -->
+        <div v-if="exerciseHistoryModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight truncate">{{ exerciseHistoryModal.exerciseName }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ exerciseHistoryModal.sheetName }}</p>
+                </div>
+              </div>
+              <button @click="exerciseHistoryModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div v-if="exerciseHistoryLogs.length === 0" class="py-8 text-center text-sm text-gray-400 font-medium">
+              Nessuna registrazione: scrivi il valore nella scheda e tocca ✓ per iniziare a tracciare i carichi.
+            </div>
+
+            <div v-else class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="log in exerciseHistoryLogs" :key="log.id" class="flex items-center justify-between gap-2 p-3 bg-gray-50 border border-gray-100 rounded-2xl">
+                <div class="min-w-0">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ formatDate(log.date) }}</div>
+                  <div class="text-base font-extrabold text-antracite flex items-baseline gap-1 flex-wrap">
+                    <span v-if="log.displayDelta !== null && log.displayDelta !== 0" class="text-xs font-bold text-gray-400 line-through">{{ formatNumber(log.displayStart) }}</span>
+                    <span v-if="log.displayDelta !== null && log.displayDelta !== 0" class="text-[10px] text-gray-400">→</span>
+                    <span>{{ formatNumber(log.displayCurrent) }} <span class="text-[10px] font-semibold text-gray-400">{{ log.unit }}</span></span>
+                    <span v-if="log.reps" class="text-[10px] text-gray-400 font-medium"> × {{ log.reps }}</span>
+                    <span v-if="log.displayDelta !== null && log.displayDelta !== 0" class="text-[10px] font-bold" :class="log.displayDelta > 0 ? 'text-salvia' : 'text-red-500'">{{ log.displayDelta > 0 ? '+' : '' }}{{ formatNumber(log.displayDelta) }} {{ log.unit }}</span>
+                  </div>
+                  <p v-if="log.intensity" class="text-[10px] font-medium text-gray-400 mt-0.5">{{ log.intensity }}</p>
+                  <p v-if="log.logSets && log.logSets.length" class="text-[9px] font-medium text-amber-700 mt-0.5 leading-snug break-words">{{ log.logSets.map(set => formatNumber(set.weight) + '×' + (set.reps || '—')).join(' · ') }}</p>
+                </div>
+                <button @click="deleteWorkoutLog(log)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina registrazione">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="exerciseHistoryModal.isOpen = false" class="w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORKOUT SHEET HISTORY MODAL -->
+        <div v-if="sheetHistoryModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Storico scheda</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ selectedSheet ? selectedSheet.name : '' }}</p>
+                </div>
+              </div>
+              <button @click="sheetHistoryModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">{{ sheetHistorySessions.length }} session{{ sheetHistorySessions.length === 1 ? 'e' : 'i' }} registrate</p>
+
+            <div v-if="sheetHistorySessions.length === 0" class="py-8 text-center text-sm text-gray-400 font-medium">
+              Ancora nessuna sessione. Registra i carichi dalla scheda per iniziare a costruire lo storico.
+            </div>
+
+            <div v-else class="overflow-y-auto flex-1 space-y-3 pr-1 hide-scrollbar">
+              <div v-for="session in sheetHistorySessions" :key="session.date" class="bg-white border border-gray-100 rounded-3xl shadow-sm overflow-hidden">
+                <!-- Intestazione sessione -->
+                <div class="flex items-center gap-3 p-3 bg-gradient-to-r from-arancione/10 to-transparent border-b border-gray-100">
+                  <div class="w-12 h-12 rounded-2xl bg-arancione text-white flex flex-col items-center justify-center flex-shrink-0 shadow-sm">
+                    <span class="text-base font-extrabold leading-none">{{ session.day }}</span>
+                    <span class="text-[8px] font-bold tracking-widest uppercase mt-0.5">{{ session.month }}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-extrabold text-antracite truncate">{{ session.weekday }}</div>
+                    <div class="flex items-center gap-1.5 flex-wrap text-[10px] font-semibold text-gray-400">
+                      <span>{{ session.logs.length }} {{ session.logs.length === 1 ? 'esercizio' : 'esercizi' }}</span>
+                      <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                      <span>{{ session.strengthCount }} forza</span>
+                      <template v-if="session.cardioCount">
+                        <span class="w-1 h-1 rounded-full bg-gray-300"></span>
+                        <span>{{ session.cardioCount }} cardio</span>
+                      </template>
+                    </div>
+                  </div>
+                  <span class="text-[9px] font-bold text-arancione bg-arancione/10 px-2 py-1 rounded-lg flex-shrink-0">{{ session.year }}</span>
+                </div>
+
+                <div class="p-2.5 space-y-2.5">
+                  <div v-for="dayGroup in session.dayGroups" :key="dayGroup.name" class="space-y-1.5">
+                    <div class="flex items-center gap-2 px-1">
+                      <span class="text-[9px] font-black uppercase tracking-widest text-gray-400 truncate">{{ dayGroup.name }}</span>
+                      <span class="h-px flex-1 bg-gray-100"></span>
+                    </div>
+
+                    <div v-for="log in dayGroup.logs" :key="log.id" class="flex items-center gap-2.5 rounded-2xl bg-gray-50 border border-gray-100 px-2.5 py-2">
+                      <div class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border"
+                           :class="log.isCardio ? 'bg-sky-500/10 text-sky-600 border-sky-200' : (log.isPyramid ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-arancione/10 text-arancione border-arancione/20')">
+                        <svg v-if="log.isCardio" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12h4l2-5 4 10 2-5h6"/></svg>
+                        <svg v-else-if="log.isPyramid" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l8 16H4L12 4zM12 12h.01"/></svg>
+                        <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
+                      </div>
+
+                      <div class="min-w-0 flex-1">
+                        <div class="text-[11px] font-bold text-antracite truncate">{{ log.exerciseName }}</div>
+                        <div class="text-[9px] font-medium text-gray-400 truncate">
+                          <template v-if="log.logSets.length">{{ log.logSets.map(set => formatNumber(set.weight) + '×' + (set.reps || '—')).join(' · ') }}</template>
+                          <template v-else-if="log.isCardio">{{ log.intensity || 'Cardio' }}</template>
+                          <template v-else-if="log.reps">× {{ log.reps }} rip.</template>
+                          <template v-else>Serie registrate</template>
+                        </div>
+                      </div>
+
+                      <div class="text-right flex-shrink-0">
+                        <div class="text-sm font-extrabold" :class="log.isCardio ? 'text-sky-600' : (log.isPyramid ? 'text-amber-600' : 'text-arancione')">
+                          {{ formatNumber(log.displayCurrent) }}<span class="text-[9px] text-gray-400 font-semibold"> {{ log.unit }}</span>
+                        </div>
+                        <div class="flex items-center justify-end gap-1 text-[9px] font-bold">
+                          <template v-if="log.displayDelta !== null && log.displayDelta !== 0">
+                            <span class="text-gray-400 line-through">{{ formatNumber(log.displayStart) }}</span>
+                            <span class="text-gray-300">→</span>
+                            <span :class="log.displayDelta > 0 ? 'text-salvia' : 'text-red-500'">{{ log.displayDelta > 0 ? '+' : '' }}{{ formatNumber(log.displayDelta) }}</span>
+                          </template>
+                          <span v-else class="text-gray-400 font-medium">Partenza</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="sheetHistoryModal.isOpen = false" class="w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORKOUT SESSION PREVIEW MODAL -->
+        <div v-if="sessionPreviewModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Sessione</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ selectedSheet ? selectedSheet.name : '' }}{{ currentSheetDay ? ' · ' + currentSheetDay.name : '' }}</p>
+                </div>
+              </div>
+              <button @click="closeSessionPreview" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="group in selectedDayGroups" :key="'preview-' + group.key" class="space-y-2">
+                <div v-if="group.label" class="flex items-center gap-2">
+                  <span class="text-[9px] font-black uppercase tracking-widest bg-amber-300 text-amber-900 px-2 py-0.5 rounded-md">{{ group.label }}</span>
+                  <span class="text-[10px] font-medium text-gray-400">senza pausa</span>
+                </div>
+                <div v-for="ex in group.exercises" :key="'preview-ex-' + ex.id" class="flex items-center gap-3 bg-gray-50 rounded-2xl border border-gray-100 p-3">
+                  <div class="w-9 h-9 rounded-xl bg-white flex items-center justify-center text-base shadow-sm flex-shrink-0">{{ ex.type === 'cardio' ? '🏃' : '🏋️' }}</div>
+                  <div class="flex-1 min-w-0">
+                    <h5 class="text-xs font-bold text-antracite truncate">{{ ex.name }}</h5>
+                    <p class="text-[10px] text-gray-500 leading-snug">
+                      <template v-if="ex.type === 'cardio'">{{ formatNumber(exerciseCurrentValue(ex)) }} min<span v-if="exerciseDeltaValue(ex)"> ({{ exerciseDeltaValue(ex) > 0 ? '+' : '' }}{{ formatNumber(exerciseDeltaValue(ex)) }} min)</span> • {{ ex.intensity || 'intensità n.d.' }}</template>
+                      <template v-else-if="ex.pyramid">Piramidale • <span v-if="exerciseDeltaValue(ex)" class="text-gray-400 line-through">{{ formatNumber(exerciseStartValue(ex)) }}</span><span v-if="exerciseDeltaValue(ex)"> → </span>{{ formatNumber(exerciseCurrentValue(ex)) }} kg<span v-if="exerciseDeltaValue(ex)"> ({{ exerciseDeltaValue(ex) > 0 ? '+' : '' }}{{ formatNumber(exerciseDeltaValue(ex)) }})</span> • rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
+                      <template v-else>{{ ex.sets ? ex.sets + '×' + (ex.reps || '—') + ' • ' : '' }}<span v-if="exerciseDeltaValue(ex)" class="text-gray-400 line-through">{{ formatNumber(exerciseStartValue(ex)) }}</span><span v-if="exerciseDeltaValue(ex)"> → </span>{{ formatNumber(exerciseCurrentValue(ex)) }} kg<span v-if="exerciseDeltaValue(ex)"> ({{ exerciseDeltaValue(ex) > 0 ? '+' : '' }}{{ formatNumber(exerciseDeltaValue(ex)) }})</span> • rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
+                    </p>
+                    <p v-if="ex.type === 'strength' && ex.pyramid" class="text-[9px] text-amber-700 leading-snug mt-0.5 break-words">{{ pyramidSummary(ex) }}</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="shrink-0 space-y-2 pt-2 border-t border-gray-100">
+              <div v-if="sessionPreviewModal.autoCreated" class="bg-arancione/10 border border-arancione/30 rounded-xl px-3 py-2.5 flex items-start gap-2.5">
+                <div class="text-base flex-shrink-0">🗓️</div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-[10px] font-bold text-arancione">Aggiunta al calendario di oggi</p>
+                  <p class="text-[10px] font-medium text-gray-500 leading-snug">Se hai avviato per errore, annulla la sessione.</p>
+                </div>
+                <button @click="cancelAutoTrainingSession" class="text-[10px] font-bold text-red-500 hover:text-red-600 underline flex-shrink-0">Annulla</button>
+              </div>
+              <p v-else-if="sessionPreviewModal.sessionId" class="text-[10px] font-bold text-arancione bg-arancione/5 border border-arancione/20 rounded-xl px-3 py-2">Sessione già presente nel calendario di oggi.</p>
+              <p class="text-[10px] font-medium text-gray-400 bg-arancione/5 border border-arancione/20 rounded-xl px-3 py-2 leading-snug">Stiamo gettando le basi: la sessione guidata (timer di recupero, serie e registrazione automatica) arriverà nella prossima fase.</p>
+              <button @click="closeSessionPreview" class="w-full bg-arancione text-white font-bold py-3 rounded-xl hover:bg-arancione/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORKOUT PYRAMID MODAL -->
+        <div v-if="pyramidModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 20h16M6 16l4-8 4 5 4-9"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Serie piramidali</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ pyramidExerciseName }}</p>
+                </div>
+              </div>
+              <button @click="pyramidModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="(set, sIdx) in pyramidModal.sets" :key="'pyramid-set-' + sIdx" class="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl p-2.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-[10px] font-extrabold flex-shrink-0">{{ sIdx + 1 }}</div>
+                <div class="flex-1 min-w-0">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Peso (kg)</label>
+                  <input type="text" inputmode="decimal" v-model="set.weight" placeholder="kg"
+                         class="w-full bg-white border border-gray-200 focus:border-amber-400 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                </div>
+                <div class="flex-1 min-w-0">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Ripetizioni</label>
+                  <input type="text" v-model="set.reps" placeholder="rip"
+                         class="w-full bg-white border border-gray-200 focus:border-amber-400 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                </div>
+                <button @click="removePyramidSet(sIdx)" :disabled="pyramidModal.sets.length <= 1" class="p-1.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400 flex-shrink-0" aria-label="Rimuovi serie">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <p v-if="pyramidModal.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2 shrink-0">{{ pyramidModal.error }}</p>
+
+            <button @click="addPyramidSet" class="w-full py-2.5 border-2 border-dashed border-amber-300 bg-amber-50 rounded-xl text-amber-700 font-bold text-xs hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5 shrink-0">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              Aggiungi serie
+            </button>
+
+            <div class="shrink-0 flex gap-2 pt-2 border-t border-gray-100">
+              <button @click="pyramidModal.isOpen = false" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Annulla</button>
+              <button @click="savePyramidModal" class="flex-1 bg-amber-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-amber-600 active:scale-95 transition-all">Salva</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WORKOUT PYRAMID LOG MODAL -->
+        <div v-if="pyramidLogModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4l8 16H4L12 4z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Registra serie</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ pyramidLogModal.exerciseName }}</p>
+                </div>
+              </div>
+              <button @click="pyramidLogModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <p class="text-[10px] font-medium text-gray-500 leading-relaxed shrink-0">Inserisci il peso di <b>ogni serie</b>. Nei progressi conta solo il peso maggiore.</p>
+
+            <div class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="(set, sIdx) in pyramidLogModal.sets" :key="'pyramid-log-set-' + sIdx" class="flex items-center gap-2 bg-gray-50 border border-gray-100 rounded-2xl p-2.5">
+                <div class="w-7 h-7 rounded-lg bg-amber-100 text-amber-700 flex items-center justify-center text-[10px] font-extrabold flex-shrink-0">{{ sIdx + 1 }}</div>
+                <div class="flex-1 min-w-0">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Peso (kg)</label>
+                  <input type="text" inputmode="decimal" v-model="set.weight" placeholder="kg"
+                         @keyup.enter="confirmPyramidLog"
+                         class="w-full bg-white border border-gray-200 focus:border-amber-400 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                </div>
+                <div class="w-20 flex-shrink-0">
+                  <label class="block text-[8px] font-bold text-gray-400 uppercase tracking-wider mb-0.5">Rip.</label>
+                  <input type="text" inputmode="numeric" v-model="set.reps" placeholder="rip"
+                         class="w-full bg-white border border-gray-200 focus:border-amber-400 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:text-gray-300">
+                </div>
+              </div>
+              <button @click="addPyramidLogSet" class="w-full py-2 border-2 border-dashed border-amber-300 bg-amber-50 rounded-xl text-amber-700 font-bold text-[10px] hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5">
+                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                Aggiungi serie
+              </button>
+            </div>
+
+            <div class="shrink-0 flex items-center justify-between gap-2 bg-amber-50 border border-amber-200 rounded-xl px-3 py-2">
+              <span class="text-[10px] font-bold text-amber-800 uppercase tracking-wider">Peso massimo</span>
+              <span class="text-sm font-extrabold text-amber-700">{{ pyramidLogTopWeight !== null ? formatNumber(pyramidLogTopWeight) + ' kg' : '—' }}</span>
+            </div>
+
+            <p v-if="pyramidLogModal.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2 shrink-0">{{ pyramidLogModal.error }}</p>
+
+            <div class="shrink-0 flex gap-2 pt-2 border-t border-gray-100">
+              <button @click="pyramidLogModal.isOpen = false" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Annulla</button>
+              <button @click="confirmPyramidLog" class="flex-1 bg-amber-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-amber-600 active:scale-95 transition-all">Conferma</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WEIGHT UPDATE CONFIRM MODAL -->
+        <div v-if="weightConfirmModal.isOpen" class="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center">
+            <div class="w-12 h-12 mx-auto rounded-2xl bg-arancione/10 border border-arancione/20 text-arancione flex items-center justify-center">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+            </div>
+            <div>
+              <h3 class="text-lg font-bold text-antracite">Aggiorna {{ weightConfirmModal.isCardio ? 'durata' : 'peso' }}</h3>
+              <p class="text-sm text-gray-500 font-medium mt-1 leading-relaxed">
+                Sei sicuro di voler aggiornare <b class="text-antracite">{{ weightConfirmModal.exerciseName }}</b> a
+                <b class="text-arancione">{{ formatNumber(weightConfirmModal.value) }} {{ weightConfirmModal.unit }}</b>?
+              </p>
+            </div>
+            <div class="flex gap-3 pt-1">
+              <button @click="cancelExerciseValue" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">No</button>
+              <button @click="confirmExerciseValue" class="flex-1 bg-arancione text-white font-bold py-3 rounded-xl shadow-md hover:bg-arancione/90 active:scale-95 transition-all">Sì, aggiorna</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRAINING DAY MODAL -->
+        <div v-if="trainingDayModal.isOpen" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Allenamenti</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">{{ trainingDayModal.dateLabel }}</p>
+                </div>
+              </div>
+              <button @click="closeTrainingDay" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">{{ trainingDaySessions.length }} {{ trainingDaySessions.length === 1 ? 'allenamento' : 'allenamenti' }}</p>
+
+            <div v-if="trainingDaySessions.length === 0" class="py-6 text-center text-sm text-gray-400 font-medium">
+              Nessun allenamento in questo giorno.
+            </div>
+
+            <div v-else class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <div v-for="session in trainingDaySessions" :key="session.id" class="flex items-center gap-2.5 rounded-2xl bg-gray-50 border border-gray-100 px-2.5 py-2">
+                <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border"
+                     :class="session.kind === 'gym' ? 'bg-arancione/10 text-arancione border-arancione/20' : 'bg-sky-500/10 text-sky-600 border-sky-200'">
+                  <svg v-if="session.kind === 'gym'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
+                  <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>
+                </div>
+                <div class="min-w-0 flex-1" :class="session.kind === 'gym' ? 'cursor-pointer' : ''" @click="session.kind === 'gym' ? openSheetForTraining(session) : null">
+                  <div class="text-[11px] font-bold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
+                  <div class="text-[9px] font-medium text-gray-400 truncate">
+                    <span v-if="session.time">{{ session.time }} • </span>{{ trainingSessionSubtitle(session) }}
+                  </div>
+                </div>
+                <button @click="removeTrainingSession(session)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina allenamento">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </div>
+
+            <button @click="openTrainingForm(trainingDayModal.dateKey)" class="w-full py-2.5 border-2 border-dashed border-arancione/40 bg-arancione/5 rounded-xl text-arancione font-bold text-xs hover:bg-arancione/10 transition-colors flex items-center justify-center gap-1.5 shrink-0">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+              Aggiungi allenamento
+            </button>
+
+            <div class="shrink-0 pt-2 border-t border-gray-100">
+              <button @click="closeTrainingDay" class="w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRAINING FORM MODAL -->
+        <div v-if="trainingFormModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[92vh]">
+            <div class="flex justify-between items-center shrink-0 gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight">Nuovo allenamento</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">Sport o palestra</p>
+                </div>
+              </div>
+              <button @click="closeTrainingForm" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 shrink-0">
+              <div>
+                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">{{ trainingFormModal.kind === 'sport' && trainingFormModal.recurring ? 'Dal' : 'Data' }}</label>
+                <input type="date" v-model="trainingFormModal.date"
+                       class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
+              </div>
+              <div>
+                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Orario</label>
+                <input type="time" v-model="trainingFormModal.time"
+                       class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
+              </div>
+            </div>
+
+            <div class="flex bg-gray-100 rounded-xl p-1 shrink-0">
+              <button @click="setTrainingKind('gym')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="trainingFormModal.kind === 'gym' ? 'bg-white text-arancione shadow-sm' : 'text-gray-500'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
+                Palestra
+              </button>
+              <button @click="setTrainingKind('sport')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="trainingFormModal.kind === 'sport' ? 'bg-white text-sky-600 shadow-sm' : 'text-gray-500'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>
+                Sport
+              </button>
+            </div>
+
+            <div class="overflow-y-auto flex-1 space-y-3 pr-1 hide-scrollbar">
+              <template v-if="trainingFormModal.kind === 'gym'">
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Scheda</label>
+                  <select v-if="workoutSheets.length" v-model="trainingFormModal.sheetId"
+                          class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-3 text-xs font-bold text-antracite outline-none transition-all">
+                    <option v-for="sheet in workoutSheets" :key="sheet.id" :value="sheet.id">{{ sheet.name }}</option>
+                  </select>
+                  <div v-else class="bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-[10px] font-medium text-amber-800 leading-relaxed">
+                    Nessuna scheda disponibile. Creane una nella sezione Schede per registrare la palestra.
+                  </div>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 leading-relaxed">La palestra è variabile: aggiungi la singola sessione ogni volta, senza giorni fissi.</p>
+              </template>
+
+              <template v-else>
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sport</label>
+                  <select v-model="trainingFormModal.sport"
+                          class="w-full bg-gray-50 border border-gray-200 focus:border-sky-400 rounded-xl p-3 text-xs font-bold text-antracite outline-none transition-all">
+                    <option v-for="sport in trainingSports" :key="sport" :value="sport">{{ sport }}</option>
+                  </select>
+                </div>
+
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-bold text-gray-500">Ripeti ogni settimana</span>
+                  <button @click="trainingFormModal.recurring = !trainingFormModal.recurring"
+                          class="w-10 h-5 rounded-full relative transition-colors flex-shrink-0"
+                          :class="trainingFormModal.recurring ? 'bg-sky-500' : 'bg-gray-300'">
+                    <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform"
+                         :class="trainingFormModal.recurring ? 'translate-x-5' : ''"></div>
+                  </button>
+                </div>
+
+                <div v-if="trainingFormModal.recurring" class="space-y-1.5">
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Giorni</label>
+                  <div class="flex gap-1.5">
+                    <button v-for="wd in trainingWeekdays" :key="'wd-' + wd.value" @click="toggleTrainingWeekday(wd.value)"
+                            class="flex-1 py-2 rounded-lg text-xs font-bold transition-colors"
+                            :class="trainingFormModal.weekdays.includes(wd.value) ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500'">{{ wd.label }}</button>
+                  </div>
+                </div>
+              </template>
+            </div>
+
+            <p v-if="trainingFormModal.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2 shrink-0">{{ trainingFormModal.error }}</p>
+
+            <div class="shrink-0 flex gap-2 pt-2 border-t border-gray-100">
+              <button @click="closeTrainingForm" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Annulla</button>
+              <button @click="saveTrainingSession" class="flex-1 bg-arancione text-white font-bold py-3 rounded-xl shadow-md hover:bg-arancione/90 active:scale-95 transition-all">Salva</button>
+            </div>
           </div>
         </div>
 
@@ -1944,26 +2827,32 @@
 
         const dashboardDayStatus = (day) => dayStatusFor(new Date(dashYear.value, dashMonth.value, day));
 
+        const dashHasTraining = (day) => hasTrainingOnDateKey(`${dashYear.value}-${String(dashMonth.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+
         const dashboardDayClasses = (day) => {
           const status = dashboardDayStatus(day);
-          if (status === 'perfect') return 'bg-salvia text-white shadow-sm';
-          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm';
-          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm';
-          if (dashIsToday(day)) return 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20';
-          return 'text-gray-600 hover:bg-gray-50';
+          const ring = dashHasTraining(day) ? 'ring-2 ring-arancione' : '';
+          if (status === 'perfect') return 'bg-salvia text-white shadow-sm ' + ring;
+          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm ' + ring;
+          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm ' + ring;
+          if (dashIsToday(day)) return 'bg-gray-100 text-salvia font-extrabold ' + (ring || 'ring-2 ring-salvia/20');
+          return 'text-gray-600 hover:bg-gray-50 ' + ring;
         };
 
         // Calendario nutrizione: sincronizzato con il calendario dashboard
         const nutritionDayStatus = (day) => dayStatusFor(new Date(currentYear.value, currentMonth.value, day));
 
+        const nutritionHasTraining = (day) => hasTrainingOnDateKey(`${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+
         const nutritionDayClasses = (day) => {
           const status = nutritionDayStatus(day);
-          if (status === 'perfect') return 'bg-salvia text-white shadow-sm';
-          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm';
-          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm';
-          if (isToday(day)) return 'bg-gray-100 text-salvia font-extrabold ring-2 ring-salvia/20';
-          if (isSunday(day)) return 'text-salvia bg-salvia/5 hover:bg-salvia/10';
-          return 'text-gray-600 hover:bg-gray-50';
+          const ring = nutritionHasTraining(day) ? 'ring-2 ring-arancione' : '';
+          if (status === 'perfect') return 'bg-salvia text-white shadow-sm ' + ring;
+          if (status === 'small_cheat') return 'bg-viola text-white shadow-sm ' + ring;
+          if (status === 'cheat') return 'bg-red-500 text-white shadow-sm ' + ring;
+          if (isToday(day)) return 'bg-gray-100 text-salvia font-extrabold ' + (ring || 'ring-2 ring-salvia/20');
+          if (isSunday(day)) return 'text-salvia bg-salvia/5 hover:bg-salvia/10 ' + ring;
+          return 'text-gray-600 hover:bg-gray-50 ' + ring;
         };
 
         // Nota su un giorno del calendario dashboard (stesso archivio del calendario nutrizione)
@@ -2000,6 +2889,12 @@
           if (!dayMenuModal.value.isOpen || !dayMenuModal.value.date) return '';
           const d = dayMenuModal.value.date;
           return commentsMap.value[`${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`] || '';
+        });
+
+        // Allenamenti del giorno selezionato (sincronizzati col calendario Allenamento)
+        const dayMenuTrainingSessions = computed(() => {
+          if (!dayMenuModal.value.isOpen || !dayMenuModal.value.dateKey) return [];
+          return trainingSessionsOnDateKey(dayMenuModal.value.dateKey);
         });
 
         const dayMenuLogs = computed(() => {
@@ -2139,6 +3034,19 @@
           return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
         };
 
+        const formatDateParts = (dateStr) => {
+          const d = new Date(String(dateStr) + 'T00:00:00');
+          if (Number.isNaN(d.getTime())) return { day: '--', month: '---', weekday: '', year: '' };
+          const months = ['GEN', 'FEB', 'MAR', 'APR', 'MAG', 'GIU', 'LUG', 'AGO', 'SET', 'OTT', 'NOV', 'DIC'];
+          const weekdays = ['Domenica', 'Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato'];
+          return {
+            day: String(d.getDate()).padStart(2, '0'),
+            month: months[d.getMonth()],
+            weekday: weekdays[d.getDay()],
+            year: String(d.getFullYear())
+          };
+        };
+
         // Clipboard Sharing
         const copyToClipboard = async (text, successMsg) => {
           try {
@@ -2244,6 +3152,940 @@
             entry.reps = null;
           });
         }
+
+        // ---------------------------------------------------------------
+        // ALLENAMENTO: schede, giorni, esercizi e progressi
+        // ---------------------------------------------------------------
+        const savedSheets = localStorage.getItem('still_workout_sheets');
+        const workoutSheets = ref(savedSheets ? JSON.parse(savedSheets) : []);
+
+        watch(workoutSheets, (sheets) => {
+          localStorage.setItem('still_workout_sheets', JSON.stringify(sheets));
+        }, { deep: true });
+
+        // ---------------------------------------------------------------
+        // CALENDARIO ALLENAMENTI: sport e sessioni in palestra
+        // ---------------------------------------------------------------
+        const trainingSports = ['Calcio', 'Pallavolo', 'Basket', 'Lotta', 'Tennis', 'Padel', 'Nuoto', 'Corsa', 'Ciclismo', 'Boxe', 'Rugby', 'Arti marziali', 'Altro'];
+        const trainingWeekdays = [
+          { label: 'L', value: 1 }, { label: 'M', value: 2 }, { label: 'M', value: 3 },
+          { label: 'G', value: 4 }, { label: 'V', value: 5 }, { label: 'S', value: 6 }, { label: 'D', value: 0 }
+        ];
+
+        const savedTrainingSessions = localStorage.getItem('still_training_sessions');
+        const trainingSessions = ref(savedTrainingSessions ? JSON.parse(savedTrainingSessions) : []);
+
+        watch(trainingSessions, (sessions) => {
+          localStorage.setItem('still_training_sessions', JSON.stringify(sessions));
+        }, { deep: true });
+
+        const trainingToday = new Date();
+        const trainingYear = ref(trainingToday.getFullYear());
+        const trainingMonth = ref(trainingToday.getMonth());
+
+        const trainingMonthName = computed(() => new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(trainingYear.value, trainingMonth.value, 1)));
+        const trainingDaysInMonth = computed(() => new Date(trainingYear.value, trainingMonth.value + 1, 0).getDate());
+        const trainingFirstDayOfMonth = computed(() => {
+          const firstDay = new Date(trainingYear.value, trainingMonth.value, 1).getDay();
+          return firstDay === 0 ? 6 : firstDay - 1;
+        });
+
+        const trainingPrevMonth = () => {
+          if (trainingMonth.value === 0) { trainingMonth.value = 11; trainingYear.value--; }
+          else trainingMonth.value--;
+        };
+        const trainingNextMonth = () => {
+          if (trainingMonth.value === 11) { trainingMonth.value = 0; trainingYear.value++; }
+          else trainingMonth.value++;
+        };
+
+        const trainingDateKey = (day) => `${trainingYear.value}-${String(trainingMonth.value + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+
+        const trainingSessionOccursOn = (session, dateKey) => {
+          if (!session) return false;
+          if (!session.recurring) return session.date === dateKey;
+          if (session.date && dateKey < session.date) return false;
+          const d = new Date(dateKey + 'T00:00:00');
+          return (session.weekdays || []).includes(d.getDay());
+        };
+
+        const trainingSessionsOnDateKey = (dateKey) => trainingSessions.value
+          .filter(session => trainingSessionOccursOn(session, dateKey))
+          .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+
+        const trainingSessionsForDay = (day) => trainingSessionsOnDateKey(trainingDateKey(day));
+
+        const hasTrainingOnDateKey = (dateKey) => trainingSessions.value.some(session => trainingSessionOccursOn(session, dateKey));
+
+        const trainingHasSessions = (day) => trainingSessionsForDay(day).length > 0;
+
+        const trainingIsToday = (day) => day === trainingToday.getDate()
+          && trainingMonth.value === trainingToday.getMonth()
+          && trainingYear.value === trainingToday.getFullYear();
+
+        const trainingDayClasses = (day) => {
+          if (trainingHasSessions(day)) return 'bg-arancione text-white shadow-sm';
+          if (trainingIsToday(day)) return 'bg-arancione/10 text-arancione font-extrabold ring-2 ring-arancione/20';
+          return 'text-gray-600 hover:bg-gray-50';
+        };
+
+        const trainingSessionLabel = (session) => {
+          if (!session) return '';
+          return session.kind === 'gym' ? (session.sheetName || 'Palestra') : (session.sport || 'Sport');
+        };
+
+        const trainingSessionSubtitle = (session) => {
+          if (!session) return '';
+          if (session.kind === 'gym') return 'Palestra' + (session.dayName ? ' • ' + session.dayName : '');
+          return 'Sport' + (session.recurring ? ' • ogni settimana' : '');
+        };
+
+        const formatDateLong = (dateStr) => {
+          const d = new Date(String(dateStr) + 'T00:00:00');
+          if (Number.isNaN(d.getTime())) return String(dateStr);
+          const label = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+          return label.charAt(0).toUpperCase() + label.slice(1);
+        };
+
+        const upcomingTrainingSessions = computed(() => {
+          const out = [];
+          const base = new Date();
+          base.setHours(0, 0, 0, 0);
+          for (let offset = 0; offset < 60 && out.length < 12; offset++) {
+            const d = new Date(base);
+            d.setDate(base.getDate() + offset);
+            const key = toISODate(d);
+            trainingSessions.value.forEach(session => {
+              if (trainingSessionOccursOn(session, key)) {
+                out.push({ ...session, occurrenceDate: key });
+              }
+            });
+          }
+          return out
+            .sort((a, b) => (a.occurrenceDate + (a.time || '')).localeCompare(b.occurrenceDate + (b.time || '')))
+            .slice(0, 12);
+        });
+
+        const trainingDayModal = ref({ isOpen: false, dateKey: '', dateLabel: '' });
+        const openTrainingDay = (day) => {
+          const key = trainingDateKey(day);
+          trainingDayModal.value = { isOpen: true, dateKey: key, dateLabel: formatDateLong(key) };
+        };
+        const closeTrainingDay = () => { trainingDayModal.value.isOpen = false; };
+
+        const trainingDaySessions = computed(() => {
+          if (!trainingDayModal.value.isOpen) return [];
+          return trainingSessions.value
+            .filter(session => trainingSessionOccursOn(session, trainingDayModal.value.dateKey))
+            .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
+        });
+
+        const trainingFormModal = ref({ isOpen: false, editingId: null, date: '', time: '18:00', kind: 'gym', sport: 'Calcio', weekdays: [], recurring: true, sheetId: null, dayName: '', note: '', error: '' });
+
+        const openTrainingForm = (dateKey, session = null) => {
+          if (session) {
+            trainingFormModal.value = {
+              isOpen: true,
+              editingId: session.id,
+              date: session.date || toISODate(),
+              time: session.time || '18:00',
+              kind: session.kind || 'gym',
+              sport: session.sport || 'Calcio',
+              weekdays: (session.weekdays || []).slice(),
+              recurring: !!session.recurring,
+              sheetId: session.sheetId !== undefined && session.sheetId !== null ? session.sheetId : (workoutSheets.value[0] ? workoutSheets.value[0].id : null),
+              dayName: session.dayName || '',
+              note: session.note || '',
+              error: ''
+            };
+            return;
+          }
+          const date = dateKey || toISODate();
+          const firstSheet = workoutSheets.value[0];
+          const weekday = new Date(date + 'T00:00:00').getDay();
+          trainingFormModal.value = {
+            isOpen: true,
+            editingId: null,
+            date,
+            time: '18:00',
+            kind: firstSheet ? 'gym' : 'sport',
+            sport: 'Calcio',
+            weekdays: [weekday],
+            recurring: true,
+            sheetId: firstSheet ? firstSheet.id : null,
+            dayName: '',
+            note: '',
+            error: ''
+          };
+        };
+
+        const editTrainingSession = (session) => {
+          if (!session) return;
+          openTrainingForm(session.date || toISODate(), session);
+        };
+
+        const closeTrainingForm = () => { trainingFormModal.value.isOpen = false; };
+
+        const setTrainingKind = (kind) => {
+          const form = trainingFormModal.value;
+          form.kind = kind;
+          form.error = '';
+          if (kind === 'sport' && (!form.weekdays || !form.weekdays.length)) {
+            form.weekdays = [new Date(form.date + 'T00:00:00').getDay()];
+          }
+        };
+
+        const toggleTrainingWeekday = (value) => {
+          const list = trainingFormModal.value.weekdays;
+          const idx = list.indexOf(value);
+          if (idx > -1) list.splice(idx, 1);
+          else list.push(value);
+        };
+
+        const saveTrainingSession = () => {
+          const form = trainingFormModal.value;
+          if (!form.date) { form.error = 'Scegli una data.'; return; }
+          const base = {
+            id: form.editingId || ('ts_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+            date: form.date,
+            time: form.time || '',
+            kind: form.kind,
+            sport: '',
+            sheetId: null,
+            sheetName: '',
+            dayName: '',
+            note: (form.note || '').trim(),
+            recurring: false,
+            weekdays: []
+          };
+          if (form.kind === 'gym') {
+            const sheet = workoutSheets.value.find(item => String(item.id) === String(form.sheetId));
+            if (!sheet) { form.error = 'Crea prima una scheda per la palestra.'; return; }
+            base.sheetId = sheet.id;
+            base.sheetName = sheet.name;
+            base.dayName = form.dayName || '';
+          } else {
+            if (!form.sport) { form.error = 'Scegli uno sport.'; return; }
+            base.sport = form.sport;
+            if (form.recurring) {
+              if (!form.weekdays.length) { form.error = 'Scegli almeno un giorno della settimana.'; return; }
+              base.recurring = true;
+              base.weekdays = form.weekdays.slice();
+            }
+          }
+          if (form.editingId) {
+            const idx = trainingSessions.value.findIndex(item => item.id === form.editingId);
+            if (idx > -1) trainingSessions.value[idx] = base;
+            showToastMessage('Allenamento aggiornato. ✏️');
+          } else {
+            trainingSessions.value.push(base);
+            showToastMessage('Allenamento aggiunto al calendario. 🗓️');
+          }
+          form.isOpen = false;
+        };
+
+        const removeTrainingSession = (session) => {
+          const message = session.recurring
+            ? "Vuoi eliminare l'intera serie settimanale di " + trainingSessionLabel(session) + '?'
+            : 'Vuoi eliminare ' + trainingSessionLabel(session) + ' del ' + formatDate(session.date) + '?';
+          showConfirm('Elimina allenamento', message, () => {
+            const idx = trainingSessions.value.findIndex(item => item.id === session.id);
+            if (idx > -1) trainingSessions.value.splice(idx, 1);
+            showToastMessage('Allenamento eliminato. 🗑️');
+          });
+        };
+
+        const openSheetForTraining = (session) => {
+          const sheet = workoutSheets.value.find(item => String(item.id) === String(session.sheetId));
+          if (!sheet) return;
+          trainingDayModal.value.isOpen = false;
+          openSheet(sheet);
+        };
+
+        const workoutView = ref('list'); // 'list' | 'detail' | 'builder'
+        const selectedSheet = ref(null);
+        const selectedSheetDayIdx = ref(0);
+        const editingSheetId = ref(null);
+        const newSheet = ref({ name: '', days: [] });
+
+        const dayLetter = (idx) => String.fromCharCode(65 + (idx % 26));
+
+        const createEmptyDay = (name) => ({ name, exercises: [] });
+
+        const createEmptyExercise = () => ({
+          id: 'ex_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+          type: 'strength', name: '', weight: '', rest: '', sets: '', reps: '',
+          duration: '', intensity: '', superset: '', pyramid: false, setsDetail: []
+        });
+
+        const startNewSheet = () => {
+          editingSheetId.value = null;
+          newSheet.value = { name: '', days: [createEmptyDay('Giorno A')] };
+          workoutView.value = 'builder';
+        };
+
+        const editSheet = (sheet) => {
+          editingSheetId.value = sheet.id;
+          newSheet.value = JSON.parse(JSON.stringify({ name: sheet.name, days: sheet.days }));
+          workoutView.value = 'builder';
+        };
+
+        const addSheetDay = () => {
+          newSheet.value.days.push(createEmptyDay('Giorno ' + dayLetter(newSheet.value.days.length)));
+        };
+
+        const removeSheetDay = (idx) => newSheet.value.days.splice(idx, 1);
+
+        const addExercise = (day) => day.exercises.push(createEmptyExercise());
+
+        const removeExercise = (day, idx) => {
+          const removed = day.exercises[idx];
+          day.exercises.splice(idx, 1);
+          if (removed && removed.superset) {
+            const remaining = day.exercises.filter(item => item.superset === removed.superset);
+            if (remaining.length < 2) remaining.forEach(item => { item.superset = ''; });
+          }
+        };
+
+        // --- Superserie: coppia di 2 esercizi diversi, senza pausa ---
+        const addSupersetPair = (day, idx) => {
+          const first = day.exercises[idx];
+          if (!first) return;
+          const key = 'ss_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+          first.superset = key;
+          const second = createEmptyExercise();
+          second.type = first.type;
+          second.superset = key;
+          day.exercises.splice(idx + 1, 0, second);
+        };
+
+        const removeSuperset = (day, idx) => {
+          const exercise = day.exercises[idx];
+          if (!exercise || !exercise.superset) return;
+          const key = exercise.superset;
+          day.exercises.forEach(item => {
+            if (item.superset === key) item.superset = '';
+          });
+        };
+
+        const supersetPairCount = (day, exercise) => {
+          if (!day || !exercise || !exercise.superset) return 0;
+          return day.exercises.filter(item => item.superset === exercise.superset).length;
+        };
+
+        const totalSheetExercises = (sheet) => (sheet.days || []).reduce((sum, day) => sum + (day.exercises || []).length, 0);
+
+        const saveSheet = () => {
+          const draft = newSheet.value;
+          if (!draft.name.trim()) return showToastMessage("Dai un nome alla scheda!");
+          if (!draft.days.length) return showToastMessage("Aggiungi almeno un giorno alla scheda.");
+
+          for (const day of draft.days) {
+            if (!day.name.trim()) return showToastMessage("Ogni giorno deve avere un nome.");
+            if (!day.exercises.length) return showToastMessage('Aggiungi almeno un esercizio in "' + day.name + '".');
+            for (const ex of day.exercises) {
+              if (!ex.name.trim()) return showToastMessage('Completa il nome di tutti gli esercizi in "' + day.name + '".');
+              if (ex.type === 'strength' && ex.pyramid) {
+                const sets = ex.setsDetail || [];
+                if (!sets.length) return showToastMessage('Configura le serie piramidali di "' + ex.name + '".');
+                if (!sets.some(set => parseOptionalNumber(set.weight) !== null)) return showToastMessage('Inserisci almeno un peso nelle serie di "' + ex.name + '".');
+                if (sets.some(set => isInvalidNumber(set.weight))) return showToastMessage('Peso non valido nelle serie di "' + ex.name + '".');
+              }
+              if (ex.type === 'strength' && isInvalidNumber(ex.weight)) return showToastMessage('Peso non valido in "' + ex.name + '".');
+              if (ex.type === 'strength' && isInvalidNumber(ex.rest)) return showToastMessage('Recupero non valido in "' + ex.name + '".');
+              if (ex.type === 'cardio' && isInvalidNumber(ex.duration)) return showToastMessage('Durata non valida in "' + ex.name + '".');
+            }
+          }
+
+          const cleaned = {
+            name: draft.name.trim(),
+            days: draft.days.map(day => ({
+              name: day.name.trim(),
+              exercises: day.exercises.map(ex => ({
+                id: ex.id || ('ex_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+                type: ex.type,
+                name: ex.name.trim(),
+                weight: ex.type === 'strength' ? (parseOptionalNumber(ex.weight) ?? '') : '',
+                rest: ex.type === 'strength' ? (parseOptionalNumber(ex.rest) ?? '') : '',
+                sets: ex.type === 'strength' ? (ex.pyramid ? String((ex.setsDetail || []).length) : ex.sets) : '',
+                reps: ex.type === 'strength' && !ex.pyramid ? ex.reps : '',
+                duration: ex.type === 'cardio' ? (parseOptionalNumber(ex.duration) ?? '') : '',
+                intensity: ex.type === 'cardio' ? ex.intensity : '',
+                superset: (ex.superset || '').trim(),
+                pyramid: ex.type === 'strength' ? !!ex.pyramid : false,
+                setsDetail: ex.type === 'strength' && ex.pyramid
+                  ? (ex.setsDetail || []).map(set => ({
+                      weight: parseOptionalNumber(set.weight) ?? '',
+                      reps: (set.reps || '').trim()
+                    }))
+                  : []
+              }))
+            }))
+          };
+
+          if (editingSheetId.value !== null) {
+            const target = workoutSheets.value.find(sheet => sheet.id === editingSheetId.value);
+            if (target) {
+              Object.assign(target, cleaned);
+              if (selectedSheet.value && selectedSheet.value.id === target.id) selectedSheet.value = target;
+            }
+            editingSheetId.value = null;
+            showToastMessage('Scheda "' + cleaned.name + '" aggiornata! ✏️');
+          } else {
+            const nextId = Math.max(0, ...workoutSheets.value.map(sheet => Number(sheet.id) || 0)) + 1;
+            workoutSheets.value.unshift({ id: nextId, createdAt: toISODate(), ...cleaned });
+            showToastMessage('Scheda "' + cleaned.name + '" creata! 💪');
+          }
+
+          newSheet.value = { name: '', days: [] };
+          workoutView.value = 'list';
+        };
+
+        const deleteSheetById = (sheetId) => {
+          const idx = workoutSheets.value.findIndex(sheet => sheet.id === sheetId);
+          if (idx > -1) workoutSheets.value.splice(idx, 1);
+          if (selectedSheet.value && selectedSheet.value.id === sheetId) {
+            selectedSheet.value = null;
+            workoutView.value = 'list';
+          }
+        };
+
+        const promptDeleteSheet = () => {
+          if (editingSheetId.value === null) return;
+          const sheetId = editingSheetId.value;
+          showConfirm("Elimina Scheda", "Sei sicuro di voler eliminare questa scheda? I progressi già registrati resteranno nello storico.", () => {
+            deleteSheetById(sheetId);
+            editingSheetId.value = null;
+            workoutView.value = 'list';
+            showToastMessage("Scheda eliminata. 🗑️");
+          });
+        };
+
+        const promptDeleteSelectedSheet = () => {
+          if (!selectedSheet.value) return;
+          const sheetId = selectedSheet.value.id;
+          showConfirm("Elimina Scheda", "Sei sicuro di voler eliminare questa scheda? I progressi già registrati resteranno nello storico.", () => {
+            deleteSheetById(sheetId);
+            showToastMessage("Scheda eliminata. 🗑️");
+          });
+        };
+
+        const openSheet = (sheet) => {
+          selectedSheet.value = sheet;
+          selectedSheetDayIdx.value = 0;
+          workoutView.value = 'detail';
+        };
+
+        const currentSheetDay = computed(() => {
+          if (!selectedSheet.value) return null;
+          return selectedSheet.value.days?.[selectedSheetDayIdx.value] || selectedSheet.value.days?.[0] || null;
+        });
+
+        // Raggruppa gli esercizi: quelli con la stessa etichetta SS formano una superserie
+        const selectedDayGroups = computed(() => {
+          const day = currentSheetDay.value;
+          if (!day || !day.exercises) return [];
+          const groups = [];
+          const seen = new Set();
+          day.exercises.forEach((ex) => {
+            const key = (ex.superset || '').trim();
+            if (!key) {
+              groups.push({ key: 'single_' + ex.id, label: '', exercises: [ex] });
+              return;
+            }
+            if (seen.has(key)) return;
+            seen.add(key);
+            const groupExercises = day.exercises.filter(item => (item.superset || '').trim() === key);
+            if (groupExercises.length < 2) {
+              groups.push({ key: 'single_' + ex.id, label: '', exercises: [ex] });
+              return;
+            }
+            groups.push({ key: 'ss_' + key, label: 'Superserie', exercises: groupExercises });
+          });
+          return groups;
+        });
+
+        // --- Storico e progressi per esercizio ---
+        const exerciseLogsFor = (exerciseName) => {
+          const needle = (exerciseName || '').trim().toLowerCase();
+          if (!needle) return [];
+          return workoutLogs.value
+            .filter(log => (log.exerciseName || '').trim().toLowerCase() === needle)
+            .slice()
+            .sort((a, b) => String(a.date).localeCompare(String(b.date)) || (Number(a.id) || 0) - (Number(b.id) || 0));
+        };
+
+        const lastExerciseLog = (exercise) => {
+          const logs = exerciseLogsFor(exercise && exercise.name);
+          return logs.length ? logs[logs.length - 1] : null;
+        };
+
+        // Per i piramidali conta solo il peso maggiore tra le serie
+        const pyramidTopWeight = (exercise) => {
+          const weights = ((exercise && exercise.setsDetail) || [])
+            .map(set => parseOptionalNumber(set && set.weight))
+            .filter(value => value !== null);
+          return weights.length ? Math.max(...weights) : null;
+        };
+
+        const currentExerciseWeight = (exercise) => {
+          const last = lastExerciseLog(exercise);
+          const lastWeight = parseOptionalNumber(last && last.weight);
+          if (lastWeight !== null) return lastWeight;
+          if (exercise && exercise.pyramid) {
+            const top = pyramidTopWeight(exercise);
+            if (top !== null) return top;
+          }
+          return parseOptionalNumber(exercise && exercise.weight);
+        };
+
+        const currentExerciseDuration = (exercise) => {
+          const last = lastExerciseLog(exercise);
+          const lastDuration = parseOptionalNumber(last && last.duration);
+          if (lastDuration !== null) return lastDuration;
+          return parseOptionalNumber(exercise && exercise.duration);
+        };
+
+        // Valore di partenza dell'esercizio (kg per la forza, minuti per il cardio)
+        const exerciseStartValue = (exercise) => {
+          if (!exercise) return null;
+          if (exercise.type === 'cardio') return parseOptionalNumber(exercise.duration);
+          if (exercise.pyramid) {
+            const top = pyramidTopWeight(exercise);
+            if (top !== null) return top;
+          }
+          return parseOptionalNumber(exercise.weight);
+        };
+
+        // Ultimo valore registrato (o partenza se non ci sono log)
+        const exerciseCurrentValue = (exercise) => {
+          if (!exercise) return null;
+          return exercise.type === 'cardio'
+            ? currentExerciseDuration(exercise)
+            : currentExerciseWeight(exercise);
+        };
+
+        const exerciseUnit = (exercise) => (exercise && exercise.type === 'cardio' ? 'min' : 'kg');
+
+        const exerciseDeltaValue = (exercise) => {
+          const start = exerciseStartValue(exercise);
+          const current = exerciseCurrentValue(exercise);
+          if (start === null || current === null) return null;
+          return Math.round((current - start) * 10) / 10;
+        };
+
+        // Crea o aggiorna la registrazione di oggi per l'esercizio (una per giorno)
+        const upsertTodayExerciseLog = (exercise, payload) => {
+          const date = toISODate();
+          const sheet = selectedSheet.value;
+          const needle = (exercise.name || '').trim().toLowerCase();
+          const existing = workoutLogs.value.find(log =>
+            log.date === date &&
+            String(log.sheetId ?? '') === String(sheet && sheet.id !== undefined ? sheet.id : '') &&
+            (log.exerciseName || '').trim().toLowerCase() === needle
+          );
+          if (existing) {
+            Object.assign(existing, payload);
+            return;
+          }
+          workoutLogs.value.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            date,
+            sheetId: sheet ? sheet.id : null,
+            sheetName: sheet ? sheet.name : '',
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            ...payload
+          });
+        };
+
+        // Valore digitato dall'utente per ogni esercizio (bozza input)
+        const exerciseInputs = ref({});
+
+        // Richiesta di conferma prima di aggiornare peso/durata
+        const weightConfirmModal = ref({ isOpen: false, exerciseId: null, exerciseName: '', value: null, unit: 'kg', isCardio: false });
+
+        const setExerciseValue = (exercise) => {
+          const value = parseOptionalNumber(exerciseInputs.value[exercise.id]);
+          if (value === null || value < 0) {
+            showToastMessage('Scrivi un valore valido per ' + exercise.name + '.');
+            return;
+          }
+          const rounded = Math.round(value * 10) / 10;
+          weightConfirmModal.value = {
+            isOpen: true,
+            exerciseId: exercise.id,
+            exerciseName: exercise.name,
+            value: rounded,
+            unit: exerciseUnit(exercise),
+            isCardio: exercise.type === 'cardio'
+          };
+        };
+
+        const applyExerciseValue = (exercise, rounded) => {
+          if (exercise.type === 'cardio') {
+            upsertTodayExerciseLog(exercise, { weight: null, reps: null, duration: rounded, intensity: exercise.intensity || '' });
+            showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' min registrati per oggi.');
+          } else {
+            upsertTodayExerciseLog(exercise, { weight: rounded, reps: parseOptionalNumber(exercise.reps) });
+            showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' kg registrati per oggi.');
+          }
+          exerciseInputs.value[exercise.id] = '';
+        };
+
+        const cancelExerciseValue = () => {
+          weightConfirmModal.value.isOpen = false;
+        };
+
+        const confirmExerciseValue = () => {
+          const modal = weightConfirmModal.value;
+          const exercise = findSelectedExerciseById(modal.exerciseId);
+          if (!exercise) {
+            modal.isOpen = false;
+            return;
+          }
+          applyExerciseValue(exercise, modal.value);
+          modal.isOpen = false;
+        };
+
+        // --- Piramidali: peso e ripetizioni per singola serie ---
+        const defaultPyramidSets = (exercise) => {
+          const count = Math.max(1, parseInt(exercise && exercise.sets, 10) || 3);
+          const baseReps = exercise && exercise.reps ? exercise.reps : '';
+          // Ogni serie va compilata singolarmente: peso e ripetizioni per ogni ripetizione
+          return Array.from({ length: count }, () => ({ weight: '', reps: baseReps }));
+        };
+
+        const pyramidSummary = (exercise) => {
+          const sets = (exercise && exercise.setsDetail) || [];
+          if (!sets.length) return 'Nessuna serie configurata';
+          return sets.map(set => {
+            const weight = parseOptionalNumber(set && set.weight);
+            return (weight !== null ? formatNumber(weight) : '—') + ' kg × ' + ((set && set.reps) || '—');
+          }).join(' · ');
+        };
+
+        const togglePyramid = (exercise, dayIdx, exIdx) => {
+          exercise.pyramid = !exercise.pyramid;
+          if (!exercise.pyramid) return;
+          if (!exercise.setsDetail || !exercise.setsDetail.length) {
+            exercise.setsDetail = defaultPyramidSets(exercise);
+          }
+          // Apri subito la modale: il peso va inserito serie per serie
+          if (dayIdx !== undefined && exIdx !== undefined) openPyramidModal(dayIdx, exIdx);
+        };
+
+        const pyramidModal = ref({ isOpen: false, dayIdx: null, exIdx: null, sets: [], error: '' });
+
+        const pyramidExerciseName = computed(() => {
+          const modal = pyramidModal.value;
+          const exercise = newSheet.value.days?.[modal.dayIdx]?.exercises?.[modal.exIdx];
+          return exercise && exercise.name ? exercise.name : 'Esercizio';
+        });
+
+        const openPyramidModal = (dayIdx, exIdx) => {
+          const exercise = newSheet.value.days?.[dayIdx]?.exercises?.[exIdx];
+          if (!exercise) return;
+          const sets = (exercise.setsDetail && exercise.setsDetail.length)
+            ? exercise.setsDetail
+            : defaultPyramidSets(exercise);
+          pyramidModal.value = {
+            isOpen: true,
+            dayIdx,
+            exIdx,
+            sets: sets.map(set => ({
+              weight: set && set.weight !== undefined ? set.weight : '',
+              reps: (set && set.reps) || ''
+            })),
+            error: ''
+          };
+        };
+
+        const addPyramidSet = () => {
+          // Nuova serie vuota: peso e ripetizioni vanno inseriti singolarmente
+          pyramidModal.value.sets.push({ weight: '', reps: '' });
+        };
+
+        const removePyramidSet = (idx) => {
+          if (pyramidModal.value.sets.length <= 1) return;
+          pyramidModal.value.sets.splice(idx, 1);
+        };
+
+        const savePyramidModal = () => {
+          const modal = pyramidModal.value;
+          const exercise = newSheet.value.days?.[modal.dayIdx]?.exercises?.[modal.exIdx];
+          if (!exercise) return;
+          const cleaned = modal.sets.map(set => ({
+            weight: parseOptionalNumber(set.weight) ?? '',
+            reps: (set.reps || '').trim()
+          }));
+          if (!cleaned.some(set => set.weight !== '')) {
+            modal.error = 'Inserisci almeno un peso nelle serie.';
+            return;
+          }
+          exercise.setsDetail = cleaned;
+          exercise.sets = String(cleaned.length);
+          exercise.weight = cleaned.reduce((max, set) => (set.weight !== '' && set.weight > max ? set.weight : max), 0) || '';
+          exercise.pyramid = true;
+          modal.isOpen = false;
+          showToastMessage('Serie piramidali salvate per ' + (exercise.name || "l'esercizio") + '.');
+        };
+
+        // --- Registrazione di una sessione piramidale: un peso per ogni serie ---
+        const pyramidLogModal = ref({ isOpen: false, exerciseId: null, exerciseName: '', sets: [], error: '' });
+
+        const findSelectedExerciseById = (id) => {
+          const sheet = selectedSheet.value;
+          if (!sheet) return null;
+          for (const day of (sheet.days || [])) {
+            for (const ex of (day.exercises || [])) {
+              if (ex.id === id) return ex;
+            }
+          }
+          return null;
+        };
+
+        const openPyramidLogModal = (exercise) => {
+          if (!exercise) return;
+          const configured = (exercise.setsDetail && exercise.setsDetail.length)
+            ? exercise.setsDetail
+            : defaultPyramidSets(exercise);
+          const today = toISODate();
+          const todayLog = workoutLogs.value.find(log =>
+            log.date === today &&
+            String(log.sheetId ?? '') === String(selectedSheet.value ? selectedSheet.value.id : '') &&
+            (log.exerciseName || '').trim().toLowerCase() === (exercise.name || '').trim().toLowerCase()
+          );
+          const source = (todayLog && Array.isArray(todayLog.setsDetail) && todayLog.setsDetail.length)
+            ? todayLog.setsDetail
+            : configured;
+          pyramidLogModal.value = {
+            isOpen: true,
+            exerciseId: exercise.id,
+            exerciseName: exercise.name || 'Esercizio',
+            sets: source.map(set => ({
+              weight: set && set.weight !== undefined && set.weight !== '' ? set.weight : '',
+              reps: (set && set.reps) || ''
+            })),
+            error: ''
+          };
+        };
+
+        const pyramidLogTopWeight = computed(() => {
+          const weights = pyramidLogModal.value.sets
+            .map(set => parseOptionalNumber(set.weight))
+            .filter(value => value !== null);
+          return weights.length ? Math.max(...weights) : null;
+        });
+
+        const addPyramidLogSet = () => {
+          pyramidLogModal.value.sets.push({ weight: '', reps: '' });
+        };
+
+        const confirmPyramidLog = () => {
+          const modal = pyramidLogModal.value;
+          const exercise = findSelectedExerciseById(modal.exerciseId);
+          if (!exercise) return;
+          const cleaned = modal.sets.map(set => ({
+            weight: parseOptionalNumber(set.weight),
+            reps: String(set.reps || '').trim()
+          }));
+          if (cleaned.some(set => set.weight === null || set.weight < 0)) {
+            modal.error = 'Inserisci un peso valido in ogni serie.';
+            return;
+          }
+          const top = cleaned.reduce((max, set) => Math.max(max, set.weight), -Infinity);
+          const topSet = cleaned.find(set => set.weight === top) || cleaned[0];
+          const rounded = Math.round(top * 10) / 10;
+          upsertTodayExerciseLog(exercise, {
+            weight: rounded,
+            reps: parseOptionalNumber(topSet.reps),
+            setsDetail: cleaned.map(set => ({ weight: Math.round(set.weight * 10) / 10, reps: set.reps }))
+          });
+          modal.isOpen = false;
+          showToastMessage(exercise.name + ': peso massimo ' + formatNumber(rounded) + ' kg registrato per oggi.');
+        };
+
+        const sheetSessionDates = computed(() => {
+          if (!selectedSheet.value) return [];
+          const dates = new Set(
+            workoutLogs.value
+              .filter(log => String(log.sheetId ?? '') === String(selectedSheet.value.id))
+              .map(log => log.date)
+              .filter(Boolean)
+          );
+          return Array.from(dates).sort((a, b) => b.localeCompare(a));
+        });
+
+        const sheetLastSessionDate = (sheet) => {
+          if (!sheet) return null;
+          const dates = workoutLogs.value
+            .filter(log => String(log.sheetId ?? '') === String(sheet.id))
+            .map(log => log.date)
+            .filter(Boolean)
+            .sort((a, b) => b.localeCompare(a));
+          return dates[0] || null;
+        };
+
+        const exerciseHistoryModal = ref({ isOpen: false, exerciseName: '', sheetName: '' });
+
+        const openExerciseHistory = (exercise) => {
+          exerciseHistoryModal.value = {
+            isOpen: true,
+            exerciseName: exercise.name,
+            sheetName: selectedSheet.value ? selectedSheet.value.name : ''
+          };
+        };
+
+        // Trova l'esercizio (per nome) in una qualsiasi scheda, per ricavarne la partenza
+        const findExerciseInfoByName = (name) => {
+          const needle = (name || '').trim().toLowerCase();
+          if (!needle) return null;
+          for (const sheet of workoutSheets.value) {
+            for (const day of (sheet.days || [])) {
+              for (const ex of (day.exercises || [])) {
+                if ((ex.name || '').trim().toLowerCase() === needle) {
+                  return { exercise: ex, dayName: day.name || 'Esercizi' };
+                }
+              }
+            }
+          }
+          return null;
+        };
+
+        // Aggiunge a un log i valori di confronto con la partenza
+        const decorateLog = (log) => {
+          const isCardio = log.duration !== null && log.duration !== undefined && log.duration !== '';
+          const unit = isCardio ? 'min' : 'kg';
+          const current = parseOptionalNumber(isCardio ? log.duration : log.weight);
+          const info = findExerciseInfoByName(log.exerciseName);
+          const ex = info ? info.exercise : null;
+          let start = parseOptionalNumber(isCardio ? (ex && ex.duration) : (ex && ex.weight));
+          if (!isCardio && ex && ex.pyramid) {
+            const top = pyramidTopWeight(ex);
+            if (top !== null) start = top;
+          }
+          if (start === null) {
+            const firstLogs = exerciseLogsFor(log.exerciseName).filter(item => {
+              const value = isCardio ? item.duration : item.weight;
+              return value !== null && value !== undefined && value !== '';
+            });
+            if (firstLogs.length) start = parseOptionalNumber(isCardio ? firstLogs[0].duration : firstLogs[0].weight);
+          }
+          const delta = (start === null || current === null) ? null : Math.round((current - start) * 10) / 10;
+          const logSets = Array.isArray(log.setsDetail) ? log.setsDetail : [];
+          return {
+            ...log,
+            isCardio,
+            isPyramid: !!(ex && ex.pyramid),
+            dayName: info ? info.dayName : 'Esercizi',
+            unit,
+            displayStart: start,
+            displayCurrent: current,
+            displayDelta: delta,
+            logSets
+          };
+        };
+
+        const exerciseHistoryLogs = computed(() => {
+          if (!exerciseHistoryModal.value.isOpen) return [];
+          return exerciseLogsFor(exerciseHistoryModal.value.exerciseName).slice().reverse().map(decorateLog);
+        });
+
+        const deleteWorkoutLog = (log) => {
+          showConfirm("Elimina registrazione", 'Vuoi eliminare la registrazione del ' + formatDate(log.date) + '?', () => {
+            const idx = workoutLogs.value.findIndex(item => item.id === log.id);
+            if (idx > -1) workoutLogs.value.splice(idx, 1);
+            showToastMessage("Registrazione eliminata. 🗑️");
+          });
+        };
+
+        const sheetHistoryModal = ref({ isOpen: false });
+
+        const sheetHistorySessions = computed(() => {
+          if (!sheetHistoryModal.value.isOpen || !selectedSheet.value) return [];
+          const sheetId = String(selectedSheet.value.id);
+          const byDate = {};
+          workoutLogs.value
+            .filter(log => String(log.sheetId ?? '') === sheetId && log.date)
+            .forEach(log => {
+              if (!byDate[log.date]) byDate[log.date] = [];
+              byDate[log.date].push(log);
+            });
+          return Object.keys(byDate)
+            .sort((a, b) => b.localeCompare(a))
+            .map(date => {
+              const logs = byDate[date].map(decorateLog);
+              const dayGroups = [];
+              const indexByDay = {};
+              logs.forEach(log => {
+                const key = log.dayName || 'Esercizi';
+                if (indexByDay[key] === undefined) {
+                  indexByDay[key] = dayGroups.length;
+                  dayGroups.push({ name: key, logs: [] });
+                }
+                dayGroups[indexByDay[key]].logs.push(log);
+              });
+              return {
+                date,
+                ...formatDateParts(date),
+                logs,
+                dayGroups,
+                strengthCount: logs.filter(log => !log.isCardio).length,
+                cardioCount: logs.filter(log => log.isCardio).length
+              };
+            });
+        });
+
+        const sessionPreviewModal = ref({ isOpen: false, sessionId: null, autoCreated: false });
+
+        const openSessionPreview = () => {
+          const sheet = selectedSheet.value;
+          if (!sheet) return;
+          const dateKey = toISODate();
+          const dayName = currentSheetDay.value ? currentSheetDay.value.name : '';
+          const existing = trainingSessions.value.find(session =>
+            session.kind === 'gym'
+            && session.date === dateKey
+            && String(session.sheetId) === String(sheet.id)
+            && (session.dayName || '') === dayName
+          );
+          let sessionId = existing ? existing.id : null;
+          let autoCreated = false;
+          if (!existing) {
+            const now = new Date();
+            const session = {
+              id: 'ts_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
+              date: dateKey,
+              time: String(now.getHours()).padStart(2, '0') + ':' + String(now.getMinutes()).padStart(2, '0'),
+              kind: 'gym',
+              sport: '',
+              sheetId: sheet.id,
+              sheetName: sheet.name,
+              dayName,
+              note: '',
+              recurring: false,
+              weekdays: []
+            };
+            trainingSessions.value.push(session);
+            sessionId = session.id;
+            autoCreated = true;
+            showToastMessage('Sessione aggiunta al calendario di oggi. 🗓️');
+          }
+          sessionPreviewModal.value = { isOpen: true, sessionId, autoCreated };
+        };
+
+        const closeSessionPreview = () => { sessionPreviewModal.value.isOpen = false; };
+
+        const cancelAutoTrainingSession = () => {
+          const id = sessionPreviewModal.value.sessionId;
+          if (id) {
+            const idx = trainingSessions.value.findIndex(item => item.id === id);
+            if (idx > -1) trainingSessions.value.splice(idx, 1);
+            showToastMessage('Avvio annullato: sessione rimossa dal calendario.');
+          }
+          sessionPreviewModal.value.isOpen = false;
+        };
 
         const measurementModal = ref({ isOpen: false, error: '' });
         const editingMeasurementId = ref(null);
@@ -2589,7 +4431,6 @@
             const first = sessions[0];
             const last = sessions[sessions.length - 1];
             const delta = last.load - first.load;
-            const gainPct = first.load > 0 ? (delta / first.load) * 100 : 0;
 
             return {
               name: group.name,
@@ -2600,8 +4441,7 @@
               lastDate: last.date,
               delta,
               deltaText: delta === 0 ? 'Stabile' : `${delta > 0 ? '+' : ''}${formatNumber(delta)} kg`,
-              classes: delta > 0 ? 'bg-salvia/10 text-salvia' : (delta < 0 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400'),
-              progressPct: Math.min(100, Math.max(8, Math.round(50 + gainPct / 2)))
+              classes: delta > 0 ? 'bg-salvia/10 text-salvia' : (delta < 0 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400')
             };
           }).sort((a, b) => b.lastDate.localeCompare(a.lastDate));
         });
@@ -2712,6 +4552,12 @@
         const commentModalStatus = computed(() => {
           if (!commentModal.value.isOpen || commentModal.value.date === null) return 'empty';
           return nutritionDayStatus(commentModal.value.date);
+        });
+
+        const commentModalTrainingSessions = computed(() => {
+          if (!commentModal.value.isOpen || commentModal.value.date === null) return [];
+          const key = `${currentYear.value}-${String(currentMonth.value + 1).padStart(2, '0')}-${String(commentModal.value.date).padStart(2, '0')}`;
+          return trainingSessionsOnDateKey(key);
         });
 
         const exportSelectedMenu = () => {
@@ -2885,6 +4731,88 @@
           circumferenceRows,
           workoutLogs,
           workoutGroups,
+          workoutView,
+          workoutSheets,
+          selectedSheet,
+          selectedSheetDayIdx,
+          newSheet,
+          editingSheetId,
+          startNewSheet,
+          editSheet,
+          addSheetDay,
+          removeSheetDay,
+          addExercise,
+          removeExercise,
+          addSupersetPair,
+          removeSuperset,
+          supersetPairCount,
+          totalSheetExercises,
+          saveSheet,
+          promptDeleteSheet,
+          promptDeleteSelectedSheet,
+          openSheet,
+          currentSheetDay,
+          selectedDayGroups,
+          exerciseHistoryModal,
+          openExerciseHistory,
+          exerciseHistoryLogs,
+          deleteWorkoutLog,
+          sheetHistoryModal,
+          sheetHistorySessions,
+          sessionPreviewModal,
+          openSessionPreview,
+          currentExerciseWeight,
+          currentExerciseDuration,
+          exerciseStartValue,
+          exerciseCurrentValue,
+          exerciseUnit,
+          exerciseDeltaValue,
+          exerciseInputs,
+          setExerciseValue,
+          weightConfirmModal,
+          confirmExerciseValue,
+          cancelExerciseValue,
+          pyramidModal,
+          openPyramidModal,
+          addPyramidSet,
+          removePyramidSet,
+          savePyramidModal,
+          togglePyramid,
+          pyramidSummary,
+          pyramidExerciseName,
+          pyramidLogModal,
+          openPyramidLogModal,
+          addPyramidLogSet,
+          pyramidLogTopWeight,
+          confirmPyramidLog,
+          lastExerciseLog,
+          sheetSessionDates,
+          sheetLastSessionDate,
+          trainingSports,
+          trainingWeekdays,
+          trainingMonthName,
+          trainingYear,
+          trainingDaysInMonth,
+          trainingFirstDayOfMonth,
+          trainingPrevMonth,
+          trainingNextMonth,
+          trainingSessionsForDay,
+          trainingDayClasses,
+          trainingDayModal,
+          openTrainingDay,
+          closeTrainingDay,
+          trainingDaySessions,
+          trainingFormModal,
+          openTrainingForm,
+          closeTrainingForm,
+          setTrainingKind,
+          toggleTrainingWeekday,
+          saveTrainingSession,
+          removeTrainingSession,
+          trainingSessionLabel,
+          trainingSessionSubtitle,
+          upcomingTrainingSessions,
+          openSheetForTraining,
           customModal,
           executeConfirm,
           commentModal,
