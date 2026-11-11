@@ -913,34 +913,8 @@
               </div>
             </div>
 
-            <!-- ORE DI ALLENAMENTO -->
-            <div v-if="trainingTimeSummary.total > 0" class="bg-antracite rounded-3xl p-5 shadow-lg text-white relative overflow-hidden">
-              <div class="absolute -top-10 -right-10 w-40 h-40 bg-arancione/25 rounded-full blur-3xl pointer-events-none"></div>
-              <div class="relative z-10 flex items-start justify-between gap-3">
-                <div>
-                  <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">⏱️ Ore di allenamento</div>
-                  <div class="text-4xl font-black mt-1 cangiante-text">{{ shortDuration(trainingTimeSummary.total) }}</div>
-                  <div class="text-[11px] font-medium text-white/60 mt-0.5">da quando usi STILL</div>
-                </div>
-                <div class="text-right space-y-1.5 shrink-0">
-                  <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Settimana</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.week) }}</div></div>
-                  <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Mese</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.month) }}</div></div>
-                </div>
-              </div>
-              <div v-if="trainingTimeSummary.gym && trainingTimeSummary.sport" class="relative z-10 mt-4">
-                <div class="h-2 rounded-full bg-white/10 overflow-hidden flex">
-                  <div class="h-full bg-arancione" :style="{ width: (trainingTimeSummary.gym / trainingTimeSummary.total * 100) + '%' }"></div>
-                  <div class="h-full bg-viola" :style="{ width: (trainingTimeSummary.sport / trainingTimeSummary.total * 100) + '%' }"></div>
-                </div>
-                <div class="flex justify-between text-[10px] font-bold text-white/60 mt-1.5">
-                  <span>💪 Palestra {{ shortDuration(trainingTimeSummary.gym) }}</span>
-                  <span>🏅 Sport {{ shortDuration(trainingTimeSummary.sport) }}</span>
-                </div>
-              </div>
-            </div>
-
             <!-- EMPTY STATE -->
-            <div v-if="measurements.length === 0 && workoutGroups.length === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
+            <div v-if="measurements.length === 0 && workoutGroups.length === 0 && trainingTimeSummary.total === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
               <div class="w-16 h-16 rounded-full bg-salvia/10 border border-salvia/20 flex items-center justify-center text-salvia">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
               </div>
@@ -1052,6 +1026,32 @@
                   <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Progressi Allenamento</h4>
                   <span v-if="workoutGroups.length === 0" class="text-[10px] font-medium text-gray-400">Nessun carico</span>
                 </div>
+
+              <!-- ORE DI ALLENAMENTO -->
+              <div v-if="trainingTimeSummary.total > 0" class="bg-antracite rounded-3xl p-5 shadow-lg text-white relative overflow-hidden">
+                <div class="absolute -top-10 -right-10 w-40 h-40 bg-arancione/25 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">⏱️ Ore di allenamento</div>
+                    <div class="text-4xl font-black mt-1 cangiante-text">{{ shortDuration(trainingTimeSummary.total) }}</div>
+                    <div class="text-[11px] font-medium text-white/60 mt-0.5">da quando usi STILL</div>
+                  </div>
+                  <div class="text-right space-y-1.5 shrink-0">
+                    <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Settimana</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.week) }}</div></div>
+                    <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Mese</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.month) }}</div></div>
+                  </div>
+                </div>
+                <div v-if="trainingTimeSummary.gym && trainingTimeSummary.sport" class="relative z-10 mt-4">
+                  <div class="h-2 rounded-full bg-white/10 overflow-hidden flex">
+                    <div class="h-full bg-arancione" :style="{ width: (trainingTimeSummary.gym / trainingTimeSummary.total * 100) + '%' }"></div>
+                    <div class="h-full bg-viola" :style="{ width: (trainingTimeSummary.sport / trainingTimeSummary.total * 100) + '%' }"></div>
+                  </div>
+                  <div class="flex justify-between text-[10px] font-bold text-white/60 mt-1.5">
+                    <span>💪 Palestra {{ shortDuration(trainingTimeSummary.gym) }}</span>
+                    <span>🏅 Sport {{ shortDuration(trainingTimeSummary.sport) }}</span>
+                  </div>
+                </div>
+              </div>
 
                 <div v-if="workoutGroups.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-4 text-center text-xs text-gray-400 font-medium">
                   I progressi appariranno qui automaticamente quando registrerai le tue schede nella sezione Allenamento.
