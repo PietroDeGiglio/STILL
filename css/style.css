@@ -1,0 +1,67 @@
+/* STILL: stili dell'app (i colori del tema sono in js/tailwind.config.js) */
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #D1D5DB; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #10B981; }
+
+button, a, input { -webkit-tap-highlight-color: transparent; }
+
+.animate-fadeIn { animation: fadeIn 0.4s ease-out forwards; }
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Hide scrollbar for the horizontal slider */
+.hide-scrollbar::-webkit-scrollbar { display: none; }
+.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+/* Animazione Gradiente Cangiante per STILL & Pulsante */
+@keyframes gradientShift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.cangiante-text {
+  background: linear-gradient(135deg, #20C997, #F5A623, #7A4DF1, #20C997);
+  background-size: 300% 300%;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: gradientShift 6s ease infinite;
+}
+
+.cangiante-btn {
+  background: linear-gradient(135deg, #20C997, #F5A623, #7A4DF1, #20C997);
+  background-size: 300% 300%;
+  animation: gradientShift 6s ease infinite;
+}
+
+/* Animazioni fluttuanti (Soft & separate) per gli aloni */
+@keyframes pulseSoft1 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  50% { transform: translate(10px, 15px) scale(1.05); opacity: 0.9; }
+}
+@keyframes pulseSoft2 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  50% { transform: translate(-15px, 10px) scale(1.05); opacity: 0.9; }
+}
+@keyframes pulseSoft3 {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.5; }
+  50% { transform: translate(10px, -15px) scale(1.05); opacity: 0.9; }
+}
+.animate-float-1 { animation: pulseSoft1 8s ease-in-out infinite; }
+.animate-float-2 { animation: pulseSoft2 9s ease-in-out infinite; }
+.animate-float-3 { animation: pulseSoft3 10s ease-in-out infinite; }
+
+/* Classe per la maschera del Logo (Sicura per GitHub) */
+.logo-mask {
+  -webkit-mask-image: url('../assets/LOGO.svg');
+  mask-image: url('../assets/LOGO.svg');
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+}
