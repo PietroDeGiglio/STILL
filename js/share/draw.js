@@ -490,8 +490,20 @@ const drawRecapBody = (ctx, data, o) => {
       ctx.fillStyle = grad(cy - 200, cy);
       ctx.textAlign = 'center';
       ctx.fillText(sc.big, W / 2, cy);
-      setFont(ctx, 800, story ? 44 : 36); ctx.fillStyle = th.text;
-      ctx.fillText(sc.caption || '', W / 2, cy + (story ? 90 : 72));
+      // "su" piccolo, poi logo + STILL in gradiente e il link dell'app
+      let y = cy + (story ? 80 : 62);
+      setFont(ctx, 700, story ? 34 : 28); ctx.fillStyle = '#FFFFFF';
+      ctx.fillText('su', W / 2, y);
+      const logo = story ? 150 : 110;
+      y += story ? 28 : 20;
+      const tight = (y0, y1, half) => (th.brand ? brandGradient(ctx, W / 2 - half, y0, W / 2 + half, y1, phase) : th.text);
+      drawLogo(ctx, W / 2 - logo / 2, y, logo, tight(y, y + logo, logo * 0.4));
+      y += logo * 0.86 + (story ? 62 : 48);
+      setFont(ctx, 900, story ? 56 : 44); ctx.fillStyle = tight(y - 50, y, story ? 130 : 100);
+      spacedText(ctx, 'STILL', W / 2, y, story ? 14 : 11, 'center');
+      y += story ? 52 : 40;
+      setFont(ctx, 700, story ? 26 : 22); ctx.fillStyle = th.sub;
+      spacedText(ctx, APP_URL_SHORT, W / 2, y, 2, 'center');
       ctx.textAlign = 'left';
     } else {
       setFont(ctx, 900, story ? 30 : 26); ctx.fillStyle = th.sub;
