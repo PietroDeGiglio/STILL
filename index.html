@@ -359,7 +359,7 @@
                         <div>
                           <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
                           <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
-                            {{ meal.calories !== null ? meal.calories + ' kcal' : 'Calorie n.d.' }}
+                            {{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'Calorie n.d.' }}
                           </span>
                         </div>
                       </div>
@@ -1341,19 +1341,24 @@
                     </select>
                   </div>
 
-                  <!-- Calorie del pasto -->
+                  <!-- Calorie del pasto: automatiche dagli alimenti, oppure scritte a mano -->
                   <div class="flex items-center gap-2">
                     <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Calorie</span>
-                    <input type="text" inputmode="numeric" v-model="meal.calories" placeholder="Es: 450"
+                    <input type="text" inputmode="numeric" v-model="meal.calories" :placeholder="builderMealEstimate(meal).kcal !== null ? 'Auto ≈ ' + builderMealEstimate(meal).kcal : 'Automatiche'"
                            class="flex-1 bg-white border border-gray-200 focus:border-viola focus:ring-1 focus:ring-viola/20 rounded-xl p-2.5 text-xs font-bold text-antracite text-center outline-none transition-all placeholder:font-medium">
                     <span class="text-[10px] font-bold text-gray-400">kcal</span>
                   </div>
+                  <p v-if="!meal.calories && builderMealEstimate(meal).total" class="text-[10px] font-medium leading-snug -mt-1 pl-1" :class="builderMealEstimate(meal).kcal !== null ? 'text-salvia' : 'text-gray-400'">
+                    <template v-if="builderMealEstimate(meal).kcal !== null">✨ Calcolate in automatico: ≈ {{ builderMealEstimate(meal).kcal }} kcal<span v-if="builderMealEstimate(meal).found < builderMealEstimate(meal).total" class="text-gray-400"> ({{ builderMealEstimate(meal).total - builderMealEstimate(meal).found }} {{ builderMealEstimate(meal).total - builderMealEstimate(meal).found === 1 ? 'alimento non riconosciuto' : 'alimenti non riconosciuti' }})</span>.</template>
+                    <template v-else>Scrivi gli alimenti con la quantità (es. "80g pasta", "2 uova") e le calorie si calcolano da sole.</template>
+                  </p>
 
                   <!-- Slot Alimenti -->
                   <div class="space-y-2">
                     <div v-for="(item, iIdx) in meal.items" :key="iIdx" class="flex gap-2 items-center">
                       <input type="text" v-model="meal.items[iIdx]" placeholder="Es: 50g Riso Basmati" 
                              class="flex-1 bg-white border border-gray-200 focus:border-viola focus:ring-1 focus:ring-viola/20 rounded-xl p-2.5 text-xs font-medium text-antracite outline-none transition-all">
+                      <span v-if="itemKcalLabel(item)" class="w-11 shrink-0 text-right text-[10px] font-bold" :class="itemKcalLabel(item) === '?' ? 'text-gray-300' : 'text-salvia'" :title="itemKcalLabel(item) === '?' ? 'Alimento o quantità non riconosciuti' : 'Calorie stimate'">{{ itemKcalLabel(item) }}</span>
                       <button v-if="meal.items.length > 1" @click="removeSlotFromMeal(meal, iIdx)" class="p-2 text-gray-400 hover:text-red-400">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                       </button>
@@ -1448,7 +1453,7 @@
                   <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
                       <h5 class="text-sm font-bold text-antracite">{{ meal.name }}</h5>
-                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? meal.calories + ' kcal' : 'kcal n.d.' }}</span>
+                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}</span>
                     </div>
                     <p class="text-xs text-gray-500 leading-relaxed">{{ meal.description }}</p>
                   </div>
@@ -1778,7 +1783,7 @@
                   <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
                   <p class="text-[10px] text-gray-500 line-clamp-1">{{ meal.description }}</p>
                 </div>
-                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? meal.calories + ' kcal' : 'kcal n.d.' }}</span>
+                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}</span>
               </div>
             </div>
 
@@ -1846,7 +1851,7 @@
                       <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
                       <p class="text-[10px] text-gray-500 line-clamp-2 leading-snug">{{ meal.description }}</p>
                     </div>
-                    <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? meal.calories + ' kcal' : '—' }}</span>
+                    <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : '—' }}</span>
                   </div>
 
                   <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
@@ -3387,6 +3392,8 @@
 
   <!-- VUE APPLICATION LOGIC -->
   <script src="js/utils/format.js"></script>
+  <script src="js/data/foods.js"></script>
+  <script src="js/utils/calories.js"></script>
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
   <script src="js/share/draw.js"></script>

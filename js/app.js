@@ -234,6 +234,14 @@ createApp({
        newPlanBuilder.value.weeks[newPlanBuilder.value.currentWeekIdx].days[newPlanBuilder.value.currentDay].splice(idx, 1);
     };
 
+    // Stima delle calorie mentre si scrive il menù
+    const builderMealEstimate = (meal) => estimateMealKcal(meal.items);
+    const itemKcalLabel = (item) => {
+      if (!item || !String(item).trim()) return '';
+      const e = estimateFoodKcal(item);
+      return e ? '≈' + e.kcal : '?';
+    };
+
     const addSlotToMeal = (meal) => {
       meal.items.push('');
     };
@@ -285,7 +293,7 @@ createApp({
            const tInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
            mockMealsForDetail.push({
              id: m.type + '_' + i, name: tInfo.label, icon: tInfo.icon,
-             calories: normalizeCalories(m.calories) !== null ? normalizeCalories(m.calories) : '-',
+             calories: normalizeCalories(m.calories) !== null ? normalizeCalories(m.calories) : (estimateMealKcal(m.items).kcal ?? '-'),
              description: m.items.filter(it => it.trim()!=='').join(', ') || 'Nessun dettaglio'
            });
          });
@@ -407,16 +415,20 @@ createApp({
       return Number.isFinite(parsed) ? parsed : null;
     };
 
-    // Trasforma i pasti del builder nel formato usato da dashboard e calendario
+    // Trasforma i pasti del builder nel formato usato da dashboard e calendario.
+    // Se le calorie non sono scritte, si stimano dagli alimenti (js/utils/calories.js)
     const mapDayMeals = (dayMeals) => {
       return (dayMeals || []).map((m, i) => {
         const typeInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
+        const written = normalizeCalories(m.calories);
+        const estimate = written === null ? estimateMealKcal(m.items).kcal : null;
         return {
           id: m.type + '_' + i,
           type: m.type,
           name: typeInfo.label,
           icon: typeInfo.icon,
-          calories: normalizeCalories(m.calories),
+          calories: written !== null ? written : estimate,
+          caloriesEstimated: written === null && estimate !== null,
           description: (m.items || []).filter(it => it && it.trim() !== '').join(', ') || 'Nessun dettaglio.'
         };
       });
@@ -4764,6 +4776,8 @@ createApp({
       openTrophyDetail,
       closeTrophyDetail,
       openTrophies,
+      builderMealEstimate,
+      itemKcalLabel,
       canInstall,
       isStandalone,
       installBanner,
