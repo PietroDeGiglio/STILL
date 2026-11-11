@@ -3484,10 +3484,10 @@ createApp({
       );
     };
 
-    // Avvio: se il profilo esiste si entra direttamente, altrimenti parte la registrazione
+    // Avvio: schermata con il logo. Chi ha già il profilo entra con "Entra", gli altri partono con la registrazione
+    const hasProfile = computed(() => !!(profile.value && profile.value.firstName));
     onMounted(() => {
       authLoading.value = false;
-      if (profile.value && profile.value.firstName) enterApp();
     });
 
     // ---------------------------------------------------------------
@@ -4469,6 +4469,8 @@ createApp({
       reminderMealTypes,
       isAuthenticated,
       authLoading,
+      hasProfile,
+      enterApp,
       showGroceryReminder,
       mealsContainer,
       currentMealId,
