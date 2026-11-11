@@ -4314,6 +4314,32 @@ createApp({
     // festeggiati e il numero di condivisioni (in still_settings).
     // Gruppi, gradini e punti: vedi js/data/trophies.js
     // ---------------------------------------------------------------
+    // ---------------------------------------------------------------
+    // INSTALLAZIONE (PWA): tasto "Installa" su Android/Chrome, istruzioni su iPhone
+    // ---------------------------------------------------------------
+    const installPrompt = ref(null);
+    const isStandalone = ref(window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true);
+    const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+    window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); installPrompt.value = e; });
+    window.addEventListener('appinstalled', () => {
+      installPrompt.value = null;
+      isStandalone.value = true;
+      showToastMessage('STILL è installata! 📲 La trovi nella schermata Home.');
+    });
+    const canInstall = computed(() => !isStandalone.value && !window.Capacitor && (!!installPrompt.value || isIOS));
+    const installBanner = computed(() => canInstall.value && !settings.value.installDismissed);
+    const installApp = async () => {
+      if (installPrompt.value) {
+        const ev = installPrompt.value;
+        ev.prompt();
+        try { await ev.userChoice; } catch (e) { /* ignora */ }
+        installPrompt.value = null;
+      } else if (isIOS) {
+        showToastMessage('Su iPhone: apri il sito con Safari, tocca Condividi (il quadrato con la freccia) e poi "Aggiungi alla schermata Home".');
+      }
+    };
+    const dismissInstall = () => { settings.value.installDismissed = true; };
+
     const countShare = () => { settings.value.shares = (settings.value.shares || 0) + 1; };
 
     // Giorni di allenamento da sempre (palestra + sport fatti)
@@ -4738,6 +4764,11 @@ createApp({
       openTrophyDetail,
       closeTrophyDetail,
       openTrophies,
+      canInstall,
+      isStandalone,
+      installBanner,
+      installApp,
+      dismissInstall,
       nextChallenges,
       openAchievementShare,
       settings,
@@ -5059,3 +5090,8 @@ createApp({
     };
   }
 }).mount('#app');
+
+// App installabile e uso offline: il service worker funziona solo da un indirizzo web (non da file e non nell'APK)
+if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !window.Capacitor) {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
