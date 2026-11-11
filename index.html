@@ -276,9 +276,17 @@
             <!-- QUOTE BANNER (Moved to top) -->
             <div class="bg-antracite rounded-2xl p-5 shadow-lg relative overflow-hidden">
               <svg class="absolute right-0 top-0 w-32 h-32 text-white/5" fill="currentColor" viewBox="0 0 100 100"><path d="M 10 90 L 50 30 L 90 90 Z"/></svg>
-              <p class="relative z-10 text-sm font-semibold italic text-bianco leading-snug">
-                "NON CONTA DA DOVE PARTI. CONTA DOVE <span class="text-salvia font-bold uppercase not-italic">DECIDI DI ANDARE.</span>"
+              <div class="relative z-10 flex items-center justify-between mb-2">
+                <span class="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">🔥 Frase del giorno</span>
+                <button @click="openShareStudio('quote')" class="px-2.5 py-1 rounded-full cangiante-btn text-[11px] font-bold text-white flex items-center gap-1" title="Condividi nelle storie">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4m0 0L8 6m4-4v13"/></svg>
+                  Storia
+                </button>
+              </div>
+              <p class="relative z-10 text-sm font-semibold italic text-bianco leading-snug uppercase">
+                "{{ dailyBar.pre }} <span class="text-salvia font-bold not-italic">{{ dailyBar.hi }}</span>"
               </p>
+              <p v-if="dailyBar.by" class="relative z-10 mt-2 text-[11px] font-bold text-white/50">— {{ dailyBar.by }}</p>
             </div>
 
             <!-- User Greeting -->
@@ -602,7 +610,7 @@
                   <div class="min-w-0 flex-1 cursor-pointer" @click="openTrainingSessionItem(session, session.occurrenceDate)">
                     <div class="text-xs font-extrabold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
                     <div class="text-[10px] font-medium text-gray-400 truncate">
-                      {{ formatDate(session.occurrenceDate) }}<span v-if="session.time"> • {{ session.time }}</span> • {{ trainingSessionSubtitle(session) }}
+                      {{ formatDate(session.occurrenceDate) }}<span v-if="session.time"> • {{ session.time }}</span> • {{ trainingSessionSubtitle(session) }}<span v-if="sportStatus(session, session.occurrenceDate) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, session.occurrenceDate) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span>
                     </div>
                     <div v-if="session.note" class="text-[10px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                   </div>
@@ -1632,14 +1640,14 @@
               <div v-if="dayMenuTrainingSessions.length" class="bg-arancione/5 border border-arancione/30 rounded-2xl px-3.5 py-3 space-y-2">
                 <div class="text-[10px] font-bold text-arancione uppercase tracking-widest">Allenamento</div>
                 <div v-for="session in dayMenuTrainingSessions" :key="'dm-tr-' + session.id" class="flex items-start gap-2.5"
-                     :class="session.kind === 'gym' ? 'cursor-pointer rounded-xl hover:bg-arancione/10 -mx-1.5 px-1.5 py-1 transition-colors' : ''"
-                     @click="session.kind === 'gym' && openSessionStats(session, dayMenuModal.dateKey)">
+                     :class="session.kind === 'gym' || sportCanCheck(session, dayMenuModal.dateKey) ? 'cursor-pointer rounded-xl hover:bg-arancione/10 -mx-1.5 px-1.5 py-1 transition-colors' : ''"
+                     @click="session.kind === 'gym' ? openSessionStats(session, dayMenuModal.dateKey) : (sportCanCheck(session, dayMenuModal.dateKey) && openSportCheck(session, dayMenuModal.dateKey))">
                   <div class="w-7 h-7 rounded-full bg-arancione/15 flex items-center justify-center text-sm flex-shrink-0">{{ session.kind === 'gym' ? '🏋️' : '🏅' }}</div>
                   <div class="flex-1 min-w-0">
                     <div class="text-[11px] font-bold text-antracite truncate">
                       {{ trainingSessionLabel(session) }}<span v-if="session.time" class="text-gray-400 font-medium"> • {{ session.time }}</span>
                     </div>
-                    <div class="text-[9px] font-medium text-gray-400 truncate">{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }} · statistiche ›</span></div>
+                    <div class="text-[9px] font-medium text-gray-400 truncate">{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }} · statistiche ›</span><span v-if="sportStatus(session, dayMenuModal.dateKey) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, dayMenuModal.dateKey) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span><span v-else-if="sportCanCheck(session, dayMenuModal.dateKey)" class="text-sky-600 font-bold"> • fatto? ›</span></div>
                     <p v-if="session.note" class="text-[10px] text-sky-600 font-medium leading-snug mt-0.5">📝 {{ session.note }}</p>
                   </div>
                 </div>
@@ -2172,7 +2180,7 @@
             <!-- Barra superiore -->
             <div class="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between gap-3 shrink-0">
               <div>
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'workout' ? 'Allenamento' : 'Progressi' }}</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ ({ workout: 'Allenamento', quote: 'Frase del giorno' })[shareStudio.kind] || 'Progressi' }}</p>
                 <h3 class="text-lg font-extrabold leading-tight">Condividi</h3>
               </div>
               <button @click="closeShareStudio" :disabled="shareStudio.recording" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30" aria-label="Chiudi">
@@ -2213,6 +2221,10 @@
                 Ancora pochi dati: allenati, registra il peso o segna i pasti per riempire la card.
               </p>
 
+              <p v-if="shareStudio.kind === 'quote' && shareData && !shareData.stats.length" class="text-[11px] font-bold text-arancione bg-arancione/10 border border-arancione/30 rounded-xl px-3 py-2 text-center">
+                Ancora nessun risultato in questo periodo: allenati o segna i pasti e qui compariranno i tuoi numeri.
+              </p>
+
               <!-- Contenuto (progressi) -->
               <div v-if="shareStudio.kind === 'progress' && shareData" class="space-y-2">
                 <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Cosa vuoi condividere</div>
@@ -2225,8 +2237,8 @@
               </div>
 
               <!-- Periodo (progressi) -->
-              <div v-if="shareStudio.kind === 'progress'" class="space-y-2">
-                <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Periodo</div>
+              <div v-if="shareStudio.kind === 'progress' || shareStudio.kind === 'quote'" class="space-y-2">
+                <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'quote' ? 'Risultati da mostrare' : 'Periodo' }}</div>
                 <div class="grid grid-cols-4 gap-1.5">
                   <button v-for="p in [{v:7,l:'7 giorni'},{v:30,l:'30 giorni'},{v:90,l:'3 mesi'},{v:0,l:'Sempre'}]" :key="'per' + p.v"
                           @click="shareStudio.period = p.v; shareStudio.hero = 'auto'"
@@ -2285,7 +2297,7 @@
                     <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform" :class="shareStudio.showName ? 'translate-x-5' : ''"></div>
                   </button>
                 </div>
-                <div v-if="shareStudio.kind === 'progress'" class="flex items-center justify-between gap-3">
+                <div v-if="shareStudio.kind === 'progress' || shareStudio.kind === 'quote'" class="flex items-center justify-between gap-3">
                   <span class="text-xs font-bold text-white/80">Peso corporeo</span>
                   <div class="flex bg-white/10 rounded-lg p-0.5">
                     <button v-for="m in [{v:'percent',l:'%'},{v:'kg',l:'kg'},{v:'off',l:'Nascondi'}]" :key="'wm' + m.v" @click="shareStudio.weightMode = m.v"
@@ -2811,10 +2823,10 @@
                   <svg v-if="session.kind === 'gym'" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"/></svg>
                   <svg v-else class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3a9 9 0 100 18 9 9 0 000-18zM3 12h18M12 3c2.5 2.5 2.5 15 0 18M12 3c-2.5 2.5-2.5 15 0 18"/></svg>
                 </div>
-                <div class="min-w-0 flex-1" :class="session.kind === 'gym' ? 'cursor-pointer' : ''" @click="openTrainingSessionItem(session, trainingDayModal.dateKey)">
+                <div class="min-w-0 flex-1" :class="session.kind === 'gym' || sportCanCheck(session, trainingDayModal.dateKey) ? 'cursor-pointer' : ''" @click="openTrainingSessionItem(session, trainingDayModal.dateKey)">
                   <div class="text-[11px] font-bold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
                   <div class="text-[9px] font-medium text-gray-400 truncate">
-                    <span v-if="session.time">{{ session.time }} • </span>{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }}</span>
+                    <span v-if="session.time">{{ session.time }} • </span>{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }}</span><span v-if="sportStatus(session, trainingDayModal.dateKey) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, trainingDayModal.dateKey) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span><span v-else-if="sportCanCheck(session, trainingDayModal.dateKey)" class="text-sky-600 font-bold"> • fatto? ›</span>
                   </div>
                   <div v-if="session.note" class="text-[9px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                 </div>
@@ -2834,6 +2846,53 @@
 
             <div class="shrink-0 pt-2 border-t border-gray-100">
               <button @click="closeTrainingDay" class="w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all">Chiudi</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- SPORT CHECK MODAL: fatto / non fatto -->
+        <div v-if="sportCheckModal.isOpen && sportCheckSession" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-3 min-w-0">
+                <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-2xl flex-shrink-0">🏅</div>
+                <div class="min-w-0">
+                  <h3 class="text-lg font-bold text-antracite leading-tight truncate">{{ trainingSessionLabel(sportCheckSession) }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
+                    {{ formatDateLong(sportCheckModal.dateKey) }}<span v-if="sportCheckSession.time"> • {{ sportCheckSession.time }}</span>
+                  </p>
+                </div>
+              </div>
+              <button @click="closeSportCheck" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0" aria-label="Chiudi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <div class="text-center space-y-1">
+              <p class="text-base font-extrabold text-antracite">Com'è andata?</p>
+              <p class="text-[11px] font-medium text-gray-400">Solo gli allenamenti fatti contano nei tuoi progressi.</p>
+              <p v-if="sportCheckModal.total > 1" class="text-[10px] font-bold text-sky-600 uppercase tracking-widest pt-1">{{ sportCheckModal.index }} di {{ sportCheckModal.total }}</p>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <button @click="setSportStatus('done')"
+                      class="py-4 rounded-2xl font-extrabold text-sm flex flex-col items-center gap-1.5 border-2 transition-all active:scale-95"
+                      :class="sportStatus(sportCheckSession, sportCheckModal.dateKey) === 'done' ? 'bg-salvia text-white border-salvia shadow-lg' : 'bg-salvia/10 text-salvia border-salvia/30 hover:bg-salvia/15'">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                Fatto
+              </button>
+              <button @click="setSportStatus('skipped')"
+                      class="py-4 rounded-2xl font-extrabold text-sm flex flex-col items-center gap-1.5 border-2 transition-all active:scale-95"
+                      :class="sportStatus(sportCheckSession, sportCheckModal.dateKey) === 'skipped' ? 'bg-red-500 text-white border-red-500 shadow-lg' : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-red-200 hover:text-red-500'">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                Non fatto
+              </button>
+            </div>
+
+            <div class="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
+              <button @click="editFromSportCheck" class="text-[11px] font-bold text-gray-400 hover:text-arancione py-2">Modifica sessione</button>
+              <button v-if="sportStatus(sportCheckSession, sportCheckModal.dateKey)" @click="setSportStatus(null)" class="text-[11px] font-bold text-gray-400 hover:text-antracite py-2">Annulla scelta</button>
+              <button v-else-if="sportCheckModal.total > 1" @click="snoozeSportChecks" class="text-[11px] font-bold text-gray-400 hover:text-antracite py-2">Più tardi</button>
             </div>
           </div>
         </div>
@@ -4151,6 +4210,10 @@
             recurring: false,
             weekdays: []
           };
+          if (form.editingId) {
+            const previous = trainingSessions.value.find(item => item.id === form.editingId);
+            if (previous && previous.statusByDate && form.kind === 'sport') base.statusByDate = { ...previous.statusByDate };
+          }
           if (form.kind === 'gym') {
             const sheet = workoutSheets.value.find(item => String(item.id) === String(form.sheetId));
             if (!sheet) { form.error = 'Crea prima una scheda per la palestra.'; return; }
@@ -5490,9 +5553,103 @@
         };
         const closeSessionStats = () => { sessionStatsModal.value.isOpen = false; };
 
-        // Apre la sessione: palestra → statistiche, sport → modifica
+        // ---------------------------------------------------------------
+        // SPORT: fatto / non fatto per ogni giorno in calendario
+        // session.statusByDate = { 'YYYY-MM-DD': 'done' | 'skipped' }
+        // ---------------------------------------------------------------
+        const sportStatus = (session, dateKey) => {
+          if (!session || session.kind !== 'sport' || !dateKey) return null;
+          const original = trainingSessions.value.find(item => item.id === session.id) || session;
+          return (original.statusByDate && original.statusByDate[dateKey]) || null;
+        };
+        const sportCanCheck = (session, dateKey) => !!session && session.kind === 'sport' && !!dateKey && dateKey <= toISODate();
+
+        const sportCheckModal = ref({ isOpen: false, sessionId: null, dateKey: '', queue: [], index: 0, total: 0 });
+        const sportCheckSnoozed = new Set();   // "Più tardi": non richiedere di nuovo in questa apertura dell'app
+
+        const sportCheckSession = computed(() => {
+          const modal = sportCheckModal.value;
+          if (!modal.isOpen) return null;
+          return trainingSessions.value.find(item => item.id === modal.sessionId) || null;
+        });
+
+        const openSportCheck = (session, dateKey, queue = []) => {
+          sportCheckModal.value = { isOpen: true, sessionId: session.id, dateKey, queue, index: 1, total: queue.length + 1 };
+        };
+        const closeSportCheck = () => { sportCheckModal.value.isOpen = false; };
+
+        const nextSportCheck = () => {
+          const modal = sportCheckModal.value;
+          const next = modal.queue.shift();
+          if (!next) { closeSportCheck(); return; }
+          modal.sessionId = next.sessionId;
+          modal.dateKey = next.dateKey;
+          modal.index++;
+        };
+
+        const setSportStatus = (status) => {
+          const modal = sportCheckModal.value;
+          const session = trainingSessions.value.find(item => item.id === modal.sessionId);
+          if (!session) { nextSportCheck(); return; }
+          const map = { ...(session.statusByDate || {}) };
+          if (status) map[modal.dateKey] = status;
+          else delete map[modal.dateKey];
+          session.statusByDate = map;
+          if (status) nextSportCheck();
+        };
+
+        const snoozeSportChecks = () => {
+          const modal = sportCheckModal.value;
+          sportCheckSnoozed.add(modal.sessionId + '|' + modal.dateKey);
+          modal.queue.forEach(item => sportCheckSnoozed.add(item.sessionId + '|' + item.dateKey));
+          closeSportCheck();
+        };
+
+        const editFromSportCheck = () => {
+          const session = sportCheckSession.value;
+          closeSportCheck();
+          if (session) editTrainingSession(session);
+        };
+
+        // Sport degli ultimi 7 giorni ancora da segnare (oggi solo se l'orario è passato da un'ora e mezza)
+        const pendingSportChecks = () => {
+          const out = [];
+          const now = new Date();
+          const todayKey = toISODate(now);
+          const nowMinutes = now.getHours() * 60 + now.getMinutes();
+          const sports = trainingSessions.value.filter(s => s.kind === 'sport');
+          if (!sports.length) return out;
+          for (let offset = 7; offset >= 0; offset--) {
+            const d = new Date(now);
+            d.setDate(now.getDate() - offset);
+            const key = toISODate(d);
+            sports.forEach(session => {
+              if (!trainingSessionOccursOn(session, key)) return;
+              if (session.statusByDate && session.statusByDate[key]) return;
+              if (sportCheckSnoozed.has(session.id + '|' + key)) return;
+              if (key === todayKey) {
+                const m = /^(\d{1,2}):(\d{2})$/.exec(session.time || '');
+                if (!m || Number(m[1]) * 60 + Number(m[2]) + 90 > nowMinutes) return;
+              }
+              out.push({ sessionId: session.id, dateKey: key });
+            });
+          }
+          return out;
+        };
+
+        const promptPendingSportChecks = () => {
+          if (sportCheckModal.value.isOpen || customModal.value.isOpen) return;
+          const pending = pendingSportChecks();
+          if (!pending.length) return;
+          const first = pending.shift();
+          const session = trainingSessions.value.find(item => item.id === first.sessionId);
+          if (session) openSportCheck(session, first.dateKey, pending);
+        };
+
+        // Apre la sessione: palestra → statistiche, sport passato/di oggi → fatto/non fatto, sport futuro → modifica
         const openTrainingSessionItem = (session, dateKey) => {
           if (session.kind === 'gym') openSessionStats(session, dateKey);
+          else if (sportCanCheck(session, dateKey)) openSportCheck(session, dateKey);
           else editTrainingSession(session);
         };
 
@@ -5995,6 +6152,149 @@
           storage.save('still_comments', newComments);
         }, { deep: true });
 
+        // ---------------------------------------------------------------
+        // FRASE DEL GIORNO: una sola al giorno, uguale per tutta la giornata.
+        // A giorni alterni, se ne hai salvate, tocca a una delle tue barre.
+        // ---------------------------------------------------------------
+        const STILL_BARS = [
+          { pre: 'Non conta da dove parti. Conta dove', hi: 'decidi di andare.' },
+          { pre: 'La motivazione ti fa iniziare.', hi: 'La disciplina ti fa arrivare.' },
+          { pre: 'Non aspettare di sentirti pronto.', hi: 'Inizia e lo diventerai.' },
+          { pre: 'Il corpo raggiunge quello che', hi: 'la mente crede possibile.' },
+          { pre: 'Un giorno o', hi: 'giorno uno. Decidi tu.' },
+          { pre: 'Fra un anno vorrai', hi: 'aver iniziato oggi.' },
+          { pre: 'Non devi essere il migliore.', hi: 'Devi essere meglio di ieri.' },
+          { pre: 'Il dolore di oggi è', hi: 'la forza di domani.' },
+          { pre: 'Le scuse non bruciano calorie.', hi: 'Il lavoro sì.' },
+          { pre: 'Nessuno verrà a salvarti.', hi: 'Alzati e fallo tu.' },
+          { pre: 'Piccoli passi ogni giorno fanno', hi: 'grandi risultati.' },
+          { pre: 'Se è importante troverai un modo.', hi: 'Se non lo è, una scusa.' },
+          { pre: 'Sudore oggi,', hi: 'orgoglio domani.' },
+          { pre: 'La costanza batte il talento quando', hi: 'il talento non è costante.' },
+          { pre: 'Non mollare adesso.', hi: 'Il difficile è già alle spalle.' },
+          { pre: 'Ogni allenamento è un voto per', hi: 'la persona che vuoi diventare.' },
+          { pre: 'Il risultato non arriva in un giorno.', hi: 'Arriva ogni giorno.' },
+          { pre: 'Quando vuoi fermarti, ricorda', hi: 'perché hai iniziato.' },
+          { pre: 'Fallo per te.', hi: 'Nessun altro lo farà al posto tuo.' },
+          { pre: 'Non è facile.', hi: 'Ed è proprio per questo che vale.' },
+          { pre: 'Lo specchio non mente.', hi: 'La costanza nemmeno.' },
+          { pre: 'Sii più forte delle', hi: 'tue scuse.' },
+          { pre: 'Il momento perfetto non esiste.', hi: 'Esiste adesso.' },
+          { pre: 'Hai già fatto cose difficili.', hi: 'Puoi farne un\'altra.' },
+          { pre: 'Il fuoco dentro deve essere più grande', hi: 'della fatica fuori.' },
+          { pre: 'Disciplina è scegliere tra quello che vuoi ora', hi: 'e quello che vuoi di più.' },
+          { pre: 'Ogni pasto giusto è', hi: 'un passo verso la vetta.' },
+          { pre: 'Non contare i giorni.', hi: 'Fai in modo che i giorni contino.' },
+          { pre: 'Chi ti ha detto che non puoi', hi: 'guarderà mentre lo fai.' },
+          { pre: 'Il limite è solo il punto in cui', hi: 'hai smesso di spingere.' },
+          { pre: 'Cadere fa parte del gioco.', hi: 'Rialzarsi è la regola.' },
+          { pre: 'Lavora in silenzio.', hi: 'Lascia parlare i risultati.' },
+          { pre: 'Quello che fai ogni giorno conta più di', hi: 'quello che fai ogni tanto.' },
+          { pre: 'La fatica passa.', hi: 'L\'orgoglio resta.' },
+          { pre: 'Non fermarti quando sei stanco.', hi: 'Fermati quando hai finito.' },
+          { pre: 'Sei a un allenamento di distanza da', hi: 'un umore migliore.' },
+          { pre: 'Credi in te anche quando', hi: 'nessun altro lo fa.' },
+          { pre: 'Oggi fai quello che gli altri non vogliono.', hi: 'Domani avrai quello che gli altri non hanno.' },
+          { pre: 'Il tuo unico avversario è', hi: 'chi eri ieri.' },
+          { pre: 'Grandi cambiamenti nascono da', hi: 'piccole scelte quotidiane.' },
+          { pre: 'Non si tratta di avere tempo.', hi: 'Si tratta di prenderselo.' },
+          { pre: 'Ogni ripetizione ti avvicina a', hi: 'chi vuoi diventare.' },
+          { pre: 'Sii orgoglioso di quanto sei arrivato', hi: 'e affamato di dove andrai.' },
+          { pre: 'La strada è lunga.', hi: 'Per questo si parte oggi.' },
+          { pre: 'Il tuo futuro è creato da', hi: 'quello che fai oggi.' },
+          { pre: 'Rendi la tua vita la prova che', hi: 'avevano torto.' },
+          { pre: 'Svegliati con determinazione.', hi: 'Vai a letto con soddisfazione.' },
+          { pre: 'Non sognare il successo.', hi: 'Allenati per averlo.' },
+          { pre: 'Se ti senti a pezzi, ricorda:', hi: 'anche i pezzi si ricostruiscono più forti.' },
+          { pre: 'La volontà è un muscolo.', hi: 'Allenala ogni giorno.' },
+          { pre: 'Oggi è un altro giorno per', hi: 'dimostrare chi sei.' },
+          { pre: 'Il successo è la somma di piccoli sforzi', hi: 'ripetuti giorno dopo giorno.' },
+          { pre: 'Non abbassare l\'obiettivo.', hi: 'Alza l\'impegno.' },
+          { pre: 'Dove c\'è fatica', hi: 'c\'è crescita.' },
+          { pre: 'Tieni duro.', hi: 'Le cose belle richiedono tempo.' },
+          { pre: 'La versione migliore di te', hi: 'ti sta aspettando.' },
+          { pre: 'Ieri hai detto domani.', hi: 'Oggi fallo.' },
+
+          // --- Cinema ---
+          { pre: 'Fai, o non fare.', hi: 'Non c\'è provare.', by: 'Yoda · L\'Impero colpisce ancora' },
+          { pre: 'Non importa come colpisci. Importa come sai resistere ai colpi,', hi: 'e se finisci al tappeto, hai la forza di rialzarti.', by: 'Rocky Balboa' },
+          { pre: 'Un passo alla volta, un pugno alla volta,', hi: 'un round alla volta.', by: 'Creed' },
+          { pre: 'Perché cadiamo?', hi: 'Per imparare a rimetterci in piedi.', by: 'Batman Begins' },
+          { pre: 'Non è tanto chi sei, quanto', hi: 'quello che fai che ti qualifica.', by: 'Batman Begins' },
+          { pre: 'Non permettere mai a nessuno di dirti', hi: 'che non sai fare qualcosa.', by: 'La ricerca della felicità' },
+          { pre: 'Se hai un sogno, lo devi proteggere.', hi: 'Se vuoi qualcosa, vai e inseguila.', by: 'La ricerca della felicità' },
+          { pre: 'Cogliete l\'attimo, ragazzi.', hi: 'Rendete straordinaria la vostra vita.', by: 'L\'attimo fuggente' },
+          { pre: 'Ciò che facciamo in vita', hi: 'riecheggia nell\'eternità.', by: 'Il Gladiatore' },
+          { pre: 'Tutto ciò che dobbiamo decidere è', hi: 'cosa fare con il tempo che ci viene concesso.', by: 'Gandalf · Il Signore degli Anelli' },
+          { pre: 'Anche la persona più piccola può', hi: 'cambiare il corso del futuro.', by: 'Il Signore degli Anelli' },
+          { pre: 'Ogni uomo muore,', hi: 'ma non ogni uomo vive davvero.', by: 'Braveheart' },
+          { pre: 'Dal passato puoi scappare', hi: 'oppure imparare qualcosa.', by: 'Rafiki · Il re leone' },
+          { pre: 'Sono le scelte che facciamo che dimostrano chi siamo veramente,', hi: 'molto più delle nostre capacità.', by: 'Silente · Harry Potter' },
+          { pre: 'La vita è un gioco di centimetri.', hi: 'E i centimetri sono intorno a noi.', by: 'Ogni maledetta domenica' },
+          { pre: 'C\'è differenza tra conoscere il sentiero', hi: 'e percorrere il sentiero.', by: 'Morpheus · Matrix' },
+          { pre: 'Ieri è storia, domani è un mistero,', hi: 'ma oggi è un dono: per questo si chiama presente.', by: 'Maestro Oogway · Kung Fu Panda' },
+          { pre: 'Le grandi cose', hi: 'hanno piccoli inizi.', by: 'Prometheus' },
+          { pre: 'Dopotutto,', hi: 'domani è un altro giorno.', by: 'Via col vento' },
+
+          // --- Filosofi e scrittori ---
+          { pre: 'Non è perché le cose sono difficili che non osiamo.', hi: 'È perché non osiamo che sono difficili.', by: 'Seneca' },
+          { pre: 'Mentre si rimanda,', hi: 'la vita passa.', by: 'Seneca' },
+          { pre: 'Nessun vento è favorevole per chi', hi: 'non sa dove andare.', by: 'Seneca' },
+          { pre: 'Non c\'è una via facile', hi: 'dalla terra alle stelle.', by: 'Seneca' },
+          { pre: 'L\'ostacolo all\'azione fa avanzare l\'azione.', hi: 'Ciò che sta sulla strada diventa la strada.', by: 'Marco Aurelio' },
+          { pre: 'Non perdere altro tempo a discutere su come dovrebbe essere un uomo buono.', hi: 'Sii uno.', by: 'Marco Aurelio' },
+          { pre: 'Nessuna cosa grande', hi: 'nasce all\'improvviso.', by: 'Epitteto' },
+          { pre: 'Quanto aspetterai ancora prima di', hi: 'pretendere il meglio da te stesso?', by: 'Epitteto' },
+          { pre: 'Siamo ciò che facciamo ripetutamente.', hi: 'L\'eccellenza non è un atto, ma un\'abitudine.', by: 'Will Durant, su Aristotele' },
+          { pre: 'Ciò che non mi uccide', hi: 'mi rende più forte.', by: 'Friedrich Nietzsche' },
+          { pre: 'Chi ha un perché per vivere', hi: 'sopporta quasi ogni come.', by: 'Friedrich Nietzsche' },
+          { pre: 'Un viaggio di mille miglia comincia', hi: 'con un singolo passo.', by: 'Lao Tzu' },
+          { pre: 'Non importa quanto vai piano,', hi: 'l\'importante è non fermarsi.', by: 'Confucio' },
+          { pre: 'La prima e la migliore delle vittorie è', hi: 'vincere se stessi.', by: 'Platone' },
+          { pre: 'Fatti non foste a viver come bruti,', hi: 'ma per seguir virtute e canoscenza.', by: 'Dante Alighieri' },
+          { pre: 'Possono,', hi: 'perché credono di potere.', by: 'Virgilio' },
+          { pre: 'Chi ha cominciato', hi: 'è a metà dell\'opera.', by: 'Orazio' },
+          { pre: 'Sii paziente e resisti:', hi: 'un giorno questo dolore ti sarà utile.', by: 'Ovidio' },
+          { pre: 'Nel mezzo dell\'inverno ho scoperto che c\'era in me', hi: 'un\'invincibile estate.', by: 'Albert Camus' },
+          { pre: 'Sono il padrone del mio destino,', hi: 'il capitano della mia anima.', by: 'William Ernest Henley · Invictus' },
+          { pre: 'La vita è come andare in bicicletta:', hi: 'per restare in equilibrio devi muoverti.', by: 'Albert Einstein' },
+          { pre: 'Sembra sempre impossibile', hi: 'finché non viene fatto.', by: 'Nelson Mandela' },
+          { pre: 'Se non puoi volare, corri. Se non puoi correre, cammina. Se non puoi camminare, gattona.', hi: 'Ma qualunque cosa tu faccia, continua ad andare avanti.', by: 'Martin Luther King' },
+          { pre: 'Che tu creda di farcela o di non farcela,', hi: 'avrai comunque ragione.', by: 'Henry Ford' },
+          { pre: 'Non ho fallito.', hi: 'Ho solo trovato 10.000 modi che non funzionano.', by: 'Thomas Edison' },
+          { pre: 'Fai quello che puoi,', hi: 'con quello che hai, dove sei.', by: 'Theodore Roosevelt' },
+          { pre: 'Siate affamati.', hi: 'Siate folli.', by: 'Steve Jobs' },
+          { pre: 'Il modo per cominciare è smettere di parlare', hi: 'e iniziare a fare.', by: 'Walt Disney' },
+          { pre: 'La disciplina è il ponte tra', hi: 'gli obiettivi e i risultati.', by: 'Jim Rohn' },
+
+          // --- Musicisti ---
+          { pre: 'Voglio afferrare il destino per la gola:', hi: 'non riuscirà a piegarmi del tutto.', by: 'Ludwig van Beethoven' },
+          { pre: 'Non sai quanto sei forte finché essere forte', hi: 'non è l\'unica scelta che hai.', by: 'Bob Marley' },
+          { pre: 'La maratona', hi: 'continua.', by: 'Nipsey Hussle' },
+
+          // --- Sport ---
+          { pre: 'Ho odiato ogni minuto di allenamento, ma mi dicevo: non mollare.', hi: 'Soffri ora e vivi il resto della tua vita da campione.', by: 'Muhammad Ali' },
+          { pre: 'Ho fallito ancora e ancora e ancora nella mia vita.', hi: 'Ed è per questo che ho successo.', by: 'Michael Jordan' },
+          { pre: 'Tutto ciò che è negativo, pressioni e sfide,', hi: 'è per me un\'occasione per crescere.', by: 'Kobe Bryant' },
+          { pre: 'Non pregare per una vita facile.', hi: 'Prega per avere la forza di sopportarne una difficile.', by: 'Bruce Lee' },
+          { pre: 'La forza non viene dalla vittoria.', hi: 'Sono le tue lotte a svilupparla.', by: 'Arnold Schwarzenegger' },
+          { pre: 'Ho guardato la metà che era rimasta,', hi: 'non quella che era andata persa.', by: 'Alex Zanardi' },
+          { pre: 'La fatica non è mai sprecata:', hi: 'soffri, ma sogni.', by: 'Pietro Mennea' },
+          { pre: 'Il successo non è un caso. È duro lavoro, perseveranza, studio, sacrificio', hi: 'e soprattutto amore per quello che fai.', by: 'Pelé' },
+          { pre: 'Non conta quante volte vieni buttato giù,', hi: 'ma quante volte ti rialzi.', by: 'Vince Lombardi' },
+          { pre: 'Il talento senza lavoro', hi: 'non è niente.', by: 'Cristiano Ronaldo' },
+          { pre: 'Se una persona non ha più sogni,', hi: 'non ha più ragione di vivere.', by: 'Ayrton Senna' }
+        ];
+
+        const dayNumber = () => {
+          const d = new Date();
+          return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
+        };
+        // Permutazione stabile: lo stesso giorno mostra sempre la stessa frase, giorni vicini frasi diverse
+        const pickIndex = (n, len) => ((n * 7919) % len + len) % len;
+
+        const dailyBar = computed(() => STILL_BARS[pickIndex(dayNumber(), STILL_BARS.length)]);
+
         const noteForToday = computed(() => {
           return commentsMap.value[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`];
         });
@@ -6148,6 +6448,11 @@
           isAuthenticated.value = true;
           if (activeTab.value === 'dashboard') scrollToCurrentMeal();
           checkSavedWorkout();
+          // Chiede com'è andato lo sport dei giorni scorsi (dopo eventuali altri avvisi)
+          setTimeout(() => {
+            if (workoutPlayer.value && workoutPlayer.value.isOpen) return;
+            promptPendingSportChecks();
+          }, 700);
         };
 
         const completeOnboarding = () => {
@@ -6215,7 +6520,8 @@
         const LOGO_PATH = 'M 234.00 426.38 C209.86,423.32 189.38,417.67 171.50,409.10 C150.37,398.99 135.05,387.90 117.65,370.14 L 107.81 360.08 L 110.05 356.93 C111.29,355.19 114.68,351.24 117.59,348.14 L 122.88 342.50 L 133.69 353.06 C150.85,369.83 160.49,377.15 176.15,385.28 C218.15,407.09 263.50,409.97 306.06,393.53 C330.63,384.04 351.53,369.28 370.15,348.25 C372.71,345.36 375.28,343.00 375.85,343.00 C376.42,343.00 380.06,346.65 383.92,351.12 C389.32,357.36 390.74,359.61 390.06,360.89 C388.22,364.32 363.11,387.73 355.47,393.14 C325.52,414.33 290.89,425.70 254.00,426.47 C244.93,426.66 235.93,426.62 234.00,426.38 ZM 393.50 342.35 C385.86,332.80 373.11,317.43 350.46,290.45 C333.50,270.25 332.38,269.00 331.24,269.00 C330.66,269.00 327.50,271.92 324.22,275.50 C320.95,279.08 317.78,282.00 317.19,282.00 C316.60,282.00 310.58,275.18 303.81,266.84 C281.27,239.09 251.20,204.00 249.96,204.00 C249.50,204.00 240.77,213.87 230.57,225.92 C220.36,237.98 211.44,248.44 210.74,249.17 C210.05,249.90 203.96,257.09 197.21,265.15 C190.46,273.21 184.27,280.36 183.46,281.04 C182.21,282.07 180.91,281.14 175.55,275.39 C169.91,269.34 168.95,268.68 167.71,270.00 C166.94,270.83 161.19,277.58 154.94,285.00 C148.70,292.42 140.16,302.33 135.97,307.00 C131.77,311.67 121.50,323.49 113.14,333.25 C104.77,343.01 97.59,351.00 97.17,351.00 C95.69,351.00 83.00,336.72 83.00,335.06 C83.00,334.62 91.66,324.15 102.25,311.78 C112.84,299.42 130.95,278.12 142.50,264.45 C154.05,250.78 164.67,238.25 166.11,236.61 L 168.72 233.63 L 171.11 236.11 C172.42,237.48 175.27,240.56 177.43,242.95 L 181.35 247.29 L 183.93 244.31 C185.34,242.67 192.80,233.51 200.50,223.95 C224.17,194.55 248.95,165.00 249.91,165.00 C250.92,165.00 281.50,201.36 303.94,229.25 C311.80,239.01 318.40,247.00 318.61,247.00 C318.82,247.00 322.10,243.74 325.91,239.75 C329.71,235.76 333.02,232.73 333.26,233.00 C333.50,233.27 339.72,240.93 347.07,250.00 C354.42,259.08 364.94,271.93 370.46,278.56 C382.52,293.06 412.95,330.42 414.87,333.09 C416.11,334.81 415.76,335.55 411.37,340.59 C408.69,343.66 405.35,347.53 403.94,349.19 L 401.38 352.21 L 393.50 342.35 ZM 85.20 303.25 C76.77,281.09 73.91,265.36 73.87,241.00 C73.81,196.87 89.64,155.67 119.93,121.15 C142.72,95.17 179.94,73.76 215.78,66.01 C292.38,49.46 372.46,90.48 407.47,164.22 C420.13,190.90 425.81,218.66 424.61,248.00 C423.89,265.31 422.28,275.89 418.18,290.00 C414.57,302.44 411.37,310.00 409.70,310.00 C407.93,310.00 395.00,296.03 395.00,294.12 C395.00,293.21 396.14,288.88 397.54,284.49 C409.05,248.24 404.28,203.23 385.00,166.29 C368.00,133.71 337.00,106.60 302.00,93.69 C256.43,76.88 208.04,82.59 166.00,109.73 C118.50,140.39 92.19,194.06 96.01,252.50 C96.94,266.74 97.67,271.04 101.45,284.50 C102.84,289.45 103.98,293.99 103.99,294.60 C103.99,295.20 101.09,298.80 97.53,302.60 C93.97,306.39 91.05,309.84 91.03,310.25 C91.01,310.66 90.36,311.00 89.57,311.00 C88.71,311.00 86.97,307.92 85.20,303.25 Z';
         const BRAND = ['#20C997', '#F5A623', '#7A4DF1'];
         const SHARE_FONT = '"Plus Jakarta Sans", sans-serif';
-        const VIDEO_SECONDS = 6;
+        const VIDEO_SECONDS = 6;     // durata dell'animazione d'ingresso (e ciclo dello sfondo)
+        const VIDEO_TOTAL = 15;      // durata totale del video esportato: il resto mostra i risultati
 
         const shareStudio = ref({
           isOpen: false, kind: 'progress', sessionId: null, period: 30, focus: 'total', hero: 'auto',
@@ -6253,8 +6559,10 @@
         // --- Dati: card PROGRESSI (Totale / Allenamento / Alimentazione / Corpo) ---
         const shareProgressData = (periodDays, opts) => {
           const today = toISODate();
+          const sportSessions = trainingSessions.value.filter(s => s.kind === 'sport');
           const allDates = [
             ...workoutLogs.value.map(log => log.date),
+            ...sportSessions.map(s => s.date),
             ...measurements.value.map(m => m.date),
             ...Object.keys(mealLogs.value)
           ].filter(Boolean).sort();
@@ -6274,6 +6582,26 @@
             ...workoutLogs.value.filter(log => inRange(log.date)).map(log => log.date),
             ...reportSessions.map(s => s.date)
           ]);
+          // Sport (calcio, nuoto, ...): ogni occorrenza in calendario fino a oggi conta come allenamento
+          let sportTotal = 0;
+          const sportBy = {};
+          if (sportSessions.length) {
+            const sc = new Date(start + 'T00:00:00');
+            const se = new Date(today + 'T00:00:00');
+            let sg = 0;
+            while (sc <= se && sg++ < 800) {
+              const key = toISODate(sc);
+              sportSessions.forEach(s => {
+                if (!trainingSessionOccursOn(s, key)) return;
+                if (s.statusByDate && s.statusByDate[key] === 'skipped') return;   // segnato "non fatto"
+                sportTotal++;
+                const name = s.sport || 'Sport';
+                sportBy[name] = (sportBy[name] || 0) + 1;
+                workoutDates.add(key);
+              });
+              sc.setDate(sc.getDate() + 1);
+            }
+          }
           const trainedSeconds = reportSessions.reduce((sum, s) => sum + (s.report.totalSeconds || 0), 0);
           const sets = reportSessions.reduce((sum, s) => sum + (s.report.sets || 0), 0);
 
@@ -6347,6 +6675,16 @@
           if (best && best.kg > 0) M.loads = { hero: loadTxt(best), label: 'Carico · ' + best.name, tile: loadTxt(best), tileLabel: 'Top · ' + best.name, chart: { type: 'line', series: best.series, label: 'Andamento · ' + best.name } };
           if (improved) M.improved = { hero: String(improved), label: improved === 1 ? 'Esercizio con carico in crescita' : 'Esercizi con carico in crescita', tile: improved + (improved === 1 ? ' esercizio' : ' esercizi'), tileLabel: 'Carichi in crescita' };
           if (workoutDates.size) M.workouts = { hero: String(workoutDates.size), label: workoutDates.size === 1 ? 'Allenamento' : 'Allenamenti', tile: String(workoutDates.size), tileLabel: 'Allenamenti' };
+          if (sportTotal) {
+            const names = Object.keys(sportBy);
+            const one = names.length === 1 ? names[0] : '';
+            M.sport = {
+              hero: String(sportTotal),
+              label: one ? (sportTotal === 1 ? 'Sessione di ' : 'Sessioni di ') + one.toLowerCase() : (sportTotal === 1 ? 'Sessione di sport' : 'Sessioni di sport'),
+              tile: String(sportTotal),
+              tileLabel: one || 'Sport'
+            };
+          }
           if (workoutDates.size && days.length >= 7) {
             const perWeek = Math.round((workoutDates.size / (days.length / 7)) * 10) / 10;
             M.perWeek = { hero: formatNumber(perWeek), label: 'Allenamenti a settimana', tile: formatNumber(perWeek), tileLabel: 'A settimana' };
@@ -6371,8 +6709,8 @@
           if (activeDays) M.active = { hero: String(activeDays), label: 'Giorni attivi', tile: activeDays + (periodDays ? '/' + days.length : ''), tileLabel: 'Giorni attivi' };
 
           const FOCUS = {
-            total: ['loads', 'weight', 'workouts', 'nutrition', 'improved', 'time', 'active', 'sets'],
-            training: ['loads', 'workouts', 'improved', 'perWeek', 'time', 'sets', 'exercises'],
+            total: ['loads', 'weight', 'workouts', 'sport', 'nutrition', 'improved', 'time', 'active', 'sets'],
+            training: ['loads', 'workouts', 'sport', 'improved', 'perWeek', 'time', 'sets', 'exercises'],
             nutrition: ['nutrition', 'perfect', 'streak', 'meals'],
             body: ['weight', 'weightRate', 'weighIns']
           };
@@ -6401,6 +6739,8 @@
             dateLabel: periodLabel(periodDays),
             hero: heroMetric ? { value: heroMetric.hero, label: heroMetric.label } : { value: '0', label: 'Si parte da qui' },
             tiles: available.filter(k => k !== heroKey).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
+            // Risultati principali (usati anche dalla card "Frase del giorno")
+            stats: FOCUS.total.filter(k => M[k]).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
             chart,
             highlights: (focus === 'total' || focus === 'training') ? lifts.filter(l => l.kg !== 0).slice(0, 2).map(l => ({ name: l.name, value: loadTxt(l), positive: l.kg > 0 })) : [],
             highlightsLabel: 'Carichi'
@@ -6511,11 +6851,13 @@
           return m[1] + v.toLocaleString('it-IT', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + m[3];
         };
         const drawLogo = (ctx, x, y, size, fill) => {
+          // Trasforma il path (non il contesto) così un gradiente in coordinate canvas resta allineato
+          const s = size / 500;
+          const p = new Path2D();
+          p.addPath(new Path2D(LOGO_PATH), new DOMMatrix([s, 0, 0, s, x, y]));
           ctx.save();
-          ctx.translate(x, y);
-          ctx.scale(size / 500, size / 500);
           ctx.fillStyle = fill;
-          ctx.fill(new Path2D(LOGO_PATH));
+          ctx.fill(p);
           ctx.restore();
         };
         // Curva morbida (monotona) passante per i punti
@@ -6554,7 +6896,7 @@
           if (theme === 'photo' && sharePhoto) {
             const iw = sharePhoto.naturalWidth || sharePhoto.width;
             const ih = sharePhoto.naturalHeight || sharePhoto.height;
-            const zoom = 1 + (live ? 0.06 * clamp01(t / VIDEO_SECONDS) : 0);
+            const zoom = 1 + (live ? 0.06 * clamp01(t / VIDEO_TOTAL) : 0);
             const scale = Math.max(W / iw, H / ih) * zoom;
             ctx.drawImage(sharePhoto, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale);
             const shade = ctx.createLinearGradient(0, 0, 0, H);
@@ -6740,6 +7082,127 @@
         };
 
         // Disegna la card. time = secondi dall'inizio dell'animazione (Infinity = immagine finale)
+        // Corpo della card "Frase del giorno": parole che entrano una alla volta, parte forte in gradiente
+        const drawQuoteBody = (ctx, data, o) => {
+          const { W, H, M, story, th, phase, at, reveal, live, time } = o;
+          const maxW = W - M * 2;
+          const stats = (data.stats || []).slice(0, 4);
+          const hasStats = stats.length > 0;
+          const top = hasStats ? (story ? 470 : 300) : (story ? 560 : 330);
+          const bottom = hasStats
+            ? (story ? (data.attribution ? 1060 : 1130) : (data.attribution ? 680 : 740))
+            : (story ? (data.attribution ? 1500 : 1600) : (data.attribution ? 1040 : 1120));
+
+          // Parole con stile: hi = parte evidenziata
+          const words = [];
+          (data.pre || '').split(/\s+/).filter(Boolean).forEach(w => words.push({ w, hi: false }));
+          (data.hi || '').split(/\s+/).filter(Boolean).forEach(w => words.push({ w, hi: true }));
+
+          // Trova la dimensione più grande che entra nello spazio
+          const layout = (size) => {
+            const lines = [[]];
+            let lineW = 0;
+            const space = size * 0.28;
+            words.forEach(word => {
+              setFont(ctx, word.hi ? 900 : 800, size);
+              const ww = ctx.measureText(word.w).width;
+              if (lineW > 0 && lineW + space + ww > maxW) { lines.push([]); lineW = 0; }
+              lines[lines.length - 1].push({ ...word, x: lineW ? lineW + space : 0, ww });
+              lineW += (lineW ? space : 0) + ww;
+            });
+            return lines;
+          };
+          let size = story ? 104 : 88, lines = layout(size);
+          while (size > 44 && lines.length * size * 1.18 > bottom - top) { size -= 4; lines = layout(size); }
+          const lh = size * 1.18;
+          const blockH = lines.length * lh;
+          const y0 = top + (bottom - top - blockH) / 2 + size;
+
+          // Kicker
+          reveal(at(0.25, 0.5), 30, () => {
+            setFont(ctx, 900, story ? 34 : 30);
+            ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, W - M, 0, phase) : th.text;
+            spacedText(ctx, (data.kicker || '').toUpperCase(), M, y0 - size - (story ? 150 : 110), 6);
+          });
+
+          // Virgolette grandi
+          reveal(at(0.4, 0.5), 20, () => {
+            setFont(ctx, 900, story ? 260 : 200);
+            ctx.fillStyle = th.brand ? brandGradient(ctx, M, y0 - size - 140, M + 160, y0, phase) : th.faint;
+            ctx.globalAlpha *= th.brand ? 0.9 : 1;
+            ctx.fillText('“', M - 14, y0 - size + (story ? 120 : 90));
+          });
+
+          // Testo, parola per parola
+          let idx = 0;
+          const step = Math.min(0.11, 2.4 / Math.max(1, words.length)); // frasi lunghe entrano più veloci
+          const gradFill = th.brand ? brandGradient(ctx, M, y0 - size, W - M, y0 + blockH, phase) : th.text;
+          lines.forEach((line, li) => {
+            line.forEach(word => {
+              const k = at(0.7 + idx * step, 0.35);
+              idx++;
+              reveal(k, 24, () => {
+                setFont(ctx, word.hi ? 900 : 800, size);
+                ctx.fillStyle = word.hi ? gradFill : th.text;
+                ctx.fillText(word.w, M + word.x, y0 + li * lh);
+              });
+            });
+          });
+          const textEnd = 0.7 + idx * step;
+
+          // Firma (artista · canzone) per le barre personali
+          if (data.attribution) {
+            reveal(at(textEnd + 0.2, 0.5), 20, () => {
+              setFont(ctx, 800, story ? 36 : 30); ctx.fillStyle = th.sub;
+              ctx.fillText(ellipsize(ctx, '— ' + data.attribution, maxW), M, y0 + blockH + (story ? 50 : 36));
+            });
+          }
+
+          // Risultati del periodo: riquadri 2 per riga
+          let statsEnd = textEnd;
+          if (hasStats) {
+            const headY = story ? 1270 : 830;
+            const gap = story ? 24 : 20;
+            const tileH = story ? 170 : 130;
+            const tw = (maxW - gap) / 2;
+            const single = stats.length === 1;
+            reveal(at(textEnd + 0.3, 0.45), 20, () => {
+              setFont(ctx, 800, story ? 24 : 21); ctx.fillStyle = th.sub;
+              spacedText(ctx, ellipsize(ctx, (data.statsLabel || '').toUpperCase(), maxW - 40), M, headY, 4);
+            });
+            stats.forEach((s, i) => {
+              const start = textEnd + 0.45 + i * 0.15;
+              statsEnd = start + 0.9;
+              reveal(at(start, 0.45), 30, () => {
+                const w = single ? maxW : tw;
+                const tx = M + (i % 2) * (tw + gap);
+                const ty = headY + (story ? 34 : 26) + Math.floor(i / 2) * (tileH + gap);
+                if (!th.shadow) {
+                  ctx.fillStyle = th.tile; roundRect(ctx, tx, ty, w, tileH, story ? 36 : 30); ctx.fill();
+                  ctx.lineWidth = 2; ctx.strokeStyle = th.border; ctx.stroke();
+                }
+                setFont(ctx, 800, story ? 22 : 19); ctx.fillStyle = th.sub;
+                spacedText(ctx, ellipsize(ctx, s.label.toUpperCase(), w - 80), tx + 32, ty + (story ? 54 : 42), 3);
+                fitFont(ctx, s.value, 900, story ? 64 : 50, w - 64, 28);
+                ctx.fillStyle = th.brand ? brandGradient(ctx, tx, ty, tx + w, ty + tileH, phase) : th.text;
+                ctx.fillText(countUp(s.value, live ? clamp01((time - start) / 0.9) : 1), tx + 30, ty + tileH - (story ? 34 : 26));
+              });
+            });
+          }
+
+          // Firma persona + motto
+          reveal(at(Math.max(textEnd + 0.5, statsEnd - 0.4), 0.6), 0, () => {
+            if (data.signature) {
+              setFont(ctx, 700, story ? 30 : 26); ctx.fillStyle = th.sub; ctx.textAlign = 'center';
+              ctx.fillText(data.signature, W / 2, o.foot - (story ? 70 : 56));
+              ctx.textAlign = 'left';
+            }
+            setFont(ctx, 900, story ? 28 : 24);
+            ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, W - M, 0, phase) : th.text;
+            spacedText(ctx, 'IERI. OGGI. DOMANI. ANCORA.', W / 2, o.foot, 6, 'center');
+          });
+        };
+
         const drawShareCard = (canvas, data, opts, time = Infinity) => {
           const story = opts.format === 'story';
           const W = 1080, H = story ? 1920 : 1350;
@@ -6768,13 +7231,23 @@
 
           // Intestazione
           reveal(at(0, 0.5), -20, () => {
-            drawLogo(ctx, M - 6, L.head - 70, 92, th.brand ? brandGradient(ctx, M, L.head - 70, M + 92, L.head + 22, phase) : th.text);
-            setFont(ctx, 900, 44); ctx.fillStyle = th.text;
+            // Logo + nome con un unico gradiente che scorre (come il motto in fondo)
+            setFont(ctx, 900, 44);
+            const nameW = [...'STILL'].reduce((w, ch) => w + ctx.measureText(ch).width, 0) + 14 * 4;
+            const headFill = th.brand ? brandGradient(ctx, M - 6, 0, M + 104 + nameW, 0, phase) : th.text;
+            drawLogo(ctx, M - 6, L.head - 70, 92, headFill);
+            ctx.fillStyle = headFill;
             spacedText(ctx, 'STILL', M + 104, L.head - 8, 14);
             setFont(ctx, 700, 28); ctx.fillStyle = th.sub; ctx.textAlign = 'right';
             ctx.fillText(ellipsize(ctx, data.dateLabel || '', 460), W - M, L.head - 10);
             ctx.textAlign = 'left';
           });
+
+          if (data.kind === 'quote') {
+            drawQuoteBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time, foot: L.foot });
+            ctx.shadowColor = 'transparent';
+            return;
+          }
 
           // Kicker (con il nome) + titolo
           reveal(at(0.25, 0.5), 30, () => {
@@ -6854,6 +7327,19 @@
           const st = shareStudio.value;
           if (!st.isOpen) return null;
           const opts = { loadMode: st.loadMode, weightMode: st.weightMode, hero: st.hero, focus: st.focus, showName: st.showName };
+          if (st.kind === 'quote') {
+            const q = dailyBar.value;
+            const name = shareFirstName();
+            const progress = shareProgressData(st.period, { ...opts, focus: 'total', hero: 'auto' });
+            return {
+              kind: 'quote', empty: false, available: [], focusAvailable: [],
+              kicker: name ? 'La frase del giorno di ' + name : 'La frase del giorno',
+              dateLabel: formatDateLong(toISODate()),
+              pre: q.pre, hi: q.hi, attribution: q.by || '',
+              stats: progress.stats,
+              statsLabel: (name ? 'I risultati di ' + name : 'I miei risultati') + ' · ' + periodLabel(st.period).toLowerCase()
+            };
+          }
           return st.kind === 'workout' ? shareWorkoutData(st.sessionId, opts) : shareProgressData(st.period, opts);
         });
 
@@ -6864,7 +7350,7 @@
           { id: 'photo', label: 'Foto', icon: '📷', swatch: 'background: #2b2b2e;' },
           { id: 'sticker', label: 'Sticker', icon: '✨', swatch: 'background-image: repeating-conic-gradient(#4a4a4a 0 25%, #333 0 50%); background-size: 12px 12px;' }
         ];
-        const shareHeroLabels = { improved: 'Carichi in crescita', perWeek: 'A settimana', exercises: 'Esercizi', loads: 'Miglior carico', weight: 'Peso', weightRate: 'A settimana', weighIns: 'Pesate', workouts: 'Allenamenti', nutrition: 'Aderenza', meals: 'Pasti', perfect: 'Giorni perfetti', streak: 'Serie migliore', time: 'Tempo', active: 'Giorni attivi', sets: 'Serie' };
+        const shareHeroLabels = { improved: 'Carichi in crescita', perWeek: 'A settimana', exercises: 'Esercizi', loads: 'Miglior carico', weight: 'Peso', weightRate: 'A settimana', weighIns: 'Pesate', workouts: 'Allenamenti', sport: 'Sport', nutrition: 'Aderenza', meals: 'Pasti', perfect: 'Giorni perfetti', streak: 'Serie migliore', time: 'Tempo', active: 'Giorni attivi', sets: 'Serie' };
         const shareFocusLabels = { total: 'Totale', training: 'Allenamento', nutrition: 'Alimentazione', body: 'Corpo' };
 
         // Video disponibile se il browser sa registrare il canvas (lo sticker è trasparente: solo immagine)
@@ -6959,7 +7445,7 @@
         };
 
         // --- Esportazione ---
-        const shareBaseName = () => `still-${shareStudio.value.kind === 'workout' ? 'allenamento' : 'progressi'}-${toISODate()}`;
+        const shareBaseName = () => `still-${({ workout: 'allenamento', quote: 'frase-del-giorno' })[shareStudio.value.kind] || 'progressi'}-${toISODate()}`;
         const downloadBlob = (blobFile, name) => {
           const url = URL.createObjectURL(blobFile);
           const a = document.createElement('a');
@@ -6972,7 +7458,7 @@
           drawShareCard(canvas, shareData.value, shareStudio.value, Infinity);
           canvas.toBlob(b => (b ? resolve(new File([b], shareBaseName() + '.png', { type: 'image/png' })) : reject(new Error('blob'))), 'image/png');
         });
-        // Registra l'animazione (6 s) direttamente dall'anteprima
+        // Registra il video (animazione 6 s + risultati in vista fino a 15 s) direttamente dall'anteprima
         const buildShareVideo = () => new Promise((resolve, reject) => {
           const canvas = sharePreviewCanvas.value;
           if (!canvas) return reject(new Error('canvas'));
@@ -6999,13 +7485,14 @@
             resolve(new File([blobFile], shareBaseName() + '.' + ext, { type }));
           };
           const data = shareData.value;
-          const total = VIDEO_SECONDS + 0.6;
+          const total = VIDEO_TOTAL;
           const start = performance.now();
           drawShareCard(canvas, data, st, 0);
           recorder.start(250);
           const frame = (now) => {
             const t = (now - start) / 1000;
-            drawShareCard(canvas, data, st, Math.min(t, VIDEO_SECONDS));
+            // Dopo l'animazione i risultati restano fermi, lo sfondo continua a muoversi piano
+            drawShareCard(canvas, data, st, Math.min(t, total));
             st.recordProgress = Math.min(100, Math.round((t / total) * 100));
             if (t < total) requestAnimationFrame(frame);
             else recorder.stop();
@@ -7035,7 +7522,7 @@
           try {
             file = await buildShareFile();
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              await navigator.share({ files: [file], text: 'Ieri. Oggi. Domani. Ancora. 💪 #STILL' });
+              await navigator.share({ files: [file], text: st.kind === 'quote' ? 'La mia carica di oggi 🔥 #STILL #fraseDelGiorno' : 'Ieri. Oggi. Domani. Ancora. 💪 #STILL' });
             } else {
               downloadBlob(file, file.name);
               showToastMessage((file.type.startsWith('video') ? 'Video salvato' : 'Immagine salvata') + ': caricala nella tua storia o nel tuo post.');
@@ -7413,6 +7900,15 @@
           trainingDaySessions,
           trainingFormModal,
           openTrainingForm,
+          sportStatus,
+          sportCanCheck,
+          sportCheckModal,
+          sportCheckSession,
+          openSportCheck,
+          closeSportCheck,
+          setSportStatus,
+          snoozeSportChecks,
+          editFromSportCheck,
           editTrainingSession,
           closeTrainingForm,
           setTrainingKind,
@@ -7426,6 +7922,7 @@
           customModal,
           executeConfirm,
           commentModal,
+          dailyBar,
           closeCommentModal,
           saveComment,
           activePlan,
