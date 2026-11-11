@@ -284,7 +284,7 @@
                 </button>
               </div>
               <p class="relative z-10 text-sm font-semibold italic text-bianco leading-snug uppercase">
-                "{{ dailyBar.pre }} <span class="text-salvia font-bold not-italic">{{ dailyBar.hi }}</span>"
+                "{{ dailyBar.pre }} <span class="text-salvia font-bold not-italic ml-1">{{ dailyBar.hi }}</span>"
               </p>
               <p v-if="dailyBar.by" class="relative z-10 mt-2 text-[11px] font-bold text-white/50">— {{ dailyBar.by }}</p>
             </div>
@@ -293,6 +293,47 @@
             <div class="space-y-1">
               <h1 class="text-3xl font-bold tracking-tight text-antracite">Ciao {{ profile ? profile.firstName : '' }},</h1>
               <p class="text-sm text-gray-500 font-medium">Ogni giorno è un passo avanti verso la vetta.</p>
+            </div>
+
+            <!-- RIEPILOGO DEL MESE SCORSO (primi giorni del mese) -->
+            <button v-if="recapBanner" @click="openRecap(1)" class="w-full cangiante-btn rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform">
+              <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎬</div>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-extrabold text-white">Il tuo {{ recapBanner.month.toLowerCase() }} è pronto</div>
+                <div class="text-[11px] font-semibold text-white/85">{{ recapBanner.active }} giorni attivi. Guardalo e condividilo nelle storie.</div>
+              </div>
+              <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
+            <!-- SERIE DI GIORNI DI FILA -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
+              <div class="flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
+                       :class="streakInfo.todayDone ? 'bg-arancione/15' : 'bg-gray-100'">
+                    <span :class="streakInfo.current ? '' : 'grayscale opacity-50'">🔥</span>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-2xl font-black text-antracite leading-none">
+                      {{ streakInfo.current }} <span class="text-sm font-bold text-gray-400">{{ streakInfo.current === 1 ? 'giorno' : 'giorni' }} di fila</span>
+                    </div>
+                    <div class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ streakInfo.message }}</div>
+                  </div>
+                </div>
+                <button @click="openRecap(0)" class="shrink-0 text-[11px] font-bold text-salvia bg-salvia/10 hover:bg-salvia/15 px-2.5 py-1.5 rounded-xl">🎬 Il mio mese</button>
+              </div>
+              <div class="grid grid-cols-7 gap-1.5 mt-3">
+                <div v-for="d in streakInfo.week" :key="'sk' + d.key" class="flex flex-col items-center gap-1">
+                  <div class="w-full h-2 rounded-full" :class="d.active ? 'cangiante-btn' : (d.protected ? 'bg-sky-400' : (d.today ? 'bg-arancione/25' : 'bg-gray-100'))"></div>
+                  <span class="text-[9px] font-bold" :class="d.today ? 'text-antracite' : 'text-gray-400'">{{ d.protected ? '🛡️' : d.label }}</span>
+                </div>
+              </div>
+              <div class="flex items-center justify-between gap-2 mt-2">
+                <span class="text-[10px] font-bold" :class="streakInfo.shieldReady ? 'text-sky-600' : 'text-gray-400'">
+                  🛡️ {{ streakInfo.shieldReady ? 'Proteggi serie pronto: se salti un giorno la serie è salva' : 'Proteggi serie in ricarica: ' + streakInfo.shieldIn + (streakInfo.shieldIn === 1 ? ' giorno attivo' : ' giorni attivi') }}
+                </span>
+                <span v-if="streakInfo.best > 1" class="text-[10px] font-bold text-gray-400 shrink-0">Record: {{ streakInfo.best }}</span>
+              </div>
             </div>
 
             <!-- APPUNTI DI OGGI (Visibile solo se c'è una nota) -->
@@ -610,7 +651,7 @@
                   <div class="min-w-0 flex-1 cursor-pointer" @click="openTrainingSessionItem(session, session.occurrenceDate)">
                     <div class="text-xs font-extrabold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
                     <div class="text-[10px] font-medium text-gray-400 truncate">
-                      {{ formatDate(session.occurrenceDate) }}<span v-if="session.time"> • {{ session.time }}</span> • {{ trainingSessionSubtitle(session) }}<span v-if="sportStatus(session, session.occurrenceDate) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, session.occurrenceDate) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span>
+                      {{ formatDate(session.occurrenceDate) }}<span v-if="session.time"> • {{ sessionTimeLabel(session) }}</span> • {{ trainingSessionSubtitle(session) }}<span v-if="sportStatus(session, session.occurrenceDate) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, session.occurrenceDate) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span>
                     </div>
                     <div v-if="session.note" class="text-[10px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                   </div>
@@ -910,20 +951,47 @@
           <!-- ==================== PROGRESSI ==================== -->
           <div v-if="activeTab === 'progress'" class="space-y-6 animate-fadeIn">
 
-            <div class="flex justify-between items-end gap-3">
+            <div class="space-y-3">
               <div>
                 <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">RISULTATI</div>
                 <h2 class="text-2xl font-bold text-antracite">I tuoi Progressi</h2>
               </div>
-              <div v-if="measurements.length > 0 || workoutGroups.length > 0" class="flex items-center gap-2 flex-shrink-0">
-              <button @click="openShareStudio('progress')" class="cangiante-btn text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center gap-1.5">
+              <div v-if="measurements.length > 0 || workoutGroups.length > 0" class="grid grid-cols-3 gap-2">
+              <button @click="openRecap(0)" class="bg-antracite text-white font-bold text-xs px-3 py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1" title="Riepilogo del mese">🎬 Mese</button>
+              <button @click="openShareStudio('progress')" class="cangiante-btn text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
                 Condividi
               </button>
-              <button @click="openMeasurementModal()" class="bg-salvia text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-salvia/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0">
+              <button @click="openMeasurementModal()" class="bg-salvia text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-1.5">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
                 Aggiungi
               </button>
+              </div>
+            </div>
+
+            <!-- ORE DI ALLENAMENTO -->
+            <div v-if="trainingTimeSummary.total > 0" class="bg-antracite rounded-3xl p-5 shadow-lg text-white relative overflow-hidden">
+              <div class="absolute -top-10 -right-10 w-40 h-40 bg-arancione/25 rounded-full blur-3xl pointer-events-none"></div>
+              <div class="relative z-10 flex items-start justify-between gap-3">
+                <div>
+                  <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">⏱️ Ore di allenamento</div>
+                  <div class="text-4xl font-black mt-1 cangiante-text">{{ shortDuration(trainingTimeSummary.total) }}</div>
+                  <div class="text-[11px] font-medium text-white/60 mt-0.5">da quando usi STILL</div>
+                </div>
+                <div class="text-right space-y-1.5 shrink-0">
+                  <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Settimana</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.week) }}</div></div>
+                  <div><div class="text-[9px] font-bold text-white/40 uppercase tracking-wider">Mese</div><div class="text-sm font-extrabold">{{ shortDuration(trainingTimeSummary.month) }}</div></div>
+                </div>
+              </div>
+              <div v-if="trainingTimeSummary.gym && trainingTimeSummary.sport" class="relative z-10 mt-4">
+                <div class="h-2 rounded-full bg-white/10 overflow-hidden flex">
+                  <div class="h-full bg-arancione" :style="{ width: (trainingTimeSummary.gym / trainingTimeSummary.total * 100) + '%' }"></div>
+                  <div class="h-full bg-viola" :style="{ width: (trainingTimeSummary.sport / trainingTimeSummary.total * 100) + '%' }"></div>
+                </div>
+                <div class="flex justify-between text-[10px] font-bold text-white/60 mt-1.5">
+                  <span>💪 Palestra {{ shortDuration(trainingTimeSummary.gym) }}</span>
+                  <span>🏅 Sport {{ shortDuration(trainingTimeSummary.sport) }}</span>
+                </div>
               </div>
             </div>
 
@@ -1545,6 +1613,66 @@
                 <p class="text-[10px] font-medium text-gray-400">Peso e circonferenze si aggiornano dalla sezione Progressi.</p>
               </div>
 
+              <!-- Promemoria -->
+              <div class="space-y-3">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Promemoria</div>
+                <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-antracite">🔔 Notifiche</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Pasti, allenamenti e serie in pericolo.</p>
+                  </div>
+                  <button @click="toggleReminders" :disabled="!remindersSupported" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0 disabled:opacity-40" :class="settings.reminders.enabled ? 'bg-salvia' : 'bg-gray-300'" aria-label="Attiva promemoria">
+                    <div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="settings.reminders.enabled ? 'translate-x-5' : ''"></div>
+                  </button>
+                </div>
+
+                <div v-if="settings.reminders.enabled" class="space-y-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <!-- Pasti -->
+                  <label class="flex items-center justify-between gap-3 cursor-pointer">
+                    <span class="text-xs font-bold text-antracite">🍽️ Pasti del piano</span>
+                    <input type="checkbox" v-model="settings.reminders.meals" class="w-4 h-4 accent-[#10B981]">
+                  </label>
+                  <div v-if="settings.reminders.meals" class="grid grid-cols-1 gap-1.5">
+                    <div v-for="t in reminderMealTypes" :key="'rt' + t.id" class="flex items-center justify-between gap-2 bg-white border border-gray-200 rounded-xl px-2.5 py-1.5">
+                      <span class="text-[11px] font-bold text-gray-600 truncate">{{ t.icon }} {{ t.label }}</span>
+                      <input type="time" v-model="settings.reminders.mealTimes[t.id]" class="text-[11px] font-bold text-antracite bg-transparent outline-none w-[84px] text-right">
+                    </div>
+                  </div>
+                  <p v-if="settings.reminders.meals" class="text-[10px] font-medium text-gray-400 -mt-1">Lascia vuoto l'orario per non ricevere quel promemoria. Se hai già segnato il pasto non arriva.</p>
+
+                  <!-- Allenamenti -->
+                  <label class="flex items-center justify-between gap-3 cursor-pointer pt-1 border-t border-gray-200">
+                    <span class="text-xs font-bold text-antracite pt-2">💪 Allenamenti e sport</span>
+                    <input type="checkbox" v-model="settings.reminders.workouts" class="w-4 h-4 accent-[#10B981] mt-2">
+                  </label>
+                  <div v-if="settings.reminders.workouts" class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-medium text-gray-500">Avvisami</span>
+                    <select v-model.number="settings.reminders.workoutLead" class="text-[11px] font-bold text-antracite bg-white border border-gray-200 rounded-xl px-2 py-1.5 outline-none">
+                      <option :value="0">all'orario</option>
+                      <option :value="15">15 min prima</option>
+                      <option :value="30">30 min prima</option>
+                      <option :value="60">1 ora prima</option>
+                      <option :value="120">2 ore prima</option>
+                    </select>
+                  </div>
+                  <label class="flex items-center justify-between gap-3 cursor-pointer">
+                    <span class="text-[11px] font-medium text-gray-500">Dopo, chiedimi com'è andata</span>
+                    <input type="checkbox" v-model="settings.reminders.checkins" class="w-4 h-4 accent-[#10B981]">
+                  </label>
+
+                  <!-- Serie -->
+                  <label class="flex items-center justify-between gap-3 cursor-pointer pt-1 border-t border-gray-200">
+                    <span class="text-xs font-bold text-antracite pt-2">🔥 Serie e proteggi serie</span>
+                    <input type="checkbox" v-model="settings.reminders.streak" class="w-4 h-4 accent-[#10B981] mt-2">
+                  </label>
+                  <div v-if="settings.reminders.streak" class="flex items-center justify-between gap-2">
+                    <span class="text-[11px] font-medium text-gray-500">Se oggi non hai segnato nulla, alle</span>
+                    <input type="time" v-model="settings.reminders.streakTime" class="text-[11px] font-bold text-antracite bg-white border border-gray-200 rounded-xl px-2 py-1.5 outline-none">
+                  </div>
+                </div>
+                <p v-if="!remindersNative" class="text-[10px] font-medium text-gray-400 leading-snug">Dal sito i promemoria arrivano solo mentre STILL è aperto. Con l'app installata arriveranno anche a telefono bloccato.</p>
+              </div>
+
               <!-- Backup -->
               <div class="space-y-2">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Backup</div>
@@ -1592,7 +1720,7 @@
                 <div v-for="session in commentModalTrainingSessions" :key="'cm-tr-' + session.id" class="flex items-start gap-2">
                   <span class="text-sm flex-shrink-0">{{ session.kind === 'gym' ? '🏋️' : '🏅' }}</span>
                   <div class="min-w-0">
-                    <div class="text-[11px] font-bold text-antracite truncate">{{ trainingSessionLabel(session) }}<span v-if="session.time" class="text-gray-400 font-medium"> • {{ session.time }}</span></div>
+                    <div class="text-[11px] font-bold text-antracite truncate">{{ trainingSessionLabel(session) }}<span v-if="session.time" class="text-gray-400 font-medium"> • {{ sessionTimeLabel(session) }}</span></div>
                     <p v-if="session.note" class="text-[10px] text-sky-600 font-medium leading-snug">📝 {{ session.note }}</p>
                   </div>
                 </div>
@@ -1645,7 +1773,7 @@
                   <div class="w-7 h-7 rounded-full bg-arancione/15 flex items-center justify-center text-sm flex-shrink-0">{{ session.kind === 'gym' ? '🏋️' : '🏅' }}</div>
                   <div class="flex-1 min-w-0">
                     <div class="text-[11px] font-bold text-antracite truncate">
-                      {{ trainingSessionLabel(session) }}<span v-if="session.time" class="text-gray-400 font-medium"> • {{ session.time }}</span>
+                      {{ trainingSessionLabel(session) }}<span v-if="session.time" class="text-gray-400 font-medium"> • {{ sessionTimeLabel(session) }}</span>
                     </div>
                     <div class="text-[9px] font-medium text-gray-400 truncate">{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }} · statistiche ›</span><span v-if="sportStatus(session, dayMenuModal.dateKey) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, dayMenuModal.dateKey) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span><span v-else-if="sportCanCheck(session, dayMenuModal.dateKey)" class="text-sky-600 font-bold"> • fatto? ›</span></div>
                     <p v-if="session.note" class="text-[10px] text-sky-600 font-medium leading-snug mt-0.5">📝 {{ session.note }}</p>
@@ -1736,6 +1864,40 @@
               <button @click="saveMealSkip" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-red-600 active:scale-95 transition-all">Salva</button>
               <button v-if="mealCommentModal.hasExisting" @click="clearMealStatus" class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Rimuovi stato</button>
             </div>
+          </div>
+        </div>
+
+
+        <!-- GIORNI PASSATI: segna in blocco fatto / non fatto -->
+        <div v-if="pastChecksModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-start shrink-0">
+              <div>
+                <h3 class="text-lg font-bold text-antracite leading-tight">Giorni passati</h3>
+                <p class="text-[11px] font-bold text-gray-400 mt-0.5">{{ pastChecksSession ? trainingSessionLabel(pastChecksSession) : '' }}<span v-if="pastChecksSession && pastChecksSession.time"> • {{ sessionTimeLabel(pastChecksSession) }}</span></p>
+              </div>
+              <button @click="pastChecksModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <p class="text-xs text-gray-500 font-medium leading-relaxed shrink-0">Segna com'è andata nei giorni già trascorsi: contano nei progressi, nelle ore di allenamento e nella serie.</p>
+            <div class="grid grid-cols-2 gap-2 shrink-0">
+              <button @click="setAllPastChecks('done')" class="py-2 rounded-xl text-[11px] font-bold bg-salvia/10 text-salvia border border-salvia/30">✓ Tutti gli altri fatti</button>
+              <button @click="setAllPastChecks('skipped')" class="py-2 rounded-xl text-[11px] font-bold bg-gray-50 text-gray-500 border border-gray-200">✗ Tutti gli altri no</button>
+            </div>
+            <div class="overflow-y-auto flex-1 space-y-1.5 pr-1 hide-scrollbar">
+              <p v-if="!pastChecksModal.items.length" class="text-xs text-gray-400 text-center py-4">Nessun giorno passato in calendario.</p>
+              <div v-for="item in pastChecksModal.items" :key="'pc' + item.dateKey" class="flex items-center justify-between gap-2 bg-gray-50 border border-gray-100 rounded-xl px-3 py-2">
+                <span class="text-xs font-bold text-antracite capitalize truncate">{{ formatDateLong(item.dateKey) }}</span>
+                <div class="flex gap-1 shrink-0">
+                  <button @click="setPastCheck(item, 'done')" class="w-9 h-8 rounded-lg text-sm font-black border transition-colors"
+                          :class="item.status === 'done' ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-300 border-gray-200'" aria-label="Fatto">✓</button>
+                  <button @click="setPastCheck(item, 'skipped')" class="w-9 h-8 rounded-lg text-sm font-black border transition-colors"
+                          :class="item.status === 'skipped' ? 'bg-red-500 text-white border-red-500' : 'bg-white text-gray-300 border-gray-200'" aria-label="Non fatto">✗</button>
+                </div>
+              </div>
+            </div>
+            <button @click="savePastChecks" class="w-full py-3.5 rounded-2xl bg-salvia text-white font-bold shadow-lg active:scale-95 transition-all shrink-0">Salva</button>
           </div>
         </div>
 
@@ -2180,7 +2342,7 @@
             <!-- Barra superiore -->
             <div class="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between gap-3 shrink-0">
               <div>
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ ({ workout: 'Allenamento', quote: 'Frase del giorno' })[shareStudio.kind] || 'Progressi' }}</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ ({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese' })[shareStudio.kind] || 'Progressi' }}</p>
                 <h3 class="text-lg font-extrabold leading-tight">Condividi</h3>
               </div>
               <button @click="closeShareStudio" :disabled="shareStudio.recording" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30" aria-label="Chiudi">
@@ -2235,6 +2397,19 @@
                           :class="shareData.focus === f ? 'bg-white text-antracite' : 'bg-white/10 text-white/70 hover:bg-white/15'">{{ shareFocusLabels[f] }}</button>
                 </div>
               </div>
+
+              <!-- Mese (riepilogo) -->
+              <div v-if="shareStudio.kind === 'recap'" class="space-y-2">
+                <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Mese</div>
+                <div class="grid grid-cols-2 gap-1.5">
+                  <button v-for="m in [0, 1]" :key="'rm' + m" @click="shareStudio.recapMonth = m"
+                          class="py-2.5 rounded-xl text-[11px] font-bold transition-colors"
+                          :class="shareStudio.recapMonth === m ? 'bg-white text-antracite' : 'bg-white/10 text-white/70 hover:bg-white/15'">{{ recapMonthName(m) }}{{ m === 0 ? ' (in corso)' : '' }}</button>
+                </div>
+              </div>
+              <p v-if="shareStudio.kind === 'recap' && shareData && shareData.empty" class="text-[11px] font-bold text-arancione bg-arancione/10 border border-arancione/30 rounded-xl px-3 py-2 text-center">
+                Nessun giorno attivo in questo mese: segna pasti e allenamenti per riempire il tuo riepilogo.
+              </p>
 
               <!-- Periodo (progressi) -->
               <div v-if="shareStudio.kind === 'progress' || shareStudio.kind === 'quote'" class="space-y-2">
@@ -2318,7 +2493,9 @@
             </div>
 
             <!-- Azioni -->
-            <div class="relative z-10 shrink-0 px-5 pt-3 pb-6 border-t border-white/10 flex gap-2 bg-antracite/80 backdrop-blur">
+            <div class="relative z-10 shrink-0 px-5 pt-3 pb-6 border-t border-white/10 bg-antracite/80 backdrop-blur space-y-2">
+              <p class="text-[10px] font-medium text-white/50 text-center leading-snug">🔗 Condividendo copio il link di STILL: su Instagram aggiungilo con lo sticker <span class="font-bold text-white/70">Link</span>.</p>
+              <div class="flex gap-2">
               <button @click="downloadShareImage" :disabled="!shareStudio.ready || shareStudio.busy" class="flex-1 bg-white/10 hover:bg-white/20 font-bold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-40">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
                 Salva
@@ -2333,6 +2510,7 @@
                   {{ shareWantsVideo ? 'Condividi video' : 'Condividi' }}
                 </template>
               </button>
+              </div>
             </div>
           </div>
         </div>
@@ -2692,7 +2870,7 @@
                 <span v-else-if="sessionStats.status === 'logs'" class="text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200 px-2 py-1 rounded-lg">Pesi registrati</span>
                 <span v-else-if="sessionStats.status === 'planned'" class="text-[10px] font-black uppercase tracking-widest bg-arancione/10 text-arancione border border-arancione/30 px-2 py-1 rounded-lg">In programma</span>
                 <span v-else class="text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200 px-2 py-1 rounded-lg">Nessun dato</span>
-                <span v-if="sessionStats.session.time" class="text-[10px] font-bold text-gray-400">ore {{ sessionStats.session.time }}</span>
+                <span v-if="sessionStats.session.time" class="text-[10px] font-bold text-gray-400">ore {{ sessionTimeLabel(sessionStats.session) }}</span>
               </div>
 
               <!-- Nessun dato -->
@@ -2826,7 +3004,7 @@
                 <div class="min-w-0 flex-1" :class="session.kind === 'gym' || sportCanCheck(session, trainingDayModal.dateKey) ? 'cursor-pointer' : ''" @click="openTrainingSessionItem(session, trainingDayModal.dateKey)">
                   <div class="text-[11px] font-bold text-antracite truncate">{{ trainingSessionLabel(session) }}</div>
                   <div class="text-[9px] font-medium text-gray-400 truncate">
-                    <span v-if="session.time">{{ session.time }} • </span>{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }}</span><span v-if="sportStatus(session, trainingDayModal.dateKey) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, trainingDayModal.dateKey) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span><span v-else-if="sportCanCheck(session, trainingDayModal.dateKey)" class="text-sky-600 font-bold"> • fatto? ›</span>
+                    <span v-if="session.time">{{ sessionTimeLabel(session) }} • </span>{{ trainingSessionSubtitle(session) }}<span v-if="session.kind === 'gym' && session.report" class="text-salvia font-bold"> • {{ session.completed ? '✓ completato' : 'interrotto' }}</span><span v-if="sportStatus(session, trainingDayModal.dateKey) === 'done'" class="text-salvia font-bold"> • ✓ fatto</span><span v-else-if="sportStatus(session, trainingDayModal.dateKey) === 'skipped'" class="text-red-500 font-bold"> • ✗ non fatto</span><span v-else-if="sportCanCheck(session, trainingDayModal.dateKey)" class="text-sky-600 font-bold"> • fatto? ›</span>
                   </div>
                   <div v-if="session.note" class="text-[9px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                 </div>
@@ -2859,7 +3037,7 @@
                 <div class="min-w-0">
                   <h3 class="text-lg font-bold text-antracite leading-tight truncate">{{ trainingSessionLabel(sportCheckSession) }}</h3>
                   <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
-                    {{ formatDateLong(sportCheckModal.dateKey) }}<span v-if="sportCheckSession.time"> • {{ sportCheckSession.time }}</span>
+                    {{ formatDateLong(sportCheckModal.dateKey) }}<span v-if="sportCheckSession.time"> • {{ sessionTimeLabel(sportCheckSession) }}</span>
                   </p>
                 </div>
               </div>
@@ -2890,7 +3068,10 @@
             </div>
 
             <div class="flex items-center justify-between gap-2 pt-1 border-t border-gray-100">
-              <button @click="editFromSportCheck" class="text-[11px] font-bold text-gray-400 hover:text-arancione py-2">Modifica sessione</button>
+              <div class="flex items-center gap-3">
+                <button @click="editFromSportCheck" class="text-[11px] font-bold text-gray-400 hover:text-arancione py-2">Modifica sessione</button>
+                <button v-if="sportCheckSession && sportCheckSession.recurring" @click="openPastFromCheck" class="text-[11px] font-bold text-sky-600 hover:text-sky-700 py-2">🗓️ Giorni passati</button>
+              </div>
               <button v-if="sportStatus(sportCheckSession, sportCheckModal.dateKey)" @click="setSportStatus(null)" class="text-[11px] font-bold text-gray-400 hover:text-antracite py-2">Annulla scelta</button>
               <button v-else-if="sportCheckModal.total > 1" @click="snoozeSportChecks" class="text-[11px] font-bold text-gray-400 hover:text-antracite py-2">Più tardi</button>
             </div>
@@ -2921,12 +3102,38 @@
                 <input type="date" v-model="trainingFormModal.date"
                        class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
               </div>
-              <div>
-                <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Orario</label>
-                <input type="time" v-model="trainingFormModal.time"
-                       class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
+              <div class="grid grid-cols-2 gap-1.5">
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Inizio</label>
+                  <input type="time" v-model="trainingFormModal.time"
+                         class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl px-1.5 py-2.5 text-xs font-bold text-antracite outline-none transition-all">
+                </div>
+                <div>
+                  <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Fine</label>
+                  <input type="time" v-model="trainingFormModal.endTime"
+                         class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl px-1.5 py-2.5 text-xs font-bold text-antracite outline-none transition-all">
+                </div>
               </div>
             </div>
+            <p class="text-[10px] font-medium text-gray-400 -mt-1 shrink-0">⏱️ {{ trainingFormModal.kind === 'sport' ? 'Il tempo si aggiunge alle tue ore di allenamento quando segni lo sport come fatto.' : "Se usi l'allenamento guidato la durata si misura da sola; altrimenti contano inizio e fine." }}</p>
+
+            <!-- Allenamento passato: com'è andata -->
+            <div v-if="!(trainingFormModal.kind === 'sport' && trainingFormModal.recurring) && trainingFormModal.date && trainingFormModal.date <= todayDateKey" class="shrink-0 space-y-1.5">
+              <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Com'è andata?</label>
+              <div class="grid grid-cols-2 gap-1.5">
+                <button @click="trainingFormModal.pastStatus = trainingFormModal.pastStatus === 'done' ? '' : 'done'" class="py-2 rounded-xl text-xs font-bold border transition-colors"
+                        :class="trainingFormModal.pastStatus === 'done' ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-200'">✓ Fatto</button>
+                <button @click="trainingFormModal.pastStatus = trainingFormModal.pastStatus === 'skipped' ? '' : 'skipped'" class="py-2 rounded-xl text-xs font-bold border transition-colors"
+                        :class="trainingFormModal.pastStatus === 'skipped' ? 'bg-red-500 text-white border-red-500' : 'bg-gray-50 text-gray-500 border-gray-200'">✗ Non fatto</button>
+              </div>
+            </div>
+            <p v-if="trainingFormModal.kind === 'sport' && trainingFormModal.recurring && trainingFormModal.date && trainingFormModal.date < todayDateKey && !trainingFormModal.editingId" class="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 shrink-0 leading-snug">
+              🗓️ Parte nel passato: dopo il salvataggio potrai segnare i giorni già trascorsi come fatti o non fatti.
+            </p>
+            <p v-if="trainingFormModal.editingId && trainingFormModal.kind === 'sport' && trainingFormModal.recurring && trainingFormModal.date < todayDateKey" class="text-[10px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 shrink-0 leading-snug">
+              Se cambi giorni o orari, le modifiche valgono <span class="font-bold">da oggi</span>: i giorni passati restano come sono.
+              <button @click="openPastFromForm" class="block mt-1 font-bold text-sky-600">🗓️ Segna i giorni passati ›</button>
+            </p>
 
             <div class="flex bg-gray-100 rounded-xl p-1 shrink-0">
               <button @click="setTrainingKind('gym')" class="flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5"
@@ -3065,7 +3272,7 @@
         // ---------------------------------------------------------------
         const STORAGE_KEYS = [
           'still_profile', 'still_plans', 'still_meal_logs', 'still_measurements', 'still_workout_logs',
-          'still_workout_sheets', 'still_training_sessions', 'still_comments'
+          'still_workout_sheets', 'still_training_sessions', 'still_comments', 'still_settings'
         ];
         const storage = {
           // Restituisce il JSON grezzo, oppure null se mancante o corrotto
@@ -4057,6 +4264,7 @@
           if (!session) return false;
           if (!session.recurring) return session.date === dateKey;
           if (session.date && dateKey < session.date) return false;
+          if (session.endDate && dateKey > session.endDate) return false;
           const d = new Date(dateKey + 'T00:00:00');
           return (session.weekdays || []).includes(d.getDay());
         };
@@ -4080,6 +4288,56 @@
           if (trainingIsToday(day)) return 'bg-arancione/10 text-arancione font-extrabold ring-2 ring-arancione/20';
           return 'text-gray-600 hover:bg-gray-50';
         };
+
+        // Durata di uno sport (minuti) da orario di inizio e fine; passa la mezzanotte se la fine è prima dell'inizio
+        const hhmmToMin = (v) => {
+          const m = /^(\d{1,2}):(\d{2})$/.exec(v || '');
+          return m ? Number(m[1]) * 60 + Number(m[2]) : null;
+        };
+        const sportDurationMin = (session) => {
+          if (!session) return 0;
+          const a = hhmmToMin(session.time), b = hhmmToMin(session.endTime);
+          if (a === null || b === null || a === b) return 0;
+          return b > a ? b - a : b + 1440 - a;
+        };
+        // "18:00–19:30" per gli sport con orario di fine, altrimenti solo l'inizio
+        const sessionTimeLabel = (session) => {
+          if (!session || !session.time) return '';
+          return session.kind === 'sport' && session.endTime ? session.time + '–' + session.endTime : session.time;
+        };
+        // Secondi di allenamento tra due date (incluse): palestra dal report, sport solo se segnati "fatto"
+        const trainingSecondsBetween = (start, end) => {
+          let gym = 0, sport = 0;
+          trainingSessions.value.forEach(s => {
+            if (s.kind === 'gym' && s.date && s.date >= start && s.date <= end) {
+              // Palestra: durata misurata dall'allenamento guidato, oppure inizio→fine se segnata a mano come fatta
+              if (s.report) gym += s.report.totalSeconds || 0;
+              else if (s.statusByDate && s.statusByDate[s.date] === 'done') gym += sportDurationMin(s) * 60;
+              return;
+            }
+            if (s.kind === 'sport' && s.statusByDate) {
+              const min = sportDurationMin(s);
+              if (!min) return;
+              Object.entries(s.statusByDate).forEach(([key, status]) => {
+                if (status === 'done' && key >= start && key <= end) sport += min * 60;
+              });
+            }
+          });
+          return { gym, sport, total: gym + sport };
+        };
+
+        // Ore di allenamento per la scheda Progressi: questa settimana, questo mese e da sempre
+        const trainingTimeSummary = computed(() => {
+          const today = toISODate();
+          const week = new Date(); week.setHours(12, 0, 0, 0); week.setDate(week.getDate() - ((week.getDay() + 6) % 7));
+          const month = new Date(); month.setHours(12, 0, 0, 0); month.setDate(1);
+          const all = trainingSecondsBetween('0000-01-01', today);
+          return {
+            week: trainingSecondsBetween(toISODate(week), today).total,
+            month: trainingSecondsBetween(toISODate(month), today).total,
+            total: all.total, gym: all.gym, sport: all.sport
+          };
+        });
 
         const trainingSessionLabel = (session) => {
           if (!session) return '';
@@ -4132,7 +4390,7 @@
             .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
         });
 
-        const trainingFormModal = ref({ isOpen: false, editingId: null, date: '', time: '18:00', kind: 'gym', sport: 'Calcio', weekdays: [], recurring: true, sheetId: null, dayName: '', note: '', error: '' });
+        const trainingFormModal = ref({ isOpen: false, editingId: null, pastStatus: '', date: '', time: '18:00', endTime: '19:30', kind: 'gym', sport: 'Calcio', weekdays: [], recurring: true, sheetId: null, dayName: '', note: '', error: '' });
 
         const openTrainingForm = (dateKey, session = null) => {
           if (session) {
@@ -4141,6 +4399,8 @@
               editingId: session.id,
               date: session.date || toISODate(),
               time: session.time || '18:00',
+              endTime: session.endTime || '',
+              pastStatus: (!session.recurring && session.statusByDate && session.statusByDate[session.date]) || '',
               kind: session.kind || 'gym',
               sport: session.sport || 'Calcio',
               weekdays: (session.weekdays || []).slice(),
@@ -4160,6 +4420,8 @@
             editingId: null,
             date,
             time: '18:00',
+            endTime: '19:30',
+            pastStatus: '',
             kind: firstSheet ? 'gym' : 'sport',
             sport: 'Calcio',
             weekdays: [weekday],
@@ -4197,10 +4459,14 @@
         const saveTrainingSession = () => {
           const form = trainingFormModal.value;
           if (!form.date) { form.error = 'Scegli una data.'; return; }
+          if (form.endTime && form.endTime === form.time) { form.error = "L'orario di fine deve essere diverso dall'inizio."; return; }
+          const today = toISODate();
+          const previous = form.editingId ? trainingSessions.value.find(item => item.id === form.editingId) : null;
           const base = {
-            id: form.editingId || ('ts_' + Date.now() + '_' + Math.floor(Math.random() * 1000)),
+            id: form.editingId || newTrainingId(),
             date: form.date,
             time: form.time || '',
+            endTime: form.time ? (form.endTime || '') : '',
             kind: form.kind,
             sport: '',
             sheetId: null,
@@ -4210,10 +4476,9 @@
             recurring: false,
             weekdays: []
           };
-          if (form.editingId) {
-            const previous = trainingSessions.value.find(item => item.id === form.editingId);
-            if (previous && previous.statusByDate && form.kind === 'sport') base.statusByDate = { ...previous.statusByDate };
-          }
+          if (previous && previous.statusByDate) base.statusByDate = { ...previous.statusByDate };
+          if (previous && previous.report) { base.report = previous.report; base.completed = previous.completed; }
+          if (previous && previous.endDate) base.endDate = previous.endDate;
           if (form.kind === 'gym') {
             const sheet = workoutSheets.value.find(item => String(item.id) === String(form.sheetId));
             if (!sheet) { form.error = 'Crea prima una scheda per la palestra.'; return; }
@@ -4229,15 +4494,104 @@
               base.weekdays = form.weekdays.slice();
             }
           }
-          if (form.editingId) {
+          // Singolo allenamento passato (o di oggi): com'è andata
+          if (!base.recurring) {
+            const map = {};
+            if (form.date <= today && form.pastStatus) map[form.date] = form.pastStatus;
+            base.statusByDate = map;
+          }
+
+          // Cambio di giorni/orari di una serie già iniziata: lo storico resta com'era,
+          // le nuove impostazioni valgono da oggi (la vecchia serie si chiude a ieri)
+          const scheduleChanged = previous && previous.recurring && base.recurring && !previous.endDate
+            && previous.date < today && form.date === previous.date
+            && (previous.time !== base.time || (previous.endTime || '') !== base.endTime || previous.sport !== base.sport
+              || [...(previous.weekdays || [])].sort().join() !== [...base.weekdays].sort().join());
+          if (scheduleChanged) {
+            // Se oggi è già stato segnato sulla vecchia serie, quella vale fino a oggi e la nuova parte da domani
+            const keepToday = !!(previous.statusByDate && previous.statusByDate[today]) && trainingSessionOccursOn(previous, today);
+            const cut = new Date(); cut.setHours(12, 0, 0, 0);
+            if (!keepToday) cut.setDate(cut.getDate() - 1);
+            const endKey = toISODate(cut);
+            const next = new Date(cut); next.setDate(next.getDate() + 1);
+            const oldMap = {}, newMap = {};
+            Object.entries(previous.statusByDate || {}).forEach(([k, v]) => { (k <= endKey ? oldMap : newMap)[k] = v; });
+            previous.endDate = endKey;
+            previous.statusByDate = oldMap;
+            trainingSessions.value.push({ ...base, id: newTrainingId(), date: toISODate(next), statusByDate: newMap });
+            form.isOpen = false;
+            showToastMessage('Nuovi orari attivi da oggi. 🗓️ I giorni passati restano come prima.');
+            return;
+          }
+
+          let saved = base;
+          if (previous) {
             const idx = trainingSessions.value.findIndex(item => item.id === form.editingId);
             if (idx > -1) trainingSessions.value[idx] = base;
-            showToastMessage('Allenamento aggiornato. ✏️');
+            saved = trainingSessions.value[idx] || base;
           } else {
             trainingSessions.value.push(base);
-            showToastMessage('Allenamento aggiunto al calendario. 🗓️');
+            saved = trainingSessions.value[trainingSessions.value.length - 1];
           }
           form.isOpen = false;
+          // Serie che parte nel passato: chiedi subito com'è andata nei giorni già trascorsi
+          if (saved.recurring && pastOccurrences(saved).some(o => !o.status)) {
+            openPastChecks(saved);
+            return;
+          }
+          showToastMessage(previous ? 'Allenamento aggiornato. ✏️' : 'Allenamento aggiunto al calendario. 🗓️');
+        };
+
+        const newTrainingId = () => 'ts_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
+
+        // Giorni passati (fino a oggi) di una serie, dal più recente; massimo 120
+        const pastOccurrences = (session) => {
+          const out = [];
+          const today = toISODate();
+          const d = new Date(); d.setHours(12, 0, 0, 0);
+          let guard = 0;
+          while (out.length < 120 && guard++ < 800) {
+            const key = toISODate(d);
+            if (session.date && key < session.date) break;
+            if (key <= today && trainingSessionOccursOn(session, key)) {
+              out.push({ dateKey: key, status: (session.statusByDate && session.statusByDate[key]) || '' });
+            }
+            d.setDate(d.getDate() - 1);
+          }
+          return out;
+        };
+
+        // Segna in blocco i giorni passati di uno sport
+        const pastChecksModal = ref({ isOpen: false, sessionId: null, items: [] });
+        const openPastChecks = (session) => {
+          pastChecksModal.value = { isOpen: true, sessionId: session.id, items: pastOccurrences(session) };
+        };
+        const pastChecksSession = computed(() => trainingSessions.value.find(s => s.id === pastChecksModal.value.sessionId) || null);
+        const setPastCheck = (item, status) => { item.status = item.status === status ? '' : status; };
+        const setAllPastChecks = (status) => { pastChecksModal.value.items.forEach(item => { if (!item.status) item.status = status; }); };
+        const openPastFromCheck = () => {
+          const session = sportCheckSession.value;
+          closeSportCheck();
+          if (session) openPastChecks(session);
+        };
+        const openPastFromForm = () => {
+          const session = trainingSessions.value.find(s => s.id === trainingFormModal.value.editingId);
+          if (!session) return;
+          trainingFormModal.value.isOpen = false;
+          openPastChecks(session);
+        };
+        const savePastChecks = () => {
+          const session = pastChecksSession.value;
+          if (session) {
+            const map = { ...(session.statusByDate || {}) };
+            pastChecksModal.value.items.forEach(item => {
+              if (item.status) map[item.dateKey] = item.status;
+              else delete map[item.dateKey];
+            });
+            session.statusByDate = map;
+          }
+          pastChecksModal.value.isOpen = false;
+          showToastMessage('Storico aggiornato. 💪');
         };
 
         const removeTrainingSession = (session) => {
@@ -5558,11 +5912,12 @@
         // session.statusByDate = { 'YYYY-MM-DD': 'done' | 'skipped' }
         // ---------------------------------------------------------------
         const sportStatus = (session, dateKey) => {
-          if (!session || session.kind !== 'sport' || !dateKey) return null;
+          if (!session || !dateKey) return null;
           const original = trainingSessions.value.find(item => item.id === session.id) || session;
           return (original.statusByDate && original.statusByDate[dateKey]) || null;
         };
-        const sportCanCheck = (session, dateKey) => !!session && session.kind === 'sport' && !!dateKey && dateKey <= toISODate();
+        const sportCanCheck = (session, dateKey) => !!session && !!dateKey && dateKey <= toISODate()
+          && (session.kind === 'sport' || !(session.report && session.date === dateKey));
 
         const sportCheckModal = ref({ isOpen: false, sessionId: null, dateKey: '', queue: [], index: 0, total: 0 });
         const sportCheckSnoozed = new Set();   // "Più tardi": non richiedere di nuovo in questa apertura dell'app
@@ -5628,8 +5983,11 @@
               if (session.statusByDate && session.statusByDate[key]) return;
               if (sportCheckSnoozed.has(session.id + '|' + key)) return;
               if (key === todayKey) {
-                const m = /^(\d{1,2}):(\d{2})$/.exec(session.time || '');
-                if (!m || Number(m[1]) * 60 + Number(m[2]) + 90 > nowMinutes) return;
+                // Si chiede solo a sport finito (orario di fine, oppure inizio + 1h30)
+                const start = hhmmToMin(session.time);
+                if (start === null) return;
+                const dur = sportDurationMin(session);
+                if (start + (dur || 90) > nowMinutes) return;
               }
               out.push({ sessionId: session.id, dateKey: key });
             });
@@ -5648,7 +6006,7 @@
 
         // Apre la sessione: palestra → statistiche, sport passato/di oggi → fatto/non fatto, sport futuro → modifica
         const openTrainingSessionItem = (session, dateKey) => {
-          if (session.kind === 'gym') openSessionStats(session, dateKey);
+          if (session.kind === 'gym' && (session.report || dateKey >= toISODate())) openSessionStats(session, dateKey);
           else if (sportCanCheck(session, dateKey)) openSportCheck(session, dateKey);
           else editTrainingSession(session);
         };
@@ -6519,12 +6877,14 @@
         // ---------------------------------------------------------------
         const LOGO_PATH = 'M 234.00 426.38 C209.86,423.32 189.38,417.67 171.50,409.10 C150.37,398.99 135.05,387.90 117.65,370.14 L 107.81 360.08 L 110.05 356.93 C111.29,355.19 114.68,351.24 117.59,348.14 L 122.88 342.50 L 133.69 353.06 C150.85,369.83 160.49,377.15 176.15,385.28 C218.15,407.09 263.50,409.97 306.06,393.53 C330.63,384.04 351.53,369.28 370.15,348.25 C372.71,345.36 375.28,343.00 375.85,343.00 C376.42,343.00 380.06,346.65 383.92,351.12 C389.32,357.36 390.74,359.61 390.06,360.89 C388.22,364.32 363.11,387.73 355.47,393.14 C325.52,414.33 290.89,425.70 254.00,426.47 C244.93,426.66 235.93,426.62 234.00,426.38 ZM 393.50 342.35 C385.86,332.80 373.11,317.43 350.46,290.45 C333.50,270.25 332.38,269.00 331.24,269.00 C330.66,269.00 327.50,271.92 324.22,275.50 C320.95,279.08 317.78,282.00 317.19,282.00 C316.60,282.00 310.58,275.18 303.81,266.84 C281.27,239.09 251.20,204.00 249.96,204.00 C249.50,204.00 240.77,213.87 230.57,225.92 C220.36,237.98 211.44,248.44 210.74,249.17 C210.05,249.90 203.96,257.09 197.21,265.15 C190.46,273.21 184.27,280.36 183.46,281.04 C182.21,282.07 180.91,281.14 175.55,275.39 C169.91,269.34 168.95,268.68 167.71,270.00 C166.94,270.83 161.19,277.58 154.94,285.00 C148.70,292.42 140.16,302.33 135.97,307.00 C131.77,311.67 121.50,323.49 113.14,333.25 C104.77,343.01 97.59,351.00 97.17,351.00 C95.69,351.00 83.00,336.72 83.00,335.06 C83.00,334.62 91.66,324.15 102.25,311.78 C112.84,299.42 130.95,278.12 142.50,264.45 C154.05,250.78 164.67,238.25 166.11,236.61 L 168.72 233.63 L 171.11 236.11 C172.42,237.48 175.27,240.56 177.43,242.95 L 181.35 247.29 L 183.93 244.31 C185.34,242.67 192.80,233.51 200.50,223.95 C224.17,194.55 248.95,165.00 249.91,165.00 C250.92,165.00 281.50,201.36 303.94,229.25 C311.80,239.01 318.40,247.00 318.61,247.00 C318.82,247.00 322.10,243.74 325.91,239.75 C329.71,235.76 333.02,232.73 333.26,233.00 C333.50,233.27 339.72,240.93 347.07,250.00 C354.42,259.08 364.94,271.93 370.46,278.56 C382.52,293.06 412.95,330.42 414.87,333.09 C416.11,334.81 415.76,335.55 411.37,340.59 C408.69,343.66 405.35,347.53 403.94,349.19 L 401.38 352.21 L 393.50 342.35 ZM 85.20 303.25 C76.77,281.09 73.91,265.36 73.87,241.00 C73.81,196.87 89.64,155.67 119.93,121.15 C142.72,95.17 179.94,73.76 215.78,66.01 C292.38,49.46 372.46,90.48 407.47,164.22 C420.13,190.90 425.81,218.66 424.61,248.00 C423.89,265.31 422.28,275.89 418.18,290.00 C414.57,302.44 411.37,310.00 409.70,310.00 C407.93,310.00 395.00,296.03 395.00,294.12 C395.00,293.21 396.14,288.88 397.54,284.49 C409.05,248.24 404.28,203.23 385.00,166.29 C368.00,133.71 337.00,106.60 302.00,93.69 C256.43,76.88 208.04,82.59 166.00,109.73 C118.50,140.39 92.19,194.06 96.01,252.50 C96.94,266.74 97.67,271.04 101.45,284.50 C102.84,289.45 103.98,293.99 103.99,294.60 C103.99,295.20 101.09,298.80 97.53,302.60 C93.97,306.39 91.05,309.84 91.03,310.25 C91.01,310.66 90.36,311.00 89.57,311.00 C88.71,311.00 86.97,307.92 85.20,303.25 Z';
         const BRAND = ['#20C997', '#F5A623', '#7A4DF1'];
+        const APP_URL = 'https://pietrodegiglio.github.io/STILL/';   // cambiare qui quando l'app avrà il suo dominio
+        const APP_URL_SHORT = 'pietrodegiglio.github.io/STILL';
         const SHARE_FONT = '"Plus Jakarta Sans", sans-serif';
         const VIDEO_SECONDS = 6;     // durata dell'animazione d'ingresso (e ciclo dello sfondo)
         const VIDEO_TOTAL = 15;      // durata totale del video esportato: il resto mostra i risultati
 
         const shareStudio = ref({
-          isOpen: false, kind: 'progress', sessionId: null, period: 30, focus: 'total', hero: 'auto',
+          isOpen: false, kind: 'progress', sessionId: null, period: 30, recapMonth: 0, focus: 'total', hero: 'auto',
           theme: 'night', format: 'story', output: 'video', showName: true, weightMode: 'percent', loadMode: 'percent',
           hasPhoto: false, ready: false, busy: false, recording: false, recordProgress: 0, error: ''
         });
@@ -6557,8 +6917,9 @@
         const periodLabel = (days) => ({ 7: 'Ultimi 7 giorni', 30: 'Ultimi 30 giorni', 90: 'Ultimi 3 mesi', 0: 'Da sempre' }[days] || '');
 
         // --- Dati: card PROGRESSI (Totale / Allenamento / Alimentazione / Corpo) ---
-        const shareProgressData = (periodDays, opts) => {
-          const today = toISODate();
+        // range (facoltativo): { start, end } in YYYY-MM-DD, per un mese preciso
+        const shareProgressData = (periodDays, opts, range = null) => {
+          const today = range ? range.end : toISODate();
           const sportSessions = trainingSessions.value.filter(s => s.kind === 'sport');
           const allDates = [
             ...workoutLogs.value.map(log => log.date),
@@ -6567,7 +6928,9 @@
             ...Object.keys(mealLogs.value)
           ].filter(Boolean).sort();
           let start;
-          if (periodDays) {
+          if (range) {
+            start = range.start;
+          } else if (periodDays) {
             const d = new Date(); d.setDate(d.getDate() - (periodDays - 1));
             start = toISODate(d);
           } else {
@@ -6578,11 +6941,15 @@
 
           // Allenamento
           const reportSessions = trainingSessions.value.filter(s => s.kind === 'gym' && s.report && inRange(s.date));
+          const manualGymDates = trainingSessions.value
+            .filter(s => s.kind === 'gym' && !s.report && inRange(s.date) && s.statusByDate && s.statusByDate[s.date] === 'done')
+            .map(s => s.date);
           const workoutDates = new Set([
             ...workoutLogs.value.filter(log => inRange(log.date)).map(log => log.date),
-            ...reportSessions.map(s => s.date)
+            ...reportSessions.map(s => s.date),
+            ...manualGymDates
           ]);
-          // Sport (calcio, nuoto, ...): ogni occorrenza in calendario fino a oggi conta come allenamento
+          // Sport (calcio, nuoto, ...): contano solo le sessioni segnate come fatte
           let sportTotal = 0;
           const sportBy = {};
           if (sportSessions.length) {
@@ -6593,7 +6960,7 @@
               const key = toISODate(sc);
               sportSessions.forEach(s => {
                 if (!trainingSessionOccursOn(s, key)) return;
-                if (s.statusByDate && s.statusByDate[key] === 'skipped') return;   // segnato "non fatto"
+                if (!s.statusByDate || s.statusByDate[key] !== 'done') return;   // solo se segnato "fatto"
                 sportTotal++;
                 const name = s.sport || 'Sport';
                 sportBy[name] = (sportBy[name] || 0) + 1;
@@ -6602,7 +6969,8 @@
               sc.setDate(sc.getDate() + 1);
             }
           }
-          const trainedSeconds = reportSessions.reduce((sum, s) => sum + (s.report.totalSeconds || 0), 0);
+          // Tempo: palestra (durata registrata) + sport segnati come fatti (inizio → fine)
+          const trainedSeconds = trainingSecondsBetween(start, today).total;
           const sets = reportSessions.reduce((sum, s) => sum + (s.report.sets || 0), 0);
 
           const byExercise = {};
@@ -6691,7 +7059,7 @@
           }
           const exercisesTrained = new Set(workoutLogs.value.filter(log => inRange(log.date)).map(log => log.exerciseId || String(log.exerciseName || '').toLowerCase())).size;
           if (exercisesTrained) M.exercises = { hero: String(exercisesTrained), label: 'Esercizi allenati', tile: String(exercisesTrained), tileLabel: 'Esercizi' };
-          if (trainedSeconds > 0) M.time = { hero: shortDuration(trainedSeconds), label: 'Di allenamento', tile: shortDuration(trainedSeconds), tileLabel: 'Tempo in palestra' };
+          if (trainedSeconds > 0) M.time = { hero: shortDuration(trainedSeconds), label: 'Di allenamento', tile: shortDuration(trainedSeconds), tileLabel: 'Ore di allenamento' };
           if (sets) M.sets = { hero: String(sets), label: 'Serie completate', tile: String(sets), tileLabel: 'Serie' };
           if (weight && opts.weightMode !== 'off' && Math.abs(weight.kg) >= 0.1) {
             const main = opts.weightMode === 'kg' ? signed(weight.kg) + ' kg' : signed(weight.pct) + '%';
@@ -6709,8 +7077,8 @@
           if (activeDays) M.active = { hero: String(activeDays), label: 'Giorni attivi', tile: activeDays + (periodDays ? '/' + days.length : ''), tileLabel: 'Giorni attivi' };
 
           const FOCUS = {
-            total: ['loads', 'weight', 'workouts', 'sport', 'nutrition', 'improved', 'time', 'active', 'sets'],
-            training: ['loads', 'workouts', 'sport', 'improved', 'perWeek', 'time', 'sets', 'exercises'],
+            total: ['loads', 'workouts', 'time', 'weight', 'sport', 'nutrition', 'improved', 'active', 'sets'],
+            training: ['loads', 'time', 'workouts', 'sport', 'improved', 'perWeek', 'sets', 'exercises'],
             nutrition: ['nutrition', 'perfect', 'streak', 'meals'],
             body: ['weight', 'weightRate', 'weighIns']
           };
@@ -6741,6 +7109,10 @@
             tiles: available.filter(k => k !== heroKey).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
             // Risultati principali (usati anche dalla card "Frase del giorno")
             stats: FOCUS.total.filter(k => M[k]).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
+            metrics: M,
+            bestLift: lifts.find(l => l.kg > 0) || null,
+            activeDays,
+            totalDays: days.length,
             chart,
             highlights: (focus === 'total' || focus === 'training') ? lifts.filter(l => l.kg !== 0).slice(0, 2).map(l => ({ name: l.name, value: loadTxt(l), positive: l.kg > 0 })) : [],
             highlightsLabel: 'Carichi'
@@ -7082,6 +7454,16 @@
         };
 
         // Disegna la card. time = secondi dall'inizio dell'animazione (Infinity = immagine finale)
+        // Piè di pagina comune: motto + indirizzo dell'app (chi vede la storia sa dove trovarla)
+        const drawShareFooter = (ctx, W, M, foot, story, th, phase) => {
+          setFont(ctx, 900, story ? 28 : 24);
+          ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, W - M, 0, phase) : th.text;
+          spacedText(ctx, 'IERI. OGGI. DOMANI. ANCORA.', W / 2, foot - (story ? 22 : 20), 6, 'center');
+          setFont(ctx, 700, story ? 24 : 21);
+          ctx.fillStyle = th.sub;
+          spacedText(ctx, APP_URL_SHORT, W / 2, foot + (story ? 26 : 22), 2, 'center');
+        };
+
         // Corpo della card "Frase del giorno": parole che entrano una alla volta, parte forte in gradiente
         const drawQuoteBody = (ctx, data, o) => {
           const { W, H, M, story, th, phase, at, reveal, live, time } = o;
@@ -7197,10 +7579,214 @@
               ctx.fillText(data.signature, W / 2, o.foot - (story ? 70 : 56));
               ctx.textAlign = 'left';
             }
-            setFont(ctx, 900, story ? 28 : 24);
-            ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, W - M, 0, phase) : th.text;
-            spacedText(ctx, 'IERI. OGGI. DOMANI. ANCORA.', W / 2, o.foot, 6, 'center');
+            drawShareFooter(ctx, W, M, o.foot, story, th, phase);
           });
+        };
+
+        // ---------------------------------------------------------------
+        // RIEPILOGO DEL MESE: video a scene (una per risultato) + riepilogo finale
+        // ---------------------------------------------------------------
+        const RECAP_SCENE = 2.4;     // secondi per scena
+        const RECAP_HOLD = 3.5;      // riepilogo finale fermo prima della fine del video
+        const recapDuration = (data) => Math.min(24, data.scenes.length * RECAP_SCENE + RECAP_HOLD);
+
+        const drawRecapCalendar = (ctx, data, x, y, w, th, k, phase) => {
+          const cols = 7, gap = 14;
+          const cell = (w - gap * (cols - 1)) / cols;
+          const size = Math.min(cell, 118);
+          const offX = x + (w - (size * cols + gap * (cols - 1))) / 2;
+          setFont(ctx, 800, 22); ctx.fillStyle = th.sub; ctx.textAlign = 'center';
+          ['L', 'M', 'M', 'G', 'V', 'S', 'D'].forEach((d, i) => ctx.fillText(d, offX + i * (size + gap) + size / 2, y));
+          ctx.textAlign = 'left';
+          const shown = Math.ceil(data.calendar.length * clamp01(k));
+          const fill = th.brand ? brandGradient(ctx, offX, y, offX + w, y + 600, phase) : th.text;
+          data.calendar.forEach((day, i) => {
+            const pos = day.lead + i;
+            const cx = offX + (pos % 7) * (size + gap);
+            const cy = y + 26 + Math.floor(pos / 7) * (size + gap);
+            roundRect(ctx, cx, cy, size, size, size * 0.3);
+            ctx.fillStyle = day.active && i < shown ? fill : th.faint;
+            ctx.fill();
+          });
+        };
+
+        const drawRecapBody = (ctx, data, o) => {
+          const { W, H, M, story, th, phase, live, time } = o;
+          const maxW = W - M * 2;
+          const grad = (y0, y1) => (th.brand ? brandGradient(ctx, M, y0, W - M, y1, phase) : th.text);
+          const finalStart = live ? data.scenes.length * RECAP_SCENE : 0;
+
+          // Scene una alla volta (solo nel video)
+          if (live && time < finalStart) {
+            // Il primo fotogramma può arrivare con un tempo appena negativo
+            const i = Math.max(0, Math.min(data.scenes.length - 1, Math.floor(time / RECAP_SCENE)));
+            const sc = data.scenes[i];
+            const local = Math.max(0, time - i * RECAP_SCENE);
+            const kIn = easeOut(local / 0.45);
+            const kOut = 1 - clamp01((local - (RECAP_SCENE - 0.35)) / 0.35);
+            const a = Math.min(kIn, kOut);
+            if (a <= 0) return;
+            ctx.save();
+            ctx.globalAlpha = a;
+            const cy = story ? H * 0.46 : H * 0.47;
+            if (sc.type === 'intro') {
+              setFont(ctx, 900, story ? 34 : 30); ctx.fillStyle = th.sub;
+              spacedText(ctx, (sc.kicker || '').toUpperCase(), W / 2, cy - (story ? 190 : 150), 6, 'center');
+              ctx.translate(0, (1 - kIn) * 40);
+              fitFont(ctx, sc.big, 900, story ? 200 : 160, maxW, 60);
+              ctx.fillStyle = grad(cy - 200, cy);
+              ctx.textAlign = 'center';
+              ctx.fillText(sc.big, W / 2, cy);
+              setFont(ctx, 800, story ? 44 : 36); ctx.fillStyle = th.text;
+              ctx.fillText(sc.caption || '', W / 2, cy + (story ? 90 : 72));
+              ctx.textAlign = 'left';
+            } else {
+              setFont(ctx, 900, story ? 30 : 26); ctx.fillStyle = th.sub;
+              const top = sc.calendar ? (story ? 360 : 260) : cy - (story ? 300 : 230);
+              spacedText(ctx, (sc.kicker || '').toUpperCase(), M, top, 6);
+              const bigSize = story ? 300 : 220;
+              fitFont(ctx, sc.big, 900, bigSize, maxW, 70);
+              ctx.fillStyle = grad(top, top + bigSize);
+              ctx.fillText(countUp(sc.big, clamp01((local - 0.15) / 1.1)), M - 6, top + bigSize + 10);
+              setFont(ctx, 800, story ? 42 : 34); ctx.fillStyle = th.text;
+              ctx.fillText(ellipsize(ctx, sc.caption || '', maxW), M, top + bigSize + (story ? 125 : 95));
+              if (sc.sub) {
+                setFont(ctx, 700, story ? 32 : 28); ctx.fillStyle = th.sub;
+                ctx.fillText(ellipsize(ctx, sc.sub, maxW), M, top + bigSize + (story ? 180 : 140));
+              }
+              if (sc.calendar) {
+                drawRecapCalendar(ctx, data, M, top + bigSize + (story ? 250 : 180), maxW, th, (local - 0.3) / 1.2, phase);
+              }
+            }
+            ctx.restore();
+            return;
+          }
+
+          // Riepilogo finale (anche immagine statica)
+          const t = live ? time - finalStart : Infinity;
+          const at = (start, dur = 0.5) => (live ? easeOut((t - start) / dur) : 1);
+          const rev = (k, dy, fn) => { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.translate(0, (1 - k) * dy); fn(); ctx.restore(); };
+          const top = story ? 330 : 250;
+          rev(at(0, 0.5), 30, () => {
+            setFont(ctx, 900, story ? 34 : 30); ctx.fillStyle = grad(0, 0);
+            spacedText(ctx, (data.kicker || '').toUpperCase(), M, top, 6);
+          });
+          rev(at(0.15, 0.5), 40, () => {
+            const size = story ? 220 : 170;
+            setFont(ctx, 900, size); ctx.fillStyle = grad(top, top + size);
+            const big = String(data.activeDays);
+            ctx.fillText(big, M - 6, top + size + 10);
+            const bw = ctx.measureText(big).width;
+            setFont(ctx, 800, story ? 40 : 34); ctx.fillStyle = th.text;
+            ctx.fillText('giorni attivi', M + bw + 24, top + size - (story ? 60 : 46));
+            setFont(ctx, 700, story ? 30 : 26); ctx.fillStyle = th.sub;
+            ctx.fillText('su ' + data.totalDays, M + bw + 24, top + size - (story ? 14 : 8));
+          });
+          if (story && data.calendar.length) {
+            rev(at(0.3, 0.5), 20, () => drawRecapCalendar(ctx, data, M + 120, top + 330, maxW - 240, th, 1, phase));
+          }
+          const tiles = data.tiles.slice(0, story ? 6 : 4);
+          const gridY = story ? (data.calendar.length ? 1130 : 760) : 560;
+          const gap = story ? 24 : 20, tileH = story ? 150 : 140;
+          const tw = (maxW - gap) / 2;
+          tiles.forEach((tile, i) => {
+            rev(at(0.45 + i * 0.12, 0.45), 30, () => {
+              const tx = M + (i % 2) * (tw + gap);
+              const ty = gridY + Math.floor(i / 2) * (tileH + gap);
+              if (!th.shadow) {
+                ctx.fillStyle = th.tile; roundRect(ctx, tx, ty, tw, tileH, 34); ctx.fill();
+                ctx.lineWidth = 2; ctx.strokeStyle = th.border; ctx.stroke();
+              }
+              setFont(ctx, 800, story ? 22 : 20); ctx.fillStyle = th.sub;
+              spacedText(ctx, ellipsize(ctx, tile.label.toUpperCase(), tw - 80), tx + 30, ty + (story ? 48 : 44), 3);
+              fitFont(ctx, tile.value, 900, story ? 58 : 52, tw - 60, 26);
+              ctx.fillStyle = th.text;
+              ctx.fillText(tile.value, tx + 28, ty + tileH - (story ? 30 : 28));
+            });
+          });
+          if (!data.activeDays) {
+            rev(at(0.5, 0.5), 20, () => {
+              setFont(ctx, 800, story ? 44 : 36); ctx.fillStyle = th.text;
+              ctx.fillText('Il prossimo mese è tuo.', M, gridY + 40);
+            });
+          }
+          rev(at(1, 0.6), 0, () => drawShareFooter(ctx, W, M, o.foot, story, th, phase));
+        };
+
+        // Dati del riepilogo: mese corrente (offset 0) o precedente (offset 1)
+        const recapRange = (offset) => {
+          const first = new Date(); first.setHours(0, 0, 0, 0); first.setDate(1); first.setMonth(first.getMonth() - offset);
+          const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
+          const today = toISODate();
+          const end = toISODate(last) > today ? today : toISODate(last);
+          const month = first.toLocaleDateString('it-IT', { month: 'long' });
+          return { start: toISODate(first), end, first, month: month.charAt(0).toUpperCase() + month.slice(1), year: first.getFullYear() };
+        };
+        const recapMonthName = (offset) => recapRange(offset).month;
+
+        const shareRecapData = (offset, opts) => {
+          const r = recapRange(offset);
+          const p = shareProgressData(0, { ...opts, focus: 'total', hero: 'auto' }, { start: r.start, end: r.end });
+          const M = p.metrics;
+          const name = shareFirstName();
+          const set = activeDaySet.value;
+
+          // Calendario del mese (fino a oggi) e serie migliore nel mese
+          const calendar = [];
+          const lead = (r.first.getDay() + 6) % 7;   // lunedì = 0
+          let run = 0, bestRun = 0;
+          const d = new Date(r.first);
+          while (toISODate(d) <= r.end) {
+            const key = toISODate(d);
+            const active = set.has(key);
+            run = active ? run + 1 : 0; bestRun = Math.max(bestRun, run);
+            calendar.push({ key, active, lead });
+            d.setDate(d.getDate() + 1);
+          }
+          const activeDays = calendar.filter(c => c.active).length;
+
+          const scenes = [{ type: 'intro', kicker: name ? 'Il mese di ' + name : 'Il mio mese', big: r.month, caption: 'su STILL' }];
+          const tiles = [];
+          if (activeDays) {
+            scenes.push({ kicker: 'Giorni attivi', big: String(activeDays), caption: 'su ' + calendar.length + ' giorni', calendar: true });
+          }
+          if (M.workouts) {
+            scenes.push({ kicker: 'Allenamenti', big: M.workouts.hero, caption: M.workouts.hero === '1' ? 'sessione completata' : 'sessioni completate', sub: M.sets ? M.sets.tile + ' serie in palestra' : '' });
+            tiles.push({ label: 'Allenamenti', value: M.workouts.tile });
+          }
+          if (M.time) {
+            const split = trainingSecondsBetween(r.start, r.end);
+            const parts = [split.gym ? shortDuration(split.gym) + ' in palestra' : '', split.sport ? shortDuration(split.sport) + ' di sport' : ''].filter(Boolean);
+            scenes.push({ kicker: 'Ore di allenamento', big: M.time.hero, caption: 'passate ad allenarti', sub: parts.length > 1 ? parts.join(' · ') : '' });
+            tiles.push({ label: 'Ore di allenamento', value: M.time.tile });
+          }
+          if (M.sport) {
+            scenes.push({ kicker: 'Sport', big: M.sport.hero, caption: M.sport.label });
+            tiles.push({ label: M.sport.tileLabel, value: M.sport.tile });
+          }
+          if (M.nutrition) {
+            scenes.push({ kicker: 'Alimentazione', big: M.nutrition.hero, caption: 'del piano rispettato', sub: M.perfect && M.perfect.hero !== '0' ? M.perfect.hero + ' ' + M.perfect.label.toLowerCase() : '' });
+            tiles.push({ label: 'Alimentazione', value: M.nutrition.tile });
+          }
+          if (M.loads && p.bestLift) {
+            scenes.push({ kicker: 'Miglior progresso', big: M.loads.hero, caption: p.bestLift.name });
+            tiles.push({ label: 'Miglior carico', value: M.loads.tile });
+          }
+          if (M.weight) {
+            scenes.push({ kicker: 'Peso corporeo', big: M.weight.hero, caption: 'nel mese' });
+            tiles.push({ label: 'Peso', value: M.weight.tile });
+          }
+          if (bestRun >= 2) {
+            scenes.push({ kicker: 'Serie migliore', big: bestRun + ' giorni', caption: 'di fila senza fermarti' });
+            tiles.push({ label: 'Serie migliore', value: bestRun + ' giorni' });
+          }
+
+          return {
+            kind: 'recap', empty: !activeDays, available: [], focusAvailable: [],
+            kicker: name ? 'Il ' + r.month.toLowerCase() + ' di ' + name : 'Il mio ' + r.month.toLowerCase(),
+            dateLabel: r.month + ' ' + r.year,
+            month: r.month, activeDays, totalDays: calendar.length, calendar, tiles, scenes
+          };
         };
 
         const drawShareCard = (canvas, data, opts, time = Infinity) => {
@@ -7243,6 +7829,11 @@
             ctx.textAlign = 'left';
           });
 
+          if (data.kind === 'recap') {
+            drawRecapBody(ctx, data, { W, H, M, story, th, phase, live, time, foot: L.foot });
+            ctx.shadowColor = 'transparent';
+            return;
+          }
           if (data.kind === 'quote') {
             drawQuoteBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time, foot: L.foot });
             ctx.shadowColor = 'transparent';
@@ -7316,9 +7907,7 @@
 
           // Piè di pagina
           reveal(at(2.5, 0.6), 0, () => {
-            setFont(ctx, 900, story ? 28 : 24);
-            ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, W - M, 0, phase) : th.text;
-            spacedText(ctx, 'IERI. OGGI. DOMANI. ANCORA.', W / 2, L.foot, 6, 'center');
+            drawShareFooter(ctx, W, M, L.foot, story, th, phase);
           });
           ctx.shadowColor = 'transparent';
         };
@@ -7340,6 +7929,7 @@
               statsLabel: (name ? 'I risultati di ' + name : 'I miei risultati') + ' · ' + periodLabel(st.period).toLowerCase()
             };
           }
+          if (st.kind === 'recap') return shareRecapData(st.recapMonth || 0, opts);
           return st.kind === 'workout' ? shareWorkoutData(st.sessionId, opts) : shareProgressData(st.period, opts);
         });
 
@@ -7350,7 +7940,7 @@
           { id: 'photo', label: 'Foto', icon: '📷', swatch: 'background: #2b2b2e;' },
           { id: 'sticker', label: 'Sticker', icon: '✨', swatch: 'background-image: repeating-conic-gradient(#4a4a4a 0 25%, #333 0 50%); background-size: 12px 12px;' }
         ];
-        const shareHeroLabels = { improved: 'Carichi in crescita', perWeek: 'A settimana', exercises: 'Esercizi', loads: 'Miglior carico', weight: 'Peso', weightRate: 'A settimana', weighIns: 'Pesate', workouts: 'Allenamenti', sport: 'Sport', nutrition: 'Aderenza', meals: 'Pasti', perfect: 'Giorni perfetti', streak: 'Serie migliore', time: 'Tempo', active: 'Giorni attivi', sets: 'Serie' };
+        const shareHeroLabels = { improved: 'Carichi in crescita', perWeek: 'A settimana', exercises: 'Esercizi', loads: 'Miglior carico', weight: 'Peso', weightRate: 'A settimana', weighIns: 'Pesate', workouts: 'Allenamenti', sport: 'Sport', nutrition: 'Aderenza', meals: 'Pasti', perfect: 'Giorni perfetti', streak: 'Serie migliore', time: 'Ore di allenamento', active: 'Giorni attivi', sets: 'Serie' };
         const shareFocusLabels = { total: 'Totale', training: 'Allenamento', nutrition: 'Alimentazione', body: 'Corpo' };
 
         // Video disponibile se il browser sa registrare il canvas (lo sticker è trasparente: solo immagine)
@@ -7386,8 +7976,10 @@
             if (now - lastDraw < 32) { shareAnimFrame = requestAnimationFrame(loop); return; }   // ~30 fps
             lastDraw = now;
             const elapsed = (now - shareAnimStart) / 1000;
-            const t = elapsed % (VIDEO_SECONDS + 1);   // 1 s di pausa sul finale prima di ripartire
-            drawShareCard(canvas, shareData.value, shareStudio.value, Math.min(t, VIDEO_SECONDS));
+            const data = shareData.value;
+            const len = data.kind === 'recap' ? data.scenes.length * RECAP_SCENE + 2.5 : VIDEO_SECONDS;
+            const t = elapsed % (len + 1);   // 1 s di pausa sul finale prima di ripartire
+            drawShareCard(canvas, data, shareStudio.value, Math.min(t, len));
             shareAnimFrame = requestAnimationFrame(loop);
           };
           st.ready = true;
@@ -7404,7 +7996,7 @@
         };
         watch(() => {
           const st = shareStudio.value;
-          return [st.isOpen, st.kind, st.sessionId, st.period, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.weightMode, st.loadMode, st.hasPhoto];
+          return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.weightMode, st.loadMode, st.hasPhoto];
         }, () => { if (shareStudio.value.isOpen) refreshSharePreview(); else stopShareAnimation(); });
 
         const openShareStudio = (kind, sessionId = null) => {
@@ -7415,6 +8007,11 @@
             output: shareVideoSupported ? st.output : 'image',
             theme: st.theme === 'photo' && !sharePhoto ? 'night' : st.theme
           };
+        };
+        const openRecap = (offset = 0) => {
+          openShareStudio('recap');
+          shareStudio.value.recapMonth = offset;
+          if (shareVideoSupported) shareStudio.value.output = 'video';
         };
         const closeShareStudio = () => {
           if (shareStudio.value.recording) return;
@@ -7445,7 +8042,7 @@
         };
 
         // --- Esportazione ---
-        const shareBaseName = () => `still-${({ workout: 'allenamento', quote: 'frase-del-giorno' })[shareStudio.value.kind] || 'progressi'}-${toISODate()}`;
+        const shareBaseName = () => `still-${({ workout: 'allenamento', quote: 'frase-del-giorno', recap: 'il-mio-mese' })[shareStudio.value.kind] || 'progressi'}-${toISODate()}`;
         const downloadBlob = (blobFile, name) => {
           const url = URL.createObjectURL(blobFile);
           const a = document.createElement('a');
@@ -7485,7 +8082,7 @@
             resolve(new File([blobFile], shareBaseName() + '.' + ext, { type }));
           };
           const data = shareData.value;
-          const total = VIDEO_TOTAL;
+          const total = data.kind === 'recap' ? recapDuration(data) : VIDEO_TOTAL;
           const start = performance.now();
           drawShareCard(canvas, data, st, 0);
           recorder.start(250);
@@ -7519,10 +8116,16 @@
           if (st.busy) return;
           st.busy = true; st.error = '';
           let file = null;
+          // Link copiato subito (serve il tocco dell'utente): su Instagram si incolla nello sticker "Link"
+          try { if (navigator.clipboard) navigator.clipboard.writeText(APP_URL).catch(() => {}); } catch (e) { /* ignora */ }
+          const shareText = ({
+            quote: 'La mia carica di oggi 🔥 #STILL #fraseDelGiorno',
+            recap: 'Il mio mese su STILL 🎬 #STILL'
+          })[st.kind] || 'Ieri. Oggi. Domani. Ancora. 💪 #STILL';
           try {
             file = await buildShareFile();
             if (navigator.canShare && navigator.canShare({ files: [file] })) {
-              await navigator.share({ files: [file], text: st.kind === 'quote' ? 'La mia carica di oggi 🔥 #STILL #fraseDelGiorno' : 'Ieri. Oggi. Domani. Ancora. 💪 #STILL' });
+              await navigator.share({ files: [file], text: shareText + ' ' + APP_URL });
             } else {
               downloadBlob(file, file.name);
               showToastMessage((file.type.startsWith('video') ? 'Video salvato' : 'Immagine salvata') + ': caricala nella tua storia o nel tuo post.');
@@ -7620,8 +8223,314 @@
           });
         };
 
+        // ---------------------------------------------------------------
+        // SERIE DI GIORNI ATTIVI: un giorno è attivo se hai segnato almeno
+        // un pasto, un allenamento in palestra o uno sport fatto.
+        // ---------------------------------------------------------------
+        const activeDaySet = computed(() => {
+          const set = new Set();
+          workoutLogs.value.forEach(log => { if (log.date) set.add(log.date); });
+          trainingSessions.value.forEach(s => {
+            if (s.kind === 'gym' && s.date && (s.report || (s.statusByDate && s.statusByDate[s.date] === 'done'))) set.add(s.date);
+            if (s.kind === 'sport' && s.statusByDate) {
+              Object.entries(s.statusByDate).forEach(([key, status]) => { if (status === 'done') set.add(key); });
+            }
+          });
+          Object.entries(mealLogs.value).forEach(([key, logs]) => {
+            if (Object.values(logs || {}).some(l => l && l.status === 'done')) set.add(key);
+          });
+          return set;
+        });
+
+        // PROTEGGI SERIE: se salti UN giorno la serie non si azzera (il giorno salvato non si conta).
+        // Si ricarica dopo SHIELD_RECHARGE giorni attivi. Calcolato sempre dallo storico: niente stato da salvare.
+        const SHIELD_RECHARGE = 7;
+        const streakInfo = computed(() => {
+          const set = activeDaySet.value;
+          const today = toISODate();
+          const keys = [...set].filter(k => k <= today).sort();
+          let current = 0, best = 0, shields = 1, sinceUse = SHIELD_RECHARGE;
+          const protectedDays = new Set();
+          const activeDay = () => {
+            current++; sinceUse++;
+            if (!shields && sinceUse >= SHIELD_RECHARGE) shields = 1;
+            best = Math.max(best, current);
+          };
+          if (keys.length) {
+            const d = new Date(keys[0] + 'T12:00:00');
+            let guard = 0;
+            while (toISODate(d) < today && guard++ < 5000) {
+              const key = toISODate(d);
+              if (set.has(key)) activeDay();
+              else if (current > 0 && shields) { shields = 0; sinceUse = 0; protectedDays.add(key); }
+              else current = 0;
+              d.setDate(d.getDate() + 1);
+            }
+            if (set.has(today)) activeDay();
+          }
+          const todayDone = set.has(today);
+          const y = new Date(); y.setHours(12, 0, 0, 0); y.setDate(y.getDate() - 1);
+          const protectedYesterday = protectedDays.has(toISODate(y));
+
+          const week = [];
+          for (let i = 6; i >= 0; i--) {
+            const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
+            const key = toISODate(d);
+            week.push({ key, label: ['D', 'L', 'M', 'M', 'G', 'V', 'S'][d.getDay()], active: set.has(key), protected: protectedDays.has(key), today: i === 0 });
+          }
+
+          let message;
+          if (todayDone) message = current > 1 ? 'Oggi è fatto. Domani si continua.' : 'Primo giorno fatto. Domani si continua.';
+          else if (protectedYesterday) message = 'Ieri il proteggi serie ha salvato la tua serie: segna qualcosa oggi per non perderla.';
+          else if (current > 0) message = 'Segna un pasto o un allenamento oggi per non perdere la serie.';
+          else message = 'Segna un pasto o un allenamento e inizia la tua serie.';
+          return {
+            current, best, todayDone, week, message, protectedYesterday,
+            shieldReady: !!shields,
+            shieldIn: shields ? 0 : Math.max(1, SHIELD_RECHARGE - sinceUse)
+          };
+        });
+
+        // Riepilogo del mese scorso in evidenza nei primi giorni del mese
+        const recapBanner = computed(() => {
+          if (new Date().getDate() > 7) return null;
+          const r = recapRange(1);
+          let active = 0;
+          const d = new Date(r.first);
+          while (toISODate(d) <= r.end) { if (activeDaySet.value.has(toISODate(d))) active++; d.setDate(d.getDate() + 1); }
+          return active ? { month: r.month, active } : null;
+        });
+
+        // ---------------------------------------------------------------
+        // PROMEMORIA: pasti, allenamenti e serie in pericolo.
+        // Nell'APK (Capacitor) diventano notifiche locali vere; sul sito
+        // arrivano solo finché l'app è aperta.
+        // ---------------------------------------------------------------
+        const DEFAULT_REMINDERS = {
+          enabled: false, meals: true, workouts: true, checkins: true, streak: true, workoutLead: 60, streakTime: '21:00',
+          mealTimes: { colazione: '08:00', spuntino_mattina: '10:30', pranzo: '13:00', spuntino_pomeriggio: '16:30', post_workout: '', cena: '20:00' }
+        };
+        const savedSettings = (() => { try { return JSON.parse(storage.getRaw('still_settings') || '{}'); } catch (e) { return {}; } })();
+        const settings = ref({
+          ...savedSettings,
+          reminders: {
+            ...DEFAULT_REMINDERS,
+            ...(savedSettings.reminders || {}),
+            mealTimes: { ...DEFAULT_REMINDERS.mealTimes, ...((savedSettings.reminders || {}).mealTimes || {}) }
+          }
+        });
+        watch(settings, (v) => storage.save('still_settings', v), { deep: true });
+
+        const nativeNotifications = () => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) || null;
+        const remindersNative = !!nativeNotifications();
+        const remindersSupported = remindersNative || typeof Notification !== 'undefined';
+
+        const atTime = (dateKey, hhmm) => {
+          const m = /^(\d{1,2}):(\d{2})$/.exec(hhmm || '');
+          if (!m) return null;
+          const d = new Date(dateKey + 'T00:00:00');
+          d.setHours(Number(m[1]), Number(m[2]), 0, 0);
+          return d.getTime();
+        };
+        const reminderId = (text) => {
+          let h = 0;
+          for (let i = 0; i < text.length; i++) h = (h * 31 + text.charCodeAt(i)) | 0;
+          return Math.abs(h) % 2000000000 + 1;
+        };
+
+        // Testi delle notifiche: variano di giorno in giorno (scelta stabile per data)
+        const pickText = (list, seed) => list[reminderId(seed) % list.length];
+        const MEAL_TITLES = {
+          colazione: 'È ora di colazione', spuntino_mattina: 'È l\'ora dello spuntino', pranzo: 'È ora di pranzo',
+          spuntino_pomeriggio: 'È l\'ora della merenda', post_workout: 'Ricarica post allenamento', cena: 'È ora di cena'
+        };
+        const MEAL_OUTROS = ['Facci sapere com\'è andata.', 'Segnalo in app quando hai finito.', 'Un pasto alla volta si arriva lontano.', 'Spunta il pasto e tieni viva la serie.'];
+        const SPORT_EMOJI = { Calcio: '⚽', Pallavolo: '🏐', Basket: '🏀', Lotta: '🤼', Tennis: '🎾', Padel: '🎾', Nuoto: '🏊', Corsa: '🏃', Ciclismo: '🚴', Boxe: '🥊', Rugby: '🏉', 'Arti marziali': '🥋' };
+        const CHECKIN_TITLES = ['Hai spaccato anche oggi?', 'Sei stato un fenomeno anche oggi?', 'Missione compiuta?', 'Allenamento chiuso?'];
+        const CHECKIN_BODIES = ['Faccelo sapere: segnalo in app e tieni viva la serie.', 'Entra e segnalo: ogni allenamento conta.', 'Raccontacelo in app, la tua serie ti aspetta.'];
+        const SPORT_CHECK_DELAY = 120;   // minuti dopo l'inizio
+
+        // Elenco dei promemoria dei prossimi 3 giorni
+        const buildReminders = () => {
+          const r = settings.value.reminders;
+          const out = [];
+          const now = Date.now();
+          const streak = streakInfo.value;
+          const todayKey = toISODate();
+          const todayActive = activeDaySet.value.has(todayKey);
+          for (let off = 0; off < 3; off++) {
+            const day = new Date(); day.setHours(12, 0, 0, 0); day.setDate(day.getDate() + off);
+            const key = toISODate(day);
+
+            // Pasti: cosa mangiare + "facci sapere"
+            if (r.meals) {
+              const logs = mealLogs.value[key] || {};
+              const byType = {};
+              getMealsForDate(day).forEach(meal => { (byType[meal.type] = byType[meal.type] || []).push(meal); });
+              Object.entries(byType).forEach(([type, meals]) => {
+                if (meals.every(m => logs[m.id] && logs[m.id].status === 'done')) return;
+                const at = atTime(key, r.mealTimes[type]);
+                if (!at || at <= now) return;
+                const items = meals.map(m => m.description).filter(d => d && d !== 'Nessun dettaglio.').join(', ');
+                out.push({
+                  id: reminderId('meal' + key + type), at,
+                  title: meals[0].icon + ' ' + (MEAL_TITLES[type] || meals[0].name),
+                  body: (items ? 'Oggi: ' + items + '. ' : '') + pickText(MEAL_OUTROS, key + type)
+                });
+              });
+            }
+
+            trainingSessions.value.forEach(session => {
+              if (!session.time || !trainingSessionOccursOn(session, key)) return;
+              const start = atTime(key, session.time);
+              if (!start) return;
+              const isSport = session.kind === 'sport';
+              const emoji = isSport ? (SPORT_EMOJI[session.sport] || '🔥') : '💪';
+              const label = trainingSessionLabel(session);
+
+              // Prima: si parte
+              if (r.workouts) {
+                const doneGym = !isSport && session.report && session.date === key;
+                const at = start - (Number(r.workoutLead) || 0) * 60000;
+                if (!doneGym && at > now) {
+                  out.push({
+                    id: reminderId('train' + key + session.id), at,
+                    title: emoji + ' ' + label + ' alle ' + session.time,
+                    body: Number(r.workoutLead) ? 'Tra ' + (r.workoutLead >= 60 ? (r.workoutLead / 60) + (r.workoutLead === 60 ? ' ora' : ' ore') : r.workoutLead + ' minuti') + ' si parte. Preparati.' : 'Si parte. Dai tutto.'
+                  });
+                }
+              }
+
+              // Dopo: com'è andata? (solo se non l'hai già segnato)
+              if (r.checkins) {
+                const already = !!sportStatus(session, key) || !!(session.report && session.date === key);
+                // Mai dopo mezzanotte: al massimo alle 23:30 dello stesso giorno
+                const after = isSport && sportDurationMin(session) ? sportDurationMin(session) + 15 : SPORT_CHECK_DELAY;   // 15 min dopo la fine
+                const at = Math.min(start + after * 60000, atTime(key, '23:30'));
+                if (!already && at > start && at > now) {
+                  const what = isSport ? (session.sport || 'sport').toLowerCase() : 'in palestra';
+                  out.push({
+                    id: reminderId('check' + key + session.id), at,
+                    title: emoji + ' ' + pickText(CHECKIN_TITLES, key + session.id),
+                    body: (isSport ? 'Com\'è andata a ' + what + '? ' : 'Com\'è andata ' + what + '? ') + pickText(CHECKIN_BODIES, 'b' + key + session.id)
+                  });
+                }
+              }
+            });
+
+            if (r.streak) {
+              // Sera: serie in pericolo
+              const evening = atTime(key, r.streakTime);
+              if (!(off === 0 && todayActive) && evening && evening > now) {
+                const n = off === 0 ? streak.current : 0;
+                const lastChance = off === 0 && n > 0 && !streak.shieldReady;
+                out.push({
+                  id: reminderId('streak' + key), at: evening,
+                  title: n > 0 ? '🔥 ' + n + (n === 1 ? ' giorno' : ' giorni') + ' di fila' : '🔥 Non fermarti oggi',
+                  body: lastChance
+                    ? 'Il proteggi serie è già stato usato: se salti oggi perdi la serie. Segna un pasto o un allenamento.'
+                    : (n > 0 ? 'Segna un pasto o un allenamento per non perdere la serie.' : 'Segna un pasto o un allenamento: ogni giorno conta.')
+                });
+              }
+              // Mattina dopo un giorno saltato: il proteggi serie ti ha salvato
+              const morning = atTime(key, '10:00');
+              const savedToday = off === 0 && streak.protectedYesterday && !todayActive;
+              const savedTomorrow = off === 1 && !todayActive && streak.current > 0 && streak.shieldReady;
+              if ((savedToday || savedTomorrow) && morning > now) {
+                const n = streak.current;
+                out.push({
+                  id: reminderId('shield' + key), at: morning,
+                  title: '🛡️ Proteggi serie attivato',
+                  body: 'Ieri non sei passato: il proteggi serie ha salvato i tuoi ' + n + (n === 1 ? ' giorno' : ' giorni') + ' di fila. Entra oggi per non perderla.'
+                });
+              }
+            }
+          }
+          return out.sort((a, b) => a.at - b.at).slice(0, 60);
+        };
+
+        let webReminderTimers = [];
+        const showWebNotification = (n) => {
+          try { new Notification(n.title, { body: n.body, tag: String(n.id) }); } catch (e) { /* alcuni browser non le permettono senza service worker */ }
+        };
+        const applyReminders = async () => {
+          webReminderTimers.forEach(clearTimeout);
+          webReminderTimers = [];
+          const list = settings.value.reminders.enabled ? buildReminders() : [];
+          const native = nativeNotifications();
+          if (native) {
+            try {
+              const pending = await native.getPending();
+              if (pending && pending.notifications && pending.notifications.length) {
+                await native.cancel({ notifications: pending.notifications.map(n => ({ id: n.id })) });
+              }
+              if (list.length) {
+                await native.schedule({ notifications: list.map(n => ({ id: n.id, title: n.title, body: n.body, schedule: { at: new Date(n.at), allowWhileIdle: true } })) });
+              }
+            } catch (e) { console.warn('Promemoria non programmati', e); }
+            return;
+          }
+          if (typeof Notification === 'undefined' || Notification.permission !== 'granted') return;
+          list.forEach(n => {
+            const delay = n.at - Date.now();
+            if (delay > 0 && delay < 2147483647) webReminderTimers.push(setTimeout(() => showWebNotification(n), delay));
+          });
+        };
+        let reminderDebounce = null;
+        const scheduleReminders = () => {
+          clearTimeout(reminderDebounce);
+          reminderDebounce = setTimeout(applyReminders, 800);
+        };
+        watch([settings, plans, mealLogs, trainingSessions], scheduleReminders, { deep: true });
+        onMounted(() => {
+          scheduleReminders();
+          setInterval(scheduleReminders, 60 * 60 * 1000);   // sposta avanti la finestra dei 3 giorni
+        });
+
+        const toggleReminders = async () => {
+          const r = settings.value.reminders;
+          if (r.enabled) { r.enabled = false; return; }
+          try {
+            const native = nativeNotifications();
+            if (native) {
+              const p = await native.requestPermissions();
+              if (p.display !== 'granted') { showToastMessage('Notifiche non consentite: attivale dalle impostazioni del telefono.'); return; }
+            } else if (typeof Notification !== 'undefined') {
+              const p = await Notification.requestPermission();
+              if (p !== 'granted') { showToastMessage('Notifiche bloccate: attivale dalle impostazioni del browser per questo sito.'); return; }
+            } else {
+              showToastMessage('Questo browser non supporta le notifiche.');
+              return;
+            }
+          } catch (e) {
+            showToastMessage('Impossibile attivare le notifiche su questo dispositivo.');
+            return;
+          }
+          r.enabled = true;
+        };
+        const reminderMealTypes = mealTypes;
+
         return {
           activeTab,
+          pastChecksModal,
+          pastChecksSession,
+          setPastCheck,
+          setAllPastChecks,
+          savePastChecks,
+          openPastFromCheck,
+          openPastFromForm,
+          shortDuration,
+          sessionTimeLabel,
+          trainingTimeSummary,
+          streakInfo,
+          recapBanner,
+          openRecap,
+          recapMonthName,
+          settings,
+          toggleReminders,
+          remindersSupported,
+          remindersNative,
+          reminderMealTypes,
           isAuthenticated,
           authLoading,
           showGroceryReminder,
