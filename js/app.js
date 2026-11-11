@@ -4368,6 +4368,18 @@ createApp({
       }).filter(Boolean).sort((a, b) => (b.value - b.prev) / b.prev - (a.value - a.prev) / a.prev);
     };
 
+    // Settimane (da lunedì) con almeno 3 giorni di allenamento
+    const fullWeeks = computed(() => {
+      const perWeek = {};
+      trainingDaySet.value.forEach(key => {
+        const d = new Date(key + 'T12:00:00');
+        d.setDate(d.getDate() - ((d.getDay() + 6) % 7));
+        const monday = toISODate(d);
+        perWeek[monday] = (perWeek[monday] || 0) + 1;
+      });
+      return Object.values(perWeek).filter(n => n >= 3).length;
+    });
+
     const mealsDoneCount = computed(() => Object.values(mealLogs.value)
       .reduce((n, logs) => n + Object.values(logs || {}).filter(l => l && l.status === 'done').length, 0));
 
@@ -4380,6 +4392,7 @@ createApp({
         active: [...activeDaySet.value].filter(k => k <= today).length,
         meals: mealsDoneCount.value,
         records: personalRecords.value.length,
+        weeks: fullWeeks.value,
         shares: settings.value.shares || 0
       };
     });
@@ -4454,10 +4467,10 @@ createApp({
     const trophyDetailGroup = computed(() => trophyGroups.value.find(g => g.id === trophyDetail.value.groupId) || null);
     const openTrophyDetail = (group) => { trophyDetail.value = { isOpen: true, groupId: group.id }; };
     const closeTrophyDetail = () => { trophyDetail.value.isOpen = false; };
-    const openTrophies = () => {
-      activeTab.value = 'progress';
-      nextTick(() => { const el = document.getElementById('trofei'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
-    };
+    const openTrophies = () => { activeTab.value = 'trophies'; };
+    // I traguardi più vicini da sbloccare (per la scheda Trofei)
+    const nextChallenges = computed(() => trophyGroups.value.filter(g => g.next)
+      .sort((a, b) => b.progress - a.progress).slice(0, 3));
 
     // Card social di un traguardo (trofeo o record)
     const openAchievementShare = (spec) => {
@@ -4725,6 +4738,7 @@ createApp({
       openTrophyDetail,
       closeTrophyDetail,
       openTrophies,
+      nextChallenges,
       openAchievementShare,
       settings,
       toggleReminders,

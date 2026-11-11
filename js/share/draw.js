@@ -590,7 +590,7 @@ const drawAchievementBody = (ctx, data, o) => {
   const sc = story ? 1 : 0.72;
   const Y = story
     ? { kicker: 330, badge: 700, pill: 985, big: 1200, cap: 1275, sub: 1335, tiles: 1430 }
-    : { kicker: 235, badge: 470, pill: 668, big: 830, cap: 892, sub: 942, tiles: 985 };
+    : { kicker: 235, badge: 490, pill: 685, big: 845, cap: 905, sub: 953, tiles: 995 };
   const R = 210 * sc;
   const color = data.color || BRAND[1];
   const text = (fill) => (th.brand ? fill : th.text);
@@ -612,13 +612,14 @@ const drawAchievementBody = (ctx, data, o) => {
     ctx.rotate(live ? time * 0.25 : 0.2);
     for (let i = 0; i < 14; i++) {
       ctx.rotate((Math.PI * 2) / 14);
-      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R * 2 * pop, -0.08, 0.08); ctx.closePath();
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R * 1.5 * pop, -0.08, 0.08); ctx.closePath();
       ctx.fillStyle = color + '24'; ctx.fill();
     }
     ctx.restore();
-    const glow = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 1.7);
+    // Alone e raggi restano entro 1,5 volte il raggio: non arrivano alla scritta sopra
+    const glow = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 1.45);
     glow.addColorStop(0, color + '66'); glow.addColorStop(1, color + '00');
-    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, R * 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, R * 1.45, 0, Math.PI * 2); ctx.fill();
     ctx.scale(pop, pop);
     ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2);
     ctx.fillStyle = color + '33'; ctx.fill();

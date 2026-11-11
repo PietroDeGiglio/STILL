@@ -23,6 +23,8 @@ const TROPHY_GROUPS = [
     hint: 'Pasti segnati come fatti' },
   { id: 'records', icon: '🏋️', name: 'Record personali', unit: 'record', one: 'record', steps: [1, 5, 10, 25, 50, 100, 200],
     hint: 'Volte in cui hai superato il tuo carico migliore' },
+  { id: 'weeks', icon: '🏅', name: 'Settimane piene', unit: 'settimane piene', one: 'settimana piena', steps: [1, 4, 12, 26, 52, 104, 156],
+    hint: 'Settimane (lun–dom) con almeno 3 allenamenti' },
   { id: 'shares', icon: '📣', name: 'Storie condivise', unit: 'condivisioni', one: 'condivisione', steps: [1, 5, 10, 25, 50, 100, 200],
     hint: 'Card e video condivisi o salvati' }
 ];
