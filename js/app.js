@@ -150,6 +150,8 @@ createApp({
 
     const startNewPlan = () => {
       editingPlanId.value = null;
+      pdfImport.value = { busy: false, error: '', summary: null };
+      newPlanBuilder.value = { currentWeekIdx: 0, currentDay: 'Lunedì', weeks: [] };
       const today = new Date();
       const nextMonth = new Date(today);
       nextMonth.setMonth(today.getMonth() + 1);
@@ -162,6 +164,7 @@ createApp({
 
     const editPlan = (plan) => {
       editingPlanId.value = plan.id;
+      pdfImport.value = { busy: false, error: '', summary: null };
       newPlanData.value = {
         name: plan.name,
         startDate: plan.startDate,
@@ -202,6 +205,41 @@ createApp({
         };
       }
       nutritionView.value = 'builder';
+    };
+
+    // Importa la dieta da un PDF del nutrizionista (js/import/diet-pdf.js).
+    // Riempie il builder: l'utente controlla, corregge e salva come sempre.
+    const pdfImport = ref({ busy: false, error: '', summary: null });
+    const importPlanPdf = async (event) => {
+      const input = event.target;
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
+        pdfImport.value = { busy: false, error: 'Il file deve essere un PDF.', summary: null };
+        return;
+      }
+      pdfImport.value = { busy: true, error: '', summary: null };
+      try {
+        const res = await importDietPdf(file);
+        if (res.error) {
+          pdfImport.value = { busy: false, summary: null, error: res.error === 'scan'
+            ? 'Questo PDF sembra una scansione (un\'immagine): non riesco a leggere il testo. Inserisci la dieta a mano qui sotto.'
+            : 'Non ho trovato pasti nel PDF. Puoi inserire la dieta a mano qui sotto.' };
+          return;
+        }
+        newPlanBuilder.value = { currentWeekIdx: 0, currentDay: 'Lunedì', weeks: res.weeks };
+        if (!newPlanData.value.name.trim()) {
+          newPlanData.value.name = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').trim().slice(0, 40) || 'Dieta';
+        }
+        pdfImport.value = { busy: false, error: '', summary: { file: file.name, weeks: res.weeks.length, meals: res.meals, foods: res.foods, missing: res.missing } };
+        goToBuilder();
+      } catch (e) {
+        console.error(e);
+        pdfImport.value = { busy: false, summary: null, error: navigator.onLine === false
+          ? 'Per leggere il PDF serve la connessione la prima volta. Riprova online o inserisci la dieta a mano.'
+          : 'Non sono riuscito ad aprire il PDF. Inserisci la dieta a mano qui sotto.' };
+      }
     };
 
     const addWeekToBuilder = () => newPlanBuilder.value.weeks.push(createEmptyWeek());
@@ -4777,6 +4815,8 @@ createApp({
       closeTrophyDetail,
       openTrophies,
       builderMealEstimate,
+      pdfImport,
+      importPlanPdf,
       itemKcalLabel,
       canInstall,
       isStandalone,

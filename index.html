@@ -1236,6 +1236,28 @@
                 </div>
               </div>
 
+              <!-- Import da PDF (in alternativa all'inserimento a mano) -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft">
+                <div class="flex items-center gap-3">
+                  <div class="w-11 h-11 shrink-0 rounded-2xl bg-viola/10 flex items-center justify-center text-xl">📄</div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-sm font-bold text-antracite">Hai la dieta in PDF?</div>
+                    <div class="text-[11px] font-medium text-gray-400 leading-snug">La leggo io e compilo il menù: tu controlli e salvi.</div>
+                  </div>
+                </div>
+                <label class="mt-4 w-full flex items-center justify-center gap-2 py-3 rounded-2xl font-bold text-sm transition-all active:scale-95"
+                       :class="pdfImport.busy ? 'bg-gray-100 text-gray-400 cursor-wait' : 'bg-viola/10 text-viola hover:bg-viola/15 cursor-pointer'">
+                  <input type="file" accept="application/pdf,.pdf" class="hidden" :disabled="pdfImport.busy" @change="importPlanPdf">
+                  <svg v-if="pdfImport.busy" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="3" stroke-dasharray="40 20"/></svg>
+                  {{ pdfImport.busy ? 'Sto leggendo il PDF…' : (editingPlanId ? 'Sostituisci menù da PDF' : 'Carica PDF') }}
+                </label>
+                <p v-if="pdfImport.error" class="mt-3 text-[11px] font-semibold text-red-500 leading-snug">{{ pdfImport.error }}</p>
+              </div>
+
+              <div class="flex items-center gap-3 text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                <div class="flex-1 h-px bg-gray-200"></div>oppure a mano<div class="flex-1 h-px bg-gray-200"></div>
+              </div>
+
               <!-- Form Creazione -->
               <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-5">
                 
@@ -1292,6 +1314,14 @@
                     <h2 class="text-2xl font-bold text-antracite leading-tight">{{ editingPlanId ? 'Modifica Menù' : 'Costruisci Menù' }}</h2>
                   </div>
                 </div>
+              </div>
+
+              <!-- Riepilogo import PDF -->
+              <div v-if="pdfImport.summary" class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4 relative">
+                <button @click="pdfImport.summary = null" class="absolute top-2 right-3 text-gray-400 text-lg leading-none" aria-label="Chiudi">×</button>
+                <div class="text-sm font-bold text-antracite pr-5">✨ Letti dal PDF: {{ pdfImport.summary.meals }} pasti, {{ pdfImport.summary.foods }} alimenti<span v-if="pdfImport.summary.weeks > 1"> in {{ pdfImport.summary.weeks }} settimane</span></div>
+                <p class="text-[11px] font-medium text-gray-500 leading-snug mt-1">Controlla giorno per giorno e correggi se serve, poi salva. Le calorie si calcolano da sole.</p>
+                <p v-if="pdfImport.summary.missing.length" class="text-[11px] font-semibold text-amber-600 leading-snug mt-1.5">Giorni vuoti: {{ pdfImport.summary.missing.join(', ') }}</p>
               </div>
 
               <!-- Settimane -->
@@ -3394,6 +3424,7 @@
   <script src="js/utils/format.js"></script>
   <script src="js/data/foods.js"></script>
   <script src="js/utils/calories.js"></script>
+  <script src="js/import/diet-pdf.js"></script>
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
   <script src="js/share/draw.js"></script>
