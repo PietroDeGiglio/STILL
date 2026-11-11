@@ -3699,8 +3699,9 @@ createApp({
       if (activeDays) M.active = { hero: String(activeDays), label: 'Giorni attivi', tile: activeDays + (periodDays ? '/' + days.length : ''), tileLabel: 'Giorni attivi' };
 
       const FOCUS = {
-        total: ['loads', 'workouts', 'time', 'weight', 'sport', 'nutrition', 'improved', 'active', 'sets'],
-        training: ['loads', 'time', 'workouts', 'sport', 'improved', 'perWeek', 'sets', 'exercises'],
+        // Gli sport non hanno un riquadro a parte: contano già negli allenamenti e nelle ore
+        total: ['loads', 'workouts', 'time', 'weight', 'nutrition', 'improved', 'active', 'sets'],
+        training: ['loads', 'time', 'workouts', 'improved', 'perWeek', 'sets', 'exercises'],
         nutrition: ['nutrition', 'perfect', 'streak', 'meals'],
         body: ['weight', 'weightRate', 'weighIns']
       };
@@ -3730,7 +3731,8 @@ createApp({
         hero: heroMetric ? { value: heroMetric.hero, label: heroMetric.label } : { value: '0', label: 'Si parte da qui' },
         tiles: available.filter(k => k !== heroKey).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
         // Risultati principali (usati anche dalla card "Frase del giorno")
-        stats: FOCUS.total.filter(k => M[k]).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
+        // (allenamenti e ore sempre per primi)
+        stats: ['workouts', 'time', 'loads', 'weight', 'nutrition', 'improved', 'active', 'sets'].filter(k => M[k]).slice(0, 4).map(k => ({ label: M[k].tileLabel, value: M[k].tile })),
         metrics: M,
         bestLift: lifts.find(l => l.kg > 0) || null,
         activeDays,
@@ -3829,10 +3831,6 @@ createApp({
         const parts = [split.gym ? shortDuration(split.gym) + ' in palestra' : '', split.sport ? shortDuration(split.sport) + ' di sport' : ''].filter(Boolean);
         scenes.push({ kicker: 'Ore di allenamento', big: M.time.hero, caption: 'passate ad allenarti', sub: parts.length > 1 ? parts.join(' · ') : '' });
         tiles.push({ label: 'Ore di allenamento', value: M.time.tile });
-      }
-      if (M.sport) {
-        scenes.push({ kicker: 'Sport', big: M.sport.hero, caption: M.sport.label });
-        tiles.push({ label: M.sport.tileLabel, value: M.sport.tile });
       }
       if (M.nutrition) {
         scenes.push({ kicker: 'Alimentazione', big: M.nutrition.hero, caption: 'del piano rispettato', sub: M.perfect && M.perfect.hero !== '0' ? M.perfect.hero + ' ' + M.perfect.label.toLowerCase() : '' });
