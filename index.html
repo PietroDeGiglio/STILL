@@ -217,6 +217,16 @@
               <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
 
+            <!-- RIEPILOGO DELLA SETTIMANA (domenica e lunedì) -->
+            <button v-else-if="weekBanner" @click="openRecap(weekBanner.offset, 'week')" class="w-full cangiante-btn rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform">
+              <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎬</div>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-extrabold text-white">{{ weekBanner.offset ? 'La tua settimana è pronta' : 'La tua settimana fin qui' }}</div>
+                <div class="text-[11px] font-semibold text-white/85">{{ weekBanner.active }} {{ weekBanner.active === 1 ? 'giorno attivo' : 'giorni attivi' }} ({{ weekBanner.label }}). Condividila nelle storie.</div>
+              </div>
+              <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
             <!-- SERIE DI GIORNI DI FILA -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div class="flex items-center justify-between gap-3">
@@ -232,7 +242,10 @@
                     <div class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ streakInfo.message }}</div>
                   </div>
                 </div>
-                <button @click="openRecap(0)" class="shrink-0 text-[11px] font-bold text-salvia bg-salvia/10 hover:bg-salvia/15 px-2.5 py-1.5 rounded-xl">🎬 Il mio mese</button>
+                <div class="shrink-0 flex flex-col gap-1">
+                  <button @click="openRecap(0, 'week')" class="text-[11px] font-bold text-salvia bg-salvia/10 hover:bg-salvia/15 px-2.5 py-1.5 rounded-xl text-left">🎬 Settimana</button>
+                  <button @click="openRecap(0)" class="text-[11px] font-bold text-viola bg-viola/10 hover:bg-viola/15 px-2.5 py-1.5 rounded-xl text-left">🎬 Il mio mese</button>
+                </div>
               </div>
               <div class="grid grid-cols-7 gap-1.5 mt-3">
                 <div v-for="d in streakInfo.week" :key="'sk' + d.key" class="flex flex-col items-center gap-1">
@@ -247,6 +260,25 @@
                 <span v-if="streakInfo.best > 1" class="text-[10px] font-bold text-gray-400 shrink-0">Record: {{ streakInfo.best }}</span>
               </div>
             </div>
+
+            <!-- LIVELLO E TROFEI -->
+            <button @click="openTrophies" class="w-full bg-white rounded-2xl px-4 py-3 shadow-sm border border-gray-100 flex items-center gap-3 text-left active:scale-[0.99] transition-transform">
+              <div class="w-11 h-11 rounded-xl cangiante-btn flex flex-col items-center justify-center text-white shrink-0 leading-none">
+                <span class="text-[8px] font-bold opacity-80">LV</span>
+                <span class="text-base font-black">{{ playerLevel.level }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="text-xs font-extrabold text-antracite truncate">⭐ {{ playerLevel.title }}</span>
+                  <span class="text-[10px] font-bold text-gray-400 shrink-0">🏆 {{ playerLevel.trophies }}/{{ playerLevel.trophyTotal }} trofei</span>
+                </div>
+                <div class="h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden">
+                  <div class="h-full cangiante-btn rounded-full transition-all" :style="{ width: Math.round(playerLevel.progress * 100) + '%' }"></div>
+                </div>
+                <div class="text-[9px] font-semibold text-gray-400 mt-1">{{ playerLevel.need - playerLevel.into }} XP al livello {{ playerLevel.level + 1 }}</div>
+              </div>
+              <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
 
             <!-- APPUNTI DI OGGI (Visibile solo se c'è una nota) -->
             <div v-if="noteForToday" class="bg-sky-500/10 border border-sky-500/30 rounded-2xl p-4 flex gap-3 items-start shadow-sm mt-4 animate-fadeIn">
@@ -904,6 +936,48 @@
                   <span>💪 Palestra {{ shortDuration(trainingTimeSummary.gym) }}</span>
                   <span>🏅 Sport {{ shortDuration(trainingTimeSummary.sport) }}</span>
                 </div>
+              </div>
+            </div>
+
+            <!-- TROFEI E LIVELLO -->
+            <div id="trofei" class="space-y-3 scroll-mt-4">
+              <div class="flex items-center justify-between px-1">
+                <h3 class="text-lg font-extrabold text-antracite">🏆 Trofei</h3>
+                <span class="text-xs font-bold text-gray-400">{{ playerLevel.trophies }} su {{ playerLevel.trophyTotal }}</span>
+              </div>
+              <div class="bg-antracite rounded-3xl p-5 shadow-lg text-white relative overflow-hidden">
+                <div class="absolute -top-10 -left-10 w-40 h-40 bg-viola/30 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="relative z-10 flex items-center gap-4">
+                  <div class="w-16 h-16 rounded-2xl cangiante-btn flex flex-col items-center justify-center shrink-0 leading-none shadow-lg">
+                    <span class="text-[9px] font-bold opacity-80">LIVELLO</span>
+                    <span class="text-2xl font-black">{{ playerLevel.level }}</span>
+                  </div>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-lg font-black cangiante-text">{{ playerLevel.title }}</div>
+                    <div class="h-2 bg-white/10 rounded-full mt-1.5 overflow-hidden">
+                      <div class="h-full cangiante-btn rounded-full transition-all" :style="{ width: Math.round(playerLevel.progress * 100) + '%' }"></div>
+                    </div>
+                    <div class="flex justify-between text-[10px] font-bold text-white/50 mt-1">
+                      <span>{{ playerLevel.into }} / {{ playerLevel.need }} XP</span>
+                      <span>{{ formatNumber(playerLevel.xp) }} XP totali</span>
+                    </div>
+                  </div>
+                </div>
+                <p class="relative z-10 text-[10px] font-medium text-white/45 mt-3 leading-snug">Guadagni XP allenandoti, segnando i pasti, battendo i tuoi record, sbloccando trofei e condividendo le tue storie.</p>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <button v-for="g in trophyGroups" :key="'tg' + g.id" @click="openTrophyDetail(g)" class="bg-white rounded-2xl p-3.5 border border-gray-100 shadow-sm text-left active:scale-[0.98] transition-transform">
+                  <div class="flex items-center justify-between gap-2">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl" :class="g.current ? '' : 'bg-gray-100 grayscale opacity-60'" :style="g.current ? { background: g.current.tier.color + '22' } : {}">{{ g.icon }}</div>
+                    <span v-if="g.current" class="text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full text-white" :style="{ background: g.current.tier.color }">{{ g.current.tier.name }}</span>
+                    <span v-else class="text-[9px] font-bold text-gray-400">🔒 Da sbloccare</span>
+                  </div>
+                  <div class="text-xs font-extrabold text-antracite mt-2 truncate">{{ g.name }}</div>
+                  <div class="text-[10px] font-semibold text-gray-400 truncate">{{ g.next ? formatNumber(g.value) + ' / ' + formatNumber(g.next.target) + ' ' + g.unit : 'Tutti sbloccati! 👑' }}</div>
+                  <div class="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                    <div class="h-full rounded-full transition-all" :style="{ width: Math.round(g.progress * 100) + '%', background: g.next ? g.next.tier.color : '#20C997' }"></div>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -1780,6 +1854,74 @@
         </div>
 
 
+        <!-- TROFEO SBLOCCATO -->
+        <div v-if="trophyModal.isOpen && !trophyModalItems.length && trophyModal.levelUp" class="fixed inset-0 z-[65] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div class="w-full max-w-sm bg-antracite text-white rounded-3xl p-6 text-center space-y-4 relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none bg-viola/40"></div>
+            <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] cangiante-text">Nuovo livello</div>
+            <div class="relative z-10 mx-auto w-28 h-28 rounded-3xl cangiante-btn flex flex-col items-center justify-center shadow-lg leading-none">
+              <span class="text-[10px] font-bold opacity-80">LIVELLO</span>
+              <span class="text-5xl font-black">{{ playerLevel.level }}</span>
+            </div>
+            <div class="relative z-10">
+              <div class="text-2xl font-black">⭐ {{ playerLevel.title }}</div>
+              <div class="text-xs font-bold text-white/60 mt-1">{{ formatNumber(playerLevel.xp) }} XP · continua così!</div>
+            </div>
+            <div class="relative z-10 space-y-2 pt-1">
+              <button @click="openAchievementShare({ type: 'level' })" class="w-full cangiante-btn text-white font-extrabold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all">📲 Condividi nella storia</button>
+              <button @click="closeTrophyModal" class="w-full bg-white/10 hover:bg-white/20 font-bold py-3 rounded-2xl transition-colors">Continua</button>
+            </div>
+          </div>
+        </div>
+        <div v-if="trophyModal.isOpen && trophyModalItems.length" class="fixed inset-0 z-[65] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm animate-fadeIn">
+          <div class="w-full max-w-sm bg-antracite text-white rounded-3xl p-6 text-center space-y-4 relative overflow-hidden shadow-2xl">
+            <div class="absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none" :style="{ background: trophyModalItems[0].tier.color + '40' }"></div>
+            <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.3em] cangiante-text">Trofeo sbloccato</div>
+            <div class="relative z-10 mx-auto w-28 h-28 rounded-full flex items-center justify-center text-6xl border-4 shadow-lg" :style="{ borderColor: trophyModalItems[0].tier.color, background: trophyModalItems[0].tier.color + '26' }">{{ trophyModalItems[0].group.icon }}</div>
+            <div class="relative z-10">
+              <span class="text-[10px] font-black uppercase tracking-wider px-2.5 py-1 rounded-full text-white" :style="{ background: trophyModalItems[0].tier.color }">{{ trophyModalItems[0].tier.name }}</span>
+              <div class="text-3xl font-black mt-3">{{ formatNumber(trophyModalItems[0].target) }} {{ trophyModalItems[0].target === 1 ? trophyModalItems[0].group.one : trophyModalItems[0].group.unit }}</div>
+              <div class="text-xs font-bold text-white/60 mt-1">{{ trophyModalItems[0].group.name }}</div>
+            </div>
+            <p v-if="trophyModalItems.length > 1" class="relative z-10 text-[11px] font-semibold text-white/60">e {{ trophyModalItems.length === 2 ? 'un altro trofeo' : 'altri ' + (trophyModalItems.length - 1) + ' trofei' }} sbloccati 🎉</p>
+            <p class="relative z-10 text-[11px] font-bold text-white/70">{{ trophyModal.levelUp ? '🎉 Sei salito al livello ' + playerLevel.level + ': ' + playerLevel.title + '!' : '⭐ Livello ' + playerLevel.level + ' · ' + playerLevel.title }}</p>
+            <div class="relative z-10 space-y-2 pt-1">
+              <button @click="openAchievementShare({ type: 'trophy', id: trophyModalItems[0].id })" class="w-full cangiante-btn text-white font-extrabold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all">📲 Condividi nella storia</button>
+              <button @click="closeTrophyModal" class="w-full bg-white/10 hover:bg-white/20 font-bold py-3 rounded-2xl transition-colors">Continua</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- DETTAGLIO DI UN GRUPPO DI TROFEI -->
+        <div v-if="trophyDetail.isOpen && trophyDetailGroup" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="closeTrophyDetail">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
+            <div class="flex justify-between items-start shrink-0">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 rounded-2xl bg-gray-50 flex items-center justify-center text-2xl">{{ trophyDetailGroup.icon }}</div>
+                <div>
+                  <h3 class="text-lg font-extrabold text-antracite leading-tight">{{ trophyDetailGroup.name }}</h3>
+                  <p class="text-[11px] font-medium text-gray-500">{{ trophyDetailGroup.hint }}</p>
+                </div>
+              </div>
+              <button @click="closeTrophyDetail" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="text-xs font-bold text-gray-500 shrink-0">Ora: <span class="text-antracite font-extrabold">{{ formatNumber(trophyDetailGroup.value) }} {{ trophyDetailGroup.value === 1 ? trophyDetailGroup.one : trophyDetailGroup.unit }}</span></div>
+            <div class="space-y-2 overflow-y-auto hide-scrollbar">
+              <div v-for="t in trophyDetailGroup.tiers" :key="t.id" class="flex items-center gap-3 rounded-2xl border p-3" :class="t.unlocked ? 'border-gray-100 bg-white' : 'border-dashed border-gray-200 bg-gray-50'">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-lg border-2 shrink-0" :class="t.unlocked ? '' : 'grayscale opacity-40'" :style="{ borderColor: t.tier.color, background: t.tier.color + '1F' }">{{ t.unlocked ? trophyDetailGroup.icon : '🔒' }}</div>
+                <div class="flex-1 min-w-0">
+                  <div class="text-xs font-extrabold" :class="t.unlocked ? 'text-antracite' : 'text-gray-400'">{{ formatNumber(t.target) }} {{ t.target === 1 ? trophyDetailGroup.one : trophyDetailGroup.unit }}</div>
+                  <div class="text-[10px] font-bold" :style="{ color: t.tier.color }">{{ t.tier.name }}</div>
+                </div>
+                <button v-if="t.unlocked" @click="openAchievementShare({ type: 'trophy', id: t.id })" class="text-[10px] font-bold text-white cangiante-btn px-3 py-1.5 rounded-xl shrink-0">Condividi</button>
+                <span v-else class="text-[10px] font-bold text-gray-400 shrink-0">−{{ formatNumber(t.target - trophyDetailGroup.value) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- GIORNI PASSATI: segna in blocco fatto / non fatto -->
         <div v-if="pastChecksModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
           <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]">
@@ -2254,7 +2396,7 @@
             <!-- Barra superiore -->
             <div class="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between gap-3 shrink-0">
               <div>
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ ({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese' })[shareStudio.kind] || 'Progressi' }}</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'recap' && shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo' })[shareStudio.kind] || 'Progressi') }}</p>
                 <h3 class="text-lg font-extrabold leading-tight">Condividi</h3>
               </div>
               <button @click="closeShareStudio" :disabled="shareStudio.recording" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30" aria-label="Chiudi">
@@ -2310,17 +2452,22 @@
                 </div>
               </div>
 
-              <!-- Mese (riepilogo) -->
+              <!-- Settimana o mese (riepilogo) -->
               <div v-if="shareStudio.kind === 'recap'" class="space-y-2">
-                <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Mese</div>
+                <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Riepilogo</div>
+                <div class="grid grid-cols-2 gap-1.5 bg-white/5 p-1 rounded-2xl">
+                  <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }]" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
+                          class="py-2 rounded-xl text-[11px] font-bold transition-colors"
+                          :class="shareStudio.recapType === t.v ? 'bg-white text-antracite' : 'text-white/70'">{{ t.l }}</button>
+                </div>
                 <div class="grid grid-cols-2 gap-1.5">
                   <button v-for="m in [0, 1]" :key="'rm' + m" @click="shareStudio.recapMonth = m"
                           class="py-2.5 rounded-xl text-[11px] font-bold transition-colors"
-                          :class="shareStudio.recapMonth === m ? 'bg-white text-antracite' : 'bg-white/10 text-white/70 hover:bg-white/15'">{{ recapMonthName(m) }}{{ m === 0 ? ' (in corso)' : '' }}</button>
+                          :class="shareStudio.recapMonth === m ? 'bg-white text-antracite' : 'bg-white/10 text-white/70 hover:bg-white/15'">{{ recapPeriodName(shareStudio.recapType, m) }}</button>
                 </div>
               </div>
               <p v-if="shareStudio.kind === 'recap' && shareData && shareData.empty" class="text-[11px] font-bold text-arancione bg-arancione/10 border border-arancione/30 rounded-xl px-3 py-2 text-center">
-                Nessun giorno attivo in questo mese: segna pasti e allenamenti per riempire il tuo riepilogo.
+                Nessun giorno attivo in questo periodo: segna pasti e allenamenti per riempire il tuo riepilogo.
               </p>
 
               <!-- Periodo (progressi) -->
@@ -2462,6 +2609,14 @@
               <div class="space-y-3">
                 <h2 class="text-3xl font-black tracking-tight">{{ workoutPlayer.summary.quote.title }}</h2>
                 <p class="text-sm font-medium text-white/70 leading-relaxed px-2">{{ workoutPlayer.summary.quote.text }}</p>
+              </div>
+              <div v-if="workoutPlayer.summary.records && workoutPlayer.summary.records.length" class="w-full bg-arancione/15 border border-arancione/40 rounded-2xl p-4 text-left space-y-2 animate-fadeIn">
+                <div class="text-sm font-black">🔥 {{ workoutPlayer.summary.records.length === 1 ? 'Nuovo record personale!' : workoutPlayer.summary.records.length + ' nuovi record personali!' }}</div>
+                <div v-for="r in workoutPlayer.summary.records.slice(0, 3)" :key="'pr' + r.name" class="flex items-center justify-between gap-2 text-xs font-bold">
+                  <span class="truncate">{{ r.name }}</span>
+                  <span class="shrink-0 text-arancione">{{ formatNumber(r.value) }} kg <span class="text-white/50 font-semibold">(prima {{ formatNumber(r.prev) }})</span></span>
+                </div>
+                <button @click="openAchievementShare(workoutPlayer.summary.records[0])" class="w-full bg-arancione text-white font-extrabold py-2.5 rounded-xl text-xs active:scale-95 transition-all">🏆 Condividi il record nella storia</button>
               </div>
               <div class="grid grid-cols-2 gap-3 w-full">
                 <div class="bg-white/10 rounded-2xl p-4">
@@ -3165,6 +3320,7 @@
   <!-- VUE APPLICATION LOGIC -->
   <script src="js/utils/format.js"></script>
   <script src="js/data/quotes.js"></script>
+  <script src="js/data/trophies.js"></script>
   <script src="js/share/draw.js"></script>
   <script src="js/app.js"></script>
 </body>

@@ -2472,6 +2472,7 @@ createApp({
       const exerciseIds = [...new Set(p.steps.map(step => step.exId))];
       saveSessionReport(true);
       p.summary = {
+        records: findSessionRecords(p.sessionId),
         totalSeconds,
         workSeconds,
         exercises: exerciseIds.length,
@@ -3507,7 +3508,7 @@ createApp({
     // Costanti e disegno delle card: vedi js/share/draw.js
 
     const shareStudio = ref({
-      isOpen: false, kind: 'progress', sessionId: null, period: 30, recapMonth: 0, focus: 'total', hero: 'auto',
+      isOpen: false, kind: 'progress', sessionId: null, period: 30, recapMonth: 0, recapType: 'month', achievement: null, focus: 'total', hero: 'auto',
       theme: 'night', format: 'story', output: 'video', showName: true, weightMode: 'percent', loadMode: 'percent',
       hasPhoto: false, ready: false, busy: false, recording: false, recordProgress: 0, error: ''
     });
@@ -3795,9 +3796,26 @@ createApp({
       return { start: toISODate(first), end, first, month: month.charAt(0).toUpperCase() + month.slice(1), year: first.getFullYear() };
     };
     const recapMonthName = (offset) => recapRange(offset).month;
+    // Settimana da lunedì a domenica: corrente (offset 0) o precedente (offset 1)
+    const weekRange = (offset) => {
+      const first = new Date(); first.setHours(0, 0, 0, 0);
+      first.setDate(first.getDate() - ((first.getDay() + 6) % 7) - offset * 7);
+      const last = new Date(first); last.setDate(last.getDate() + 6);
+      const today = toISODate();
+      const end = toISODate(last) > today ? today : toISODate(last);
+      const m1 = first.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+      const m2 = last.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+      const label = first.getDate() + (m1 !== m2 ? ' ' + m1 : '') + '–' + last.getDate() + ' ' + m2;
+      return { start: toISODate(first), end, first, month: label, year: last.getFullYear() };
+    };
+    const recapPeriodName = (type, offset) => (type === 'week'
+      ? (offset ? 'Settimana scorsa' : 'Questa settimana')
+      : recapRange(offset).month + (offset ? '' : ' (in corso)'));
 
-    const shareRecapData = (offset, opts) => {
-      const r = recapRange(offset);
+    const shareRecapData = (offset, opts, type = 'month') => {
+      const week = type === 'week';
+      const r = week ? weekRange(offset) : recapRange(offset);
+      const recapKicker = (n) => (week ? (n ? 'La settimana di ' + n : 'La mia settimana') : (n ? 'Il mese di ' + n : 'Il mio mese'));
       const p = shareProgressData(0, { ...opts, focus: 'total', hero: 'auto' }, { start: r.start, end: r.end });
       const M = p.metrics;
       const name = shareFirstName();
@@ -3817,7 +3835,7 @@ createApp({
       }
       const activeDays = calendar.filter(c => c.active).length;
 
-      const scenes = [{ type: 'intro', kicker: name ? 'Il mese di ' + name : 'Il mio mese', big: r.month, caption: 'su STILL' }];
+      const scenes = [{ type: 'intro', kicker: recapKicker(name), big: r.month, caption: 'su STILL' }];
       const tiles = [];
       if (activeDays) {
         scenes.push({ kicker: 'Giorni attivi', big: String(activeDays), caption: 'su ' + calendar.length + ' giorni', calendar: true });
@@ -3841,7 +3859,7 @@ createApp({
         tiles.push({ label: 'Miglior carico', value: M.loads.tile });
       }
       if (M.weight) {
-        scenes.push({ kicker: 'Peso corporeo', big: M.weight.hero, caption: 'nel mese' });
+        scenes.push({ kicker: 'Peso corporeo', big: M.weight.hero, caption: week ? 'nella settimana' : 'nel mese' });
         tiles.push({ label: 'Peso', value: M.weight.tile });
       }
       if (bestRun >= 2) {
@@ -3851,7 +3869,8 @@ createApp({
 
       return {
         kind: 'recap', empty: !activeDays, available: [], focusAvailable: [],
-        kicker: name ? 'Il ' + r.month.toLowerCase() + ' di ' + name : 'Il mio ' + r.month.toLowerCase(),
+        kicker: week ? recapKicker(name) : (name ? 'Il ' + r.month.toLowerCase() + ' di ' + name : 'Il mio ' + r.month.toLowerCase()),
+        emptyText: week ? 'La prossima settimana è tua.' : 'Il prossimo mese è tuo.',
         dateLabel: r.month + ' ' + r.year,
         month: r.month, activeDays, totalDays: calendar.length, calendar, tiles, scenes
       };
@@ -3874,7 +3893,8 @@ createApp({
           statsLabel: (name ? 'I risultati di ' + name : 'I miei risultati') + ' · ' + periodLabel(st.period).toLowerCase()
         };
       }
-      if (st.kind === 'recap') return shareRecapData(st.recapMonth || 0, opts);
+      if (st.kind === 'recap') return shareRecapData(st.recapMonth || 0, opts, st.recapType);
+      if (st.kind === 'achievement') return shareAchievementData(st.achievement);
       return st.kind === 'workout' ? shareWorkoutData(st.sessionId, opts) : shareProgressData(st.period, opts);
     });
 
@@ -3941,7 +3961,7 @@ createApp({
     };
     watch(() => {
       const st = shareStudio.value;
-      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.weightMode, st.loadMode, st.hasPhoto];
+      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.weightMode, st.loadMode, st.hasPhoto];
     }, () => { if (shareStudio.value.isOpen) refreshSharePreview(); else stopShareAnimation(); });
 
     const openShareStudio = (kind, sessionId = null) => {
@@ -3953,9 +3973,10 @@ createApp({
         theme: st.theme === 'photo' && !sharePhoto ? 'night' : st.theme
       };
     };
-    const openRecap = (offset = 0) => {
+    const openRecap = (offset = 0, type = 'month') => {
       openShareStudio('recap');
       shareStudio.value.recapMonth = offset;
+      shareStudio.value.recapType = type;
       if (shareVideoSupported) shareStudio.value.output = 'video';
     };
     const closeShareStudio = () => {
@@ -3987,7 +4008,12 @@ createApp({
     };
 
     // --- Esportazione ---
-    const shareBaseName = () => `still-${({ workout: 'allenamento', quote: 'frase-del-giorno', recap: 'il-mio-mese' })[shareStudio.value.kind] || 'progressi'}-${toISODate()}`;
+    const shareBaseName = () => {
+      const st = shareStudio.value;
+      const kind = st.kind === 'recap' && st.recapType === 'week' ? 'la-mia-settimana'
+        : ({ workout: 'allenamento', quote: 'frase-del-giorno', recap: 'il-mio-mese', achievement: 'traguardo' })[st.kind] || 'progressi';
+      return 'still-' + kind + '-' + toISODate();
+    };
     const downloadBlob = (blobFile, name) => {
       const url = URL.createObjectURL(blobFile);
       const a = document.createElement('a');
@@ -4050,6 +4076,7 @@ createApp({
       try {
         const file = await buildShareFile();
         downloadBlob(file, file.name);
+        countShare();
       } catch (e) {
         st.error = shareWantsVideo.value ? 'Impossibile creare il video su questo dispositivo: prova con "Immagine".' : "Impossibile salvare l'immagine.";
       }
@@ -4065,14 +4092,17 @@ createApp({
       try { if (navigator.clipboard) navigator.clipboard.writeText(APP_URL).catch(() => {}); } catch (e) { /* ignora */ }
       const shareText = ({
         quote: 'La mia carica di oggi 🔥 #STILL #fraseDelGiorno',
-        recap: 'Il mio mese su STILL 🎬 #STILL'
+        recap: st.recapType === 'week' ? 'La mia settimana su STILL 🎬 #STILL' : 'Il mio mese su STILL 🎬 #STILL',
+        achievement: 'Nuovo traguardo su STILL 🏆 #STILL'
       })[st.kind] || 'Ieri. Oggi. Domani. Ancora. 💪 #STILL';
       try {
         file = await buildShareFile();
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           await navigator.share({ files: [file], text: shareText + ' ' + APP_URL });
+          countShare();
         } else {
           downloadBlob(file, file.name);
+          countShare();
           showToastMessage((file.type.startsWith('video') ? 'Video salvato' : 'Immagine salvata') + ': caricala nella tua storia o nel tuo post.');
         }
       } catch (e) {
@@ -4246,6 +4276,18 @@ createApp({
       return active ? { month: r.month, active } : null;
     });
 
+    // Riepilogo della settimana: domenica quella in corso, lunedì quella appena finita
+    const weekBanner = computed(() => {
+      const dow = new Date().getDay();
+      if (dow !== 0 && dow !== 1) return null;
+      const offset = dow === 0 ? 0 : 1;
+      const r = weekRange(offset);
+      let active = 0;
+      const d = new Date(r.first);
+      while (toISODate(d) <= r.end) { if (activeDaySet.value.has(toISODate(d))) active++; d.setDate(d.getDate() + 1); }
+      return active ? { offset, active, label: r.month } : null;
+    });
+
     // ---------------------------------------------------------------
     // PROMEMORIA: pasti, allenamenti e serie in pericolo.
     // Nell'APK (Capacitor) diventano notifiche locali vere; sul sito
@@ -4265,6 +4307,206 @@ createApp({
       }
     });
     watch(settings, (v) => storage.save('still_settings', v), { deep: true });
+
+    // ---------------------------------------------------------------
+    // GAMIFICATION: trofei, livelli (XP) e record personali.
+    // Tutto si calcola dallo storico: si salvano solo i trofei già
+    // festeggiati e il numero di condivisioni (in still_settings).
+    // Gruppi, gradini e punti: vedi js/data/trophies.js
+    // ---------------------------------------------------------------
+    const countShare = () => { settings.value.shares = (settings.value.shares || 0) + 1; };
+
+    // Giorni di allenamento da sempre (palestra + sport fatti)
+    const trainingDaySet = computed(() => {
+      const set = new Set();
+      const today = toISODate();
+      workoutLogs.value.forEach(log => { if (log.date && log.date <= today) set.add(log.date); });
+      trainingSessions.value.forEach(s => {
+        if (s.kind === 'gym' && s.date && s.date <= today && (s.report || (s.statusByDate && s.statusByDate[s.date] === 'done'))) set.add(s.date);
+        if (s.kind === 'sport' && s.statusByDate) {
+          Object.entries(s.statusByDate).forEach(([key, status]) => { if (status === 'done' && key <= today) set.add(key); });
+        }
+      });
+      return set;
+    });
+
+    // Record personali: ogni volta che un esercizio supera il suo carico migliore
+    const personalRecords = computed(() => {
+      const byExercise = {};
+      workoutLogs.value.forEach(log => {
+        const w = parseOptionalNumber(log.weight);
+        if (w === null || w <= 0 || !log.date) return;
+        const key = log.exerciseId ? 'id:' + log.exerciseId : 'n:' + String(log.exerciseName || '').toLowerCase();
+        (byExercise[key] = byExercise[key] || []).push({ date: log.date, w, name: log.exerciseName });
+      });
+      const list = [];
+      Object.values(byExercise).forEach(items => {
+        items.sort((a, b) => a.date.localeCompare(b.date));
+        let best = null;
+        items.forEach(item => {
+          if (best !== null && item.w > best) list.push({ date: item.date, name: item.name, value: item.w, prev: best });
+          best = best === null ? item.w : Math.max(best, item.w);
+        });
+      });
+      return list;
+    });
+
+    // Record battuti nell'allenamento guidato appena finito (rispetto ai giorni precedenti)
+    const findSessionRecords = (sessionId) => {
+      const session = trainingSessions.value.find(item => item.id === sessionId);
+      const report = session && session.report;
+      if (!report) return [];
+      const today = toISODate();
+      return report.exercises.map(ex => {
+        if (ex.type === 'cardio' || !ex.endValue) return null;
+        const exercise = findSelectedExerciseById(ex.id);
+        const before = exercise ? exerciseLogsFor(exercise).filter(log => log.date < today)
+          .map(log => parseOptionalNumber(log.weight)).filter(v => v !== null && v > 0) : [];
+        if (!before.length) return null;
+        const best = Math.max(...before);
+        return ex.endValue > best ? { type: 'record', name: ex.name, value: ex.endValue, prev: best, unit: 'kg', date: today } : null;
+      }).filter(Boolean).sort((a, b) => (b.value - b.prev) / b.prev - (a.value - a.prev) / a.prev);
+    };
+
+    const mealsDoneCount = computed(() => Object.values(mealLogs.value)
+      .reduce((n, logs) => n + Object.values(logs || {}).filter(l => l && l.status === 'done').length, 0));
+
+    const gameStats = computed(() => {
+      const today = toISODate();
+      return {
+        workouts: trainingDaySet.value.size,
+        hours: Math.floor(trainingTimeSummary.value.total / 3600),
+        streak: streakInfo.value.best,
+        active: [...activeDaySet.value].filter(k => k <= today).length,
+        meals: mealsDoneCount.value,
+        records: personalRecords.value.length,
+        shares: settings.value.shares || 0
+      };
+    });
+
+    const trophyGroups = computed(() => {
+      const st = gameStats.value;
+      return TROPHY_GROUPS.map(g => {
+        const value = st[g.id] || 0;
+        const tiers = g.steps.map((target, index) => ({ id: g.id + '_' + target, target, index, tier: TROPHY_TIERS[index], unlocked: value >= target }));
+        const level = tiers.filter(t => t.unlocked).length;
+        const next = tiers[level] || null;
+        const from = level ? tiers[level - 1].target : 0;
+        return {
+          ...g, value, tiers, level,
+          current: level ? tiers[level - 1] : null,
+          next,
+          progress: next ? Math.max(0, Math.min(1, (value - from) / (next.target - from))) : 1
+        };
+      });
+    });
+    const unlockedTrophies = computed(() => trophyGroups.value.flatMap(g => g.tiers.filter(t => t.unlocked).map(t => ({ ...t, group: g }))));
+    const TROPHY_TOTAL = TROPHY_GROUPS.reduce((n, g) => n + g.steps.length, 0);
+
+    // Livelli: dal livello L al successivo servono 100 + 50·(L−1) XP
+    const playerLevel = computed(() => {
+      const st = gameStats.value;
+      const xp = st.workouts * XP_RULES.workout + st.hours * XP_RULES.hour + st.active * XP_RULES.activeDay
+        + st.meals * XP_RULES.meal + st.records * XP_RULES.record + st.shares * XP_RULES.share
+        + unlockedTrophies.value.length * XP_RULES.trophy;
+      let level = 1, floor = 0, need = 100;
+      while (xp >= floor + need && level < 999) { floor += need; level++; need = 100 + (level - 1) * 50; }
+      return {
+        xp, level, need, into: xp - floor, progress: (xp - floor) / need,
+        title: LEVEL_TITLES[Math.min(LEVEL_TITLES.length - 1, Math.floor((level - 1) / 5))],
+        trophies: unlockedTrophies.value.length, trophyTotal: TROPHY_TOTAL
+      };
+    });
+
+    // Festa per i trofei nuovi (la prima volta si segnano come già visti quelli esistenti)
+    const trophyModal = ref({ isOpen: false, ids: [], levelUp: 0 });
+    const trophyModalItems = computed(() => trophyModal.value.ids
+      .map(id => unlockedTrophies.value.find(t => t.id === id)).filter(Boolean)
+      .sort((a, b) => b.index - a.index));
+    const closeTrophyModal = () => { trophyModal.value.isOpen = false; };
+    const checkTrophies = () => {
+      if (!isAuthenticated.value) return;
+      const s = settings.value;
+      const ids = unlockedTrophies.value.map(t => t.id);
+      const level = playerLevel.value.level;
+      if (!Array.isArray(s.trophiesSeen)) { s.trophiesSeen = ids; s.lastLevel = level; return; }
+      const busy = trophyModal.value.isOpen || (workoutPlayer.value && workoutPlayer.value.isOpen) || shareStudio.value.isOpen
+        || sportCheckModal.value.isOpen || pastChecksModal.value.isOpen || customModal.value.isOpen;
+      if (busy) return;
+      const fresh = ids.filter(id => !s.trophiesSeen.includes(id));
+      const levelUp = level > (s.lastLevel || 0) ? level : 0;
+      if (!fresh.length && !levelUp) return;
+      s.trophiesSeen = [...s.trophiesSeen, ...fresh];
+      s.lastLevel = level;
+      trophyModal.value = { isOpen: true, ids: fresh, levelUp };
+      vibrate([60, 40, 120]);
+    };
+    let trophyTimer = null;
+    watch(() => [unlockedTrophies.value.length, playerLevel.value.level, isAuthenticated.value,
+      workoutPlayer.value && workoutPlayer.value.isOpen, shareStudio.value.isOpen,
+      sportCheckModal.value.isOpen, pastChecksModal.value.isOpen, customModal.value.isOpen], () => {
+      clearTimeout(trophyTimer);
+      trophyTimer = setTimeout(checkTrophies, 700);
+    });
+
+    // Dettaglio di un gruppo di trofei
+    const trophyDetail = ref({ isOpen: false, groupId: null });
+    const trophyDetailGroup = computed(() => trophyGroups.value.find(g => g.id === trophyDetail.value.groupId) || null);
+    const openTrophyDetail = (group) => { trophyDetail.value = { isOpen: true, groupId: group.id }; };
+    const closeTrophyDetail = () => { trophyDetail.value.isOpen = false; };
+    const openTrophies = () => {
+      activeTab.value = 'progress';
+      nextTick(() => { const el = document.getElementById('trofei'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+    };
+
+    // Card social di un traguardo (trofeo o record)
+    const openAchievementShare = (spec) => {
+      trophyModal.value.isOpen = false;
+      trophyDetail.value.isOpen = false;
+      shareStudio.value.achievement = spec;
+      openShareStudio('achievement');
+    };
+    const shareAchievementData = (spec) => {
+      const name = shareFirstName();
+      const lv = playerLevel.value;
+      const base = { kind: 'achievement', empty: false, available: [], focusAvailable: [] };
+      if (spec && spec.type === 'level') {
+        return {
+          ...base,
+          kicker: name ? 'Nuovo livello per ' + name : 'Nuovo livello',
+          dateLabel: formatDateLong(toISODate()),
+          icon: '⭐', color: '#8B5CF6', badge: 'Livello raggiunto',
+          big: 'Livello ' + lv.level,
+          caption: lv.title,
+          sub: formatNumber(lv.xp) + ' XP guadagnati su STILL',
+          tiles: [{ label: 'Trofei', value: lv.trophies + ' su ' + lv.trophyTotal }, { label: 'Serie migliore', value: streakInfo.value.best + (streakInfo.value.best === 1 ? ' giorno' : ' giorni') }]
+        };
+      }
+      if (spec && spec.type === 'record') {
+        return {
+          ...base,
+          kicker: name ? 'Nuovo record di ' + name : 'Nuovo record personale',
+          dateLabel: formatDateLong(spec.date || toISODate()),
+          icon: '🏋️', color: '#F5A623', badge: 'Record personale',
+          big: formatNumber(spec.value) + ' ' + (spec.unit || 'kg'),
+          caption: spec.name || '',
+          sub: 'Prima ' + formatNumber(spec.prev) + ' kg · ' + signed(spec.value - spec.prev) + ' kg',
+          tiles: [{ label: 'Livello', value: lv.level + ' · ' + lv.title }, { label: 'Record personali', value: String(personalRecords.value.length) }]
+        };
+      }
+      const t = unlockedTrophies.value.find(x => spec && x.id === spec.id);
+      if (!t) return { ...base, empty: true, kicker: 'Trofeo', dateLabel: '', icon: '🏆', color: '#F5A623', badge: '', big: '—', caption: '', sub: '', tiles: [] };
+      return {
+        ...base,
+        kicker: name ? 'Trofeo sbloccato da ' + name : 'Trofeo sbloccato',
+        dateLabel: formatDateLong(toISODate()),
+        icon: t.group.icon, color: t.tier.color, badge: t.tier.name,
+        big: formatNumber(t.target),
+        caption: t.target === 1 ? t.group.one : t.group.unit,
+        sub: t.group.name + ' · trofeo ' + t.tier.name,
+        tiles: [{ label: 'Livello', value: lv.level + ' · ' + lv.title }, { label: 'Trofei', value: lv.trophies + ' su ' + lv.trophyTotal }]
+      };
+    };
 
     const nativeNotifications = () => (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.LocalNotifications) || null;
     const remindersNative = !!nativeNotifications();
@@ -4469,8 +4711,21 @@ createApp({
       trainingTimeSummary,
       streakInfo,
       recapBanner,
+      weekBanner,
       openRecap,
       recapMonthName,
+      recapPeriodName,
+      trophyGroups,
+      playerLevel,
+      trophyModal,
+      trophyModalItems,
+      closeTrophyModal,
+      trophyDetail,
+      trophyDetailGroup,
+      openTrophyDetail,
+      closeTrophyDetail,
+      openTrophies,
+      openAchievementShare,
       settings,
       toggleReminders,
       remindersSupported,

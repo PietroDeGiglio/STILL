@@ -546,8 +546,12 @@ const drawRecapBody = (ctx, data, o) => {
   if (story && data.calendar.length) {
     rev(at(0.3, 0.5), 20, () => drawRecapCalendar(ctx, data, M + 120, top + 330, maxW - 240, th, 1, phase));
   }
-  const tiles = data.tiles.slice(0, story ? 6 : 4);
-  const gridY = story ? (data.calendar.length ? 1130 : 760) : 560;
+  // Sotto il calendario (1 riga per la settimana, fino a 6 per il mese) vanno i riquadri;
+  // se il mese occupa tante righe se ne mostrano 4 invece di 6 per non toccare il piè di pagina
+  const calRows = data.calendar.length ? Math.ceil(((data.calendar[0].lead || 0) + data.calendar.length) / 7) : 0;
+  const calStep = Math.min((maxW - 240 - 14 * 6) / 7, 118) + 14;
+  const gridY = story ? (calRows ? top + 330 + 26 + calRows * calStep + 70 : 760) : 560;
+  const tiles = data.tiles.slice(0, story ? (gridY > 1150 ? 4 : 6) : 4);
   const gap = story ? 24 : 20, tileH = story ? 150 : 140;
   const tw = (maxW - gap) / 2;
   tiles.forEach((tile, i) => {
@@ -568,11 +572,142 @@ const drawRecapBody = (ctx, data, o) => {
   if (!data.activeDays) {
     rev(at(0.5, 0.5), 20, () => {
       setFont(ctx, 800, story ? 44 : 36); ctx.fillStyle = th.text;
-      ctx.fillText('Il prossimo mese è tuo.', M, gridY + 40);
+      ctx.fillText(data.emptyText || 'Il prossimo mese è tuo.', M, gridY + 40);
     });
   }
 };
 
+
+// ---------------------------------------------------------------
+// TRAGUARDO (trofeo sbloccato o nuovo record): medaglia che entra con
+// un "pop", raggi che girano, coriandoli e il numero che conta.
+// ---------------------------------------------------------------
+const EMOJI_FONT = '"Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", sans-serif';
+const drawAchievementBody = (ctx, data, o) => {
+  const { W, M, story, th, phase, at, reveal, live, time } = o;
+  const maxW = W - M * 2;
+  const cx = W / 2;
+  const sc = story ? 1 : 0.72;
+  const Y = story
+    ? { kicker: 330, badge: 700, pill: 985, big: 1200, cap: 1275, sub: 1335, tiles: 1430 }
+    : { kicker: 235, badge: 470, pill: 668, big: 830, cap: 892, sub: 942, tiles: 985 };
+  const R = 210 * sc;
+  const color = data.color || BRAND[1];
+  const text = (fill) => (th.brand ? fill : th.text);
+
+  reveal(at(0.1, 0.5), 20, () => {
+    fitFont(ctx, (data.kicker || '').toUpperCase(), 900, story ? 36 : 30, maxW, 22);
+    ctx.fillStyle = text(brandGradient(ctx, M, 0, W - M, 0, phase));
+    spacedText(ctx, (data.kicker || '').toUpperCase(), cx, Y.kicker, 6, 'center');
+  });
+
+  // Medaglia
+  const k = live ? clamp01((time - 0.3) / 0.7) : 1;
+  if (k > 0) {
+    const pop = k < 1 ? easeOut(k) * (1 + 0.15 * Math.sin(k * Math.PI)) : 1;
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, k * 1.6);
+    ctx.translate(cx, Y.badge);
+    ctx.save();
+    ctx.rotate(live ? time * 0.25 : 0.2);
+    for (let i = 0; i < 14; i++) {
+      ctx.rotate((Math.PI * 2) / 14);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.arc(0, 0, R * 2 * pop, -0.08, 0.08); ctx.closePath();
+      ctx.fillStyle = color + '24'; ctx.fill();
+    }
+    ctx.restore();
+    const glow = ctx.createRadialGradient(0, 0, R * 0.4, 0, 0, R * 1.7);
+    glow.addColorStop(0, color + '66'); glow.addColorStop(1, color + '00');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(0, 0, R * 1.7, 0, Math.PI * 2); ctx.fill();
+    ctx.scale(pop, pop);
+    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2);
+    ctx.fillStyle = color + '33'; ctx.fill();
+    ctx.lineWidth = 16 * sc;
+    ctx.strokeStyle = th.brand ? brandGradient(ctx, -R, -R, R, R, phase) : color;
+    ctx.stroke();
+    ctx.beginPath(); ctx.arc(0, 0, R - 30 * sc, 0, Math.PI * 2);
+    ctx.lineWidth = 4 * sc; ctx.strokeStyle = color + '99'; ctx.stroke();
+    ctx.shadowColor = 'transparent';
+    ctx.font = Math.round(R * 0.95) + 'px ' + EMOJI_FONT;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(data.icon || '🏆', 0, R * 0.06);
+    ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.restore();
+  }
+
+  // Coriandoli che esplodono dalla medaglia (solo nel video)
+  if (live) {
+    const colors = [BRAND[0], BRAND[1], BRAND[2], color, '#FFFFFF'];
+    for (let i = 0; i < 70; i++) {
+      const r1 = ((Math.sin(i * 12.9898) * 43758.5453) % 1 + 1) % 1;
+      const r2 = ((Math.sin(i * 78.233) * 12345.6789) % 1 + 1) % 1;
+      const tt = time - (0.55 + r2 * 0.35);
+      if (tt < 0 || tt > 2.6) continue;
+      const a = r1 * Math.PI * 2;
+      const v = (500 + r2 * 800) * sc;
+      const x = cx + Math.cos(a) * v * tt;
+      const y = Y.badge + Math.sin(a) * v * tt + 900 * sc * tt * tt;
+      ctx.save();
+      ctx.globalAlpha = clamp01(1 - tt / 2.6);
+      ctx.translate(x, y); ctx.rotate(tt * (4 + r1 * 6));
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fillRect(-8 * sc, -14 * sc, 16 * sc, 28 * sc);
+      ctx.restore();
+    }
+  }
+
+  // Etichetta (Oro, Record personale, ...)
+  if (data.badge) {
+    reveal(at(0.9, 0.4), 16, () => {
+      const label = data.badge.toUpperCase();
+      const fs = story ? 28 : 22;
+      setFont(ctx, 900, fs);
+      const tw = [...label].reduce((w, ch) => w + ctx.measureText(ch).width, 0) + 5 * (label.length - 1);
+      const ph = fs * 2, pw = tw + fs * 2.4;
+      roundRect(ctx, cx - pw / 2, Y.pill - ph / 2, pw, ph, ph / 2);
+      ctx.fillStyle = color; ctx.fill();
+      ctx.fillStyle = '#FFFFFF';
+      spacedText(ctx, label, cx, Y.pill + fs * 0.36, 5, 'center');
+    });
+  }
+
+  // Numero + descrizione
+  reveal(at(1.1, 0.5), 30, () => {
+    fitFont(ctx, data.big || '', 900, story ? 190 : 140, maxW, 60);
+    ctx.fillStyle = text(brandGradient(ctx, M, Y.big - 180, W - M, Y.big, phase));
+    ctx.textAlign = 'center';
+    ctx.fillText(countUp(data.big || '', live ? clamp01((time - 1.1) / 1.2) : 1), cx, Y.big);
+    fitFont(ctx, data.caption || '', 800, story ? 50 : 40, maxW, 24);
+    ctx.fillStyle = th.text;
+    ctx.fillText(data.caption || '', cx, Y.cap);
+    if (data.sub) {
+      setFont(ctx, 700, story ? 32 : 26); ctx.fillStyle = th.sub;
+      ctx.fillText(ellipsize(ctx, data.sub, maxW), cx, Y.sub);
+    }
+    ctx.textAlign = 'left';
+  });
+
+  // Riquadri (livello, trofei, ...)
+  const tiles = (data.tiles || []).slice(0, 2);
+  const gap = story ? 24 : 20, tileH = story ? 150 : 120;
+  const tw = (maxW - gap) / 2;
+  tiles.forEach((tile, i) => {
+    reveal(at(1.6 + i * 0.15, 0.45), 30, () => {
+      const tx = M + i * (tw + gap);
+      const ty = Y.tiles;
+      if (!th.shadow) {
+        ctx.fillStyle = th.tile; roundRect(ctx, tx, ty, tw, tileH, 34); ctx.fill();
+        ctx.lineWidth = 2; ctx.strokeStyle = th.border; ctx.stroke();
+      }
+      setFont(ctx, 800, story ? 22 : 18); ctx.fillStyle = th.sub;
+      spacedText(ctx, ellipsize(ctx, tile.label.toUpperCase(), tw - 80), tx + 30, ty + (story ? 48 : 40), 3);
+      fitFont(ctx, tile.value, 900, story ? 52 : 42, tw - 60, 22);
+      ctx.fillStyle = th.text;
+      ctx.fillText(tile.value, tx + 28, ty + tileH - (story ? 32 : 26));
+    });
+  });
+};
 
 const drawShareCard = (canvas, data, opts, time = Infinity) => {
   const story = opts.format === 'story';
@@ -623,6 +758,11 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
   }
   if (data.kind === 'quote') {
     drawQuoteBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time, foot: L.foot });
+    ctx.shadowColor = 'transparent';
+    return;
+  }
+  if (data.kind === 'achievement') {
+    drawAchievementBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time });
     ctx.shadowColor = 'transparent';
     return;
   }
