@@ -1052,23 +1052,34 @@ createApp({
       if (!session || !session.time) return '';
       return session.kind === 'sport' && session.endTime ? session.time + '–' + session.endTime : session.time;
     };
-    // Secondi di allenamento tra due date (incluse): palestra dal report, sport solo se segnati "fatto"
+    // Durata stimata quando manca l'orario di fine (o l'allenamento è stato registrato solo con i carichi)
+    const DEFAULT_TRAINING_MIN = 60;
+    // Secondi di allenamento tra due date (incluse), contando solo ciò che è stato fatto:
+    // palestra = durata dell'allenamento guidato, oppure inizio→fine se segnata a mano, oppure 1h stimata
+    // per i giorni con carichi registrati; sport = inizio→fine (o 1h) per ogni giorno segnato "fatto"
     const trainingSecondsBetween = (start, end) => {
       let gym = 0, sport = 0;
+      const gymDays = new Set();
+      const inRange = (key) => key && key >= start && key <= end;
       trainingSessions.value.forEach(s => {
-        if (s.kind === 'gym' && s.date && s.date >= start && s.date <= end) {
-          // Palestra: durata misurata dall'allenamento guidato, oppure inizio→fine se segnata a mano come fatta
-          if (s.report) gym += s.report.totalSeconds || 0;
-          else if (s.statusByDate && s.statusByDate[s.date] === 'done') gym += sportDurationMin(s) * 60;
+        if (s.kind === 'gym' && inRange(s.date)) {
+          if (s.report) { gym += s.report.totalSeconds || 0; gymDays.add(s.date); }
+          else if (s.statusByDate && s.statusByDate[s.date] === 'done') {
+            gym += (sportDurationMin(s) || DEFAULT_TRAINING_MIN) * 60;
+            gymDays.add(s.date);
+          }
           return;
         }
         if (s.kind === 'sport' && s.statusByDate) {
-          const min = sportDurationMin(s);
-          if (!min) return;
+          const min = sportDurationMin(s) || DEFAULT_TRAINING_MIN;
           Object.entries(s.statusByDate).forEach(([key, status]) => {
-            if (status === 'done' && key >= start && key <= end) sport += min * 60;
+            if (status === 'done' && inRange(key)) sport += min * 60;
           });
         }
+      });
+      // Giorni di palestra registrati solo con i carichi (senza sessione nel calendario)
+      new Set(workoutLogs.value.map(log => log.date).filter(inRange)).forEach(key => {
+        if (!gymDays.has(key)) gym += DEFAULT_TRAINING_MIN * 60;
       });
       return { gym, sport, total: gym + sport };
     };
