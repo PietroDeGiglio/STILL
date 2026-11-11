@@ -567,7 +567,7 @@
                     </div>
                     <div v-if="session.note" class="text-[10px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                   </div>
-                  <button @click="editTrainingSession(session)" class="p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0" aria-label="Modifica allenamento">
+                  <button @click="editTrainingSession(session, session.occurrenceDate)" class="p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0" aria-label="Modifica allenamento">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                   </button>
                   <button @click="removeTrainingSession(session)" class="p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina allenamento">
@@ -2920,7 +2920,7 @@
                   </div>
                   <div v-if="session.note" class="text-[9px] font-medium text-sky-600 truncate mt-0.5">📝 {{ session.note }}</div>
                 </div>
-                <button @click="editTrainingSession(session)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0" aria-label="Modifica allenamento">
+                <button @click="editTrainingSession(session, trainingDayModal.dateKey)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0" aria-label="Modifica allenamento">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                 </button>
                 <button @click="removeTrainingSession(session)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina allenamento">
@@ -3042,8 +3042,8 @@
             <p v-if="trainingFormModal.kind === 'sport' && trainingFormModal.recurring && trainingFormModal.date && trainingFormModal.date < todayDateKey && !trainingFormModal.editingId" class="text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 shrink-0 leading-snug">
               🗓️ Parte nel passato: dopo il salvataggio potrai segnare i giorni già trascorsi come fatti o non fatti.
             </p>
-            <p v-if="trainingFormModal.editingId && trainingFormModal.kind === 'sport' && trainingFormModal.recurring && trainingFormModal.date < todayDateKey" class="text-[10px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 shrink-0 leading-snug">
-              Se cambi giorni o orari, le modifiche valgono <span class="font-bold">da oggi</span>: i giorni passati restano come sono.
+            <p v-if="trainingFormModal.editingId && trainingFormModal.kind === 'sport' && trainingFormModal.recurring && (trainingFormModal.date < todayDateKey || trainingFormModal.fromDate > trainingFormModal.date)" class="text-[10px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 shrink-0 leading-snug">
+              Se cambi giorni o orari, le modifiche valgono <span class="font-bold">{{ trainingFormModal.fromDate > todayDateKey ? 'dal ' + formatDate(trainingFormModal.fromDate) : 'da oggi' }}</span>: i giorni prima restano come sono.
               <button @click="openPastFromForm" class="block mt-1 font-bold text-sky-600">🗓️ Segna i giorni passati ›</button>
             </p>
 

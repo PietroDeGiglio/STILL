@@ -432,7 +432,6 @@ const drawQuoteBody = (ctx, data, o) => {
       ctx.fillText(data.signature, W / 2, o.foot - (story ? 70 : 56));
       ctx.textAlign = 'left';
     }
-    drawShareFooter(ctx, W, M, o.foot, story, th, phase);
   });
 };
 
@@ -490,7 +489,7 @@ const drawRecapBody = (ctx, data, o) => {
       ctx.fillStyle = grad(cy - 200, cy);
       ctx.textAlign = 'center';
       ctx.fillText(sc.big, W / 2, cy);
-      // "su" piccolo, poi logo + STILL in gradiente e il link dell'app
+      // "su" piccolo, poi logo + STILL in gradiente (il link è sempre in basso)
       let y = cy + (story ? 80 : 62);
       setFont(ctx, 700, story ? 34 : 28); ctx.fillStyle = '#FFFFFF';
       ctx.fillText('su', W / 2, y);
@@ -501,9 +500,6 @@ const drawRecapBody = (ctx, data, o) => {
       y += logo * 0.86 + (story ? 62 : 48);
       setFont(ctx, 900, story ? 56 : 44); ctx.fillStyle = tight(y - 50, y, story ? 130 : 100);
       spacedText(ctx, 'STILL', W / 2, y, story ? 14 : 11, 'center');
-      y += story ? 52 : 40;
-      setFont(ctx, 700, story ? 26 : 22); ctx.fillStyle = th.sub;
-      spacedText(ctx, APP_URL_SHORT, W / 2, y, 2, 'center');
       ctx.textAlign = 'left';
     } else {
       setFont(ctx, 900, story ? 30 : 26); ctx.fillStyle = th.sub;
@@ -575,7 +571,6 @@ const drawRecapBody = (ctx, data, o) => {
       ctx.fillText('Il prossimo mese è tuo.', M, gridY + 40);
     });
   }
-  rev(at(1, 0.6), 0, () => drawShareFooter(ctx, W, M, o.foot, story, th, phase));
 };
 
 
@@ -617,6 +612,8 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
     setFont(ctx, 700, 28); ctx.fillStyle = th.sub; ctx.textAlign = 'right';
     ctx.fillText(ellipsize(ctx, data.dateLabel || '', 460), W - M, L.head - 10);
     ctx.textAlign = 'left';
+    // Piè di pagina (motto + link di STILL): sempre visibile, dal primo all'ultimo fotogramma
+    drawShareFooter(ctx, W, M, L.foot, story, th, phase);
   });
 
   if (data.kind === 'recap') {
@@ -695,10 +692,6 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
     });
   }
 
-  // Piè di pagina
-  reveal(at(2.5, 0.6), 0, () => {
-    drawShareFooter(ctx, W, M, L.foot, story, th, phase);
-  });
   ctx.shadowColor = 'transparent';
 };
 

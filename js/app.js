@@ -1137,13 +1137,15 @@ createApp({
         .sort((a, b) => (a.time || '').localeCompare(b.time || ''));
     });
 
-    const trainingFormModal = ref({ isOpen: false, editingId: null, pastStatus: '', date: '', time: '18:00', endTime: '19:30', kind: 'gym', sport: 'Calcio', weekdays: [], recurring: true, sheetId: null, dayName: '', note: '', error: '' });
+    const trainingFormModal = ref({ isOpen: false, editingId: null, fromDate: '', pastStatus: '', date: '', time: '18:00', endTime: '19:30', kind: 'gym', sport: 'Calcio', weekdays: [], recurring: true, sheetId: null, dayName: '', note: '', error: '' });
 
-    const openTrainingForm = (dateKey, session = null) => {
+    const openTrainingForm = (dateKey, session = null, fromDate = '') => {
       if (session) {
         trainingFormModal.value = {
           isOpen: true,
           editingId: session.id,
+          // Giorno da cui si è aperta la modifica: i cambi d'orario valgono da lì in avanti
+          fromDate: fromDate || '',
           date: session.date || toISODate(),
           time: session.time || '18:00',
           endTime: session.endTime || '',
@@ -1165,6 +1167,7 @@ createApp({
       trainingFormModal.value = {
         isOpen: true,
         editingId: null,
+        fromDate: '',
         date,
         time: '18:00',
         endTime: '19:30',
@@ -1180,9 +1183,9 @@ createApp({
       };
     };
 
-    const editTrainingSession = (session) => {
+    const editTrainingSession = (session, fromDate = '') => {
       if (!session) return;
-      openTrainingForm(session.date || toISODate(), session);
+      openTrainingForm(session.date || toISODate(), session, fromDate);
     };
 
     const closeTrainingForm = () => { trainingFormModal.value.isOpen = false; };
@@ -1248,16 +1251,18 @@ createApp({
         base.statusByDate = map;
       }
 
-      // Cambio di giorni/orari di una serie già iniziata: lo storico resta com'era,
-      // le nuove impostazioni valgono da oggi (la vecchia serie si chiude a ieri)
-      const scheduleChanged = previous && previous.recurring && base.recurring && !previous.endDate
-        && previous.date < today && form.date === previous.date
+      // Cambio di giorni/orari di una serie già iniziata: lo storico resta com'era.
+      // Le nuove impostazioni valgono dal giorno da cui si è aperta la modifica (se futuro), altrimenti da oggi
+      const splitFrom = form.fromDate && form.fromDate > today ? form.fromDate : today;
+      const scheduleChanged = previous && previous.recurring && base.recurring
+        && (!previous.endDate || previous.endDate >= splitFrom)
+        && previous.date < splitFrom && form.date === previous.date
         && (previous.time !== base.time || (previous.endTime || '') !== base.endTime || previous.sport !== base.sport
           || [...(previous.weekdays || [])].sort().join() !== [...base.weekdays].sort().join());
       if (scheduleChanged) {
         // Se oggi è già stato segnato sulla vecchia serie, quella vale fino a oggi e la nuova parte da domani
-        const keepToday = !!(previous.statusByDate && previous.statusByDate[today]) && trainingSessionOccursOn(previous, today);
-        const cut = new Date(); cut.setHours(12, 0, 0, 0);
+        const keepToday = splitFrom === today && !!(previous.statusByDate && previous.statusByDate[today]) && trainingSessionOccursOn(previous, today);
+        const cut = new Date(splitFrom + 'T12:00:00');
         if (!keepToday) cut.setDate(cut.getDate() - 1);
         const endKey = toISODate(cut);
         const next = new Date(cut); next.setDate(next.getDate() + 1);
@@ -1267,7 +1272,9 @@ createApp({
         previous.statusByDate = oldMap;
         trainingSessions.value.push({ ...base, id: newTrainingId(), date: toISODate(next), statusByDate: newMap });
         form.isOpen = false;
-        showToastMessage('Nuovi orari attivi da oggi. 🗓️ I giorni passati restano come prima.');
+        showToastMessage(splitFrom > today
+          ? 'Nuovi orari attivi dal ' + formatDate(toISODate(next)) + '. 🗓️ I giorni prima restano come sono.'
+          : 'Nuovi orari attivi da oggi. 🗓️ I giorni passati restano come prima.');
         return;
       }
 
@@ -2747,7 +2754,7 @@ createApp({
     const openTrainingSessionItem = (session, dateKey) => {
       if (session.kind === 'gym' && (session.report || dateKey >= toISODate())) openSessionStats(session, dateKey);
       else if (sportCanCheck(session, dateKey)) openSportCheck(session, dateKey);
-      else editTrainingSession(session);
+      else editTrainingSession(session, dateKey);
     };
 
     const sessionStats = computed(() => {
