@@ -31,6 +31,20 @@
   <script src="js/tailwind.config.js"></script>
   
   <link rel="stylesheet" href="css/style.css">
+
+  <!-- Tema scuro applicato subito (prima che parta l'app), così non c'è il lampo bianco -->
+  <script>
+    (function () {
+      try {
+        var theme = (JSON.parse(localStorage.getItem('still_settings') || '{}') || {}).theme;
+        var dark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) {
+          document.documentElement.classList.add('dark');
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0E0E11');
+        }
+      } catch (e) {}
+    })();
+  </script>
 </head>
 
 <body class="h-full font-sans text-antracite antialiased selection:bg-salvia selection:text-white bg-gray-100 flex justify-center">
@@ -95,6 +109,15 @@
               <div>
                 <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Cognome</label>
                 <input type="text" v-model="onboarding.lastName" placeholder="Facoltativo" autocomplete="family-name" class="w-full bg-white border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-xl p-3 text-sm font-bold text-antracite outline-none transition-all placeholder:text-gray-300 placeholder:font-medium">
+              </div>
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sesso</label>
+                <div class="grid grid-cols-2 gap-2">
+                  <button v-for="opt in sexOptions" :key="'ob-sex-' + opt.id" type="button" @click="onboarding.sex = onboarding.sex === opt.id ? '' : opt.id"
+                          class="py-3 rounded-xl text-sm font-bold border transition-all"
+                          :class="onboarding.sex === opt.id ? 'bg-salvia/10 border-salvia text-salvia' : 'bg-white border-gray-200 text-gray-500'">{{ opt.label }}</button>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 mt-1">Serve solo per calcolare fabbisogno e massa grassa.</p>
               </div>
               <div class="grid grid-cols-2 gap-3">
                 <div>
@@ -1021,9 +1044,9 @@
                 <!-- SVG Line Chart (Light Theme) -->
                 <div class="relative h-40 w-full pt-4">
                   <svg class="w-full h-full overflow-visible" viewBox="0 0 300 150">
-                    <line x1="0" y1="30" x2="300" y2="30" stroke="#E5E7EB" stroke-dasharray="3,3"/>
-                    <line x1="0" y1="75" x2="300" y2="75" stroke="#E5E7EB" stroke-dasharray="3,3"/>
-                    <line x1="0" y1="120" x2="300" y2="120" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                    <line x1="0" y1="30" x2="300" y2="30" class="chart-grid" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                    <line x1="0" y1="75" x2="300" y2="75" class="chart-grid" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                    <line x1="0" y1="120" x2="300" y2="120" class="chart-grid" stroke="#E5E7EB" stroke-dasharray="3,3"/>
 
                     <defs>
                       <linearGradient id="lightAreaGrad" x1="0" y1="0" x2="0" y2="1">
@@ -1037,8 +1060,8 @@
 
                     <!-- Data Points -->
                     <g v-for="(pt, index) in weightChart.points" :key="index">
-                      <circle :cx="pt.x" :cy="pt.y" r="5" fill="#FFFFFF" stroke="#10B981" stroke-width="3"/>
-                      <text v-if="pt.showLabel" :x="pt.x" :y="pt.y - 12" text-anchor="middle" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.label }}</text>
+                      <circle :cx="pt.x" :cy="pt.y" class="chart-dot" r="5" fill="#FFFFFF" stroke="#10B981" stroke-width="3"/>
+                      <text v-if="pt.showLabel" :x="pt.x" :y="pt.y - 12" text-anchor="middle" class="chart-label" fill="#1D1D1D" font-size="10" font-weight="bold">{{ pt.label }}</text>
                     </g>
                   </svg>
                 </div>
@@ -1047,6 +1070,120 @@
                   Dal {{ formatDate(weightEntries[0].date) }} al {{ formatDate(weightEntries[weightEntries.length - 1].date) }}
                   <span v-if="weightDelta && weightDelta.days > 0"> • {{ weightDelta.days }} giorni</span>
                 </p>
+              </div>
+
+              <!-- IL TUO CORPO: statistiche calcolate -->
+              <div class="space-y-3">
+                <div class="flex justify-between items-center px-1">
+                  <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">Il tuo corpo</h4>
+                  <span class="text-[10px] font-medium text-gray-400">Tocca per sapere cos'è</span>
+                </div>
+
+                <button v-if="bodyStats.missing.length" @click="openProfileCompletion" class="w-full text-left bg-viola/10 border border-viola/20 rounded-2xl p-3.5 flex items-center gap-3 active:scale-[0.99] transition-transform">
+                  <span class="text-xl">🧬</span>
+                  <span class="flex-1 min-w-0 text-xs font-semibold text-antracite leading-snug">Aggiungi <b>{{ bodyStats.missing.filter(x => x !== 'peso').join(', ') || 'una pesata' }}</b> per sbloccare fabbisogno e massa grassa.</span>
+                  <span class="text-xs font-bold text-viola shrink-0">{{ bodyStats.missing.length === 1 && bodyStats.missing[0] === 'peso' ? '' : 'Completa' }}</span>
+                </button>
+
+                <!-- Fabbisogno -->
+                <div v-if="bodyStats.energy" @click="toggleBodyInfo('energy')" role="button" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🔥 Fabbisogno giornaliero</div>
+                      <div class="text-3xl font-extrabold text-antracite mt-1">{{ bodyStats.energy.tdee }} <span class="text-sm font-bold text-gray-400">kcal</span></div>
+                      <div class="text-[11px] font-medium text-gray-500 mt-0.5">Metabolismo basale {{ bodyStats.energy.bmr }} kcal · {{ bodyStats.activity.label }}</div>
+                    </div>
+                    <span class="text-[10px] font-bold text-arancione bg-arancione/10 px-2 py-1 rounded-md shrink-0">{{ formatNumber(Math.round(bodyStats.activity.weeklyHours * 10) / 10) }} h/sett</span>
+                  </div>
+                  <div class="grid grid-cols-3 gap-2 mt-4">
+                    <div class="rounded-2xl bg-sky-500/10 px-2 py-2.5 text-center">
+                      <div class="text-[9px] font-bold text-sky-600 uppercase tracking-wider">Dimagrire</div>
+                      <div class="text-sm font-extrabold text-antracite mt-0.5">{{ bodyStats.energy.lose }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-salvia/10 px-2 py-2.5 text-center">
+                      <div class="text-[9px] font-bold text-salvia uppercase tracking-wider">Mantenere</div>
+                      <div class="text-sm font-extrabold text-antracite mt-0.5">{{ bodyStats.energy.tdee }}</div>
+                    </div>
+                    <div class="rounded-2xl bg-arancione/10 px-2 py-2.5 text-center">
+                      <div class="text-[9px] font-bold text-arancione uppercase tracking-wider">Aumentare</div>
+                      <div class="text-sm font-extrabold text-antracite mt-0.5">{{ bodyStats.energy.gain }}</div>
+                    </div>
+                  </div>
+                  <!-- Il piano a confronto -->
+                  <div v-if="bodyStats.plan" class="mt-3 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2.5">
+                    <div class="text-[11px] font-semibold text-gray-600 leading-snug">
+                      Il tuo piano: circa <b class="text-antracite">{{ bodyStats.plan.kcal }} kcal</b>
+                      <span v-if="Math.abs(bodyStats.plan.balance) < 100"> · in linea col fabbisogno</span>
+                      <span v-else> · <b :class="bodyStats.plan.balance < 0 ? 'text-sky-600' : 'text-arancione'">{{ bodyStats.plan.balance > 0 ? '+' : '' }}{{ bodyStats.plan.balance }} kcal</b> al giorno</span>
+                    </div>
+                    <div class="text-[10px] font-medium text-gray-400 mt-0.5">
+                      <span v-if="bodyStats.plan.balance < -900" class="block text-arancione font-semibold mb-0.5">Molto sotto il fabbisogno: controlla che tutti i pasti abbiano le calorie stimate.</span>
+                      Previsto {{ bodyStats.plan.perWeek > 0 ? '+' : '' }}{{ formatNumber(Math.round(bodyStats.plan.perWeek * 10) / 10) }} kg/sett<span v-if="bodyStats.trend"> · reale {{ bodyStats.trend.perWeek > 0 ? '+' : '' }}{{ formatNumber(Math.round(bodyStats.trend.perWeek * 10) / 10) }} kg/sett</span>
+                    </div>
+                  </div>
+                  <p v-if="bodyInfoOpen === 'energy'" class="mt-3 text-[11px] font-medium text-gray-500 leading-relaxed">
+                    Le calorie che bruci in un giorno. Il <b>metabolismo basale</b> è quello che consumi a riposo (formula Mifflin-St Jeor da peso, altezza, età e sesso); poi si moltiplica per il tuo livello di attività, calcolato dalle ore di allenamento e sport segnate nelle ultime 4 settimane. Per dimagrire si tolgono ~500 kcal (circa mezzo chilo a settimana), per aumentare si aggiungono ~300 kcal. È una stima: se il peso reale va diversamente, conta quello.
+                  </p>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3">
+                  <!-- BMI -->
+                  <div v-if="bodyStats.bmi" @click="toggleBodyInfo('bmi')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'bmi' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">BMI</div>
+                    <div class="text-2xl font-extrabold text-antracite mt-1">{{ formatNumber(Math.round(bodyStats.bmi.value * 10) / 10) }}</div>
+                    <div class="text-[11px] font-bold" :class="bodyStats.bmi.color">{{ bodyStats.bmi.label }}</div>
+                    <div class="relative mt-2 h-1.5 rounded-full overflow-hidden flex">
+                      <div class="h-full bg-sky-400" style="width:17.5%"></div>
+                      <div class="h-full bg-salvia" style="width:32.5%"></div>
+                      <div class="h-full bg-arancione" style="width:25%"></div>
+                      <div class="h-full bg-red-500" style="width:25%"></div>
+                    </div>
+                    <div class="relative h-2"><div class="absolute -top-0.5 w-1.5 h-2.5 rounded-full bg-antracite ring-2 ring-white" :style="{ left: 'calc(' + bodyStats.bmi.pos + '% - 3px)' }"></div></div>
+                    <p v-if="bodyInfoOpen === 'bmi'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">Peso diviso altezza al quadrato. Normopeso tra 18,5 e 25. Non distingue muscoli e grasso: chi ha tanta massa muscolare può risultare "sovrappeso" pur essendo in forma, per questo guarda anche la massa grassa.</p>
+                  </div>
+
+                  <!-- Massa grassa -->
+                  <div v-if="bodyStats.bodyFat" @click="toggleBodyInfo('fat')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'fat' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Massa grassa</div>
+                    <div class="text-2xl font-extrabold text-antracite mt-1">{{ formatNumber(Math.round(bodyStats.bodyFat.value * 10) / 10) }}<span class="text-sm font-bold text-gray-400">%</span></div>
+                    <div class="text-[11px] font-bold" :class="bodyStats.bodyFat.color">{{ bodyStats.bodyFat.label }}</div>
+                    <div class="text-[10px] font-medium text-gray-400 mt-1">{{ formatNumber(Math.round(bodyStats.bodyFat.leanKg * 10) / 10) }} kg magri · {{ formatNumber(Math.round(bodyStats.bodyFat.fatKg * 10) / 10) }} kg grasso</div>
+                    <p v-if="bodyInfoOpen === 'fat'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">Stima {{ bodyStats.bodyFat.method }} (formula {{ bodyStats.waist ? 'RFM' : 'Deurenberg' }}). Non è precisa come una plicometria o una bioimpedenza, ma è ottima per vedere la tendenza nel tempo: {{ bodyStats.waist ? 'misura la vita sempre allo stesso modo, all\'altezza dell\'ombelico.' : 'aggiungi la circonferenza vita per una stima migliore.' }}</p>
+                  </div>
+
+                  <!-- Vita / altezza -->
+                  <div v-if="bodyStats.whtr" @click="toggleBodyInfo('whtr')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'whtr' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Vita / altezza</div>
+                    <div class="text-2xl font-extrabold text-antracite mt-1">{{ bodyStats.whtr.value.toFixed(2).replace('.', ',') }}</div>
+                    <div class="text-[11px] font-bold" :class="bodyStats.whtr.color">{{ bodyStats.whtr.label }}</div>
+                    <p v-if="bodyInfoOpen === 'whtr'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">Circonferenza vita divisa per l'altezza. Sotto 0,5 è il valore consigliato: la regola è "la vita sotto la metà della tua altezza". Indica il grasso addominale meglio del BMI.</p>
+                  </div>
+
+                  <!-- Peso forma -->
+                  <div v-if="bodyStats.idealWeight" @click="toggleBodyInfo('ideal')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'ideal' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Peso forma</div>
+                    <div class="text-lg font-extrabold text-antracite mt-1 leading-tight">{{ Math.round(bodyStats.idealWeight.min) }}–{{ Math.round(bodyStats.idealWeight.max) }} <span class="text-xs font-bold text-gray-400">kg</span></div>
+                    <div class="text-[11px] font-bold" :class="bodyStats.idealWeight.delta === 0 ? 'text-salvia' : 'text-arancione'">{{ bodyStats.idealWeight.delta === 0 ? 'Ci sei dentro' : (bodyStats.idealWeight.delta > 0 ? '+' : '') + formatNumber(Math.round(bodyStats.idealWeight.delta * 10) / 10) + ' kg' }}</div>
+                    <p v-if="bodyInfoOpen === 'ideal'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">L'intervallo di peso con BMI tra 18,5 e 25 per la tua altezza. È un riferimento generale: con molta massa muscolare il tuo peso ideale può essere più alto.</p>
+                  </div>
+
+                  <!-- Acqua -->
+                  <div v-if="bodyStats.water" @click="toggleBodyInfo('water')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'water' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">💧 Acqua</div>
+                    <div class="text-2xl font-extrabold text-antracite mt-1">{{ formatNumber(bodyStats.water) }} <span class="text-sm font-bold text-gray-400">L</span></div>
+                    <div class="text-[11px] font-bold text-sky-600">al giorno</div>
+                    <p v-if="bodyInfoOpen === 'water'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">Circa 35 ml per ogni kg di peso, più mezzo litro per ogni ora di allenamento (in media sulla settimana). Con il caldo o se sudi molto bevi di più.</p>
+                  </div>
+
+                  <!-- Proteine -->
+                  <div v-if="bodyStats.protein" @click="toggleBodyInfo('protein')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'protein' ? 'col-span-2' : ''">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">🥩 Proteine</div>
+                    <div class="text-lg font-extrabold text-antracite mt-1 leading-tight">{{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} <span class="text-xs font-bold text-gray-400">g</span></div>
+                    <div class="text-[11px] font-bold text-viola">al giorno</div>
+                    <p v-if="bodyInfoOpen === 'protein'" class="mt-2 text-[11px] font-medium text-gray-500 leading-relaxed">{{ bodyStats.protein.active ? 'Ti alleni con costanza: 1,6–2 g per kg di peso aiutano a costruire e mantenere i muscoli.' : '1–1,2 g per kg di peso. Se inizi ad allenarti spesso, il fabbisogno sale fino a 1,6–2 g/kg.' }}</p>
+                  </div>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 px-1 leading-snug">Stime calcolate con formule scientifiche standard: utili per orientarti, non sostituiscono il parere del tuo nutrizionista o medico.</p>
               </div>
 
               <!-- CIRCONFERENZE -->
@@ -1715,12 +1852,33 @@
                     <input type="text" inputmode="numeric" v-model="profileEdit.height" class="w-full bg-gray-50 border border-gray-200 focus:border-salvia rounded-xl p-2.5 text-sm font-bold text-antracite outline-none transition-all placeholder:text-gray-300 placeholder:font-medium bg-white text-center">
                   </div>
                 </div>
+                <div>
+                  <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Sesso</label>
+                  <div class="grid grid-cols-2 gap-2">
+                    <button v-for="opt in sexOptions" :key="'pe-sex-' + opt.id" type="button" @click="profileEdit.sex = profileEdit.sex === opt.id ? '' : opt.id"
+                            class="py-2.5 rounded-xl text-sm font-bold border transition-all"
+                            :class="profileEdit.sex === opt.id ? 'bg-salvia/10 border-salvia text-salvia' : 'bg-white border-gray-200 text-gray-500'">{{ opt.label }}</button>
+                  </div>
+                </div>
                 <p v-if="profileEdit.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{{ profileEdit.error }}</p>
                 <div class="flex gap-2">
                   <button @click="profileEdit.isOpen = false" class="flex-1 bg-white border border-gray-200 text-gray-600 font-bold py-2.5 rounded-xl text-sm">Annulla</button>
                   <button @click="saveProfileEdit" class="flex-1 bg-salvia text-white font-bold py-2.5 rounded-xl text-sm">Salva</button>
                 </div>
                 <p class="text-[10px] font-medium text-gray-400">Peso e circonferenze si aggiornano dalla sezione Progressi.</p>
+              </div>
+
+              <!-- Aspetto -->
+              <div class="space-y-3">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Aspetto</div>
+                <div class="grid grid-cols-3 gap-1.5 bg-gray-50 border border-gray-100 rounded-2xl p-1.5">
+                  <button v-for="opt in themeOptions" :key="'th-' + opt.id" @click="settings.theme = opt.id"
+                          class="py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1"
+                          :class="settings.theme === opt.id ? 'bg-white text-antracite shadow-sm border border-gray-200' : 'text-gray-400 hover:text-antracite border border-transparent'">
+                    <span class="text-base leading-none">{{ opt.icon }}</span>{{ opt.label }}
+                  </button>
+                </div>
+                <p v-if="settings.theme === 'system'" class="text-[10px] font-medium text-gray-400 -mt-1">Segue il tema del telefono: scuro di sera se l'hai impostato così.</p>
               </div>
 
               <!-- App sul telefono -->
@@ -2323,7 +2481,7 @@
                       </linearGradient>
                     </defs>
                     <g v-for="g in exerciseChart.grid" :key="'g' + g.y">
-                      <line x1="16" :y1="g.y" x2="284" :y2="g.y" stroke="#E5E7EB" stroke-dasharray="3,3"/>
+                      <line x1="16" :y1="g.y" x2="284" :y2="g.y" class="chart-grid" stroke="#E5E7EB" stroke-dasharray="3,3"/>
                       <text x="0" :y="g.y + 3" fill="#9CA3AF" font-size="8" font-weight="600">{{ g.label }}</text>
                     </g>
                     <polygon :points="exerciseChart.area" fill="url(#exerciseAreaGrad)"/>
@@ -2332,8 +2490,8 @@
                           :x1="exerciseChart.points[exerciseChartActive].x" y1="14" :x2="exerciseChart.points[exerciseChartActive].x" y2="122"
                           stroke="#9CA3AF" stroke-width="1"/>
                     <g v-for="(pt, i) in exerciseChart.points" :key="'p' + i">
-                      <circle :cx="pt.x" :cy="pt.y" :r="exerciseChartActive === i ? 5.5 : 4" fill="#FFFFFF" :stroke="exerciseChart.color" stroke-width="2"/>
-                      <text v-if="pt.label && exerciseChartActive === null" :x="Math.min(Math.max(pt.x, 14), 286)" :y="pt.y - 9" text-anchor="middle" fill="#1D1D1D" font-size="9" font-weight="800">{{ formatNumber(pt.value) }}</text>
+                      <circle :cx="pt.x" :cy="pt.y" :r="exerciseChartActive === i ? 5.5 : 4" class="chart-dot" fill="#FFFFFF" :stroke="exerciseChart.color" stroke-width="2"/>
+                      <text v-if="pt.label && exerciseChartActive === null" :x="Math.min(Math.max(pt.x, 14), 286)" :y="pt.y - 9" text-anchor="middle" class="chart-label" fill="#1D1D1D" font-size="9" font-weight="800">{{ formatNumber(pt.value) }}</text>
                     </g>
                     <text x="16" y="138" fill="#9CA3AF" font-size="8" font-weight="600">{{ formatDate(exerciseChart.firstDate) }}</text>
                     <text x="284" y="138" text-anchor="end" fill="#9CA3AF" font-size="8" font-weight="600">{{ formatDate(exerciseChart.lastDate) }}</text>

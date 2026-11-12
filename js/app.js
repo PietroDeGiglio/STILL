@@ -3542,15 +3542,17 @@ createApp({
       if (height !== null && (height < 80 || height > 250)) return "Controlla l'altezza: va indicata in centimetri.";
       return '';
     };
+    const sexOptions = [{ id: 'M', label: 'Uomo' }, { id: 'F', label: 'Donna' }];
     const profileFromForm = (form) => ({
       firstName: String(form.firstName).trim(),
       lastName: String(form.lastName || '').trim(),
       birthDate: form.birthDate || '',
-      height: parseOptionalNumber(form.height)
+      height: parseOptionalNumber(form.height),
+      sex: form.sex === 'M' || form.sex === 'F' ? form.sex : ''
     });
 
     const onboarding = ref({
-      step: 0, error: '', firstName: '', lastName: '', birthDate: '', height: '',
+      step: 0, error: '', firstName: '', lastName: '', birthDate: '', height: '', sex: '',
       weight: '', chest: '', arms: '', waist: '', thighs: '', belly: ''
     });
     const onboardingFileInput = ref(null);
@@ -3608,8 +3610,125 @@ createApp({
       shareStudio.value.format = 'story';
     };
 
+    // ---------------------------------------------------------------
+    // IL TUO CORPO: statistiche calcolate da profilo, misure e allenamenti.
+    // Stime con formule standard (non sostituiscono il parere di un professionista).
+    // ---------------------------------------------------------------
+    const bodyInfoOpen = ref('');
+    const toggleBodyInfo = (key) => { bodyInfoOpen.value = bodyInfoOpen.value === key ? '' : key; };
+    const roundTo = (v, step) => Math.round(v / step) * step;
+
+    const bodyStats = computed(() => {
+      const p = profile.value || {};
+      const weightEntry = latestWeight.value;
+      const weight = weightEntry ? Number(weightEntry.weight) : null;
+      const height = p.height ? Number(p.height) : null;
+      const age = profileAge.value;
+      const sex = p.sex === 'M' || p.sex === 'F' ? p.sex : '';
+      const waistEntry = [...sortedMeasurements.value].reverse().find(m => m.waist !== null && m.waist !== undefined && m.waist !== '');
+      const waist = waistEntry ? Number(waistEntry.waist) : null;
+      const missing = [];
+      if (!weight) missing.push('peso');
+      if (!height) missing.push('altezza');
+      if (age === null) missing.push('data di nascita');
+      if (!sex) missing.push('sesso');
+      const out = { missing, weight, height, age, sex, waist, tiles: {} };
+      const h = height ? height / 100 : null;
+
+      // BMI
+      if (weight && h) {
+        const bmi = weight / (h * h);
+        const cat = bmi < 18.5 ? { label: 'Sottopeso', color: 'text-sky-600' }
+          : bmi < 25 ? { label: 'Normopeso', color: 'text-salvia' }
+          : bmi < 30 ? { label: 'Sovrappeso', color: 'text-arancione' }
+          : { label: 'Obesità', color: 'text-red-500' };
+        // Posizione sulla barra 15 → 35
+        out.bmi = { value: bmi, ...cat, pos: Math.max(0, Math.min(100, ((bmi - 15) / 20) * 100)) };
+        out.idealWeight = { min: 18.5 * h * h, max: 24.9 * h * h };
+        out.idealWeight.delta = weight < out.idealWeight.min ? weight - out.idealWeight.min : (weight > out.idealWeight.max ? weight - out.idealWeight.max : 0);
+      }
+
+      // Rapporto vita / altezza
+      if (waist && height) {
+        const r = waist / height;
+        out.whtr = { value: r, ...(r < 0.4 ? { label: 'Molto basso', color: 'text-sky-600' } : r < 0.5 ? { label: 'Ottimo', color: 'text-salvia' } : r < 0.6 ? { label: 'Da tenere d\'occhio', color: 'text-arancione' } : { label: 'Alto', color: 'text-red-500' }) };
+      }
+
+      // Massa grassa stimata: RFM (dalla vita) oppure Deurenberg (da BMI ed età)
+      if (sex && weight && h) {
+        let pct = null, method = '';
+        if (waist && height) { pct = (sex === 'M' ? 64 : 76) - 20 * (height / waist); method = 'dalla circonferenza vita'; }
+        else if (age !== null && out.bmi) { pct = 1.2 * out.bmi.value + 0.23 * age - 10.8 * (sex === 'M' ? 1 : 0) - 5.4; method = 'da BMI ed età'; }
+        if (pct !== null) {
+          pct = Math.max(3, Math.min(60, pct));
+          const bands = sex === 'M' ? [6, 14, 18, 25] : [14, 21, 25, 32];
+          const labels = ['Molto bassa', 'Da atleta', 'In forma', 'Nella media', 'Alta'];
+          const colors = ['text-sky-600', 'text-salvia', 'text-salvia', 'text-arancione', 'text-red-500'];
+          const i = bands.findIndex(b => pct < b);
+          const idx = i < 0 ? 4 : i;
+          out.bodyFat = { value: pct, fatKg: weight * pct / 100, leanKg: weight * (1 - pct / 100), label: labels[idx], color: colors[idx], method };
+        }
+      }
+
+      // Attività: ore di allenamento a settimana nelle ultime 4 settimane (palestra + sport segnati)
+      const today = toISODate();
+      const from = new Date(); from.setHours(12, 0, 0, 0); from.setDate(from.getDate() - 27);
+      const weeklyHours = trainingSecondsBetween(toISODate(from), today).total / 3600 / 4;
+      const level = weeklyHours < 1 ? { factor: 1.2, label: 'Sedentario' }
+        : weeklyHours < 3 ? { factor: 1.375, label: 'Poco attivo' }
+        : weeklyHours < 5 ? { factor: 1.55, label: 'Attivo' }
+        : weeklyHours < 8 ? { factor: 1.725, label: 'Molto attivo' }
+        : { factor: 1.9, label: 'Atleta' };
+      out.activity = { weeklyHours, ...level };
+
+      // Metabolismo basale (Mifflin-St Jeor) e fabbisogno giornaliero
+      if (weight && height && age !== null && sex) {
+        const bmr = 10 * weight + 6.25 * height - 5 * age + (sex === 'M' ? 5 : -161);
+        const tdee = bmr * level.factor;
+        out.energy = {
+          bmr: roundTo(bmr, 10),
+          tdee: roundTo(tdee, 10),
+          lose: roundTo(Math.max(bmr, tdee - 500), 10),
+          gain: roundTo(tdee + 300, 10)
+        };
+      }
+
+      // Acqua e proteine
+      if (weight) {
+        out.water = Math.round((weight * 0.035 + (weeklyHours / 7) * 0.5) * 10) / 10;
+        const active = weeklyHours >= 2;
+        out.protein = { min: roundTo(weight * (active ? 1.6 : 1.0), 5), max: roundTo(weight * (active ? 2.0 : 1.2), 5), active };
+      }
+
+      // Il piano a confronto: calorie medie dei prossimi 7 giorni del piano attivo
+      if (activePlan.value && out.energy) {
+        let total = 0, days = 0;
+        for (let i = 0; i < 7; i++) {
+          const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
+          const kcal = getMealsForDate(d).reduce((s, m) => s + (m.calories || 0), 0);
+          if (kcal > 0) { total += kcal; days++; }
+        }
+        if (days) {
+          const planKcal = Math.round(total / days);
+          const balance = planKcal - out.energy.tdee;
+          out.plan = { kcal: planKcal, balance, perWeek: (balance * 7) / 7700 };
+        }
+      }
+
+      // Andamento reale del peso (ultime ~8 settimane)
+      const recent = weightEntries.value.filter(e => daysBetween(e.date, today) <= 60);
+      if (recent.length >= 2) {
+        const first = recent[0], last = recent[recent.length - 1];
+        const days = daysBetween(first.date, last.date);
+        if (days >= 7) out.trend = { perWeek: ((last.weight - first.weight) / days) * 7, days };
+      }
+      return out;
+    });
+
+    const openProfileCompletion = () => { openBackupModal(); openProfileEdit(); };
+
     // Modifica profilo (dalla modale Profilo)
-    const profileEdit = ref({ isOpen: false, firstName: '', lastName: '', birthDate: '', height: '', error: '' });
+    const profileEdit = ref({ isOpen: false, firstName: '', lastName: '', birthDate: '', height: '', sex: '', error: '' });
     const openProfileEdit = () => {
       const current = profile.value || {};
       profileEdit.value = {
@@ -3618,6 +3737,7 @@ createApp({
         lastName: current.lastName || '',
         birthDate: current.birthDate || '',
         height: current.height !== null && current.height !== undefined ? String(current.height) : '',
+        sex: current.sex || '',
         error: ''
       };
     };
@@ -4454,6 +4574,28 @@ createApp({
     watch(settings, (v) => storage.save('still_settings', v), { deep: true });
 
     // ---------------------------------------------------------------
+    // ASPETTO: chiaro, scuro o automatico (segue il telefono). Colori scuri in css/style.css
+    // ---------------------------------------------------------------
+    if (!['light', 'dark', 'system'].includes(settings.value.theme)) settings.value.theme = 'light';
+    const darkQuery = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    const systemDark = ref(!!(darkQuery && darkQuery.matches));
+    if (darkQuery) {
+      const onChange = (e) => { systemDark.value = e.matches; };
+      if (darkQuery.addEventListener) darkQuery.addEventListener('change', onChange); else if (darkQuery.addListener) darkQuery.addListener(onChange);
+    }
+    const isDark = computed(() => settings.value.theme === 'dark' || (settings.value.theme === 'system' && systemDark.value));
+    watch(isDark, (dark) => {
+      document.documentElement.classList.toggle('dark', dark);
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', dark ? '#0E0E11' : '#F6F5F2');
+    }, { immediate: true });
+    const themeOptions = [
+      { id: 'light', label: 'Chiaro', icon: '☀️' },
+      { id: 'dark', label: 'Scuro', icon: '🌙' },
+      { id: 'system', label: 'Automatico', icon: '📱' }
+    ];
+
+    // ---------------------------------------------------------------
     // GAMIFICATION: trofei, livelli (XP) e record personali.
     // Tutto si calcola dallo storico: si salvano solo i trofei già
     // festeggiati e il numero di condivisioni (in still_settings).
@@ -4998,6 +5140,13 @@ createApp({
       onboardingNext,
       onboardingBack,
       completeOnboarding,
+      sexOptions,
+      bodyStats,
+      bodyInfoOpen,
+      toggleBodyInfo,
+      openProfileCompletion,
+      themeOptions,
+      isDark,
       welcomeModal,
       closeWelcome,
       shareWelcome,
