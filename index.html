@@ -2826,6 +2826,21 @@
                 </div>
               </div>
 
+              <!-- Compagno della serie nella storia -->
+              <div v-if="petState.stage > 0 && !(shareStudio.kind === 'achievement' && shareStudio.achievement && (shareStudio.achievement.type === 'pet' || shareStudio.achievement.type === 'streakSave'))"
+                   class="flex items-center justify-between gap-3 bg-white/5 border border-white/10 rounded-2xl p-3">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-11 h-11 shrink-0 pet-bob" v-html="petMainSvg"></div>
+                  <div class="min-w-0">
+                    <span class="text-xs font-bold text-white/80">Mostra {{ petState.name }}</span>
+                    <p class="text-[10px] font-medium text-white/40">{{ shareWantsVideo ? 'Nel video fa il suo balletto' : 'Compare nella storia' }}</p>
+                  </div>
+                </div>
+                <button @click="toggleSharePet" class="w-10 h-5 rounded-full relative transition-colors flex-shrink-0" :class="shareStudio.showPet ? 'bg-salvia' : 'bg-white/20'" aria-label="Mostra il compagno">
+                  <div class="w-4 h-4 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform" :class="shareStudio.showPet ? 'translate-x-5' : ''"></div>
+                </button>
+              </div>
+
               <!-- Privacy -->
               <div class="space-y-3 bg-white/5 border border-white/10 rounded-2xl p-4">
                 <div class="flex items-center gap-2">
@@ -3204,7 +3219,9 @@
           <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto">
             <div class="relative px-6 pt-6 pb-5 text-center" :style="{ background: 'linear-gradient(160deg, ' + petState.color + '33, transparent 75%)' }">
               <button @click="petModal.isOpen = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/70 text-gray-500 flex items-center justify-center text-lg font-bold">×</button>
-              <div class="pet-bob w-36 h-36 mx-auto" :class="petState.mood === 'sleepy' ? 'pet-sleep' : ''" v-html="petMainSvg"></div>
+              <button @click="petDance" class="block w-36 h-36 mx-auto" aria-label="Fai ballare il compagno">
+                <div class="w-full h-full" :class="petDanceClass || ('pet-bob' + (petState.mood === 'sleepy' ? ' pet-sleep' : ''))" v-html="petMainSvg"></div>
+              </button>
               <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ petState.speciesName }}<span v-if="petState.legendary"> · leggendario ✨</span></p>
               <h3 class="text-2xl font-extrabold text-antracite leading-tight">{{ petState.name }}</h3>
               <p class="text-xs font-medium text-gray-500 mt-1">
@@ -3216,6 +3233,7 @@
                 <div class="h-full rounded-full transition-all" :style="{ width: petState.progress + '%', background: petState.color }"></div>
               </div>
               <p v-if="petState.mood === 'worried'" class="text-[11px] font-bold text-arancione mt-2">Ha un po' di ansia: oggi non hai ancora fatto niente 😬</p>
+              <p v-else class="text-[10px] font-bold text-gray-400 mt-2">Toccalo per farlo ballare 💃</p>
             </div>
 
             <div class="px-5 pb-6 space-y-5">
@@ -3253,20 +3271,36 @@
 
               <!-- Album -->
               <div>
-                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Album dei compagni</h4>
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Album dei compagni · {{ petAlbumFound }} su {{ petAlbum.length }}</h4>
                 <div class="grid grid-cols-4 gap-2">
-                  <div v-for="a in petAlbum" :key="'pa' + a.id" class="text-center">
-                    <div class="w-full aspect-square rounded-2xl bg-gray-50 p-1" v-html="a.svg"></div>
+                  <div v-for="a in petAlbum" :key="'pa' + a.id" class="text-center relative">
+                    <div class="w-full aspect-square rounded-2xl bg-gray-50 p-1" :class="a.locked ? 'opacity-60' : ''" v-html="a.svg"></div>
+                    <div v-if="a.locked" class="absolute top-1 right-1 text-[10px] bg-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm">🔒</div>
                     <div class="text-[9px] font-extrabold mt-1" :class="a.max ? 'text-antracite' : 'text-gray-400'">{{ a.name }}</div>
                   </div>
                 </div>
-                <p class="text-[10px] font-medium text-gray-400 mt-2">Ogni nuova serie fa nascere un compagno a sorpresa. Riuscirai a trovarli tutti?</p>
+                <p class="text-[10px] font-medium text-gray-400 mt-2">Ogni nuova serie fa nascere un compagno a sorpresa. Porta un compagno alla forma finale (60 giorni di fila) e ne sblocchi uno nuovo.</p>
               </div>
 
               <button v-if="petState.stage > 0" @click="sharePet" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2 shadow-sm">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
                 Mostralo nelle storie
               </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NUOVO COMPAGNO SBLOCCATO (forma finale raggiunta) -->
+        <div v-if="petUnlockModal.isOpen && !petEvolveModal.isOpen" class="fixed inset-0 z-[68] flex items-center justify-center p-4 bg-antracite/50 backdrop-blur-sm animate-fadeIn" @click.self="petUnlockModal.isOpen = false">
+          <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center">
+            <div class="px-6 pt-8 pb-5" :style="{ background: 'radial-gradient(circle at 50% 45%, ' + PET_SPECIES[petUnlockModal.species].color + '55, transparent 70%)' }">
+              <div class="pet-pop w-36 h-36 mx-auto" v-html="petUnlockSvg"></div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">Nuovo compagno sbloccato!</p>
+              <h3 class="text-2xl font-extrabold text-antracite leading-tight mt-1">{{ PET_SPECIES[petUnlockModal.species].name }}</h3>
+              <p class="text-sm text-gray-500 font-medium mt-2">Hai portato {{ petState.speciesName }} alla forma finale. Da ora {{ PET_SPECIES[petUnlockModal.species].name }} può uscire dalle tue prossime uova.</p>
+            </div>
+            <div class="p-6 pt-2">
+              <button @click="petUnlockModal.isOpen = false" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm">Fantastico!</button>
             </div>
           </div>
         </div>

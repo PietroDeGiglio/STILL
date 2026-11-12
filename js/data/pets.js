@@ -13,28 +13,45 @@ const PET_SPECIES = [
   { id: 'sprout', name: 'Germoglio', color: '#22C55E', stages: ['Semino', 'Germoglio', 'Piantina', 'Bocciolo', 'Fiorellino', 'Fiore arcobaleno'] },
   { id: 'dragon', name: 'Draghetto', color: '#8B5CF6', stages: ['Cucciolo di drago', 'Draghetto', 'Draghetto alato', 'Drago', 'Drago di fuoco', 'Drago leggendario'] },
   { id: 'avocado', name: 'Avocado', color: '#65A30D', stages: ['Nocciolo', 'Nocciolo germogliato', 'Avocadino', 'Avocado', 'Avocado palestrato', 'Avocado d\'oro'] },
-  { id: 'drop', name: 'Gocciolina', color: '#0EA5E9', stages: ['Gocciolina', 'Goccia', 'Goccia frizzante', 'Nuvoletta', 'Nuvola', 'Nuvola arcobaleno'] }
+  { id: 'drop', name: 'Gocciolina', color: '#0EA5E9', stages: ['Gocciolina', 'Goccia', 'Goccia frizzante', 'Nuvoletta', 'Nuvola', 'Nuvola arcobaleno'] },
+  // Da sbloccare: uno nuovo ogni volta che un compagno arriva alla forma finale
+  { id: 'shroom', name: 'Funghetto', color: '#EF4444', locked: true, stages: ['Spora', 'Funghetto', 'Fungo a pois', 'Fungo saltellante', 'Fungo gigante', 'Fungo stellato'] },
+  { id: 'star', name: 'Stellina', color: '#F59E0B', locked: true, stages: ['Polvere di stelle', 'Stellina', 'Stella', 'Stella cadente', 'Cometa', 'Supernova'] },
+  { id: 'cat', name: 'Gattino', color: '#F97316', locked: true, stages: ['Gattino', 'Micio', 'Micio birbante', 'Gattone', 'Gatto atleta', 'Gatto cosmico'] }
 ];
+const PET_BASE_IDS = PET_SPECIES.filter(s => !s.locked).map(s => s.id);
+const petSpeciesById = (id) => Math.max(0, PET_SPECIES.findIndex(s => s.id === id));
 
 // Vestiti: si sbloccano con la serie migliore di sempre
 const PET_ITEMS = [
   { id: 'cap', slot: 'hat', name: 'Cappellino', icon: '🧢', unlock: 0 },
+  { id: 'flower', slot: 'hat', name: 'Fiorellino', icon: '🌼', unlock: 2 },
   { id: 'headband', slot: 'hat', name: 'Fascia', icon: '🎽', unlock: 3 },
+  { id: 'cape', slot: 'back', name: 'Mantello', icon: '🦸', unlock: 4 },
   { id: 'sunglasses', slot: 'eyes', name: 'Occhiali da sole', icon: '🕶️', unlock: 5 },
   { id: 'scarf', slot: 'neck', name: 'Sciarpa', icon: '🧣', unlock: 7 },
   { id: 'beanie', slot: 'hat', name: 'Berretto', icon: '🧶', unlock: 10 },
+  { id: 'backpack', slot: 'back', name: 'Zainetto', icon: '🎒', unlock: 12 },
   { id: 'bowtie', slot: 'neck', name: 'Papillon', icon: '🎀', unlock: 14 },
+  { id: 'mask', slot: 'eyes', name: 'Maschera da eroe', icon: '🦹', unlock: 18 },
   { id: 'round', slot: 'eyes', name: 'Occhialini', icon: '👓', unlock: 21 },
+  { id: 'whistle', slot: 'neck', name: 'Fischietto', icon: '📯', unlock: 25 },
   { id: 'headphones', slot: 'hat', name: 'Cuffie', icon: '🎧', unlock: 30 },
+  { id: 'stars', slot: 'eyes', name: 'Occhiali a stella', icon: '⭐', unlock: 35 },
+  { id: 'lei', slot: 'neck', name: 'Collana di fiori', icon: '🌺', unlock: 40 },
   { id: 'party', slot: 'hat', name: 'Cappello da festa', icon: '🥳', unlock: 45 },
+  { id: 'wings', slot: 'back', name: 'Ali', icon: '🪽', unlock: 50 },
   { id: 'medal', slot: 'neck', name: 'Medaglia', icon: '🏅', unlock: 60 },
+  { id: 'tophat', slot: 'hat', name: 'Cilindro', icon: '🎩', unlock: 65 },
   { id: 'chain', slot: 'neck', name: 'Catena d\'oro', icon: '⛓️', unlock: 75 },
+  { id: 'rainbowcape', slot: 'back', name: 'Mantello arcobaleno', icon: '🌈', unlock: 90 },
   { id: 'crown', slot: 'hat', name: 'Corona', icon: '👑', unlock: 100 }
 ];
 const PET_SLOTS = [
   { id: 'hat', label: 'Testa' },
   { id: 'eyes', label: 'Occhi' },
-  { id: 'neck', label: 'Collo' }
+  { id: 'neck', label: 'Collo' },
+  { id: 'back', label: 'Schiena' }
 ];
 
 const petStageFor = (days) => {
@@ -47,7 +64,8 @@ const petHash = (text) => {
   for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
   return Math.abs(h);
 };
-const petSpeciesIndex = (seed, startKey) => petHash(String(seed) + '|' + String(startKey)) % PET_SPECIES.length;
+// Specie "di partenza" calcolata dal seme (usata solo per chi aveva già un compagno prima che la specie venisse salvata)
+const petSpeciesIndex = (seed, startKey) => petSpeciesById(PET_BASE_IDS[petHash(String(seed) + '|' + String(startKey)) % PET_BASE_IDS.length]);
 const petStageName = (speciesIdx, stage) => (stage === 0 ? 'Uovo misterioso' : PET_SPECIES[speciesIdx].stages[stage - 1]);
 
 // --- Disegno ---
@@ -274,7 +292,116 @@ const drawDrop = (uid, stage, mood) => {
   };
 };
 
-const PET_DRAW = [drawSprout, drawDragon, drawAvocado, drawDrop];
+// 5) Spora → Fungo stellato
+const drawShroom = (uid, stage, mood) => {
+  const sw = [0, 30, 34, 38, 40, 42, 44][stage], sh = [0, 24, 27, 30, 32, 34, 36][stage];
+  const cw = [0, 24, 29, 34, 38, 42, 46][stage], ch = [0, 17, 21, 25, 28, 31, 34][stage];
+  const stemTop = 106 - sh;
+  const base = stemTop + 7;
+  const capTop = base - ch;
+  const gold = stage >= 6;
+  const c1 = gold ? '#FDE68A' : '#FCA5A5', c2 = gold ? '#F59E0B' : '#DC2626';
+  let back = '', front = '';
+  if (stage >= 4) back += [-1, 1].map(k => `<path d="M${pn(60 + k * (sw / 2 + 8))} ${pn(stemTop + 8)} l${pn(k * 6)} -3 M${pn(60 + k * (sw / 2 + 9))} ${pn(stemTop + 15)} l${pn(k * 7)} 0" stroke="#FCA5A5" stroke-width="2.4" stroke-linecap="round"/>`).join('');
+  if (gold) back += `<circle cx="60" cy="${pn(capTop + ch * 0.6)}" r="${pn(cw * 1.15)}" fill="#FDE68A" opacity=".25"/>` + petSparkle(20, 34, 5) + petSparkle(100, 40, 4, '#EF4444') + petSparkle(94, 92, 3, '#7A4DF1');
+  // Gambo (corpo con la faccia)
+  const stem = `<defs><linearGradient id="${uid}s" x1="0" x2="1"><stop offset="0" stop-color="#FFF7ED"/><stop offset="1" stop-color="#F5DEC4"/></linearGradient></defs>` +
+    `<rect x="${pn(60 - sw / 2)}" y="${pn(stemTop)}" width="${pn(sw)}" height="${pn(sh)}" rx="${pn(sw * 0.42)}" fill="url(#${uid}s)" stroke="#E7C9A5" stroke-width="1.2"/>`;
+  // Braccini dal gambo
+  if (stage >= 5) front += [-1, 1].map(k => `<path d="M${pn(60 + k * sw * 0.45)} ${pn(stemTop + sh * 0.55)} q${pn(k * 8)} 2 ${pn(k * 10)} -6" stroke="#E7C9A5" stroke-width="4" fill="none" stroke-linecap="round"/>`).join('');
+  // Cappello a cupola con i pois
+  const cap = `<defs><radialGradient id="${uid}c" cx="40%" cy="25%" r="85%"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient></defs>` +
+    `<path d="M${pn(60 - cw)} ${pn(base)} C${pn(60 - cw)} ${pn(capTop - ch * 0.1)} ${pn(60 + cw)} ${pn(capTop - ch * 0.1)} ${pn(60 + cw)} ${pn(base)} Q60 ${pn(base + 5)} ${pn(60 - cw)} ${pn(base)}Z" fill="url(#${uid}c)"/>`;
+  const dots = stage >= 2
+    ? [[-0.5, 0.45, 0.17], [0.15, 0.22, 0.14], [0.6, 0.55, 0.13], [-0.1, 0.7, 0.1], [0.42, 0.85, 0.08], [-0.75, 0.85, 0.08]]
+    : [[-0.35, 0.5, 0.16], [0.4, 0.45, 0.14]];
+  const spots = dots.map(([kx, ky, kr]) => gold
+    ? petSparkle(60 + kx * cw, capTop + ky * ch, kr * cw * 1.3, '#FFFFFF')
+    : `<ellipse cx="${pn(60 + kx * cw)}" cy="${pn(capTop + ky * ch)}" rx="${pn(kr * cw)}" ry="${pn(kr * cw * 0.85)}" fill="#fff" opacity=".92"/>`).join('');
+  const faceY = stemTop + 7 + (sh - 7) * 0.42;
+  const s = sw / 44;
+  const feet = stage >= 3 ? petFeet(60, 107, sw * 0.8, '#E7C9A5') : '';
+  return {
+    back,
+    body: petShadow(Math.max(sw * 0.7, cw * 0.7)) + feet + stem + front + petFace(60, faceY, s, mood) + cap + spots,
+    top: '',
+    anchors: { top: { x: 60, y: capTop + 3, w: cw * 0.95 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: faceY + 13 * s, w: sw * 1.05 } }
+  };
+};
+
+// 6) Polvere di stelle → Supernova
+const drawStar = (uid, stage, mood) => {
+  const R = [0, 22, 26, 30, 33, 36, 39][stage];
+  const cy = 104 - R * 0.809;
+  const pts = [];
+  for (let i = 0; i < 10; i++) {
+    const a = -Math.PI / 2 + (i * Math.PI) / 5;
+    const rr = i % 2 ? R * 0.52 : R;
+    pts.push(`${pn(60 + Math.cos(a) * rr)},${pn(cy + Math.sin(a) * rr)}`);
+  }
+  const nova = stage >= 6;
+  let back = '';
+  if (stage >= 4) {
+    // Scia dietro (stella cadente, poi cometa)
+    const L = stage === 4 ? 26 : 42;
+    back += `<defs><linearGradient id="${uid}t" x1="1" y1="1" x2="0" y2="0"><stop offset="0" stop-color="#FBBF24" stop-opacity=".9"/><stop offset="1" stop-color="#FBBF24" stop-opacity="0"/></linearGradient></defs>` +
+      [-0.35, 0, 0.35].map(k => `<path d="M${pn(60 - R * 0.35 + k * 10)} ${pn(cy - R * 0.2 - k * 10)} l${pn(-L)} ${pn(-L * 0.62)}" stroke="url(#${uid}t)" stroke-width="${k ? 5 : 8}" stroke-linecap="round"/>`).join('');
+  }
+  if (nova) {
+    back = ['#F87171', '#FBBF24', '#34D399', '#60A5FA', '#A78BFA', '#F472B6'].map((c, i) => {
+      const a = (i / 6) * Math.PI * 2 + 0.3;
+      return `<path d="M${pn(60 + Math.cos(a) * R * 0.9)} ${pn(cy + Math.sin(a) * R * 0.9)} L${pn(60 + Math.cos(a) * R * 1.45)} ${pn(cy + Math.sin(a) * R * 1.45)}" stroke="${c}" stroke-width="5" stroke-linecap="round"/>`;
+    }).join('') + `<circle cx="60" cy="${pn(cy)}" r="${pn(R * 1.25)}" fill="#FDE68A" opacity=".22"/>` + petSparkle(20, 28, 5, '#A78BFA') + petSparkle(102, 30, 4) + petSparkle(16, 92, 3, '#F472B6');
+  }
+  if (stage <= 2) back += petSparkle(60 - R - 6, cy - R * 0.6, 3.5) + petSparkle(60 + R + 5, cy - R * 0.2, 2.6, '#FDE68A');
+  const fillA = nova ? '#FEF3C7' : '#FEF08A', fillB = nova ? '#F472B6' : '#F59E0B';
+  const body = `<defs><radialGradient id="${uid}st" cx="42%" cy="35%" r="75%"><stop offset="0" stop-color="${fillA}"/><stop offset="1" stop-color="${fillB}"/></radialGradient></defs>` +
+    `<polygon points="${pts.join(' ')}" fill="url(#${uid}st)" stroke="url(#${uid}st)" stroke-width="${pn(R * 0.28)}" stroke-linejoin="round"/>` +
+    `<ellipse cx="${pn(60 - R * 0.3)}" cy="${pn(cy - R * 0.32)}" rx="${pn(R * 0.14)}" ry="${pn(R * 0.08)}" fill="#fff" opacity=".6" transform="rotate(-30 ${pn(60 - R * 0.3)} ${pn(cy - R * 0.32)})"/>`;
+  const s = R / 38;
+  const faceY = cy + R * 0.02;
+  return {
+    back,
+    body: petShadow(R * 0.75) + body + petFace(60, faceY, s, mood),
+    top: '',
+    anchors: { top: { x: 60, y: cy - R * 0.62, w: R * 0.75 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: cy + R * 0.42, w: R * 0.95 } }
+  };
+};
+
+// 7) Gattino → Gatto cosmico
+const drawCat = (uid, stage, mood) => {
+  const r = [0, 19, 22, 25.5, 28, 30.5, 33][stage];
+  const cy = 106 - r * 0.94;
+  const top = cy - r * 0.94;
+  const cosmic = stage >= 6;
+  const c1 = cosmic ? '#C4B5FD' : '#FDBA74', c2 = cosmic ? '#4C1D95' : '#EA580C', dark = cosmic ? '#3B0764' : '#C2410C';
+  let back = '', front = '';
+  // Coda
+  if (stage >= 2) {
+    const L = stage === 2 ? 0.9 : 1.15;
+    back += `<path d="M${pn(60 + r * 0.7)} ${pn(cy + r * 0.55)} Q${pn(60 + r * (1.1 + L * 0.3))} ${pn(cy + r * 0.5)} ${pn(60 + r * (1 + L * 0.25))} ${pn(cy - r * 0.15)} Q${pn(60 + r * (0.95 + L * 0.2))} ${pn(cy - r * 0.55)} ${pn(60 + r * (1.2 + L * 0.2))} ${pn(cy - r * 0.6)}" stroke="${c2}" stroke-width="${pn(r * 0.22)}" fill="none" stroke-linecap="round"/>`;
+    if (stage === 5) back += `<rect x="${pn(60 + r * (1.02 + L * 0.25) - 5)}" y="${pn(cy - r * 0.05)}" width="10" height="5" rx="2" fill="#3B82F6"/>`;
+  }
+  if (cosmic) back = `<circle cx="60" cy="${pn(cy)}" r="${pn(r * 1.5)}" fill="#A78BFA" opacity=".2"/>` + back + petSparkle(22, 32, 5, '#FDE68A') + petSparkle(98, 30, 4, '#F472B6') + petSparkle(100, 92, 3, '#60A5FA');
+  // Orecchie (dietro alla testa, parte del corpo così il cappello le copre)
+  const ears = [-1, 1].map(k => `<path d="M${pn(60 + k * r * 0.25)} ${pn(top + r * 0.18)} L${pn(60 + k * r * 0.78)} ${pn(top - r * 0.38)} L${pn(60 + k * r * 0.88)} ${pn(top + r * 0.5)}Z" fill="${c2}" stroke="${c2}" stroke-width="3" stroke-linejoin="round"/><path d="M${pn(60 + k * r * 0.45)} ${pn(top + r * 0.2)} L${pn(60 + k * r * 0.74)} ${pn(top - r * 0.15)} L${pn(60 + k * r * 0.78)} ${pn(top + r * 0.32)}Z" fill="#FDA4AF"/>`).join('');
+  // Strisce sulla fronte, baffi, zampette
+  const stripes = [-1, 0, 1].map(k => `<path d="M${pn(60 + k * r * 0.2)} ${pn(top + r * 0.12)} l0 ${pn(r * (k ? 0.18 : 0.26))}" stroke="${dark}" stroke-width="${pn(r * 0.08)}" stroke-linecap="round" opacity="${cosmic ? 0 : 0.6}"/>`).join('');
+  const s = r / 30;
+  const faceY = cy - r * 0.05;
+  const whiskers = [-1, 1].map(k => `<path d="M${pn(60 + k * r * 0.62)} ${pn(faceY + r * 0.28)} l${pn(k * r * 0.4)} ${pn(-r * 0.06)} M${pn(60 + k * r * 0.62)} ${pn(faceY + r * 0.36)} l${pn(k * r * 0.4)} ${pn(r * 0.06)}" stroke="${dark}" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>`).join('');
+  if (stage >= 3) front += `<ellipse cx="60" cy="${pn(cy + r * 0.5)}" rx="${pn(r * 0.42)}" ry="${pn(r * 0.3)}" fill="${cosmic ? '#EDE9FE' : '#FFEDD5'}"/>`;
+  if (stage >= 4) front += [-1, 1].map(k => `<ellipse cx="${pn(60 + k * r * 0.32)}" cy="${pn(cy + r * 0.78)}" rx="${pn(r * 0.17)}" ry="${pn(r * 0.13)}" fill="${c1}" stroke="${dark}" stroke-width=".8"/>`).join('');
+  if (cosmic) front += [[-0.4, -0.35], [0.35, 0.1], [-0.15, 0.55], [0.5, -0.45]].map(([kx, ky]) => `<circle cx="${pn(60 + kx * r)}" cy="${pn(cy + ky * r)}" r="1.4" fill="#fff" opacity=".85"/>`).join('');
+  return {
+    back,
+    body: petShadow(r * 0.85) + ears + petBlobBody(uid, 60, cy, r, c1, c2) + petFeet(60, 107, r, dark) + stripes + front + whiskers + petFace(60, faceY, s, mood),
+    top: '',
+    anchors: { top: { x: 60, y: top, w: r * 1.35 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: cy + r * 0.5, w: r * 1.3 } }
+  };
+};
+
+const PET_DRAW = [drawSprout, drawDragon, drawAvocado, drawDrop, drawShroom, drawStar, drawCat];
 
 // --- Vestiti ---
 const petHat = (id, a, e) => {
@@ -287,6 +414,11 @@ const petHat = (id, a, e) => {
     return `<path d="M${pn(x - w * 0.4)} ${pn(b)} L${pn(x - w * 0.44)} ${pn(t + 4)} L${pn(x - w * 0.2)} ${pn(b - w * 0.17)} L${pn(x)} ${pn(t)} L${pn(x + w * 0.2)} ${pn(b - w * 0.17)} L${pn(x + w * 0.44)} ${pn(t + 4)} L${pn(x + w * 0.4)} ${pn(b)}Z" fill="#FBBF24" stroke="#D97706" stroke-width="1.2" stroke-linejoin="round"/><circle cx="${pn(x)}" cy="${pn(b - 4)}" r="2.4" fill="#EF4444"/><circle cx="${pn(x - w * 0.24)}" cy="${pn(b - 3.5)}" r="1.8" fill="#3B82F6"/><circle cx="${pn(x + w * 0.24)}" cy="${pn(b - 3.5)}" r="1.8" fill="#10B981"/>`;
   }
   if (id === 'party') return `<path d="M${pn(x - w * 0.3)} ${pn(y + 4)} L${pn(x + w * 0.05)} ${pn(y - w * 0.85)} L${pn(x + w * 0.32)} ${pn(y + 4)}Z" fill="#20C997"/><path d="M${pn(x - w * 0.2)} ${pn(y - w * 0.2)} L${pn(x + w * 0.24)} ${pn(y - w * 0.14)} M${pn(x - w * 0.08)} ${pn(y - w * 0.5)} L${pn(x + w * 0.16)} ${pn(y - w * 0.46)}" stroke="#F5A623" stroke-width="3" stroke-linecap="round"/><circle cx="${pn(x + w * 0.05)}" cy="${pn(y - w * 0.88)}" r="3" fill="#7A4DF1"/>`;
+  if (id === 'flower') {
+    const fx = x + w * 0.28, fy = y + 1;
+    return [0, 1, 2, 3, 4].map(i => { const a = (i / 5) * Math.PI * 2; return `<circle cx="${pn(fx + Math.cos(a) * 4.6)}" cy="${pn(fy + Math.sin(a) * 4.6)}" r="3.6" fill="#FDE047"/>`; }).join('') + `<circle cx="${pn(fx)}" cy="${pn(fy)}" r="3" fill="#F97316"/>` + petLeaf(fx - 4, fy + 4, 8, 150, '#4ADE80', false);
+  }
+  if (id === 'tophat') return `<rect x="${pn(x - w * 0.45)}" y="${pn(y)}" width="${pn(w * 0.9)}" height="5" rx="2.5" fill="#1F2937"/><rect x="${pn(x - w * 0.28)}" y="${pn(y - w * 0.55)}" width="${pn(w * 0.56)}" height="${pn(w * 0.57)}" rx="2" fill="#111827"/><rect x="${pn(x - w * 0.28)}" y="${pn(y - w * 0.12)}" width="${pn(w * 0.56)}" height="${pn(w * 0.1)}" fill="#7A4DF1"/>`;
   if (id === 'headphones' && e) {
     const L = x - e.d - 13 * e.s, R = x + e.d + 13 * e.s;
     return `<path d="M${pn(L + 2)} ${pn(e.y)} Q${pn(L - 2)} ${pn(y - w * 0.32)} ${pn(x)} ${pn(y - w * 0.32)} Q${pn(R + 2)} ${pn(y - w * 0.32)} ${pn(R - 2)} ${pn(e.y)}" stroke="#2B2233" stroke-width="3.5" fill="none" stroke-linecap="round"/>${[L, R].map(cx => `<rect x="${pn(cx - 4.5)}" y="${pn(e.y - 7)}" width="9" height="14" rx="4" fill="#EF4444"/><rect x="${pn(cx - 2)}" y="${pn(e.y - 4)}" width="4" height="8" rx="2" fill="#FCA5A5"/>`).join('')}`;
@@ -298,6 +430,13 @@ const petEyes = (id, e) => {
   const { x, y, d, s } = e;
   if (id === 'sunglasses') return [-1, 1].map(k => `<rect x="${pn(x + k * d - 6.5 * s)}" y="${pn(y - 4.5 * s)}" width="${pn(13 * s)}" height="${pn(9.5 * s)}" rx="${pn(4 * s)}" fill="#111827"/><path d="M${pn(x + k * d - 3.5 * s)} ${pn(y - 2 * s)} l${pn(3 * s)} ${pn(-1 * s)}" stroke="#fff" stroke-opacity=".6" stroke-width="${pn(1.4 * s)}" stroke-linecap="round"/>`).join('') + `<path d="M${pn(x - d + 6.5 * s)} ${pn(y - 2 * s)} Q${pn(x)} ${pn(y - 4.5 * s)} ${pn(x + d - 6.5 * s)} ${pn(y - 2 * s)}" stroke="#111827" stroke-width="${pn(2 * s)}" fill="none"/>`;
   if (id === 'round') return [-1, 1].map(k => `<circle cx="${pn(x + k * d)}" cy="${pn(y)}" r="${pn(6.6 * s)}" fill="#fff" fill-opacity=".18" stroke="#B45309" stroke-width="${pn(1.8 * s)}"/>`).join('') + `<path d="M${pn(x - d + 6.6 * s)} ${pn(y)} Q${pn(x)} ${pn(y - 3 * s)} ${pn(x + d - 6.6 * s)} ${pn(y)}" stroke="#B45309" stroke-width="${pn(1.8 * s)}" fill="none"/>`;
+  if (id === 'mask') return `<path d="M${pn(x - d - 9 * s)} ${pn(y - 2 * s)} Q${pn(x - d)} ${pn(y - 8 * s)} ${pn(x)} ${pn(y - 3.5 * s)} Q${pn(x + d)} ${pn(y - 8 * s)} ${pn(x + d + 9 * s)} ${pn(y - 2 * s)} Q${pn(x + d + 8 * s)} ${pn(y + 6 * s)} ${pn(x + d)} ${pn(y + 5.5 * s)} Q${pn(x)} ${pn(y + 4 * s)} ${pn(x - d)} ${pn(y + 5.5 * s)} Q${pn(x - d - 8 * s)} ${pn(y + 6 * s)} ${pn(x - d - 9 * s)} ${pn(y - 2 * s)}Z" fill="#2563EB"/>` +
+    [-1, 1].map(k => `<ellipse cx="${pn(x + k * d)}" cy="${pn(y)}" rx="${pn(3.6 * s)}" ry="${pn(3 * s)}" fill="#fff"/><circle cx="${pn(x + k * d)}" cy="${pn(y)}" r="${pn(1.7 * s)}" fill="${PD}"/>`).join('') +
+    `<path d="M${pn(x + d + 8 * s)} ${pn(y - 1 * s)} l${pn(7 * s)} ${pn(-3 * s)} M${pn(x + d + 8 * s)} ${pn(y + 1.5 * s)} l${pn(7 * s)} ${pn(3 * s)}" stroke="#2563EB" stroke-width="${pn(2.2 * s)}" stroke-linecap="round"/>`;
+  if (id === 'stars') {
+    const star = (cx, r) => { const p = []; for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5; const rr = i % 2 ? r * 0.5 : r; p.push(`${pn(cx + Math.cos(a) * rr)},${pn(y + Math.sin(a) * rr)}`); } return `<polygon points="${p.join(' ')}" fill="#F472B6" fill-opacity=".85" stroke="#DB2777" stroke-width="${pn(1.2 * s)}" stroke-linejoin="round"/>`; };
+    return star(x - d, 9 * s) + star(x + d, 9 * s) + `<path d="M${pn(x - d + 5 * s)} ${pn(y - 1 * s)} L${pn(x + d - 5 * s)} ${pn(y - 1 * s)}" stroke="#DB2777" stroke-width="${pn(1.6 * s)}"/>`;
+  }
   return '';
 };
 const petNeck = (id, a) => {
@@ -311,7 +450,83 @@ const petNeck = (id, a) => {
     for (let i = 0; i <= 8; i++) { const t = i / 8; s += `<circle cx="${pn(x - w * 0.42 + t * w * 0.84)}" cy="${pn(y - 1 + Math.sin(t * Math.PI) * 6)}" r="2.3" fill="none" stroke="#FBBF24" stroke-width="1.6"/>`; }
     return s + `<circle cx="${pn(x)}" cy="${pn(y + 9)}" r="3.5" fill="#FBBF24"/>`;
   }
+  if (id === 'whistle') return `<path d="M${pn(x - w * 0.36)} ${pn(y - 2)} Q${pn(x)} ${pn(y + 9)} ${pn(x + w * 0.36)} ${pn(y - 2)}" stroke="#EF4444" stroke-width="1.8" fill="none"/><g transform="translate(${pn(x)} ${pn(y + 9)})"><rect x="-3" y="-1" width="11" height="6" rx="3" fill="#D1D5DB" stroke="#6B7280" stroke-width="1"/><circle cx="-1" cy="3" r="4.2" fill="#E5E7EB" stroke="#6B7280" stroke-width="1"/><circle cx="-1" cy="3" r="1.4" fill="#6B7280"/></g>`;
+  if (id === 'lei') {
+    let s = '';
+    const cols = ['#F472B6', '#FDE047', '#A78BFA', '#FB923C', '#34D399'];
+    for (let i = 0; i <= 6; i++) {
+      const t = i / 6, fx = x - w * 0.42 + t * w * 0.84, fy = y - 1 + Math.sin(t * Math.PI) * 5;
+      s += [0, 1, 2, 3, 4].map(j => { const a = (j / 5) * Math.PI * 2; return `<circle cx="${pn(fx + Math.cos(a) * 2.6)}" cy="${pn(fy + Math.sin(a) * 2.6)}" r="2.3" fill="${cols[i % cols.length]}"/>`; }).join('') + `<circle cx="${pn(fx)}" cy="${pn(fy)}" r="1.4" fill="#fff"/>`;
+    }
+    return s;
+  }
   return '';
+};
+// Schiena: dietro al corpo (back) + dettagli davanti (front)
+const petBack = (id, a) => {
+  if (!a || !id) return { back: '', front: '' };
+  const { x, y, w } = a;
+  if (id === 'cape' || id === 'rainbowcape') {
+    const rainbow = id === 'rainbowcape';
+    const fill = rainbow ? `url(#capeRb)` : '#DC2626';
+    const defs = rainbow ? `<defs><linearGradient id="capeRb" x1="0" x2="1"><stop offset="0" stop-color="#F87171"/><stop offset=".25" stop-color="#FBBF24"/><stop offset=".5" stop-color="#34D399"/><stop offset=".75" stop-color="#60A5FA"/><stop offset="1" stop-color="#A78BFA"/></linearGradient></defs>` : '';
+    return {
+      back: defs + `<path d="M${pn(x - w * 0.42)} ${pn(y - 2)} Q${pn(x - w * 0.95)} ${pn(y + 22)} ${pn(x - w * 1.02)} 104 Q${pn(x - w * 0.5)} 99 ${pn(x)} 104 Q${pn(x + w * 0.5)} 99 ${pn(x + w * 1.02)} 104 Q${pn(x + w * 0.95)} ${pn(y + 22)} ${pn(x + w * 0.42)} ${pn(y - 2)}Z" fill="${fill}"/>`,
+      front: `<circle cx="${pn(x - w * 0.36)}" cy="${pn(y)}" r="3" fill="#FBBF24"/><circle cx="${pn(x + w * 0.36)}" cy="${pn(y)}" r="3" fill="#FBBF24"/>`
+    };
+  }
+  if (id === 'backpack') return {
+    back: `<rect x="${pn(x + w * 0.25)}" y="${pn(y - 6)}" width="${pn(w * 0.62)}" height="${pn(w * 0.72)}" rx="7" fill="#20C997"/><rect x="${pn(x + w * 0.55)}" y="${pn(y + w * 0.22)}" width="${pn(w * 0.3)}" height="${pn(w * 0.26)}" rx="4" fill="#0F9F78"/>`,
+    front: [-1, 1].map(k => `<path d="M${pn(x + k * w * 0.3)} ${pn(y - 5)} L${pn(x + k * w * 0.27)} ${pn(y + w * 0.45)}" stroke="#0F9F78" stroke-width="3.2" stroke-linecap="round"/>`).join('')
+  };
+  if (id === 'wings') {
+    const wing = (k) => {
+      const bx = x + k * w * 0.35, by = y - 8;
+      return `<path d="M${pn(bx)} ${pn(by)} Q${pn(bx + k * 30)} ${pn(by - 34)} ${pn(bx + k * 46)} ${pn(by - 22)} Q${pn(bx + k * 40)} ${pn(by - 12)} ${pn(bx + k * 44)} ${pn(by - 6)} Q${pn(bx + k * 34)} ${pn(by)} ${pn(bx + k * 38)} ${pn(by + 8)} Q${pn(bx + k * 24)} ${pn(by + 10)} ${pn(bx)} ${pn(by + 14)}Z" fill="#FFFFFF" stroke="#C7D2FE" stroke-width="1.6" stroke-linejoin="round"/>` +
+        `<path d="M${pn(bx + k * 10)} ${pn(by - 2)} Q${pn(bx + k * 24)} ${pn(by - 14)} ${pn(bx + k * 34)} ${pn(by - 14)} M${pn(bx + k * 10)} ${pn(by + 5)} Q${pn(bx + k * 22)} ${pn(by)} ${pn(bx + k * 30)} ${pn(by + 1)}" stroke="#C7D2FE" stroke-width="1.4" fill="none" stroke-linecap="round"/>`;
+    };
+    return { back: wing(-1) + wing(1), front: '' };
+  }
+  return { back: '', front: '' };
+};
+
+// --- Balletti: mossa diversa per ogni specie (usata nell'app via CSS e nei video da condividere) ---
+// Ritorna spostamento, rotazione (attorno ai piedi), schiacciamento e specchio al tempo t (secondi)
+const petDancePose = (id, t) => {
+  const P = { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1, flip: false };
+  const hop = (period, height) => { const p = (t % period) / period; return -Math.sin(p * Math.PI) * height; };
+  switch (id) {
+    case 'sprout':      // ondeggia come al vento, con un saltino
+      P.rot = Math.sin(t * 3) * 0.16; P.dy = -Math.abs(Math.sin(t * 3)) * 8; break;
+    case 'dragon': {    // salti, e ogni tre salti una giravolta in aria
+      const n = Math.floor(t / 0.9), p = (t % 0.9) / 0.9;
+      P.dy = hop(0.9, 70);
+      if (n % 3 === 2) P.rot = p * Math.PI * 2;
+      else { const q = Math.max(0, 1 - Math.abs(p - 0.98) * 10); P.sy = 1 - q * 0.12; P.sx = 1 + q * 0.1; }
+      break;
+    }
+    case 'avocado': {   // squat da palestra + passetti laterali
+      const q = Math.max(0, Math.sin(t * 5));
+      P.sy = 1 - q * 0.16; P.sx = 1 + q * 0.1; P.dx = Math.sin(t * 1.25) * 30; break;
+    }
+    case 'drop':        // gelatina che fluttua
+      P.sx = 1 + Math.sin(t * 6) * 0.1; P.sy = 1 - Math.sin(t * 6) * 0.1; P.dy = Math.sin(t * 2) * 14 - 10; break;
+    case 'shroom': {    // molla: salta e atterra schiacciandosi
+      const p = (t % 0.7) / 0.7;
+      P.dy = hop(0.7, 50);
+      const land = p > 0.85 || p < 0.08 ? 1 : 0;
+      P.sy = 1 - land * 0.18; P.sx = 1 + land * 0.14; break;
+    }
+    case 'star':        // gira su se stessa e brilla
+      P.rot = Math.sin(t * 2.4) * 0.5; P.sx = P.sy = 1 + Math.sin(t * 8) * 0.06; P.dy = Math.sin(t * 2.4) * -16 - 8; break;
+    case 'cat': {       // passo a destra e a sinistra, si gira a ogni passo
+      const n = Math.floor(t / 0.6);
+      P.flip = n % 2 === 1; P.dy = hop(0.6, 34); P.dx = (n % 2 ? -1 : 1) * 24 * Math.sin(((t % 0.6) / 0.6) * Math.PI); P.rot = (n % 2 ? -1 : 1) * 0.12; break;
+    }
+    default:            // uovo: dondola
+      P.rot = Math.sin(t * 4) * 0.12;
+  }
+  return P;
 };
 
 // SVG completo. opts: { species, stage, mood, outfit: { hat, eyes, neck }, legendary, uid, size }
@@ -326,12 +541,13 @@ const petSvg = (opts = {}) => {
   const aura = opts.legendary && stage > 0
     ? `<defs><radialGradient id="${uid}g"><stop offset="0" stop-color="#FDE68A" stop-opacity=".7"/><stop offset="1" stop-color="#FDE68A" stop-opacity="0"/></radialGradient></defs><circle cx="60" cy="64" r="56" fill="url(#${uid}g)"/>`
     : '';
-  const wear = a ? petNeck(o.neck, a.neck) + petEyes(o.eyes, a.eyes) : '';
+  const backItem = a ? petBack(o.back, a.neck) : { back: '', front: '' };
+  const wear = a ? backItem.front + petNeck(o.neck, a.neck) + petEyes(o.eyes, a.eyes) : '';
   // Il cappello va sopra al corpo ma sotto a foglie, fiori e corna
   const hat = a && o.hat ? petHat(o.hat, a.top, a.eyes) : '';
   const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
   const silhouette = opts.silhouette ? ` style="filter: brightness(0); opacity: .18"` : '';
-  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${art.back}${art.body}${wear}${hat}${art.top}</svg>`;
+  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${art.back}${backItem.back}${art.body}${wear}${hat}${art.top}</svg>`;
 };
 
 // Immagine (per le card da condividere su canvas)

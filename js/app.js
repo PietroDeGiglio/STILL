@@ -3774,7 +3774,7 @@ createApp({
 
     const shareStudio = ref({
       isOpen: false, kind: 'progress', sessionId: null, period: 30, recapMonth: 0, recapType: 'month', achievement: null, focus: 'total', hero: 'auto',
-      theme: 'night', format: 'story', output: 'video', showName: true, weightMode: 'percent', loadMode: 'percent',
+      theme: 'night', format: 'story', output: 'video', showName: true, showPet: true, weightMode: 'percent', loadMode: 'percent',
       hasPhoto: false, ready: false, busy: false, recording: false, recordProgress: 0, error: ''
     });
     const sharePreviewCanvas = ref(null);
@@ -4141,7 +4141,29 @@ createApp({
       };
     };
 
+    // Compagno della serie in ogni storia (si può nascondere): immagine + specie per il balletto nel video
+    const petCornerImg = shallowRef(null);
+    const petShareImg = shallowRef(null);   // compagno protagonista (card del compagno e "salva la serie")
+    const loadPetCornerImage = async () => {
+      const st = petState.value;
+      if (!st.stage) { petCornerImg.value = null; return; }
+      try {
+        petCornerImg.value = await petImage({ species: st.species, stage: st.stage, mood: 'happy', legendary: st.legendary, outfit: settings.value.pet.outfit, uid: 'petCorner' });
+      } catch (e) { petCornerImg.value = null; }
+    };
+    const toggleSharePet = () => {
+      shareStudio.value.showPet = !shareStudio.value.showPet;
+      settings.value.sharePet = shareStudio.value.showPet;
+    };
     const shareData = computed(() => {
+      const data = shareDataFor();
+      const st = shareStudio.value;
+      if (!data) return data;
+      if (data.petImg) data.petDance = PET_SPECIES[data.petSpecies != null ? data.petSpecies : petState.value.species].id;
+      else if (st.showPet && petCornerImg.value && petState.value.stage > 0) data.pet = { img: petCornerImg.value, id: PET_SPECIES[petState.value.species].id };
+      return data;
+    });
+    const shareDataFor = () => {
       const st = shareStudio.value;
       if (!st.isOpen) return null;
       const opts = { loadMode: st.loadMode, weightMode: st.weightMode, hero: st.hero, focus: st.focus, showName: st.showName };
@@ -4161,7 +4183,7 @@ createApp({
       if (st.kind === 'recap') return shareRecapData(st.recapMonth || 0, opts, st.recapType);
       if (st.kind === 'achievement') return shareAchievementData(st.achievement);
       return st.kind === 'workout' ? shareWorkoutData(st.sessionId, opts) : shareProgressData(st.period, opts);
-    });
+    };
 
     const shareThemeOptions = [
       { id: 'night', label: 'Notte', icon: '', swatch: 'background: radial-gradient(circle at 25% 25%, rgba(16,185,129,.55), transparent 55%), radial-gradient(circle at 80% 80%, rgba(139,92,246,.6), transparent 55%), #0E0E10;' },
@@ -4226,14 +4248,16 @@ createApp({
     };
     watch(() => {
       const st = shareStudio.value;
-      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.weightMode, st.loadMode, st.hasPhoto];
+      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.showPet, petCornerImg.value, petShareImg.value, st.weightMode, st.loadMode, st.hasPhoto];
     }, () => { if (shareStudio.value.isOpen) refreshSharePreview(); else stopShareAnimation(); });
 
     const openShareStudio = (kind, sessionId = null) => {
       const st = shareStudio.value;
+      loadPetCornerImage();
       shareStudio.value = {
         ...st,
         isOpen: true, kind, sessionId, hero: 'auto', focus: 'total', ready: false, error: '', busy: false, recording: false,
+        showPet: settings.value.sharePet !== false,
         output: shareVideoSupported ? st.output : 'image',
         theme: st.theme === 'photo' && !sharePhoto ? 'night' : st.theme
       };
@@ -4623,16 +4647,53 @@ createApp({
     {
       const pet = settings.value.pet;
       if (!pet.seed) pet.seed = Math.random().toString(36).slice(2, 10);
-      if (!pet.outfit) pet.outfit = { hat: '', eyes: '', neck: '' };
+      if (!pet.outfit) pet.outfit = { hat: '', eyes: '', neck: '', back: '' };
+      if (pet.outfit.back === undefined) pet.outfit.back = '';
       if (!pet.album) pet.album = {};
+      if (!Array.isArray(pet.unlocked)) pet.unlocked = [...PET_BASE_IDS];
     }
+
+    // Specie della serie: decisa alla schiusa e SALVATA (pet.run), così non cambia più finché la serie continua,
+    // anche se la data d'inizio si sposta (giorni segnati dopo, serie salvata, proteggi serie).
+    // pet.prevRun = compagno della serie precedente, per riaverlo se quella serie viene recuperata.
+    const rollPetSpecies = () => {
+      const pet = settings.value.pet;
+      let pool = PET_SPECIES.filter(sp => pet.unlocked.includes(sp.id)).map(sp => sp.id);
+      if (!pool.length) pool = [...PET_BASE_IDS];
+      const last = pet.run && pet.run.species;
+      if (pool.length > 1 && last) pool = pool.filter(id => id !== last);
+      const unseen = pool.filter(id => !pet.album[id]);
+      const pick = unseen.length && Math.random() < 0.6 ? unseen : pool;
+      return pick[Math.floor(Math.random() * pick.length)];
+    };
+    watch(() => [streakInfo.value.current, streakInfo.value.startKey], ([current, startKey]) => {
+      const pet = settings.value.pet;
+      if (!current || !startKey) return;
+      const run = pet.run;
+      if (run && run.start === startKey) return;
+      if (!run) {
+        // Prima volta (o compagno nato prima di questo salvataggio): tiene quello che si vedeva
+        pet.run = { start: startKey, species: PET_SPECIES[petSpeciesIndex(pet.seed, startKey)].id };
+        return;
+      }
+      if (startKey < run.start) {
+        // Stessa serie che si allunga all'indietro: se si ricongiunge con la serie precedente torna quel compagno
+        if (pet.prevRun && pet.prevRun.start === startKey) { const cur = pet.run; pet.run = pet.prevRun; pet.prevRun = cur; }
+        else pet.run = { ...run, start: startKey };
+        return;
+      }
+      // Serie nuova: nuovo uovo, nuovo compagno a sorpresa
+      pet.prevRun = run;
+      pet.run = { start: startKey, species: rollPetSpecies() };
+    }, { immediate: true });
+
     const petNow = ref(Date.now());
     setInterval(() => { petNow.value = Date.now(); }, 5 * 60 * 1000);
     const petState = computed(() => {
       const s = streakInfo.value;
       const pet = settings.value.pet;
       const stage = s.current > 0 ? petStageFor(s.current) : 0;
-      const species = s.current > 0 ? petSpeciesIndex(pet.seed, s.startKey) : 0;
+      const species = s.current > 0 && pet.run ? petSpeciesById(pet.run.species) : 0;
       const hour = new Date(petNow.value).getHours();
       const mood = stage === 0 ? 'sleepy' : s.todayDone ? 'happy' : (s.protectedYesterday || hour >= 18 ? 'worried' : 'normal');
       const nextAt = PET_THRESHOLDS[stage + 1];
@@ -4662,6 +4723,19 @@ createApp({
       if ((album[id] || 0) < stage) album[id] = stage;
     }, { immediate: true });
 
+    // Forma finale raggiunta: si sblocca un nuovo compagno, che potrà nascere dalle prossime uova
+    const petUnlockModal = ref({ isOpen: false, species: 0 });
+    watch(() => petState.value.stage, (stage) => {
+      const pet = settings.value.pet;
+      if (stage < 6 || !pet.run || pet.run.maxed) return;
+      pet.run.maxed = true;
+      const next = PET_SPECIES.find(sp => !pet.unlocked.includes(sp.id));
+      if (!next) return;
+      pet.unlocked.push(next.id);
+      petUnlockModal.value = { isOpen: true, species: PET_SPECIES.indexOf(next) };
+    }, { immediate: true });
+    const petUnlockSvg = computed(() => petSvg({ species: petUnlockModal.value.species, stage: 3, mood: 'happy', uid: 'petUnlock' }));
+
     // Evoluzione: festa quando cambia forma (non alla prima apertura)
     const petEvolveModal = ref({ isOpen: false });
     watch(() => petState.value.stage + '|' + streakInfo.value.startKey, () => {
@@ -4686,7 +4760,16 @@ createApp({
       const outfit = settings.value.pet.outfit;
       outfit[item.slot] = outfit[item.slot] === item.id ? '' : item.id;
     };
-    const petItemPreview = (item) => petMarkup({ uid: 'pi' + item.id, stage: Math.max(petState.value.stage, 3), mood: 'happy', outfit: { hat: '', eyes: '', neck: '', [item.slot]: item.id } });
+    const petItemPreview = (item) => petMarkup({ uid: 'pi' + item.id, stage: Math.max(petState.value.stage, 3), mood: 'happy', outfit: { hat: '', eyes: '', neck: '', back: '', [item.slot]: item.id } });
+    // Tocco sul compagno: fa il suo balletto (mossa diversa per ogni specie, vedi css/style.css)
+    const petDancing = ref(false);
+    let petDanceTimer = null;
+    const petDance = () => {
+      if (!petState.value.stage) { petDancing.value = 'egg'; } else petDancing.value = PET_SPECIES[petState.value.species].id;
+      clearTimeout(petDanceTimer);
+      petDanceTimer = setTimeout(() => { petDancing.value = false; }, 2600);
+    };
+    const petDanceClass = computed(() => (petDancing.value ? 'pet-dance pet-dance-' + petDancing.value : ''));
     const petEvolutionPath = computed(() => {
       const st = petState.value;
       return PET_THRESHOLDS.map((days, stage) => ({
@@ -4699,11 +4782,12 @@ createApp({
     });
     const petAlbum = computed(() => PET_SPECIES.map((sp, i) => {
       const max = settings.value.pet.album[sp.id] || 0;
-      return { id: sp.id, name: max ? sp.name : '???', max, svg: petSvg({ species: i, stage: max || 6, mood: 'happy', uid: 'pa' + sp.id, silhouette: !max }) };
+      const locked = !settings.value.pet.unlocked.includes(sp.id);
+      return { id: sp.id, name: max ? sp.name : (locked ? 'Bloccato' : '???'), max, locked, svg: petSvg({ species: i, stage: max || 6, mood: 'happy', uid: 'pa' + sp.id, silhouette: !max }) };
     }));
+    const petAlbumFound = computed(() => petAlbum.value.filter(a => a.max).length);
 
     // Immagine del compagno per le card da condividere (canvas)
-    const petShareImg = shallowRef(null);
     // L'immagine va caricata PRIMA di aprire la card, altrimenti il canvas disegna l'emoji
     const loadPetShareImage = async (over = {}) => {
       const st = petState.value;
@@ -4720,9 +4804,11 @@ createApp({
     // Storia "salva la serie": mostra il compagno della serie persa, nella forma che aveva raggiunto
     const shareStreakSave = async () => {
       const rec = streakInfo.value.recoverable;
-      await loadPetShareImage(rec ? { species: petSpeciesIndex(settings.value.pet.seed, rec.startKey), stage: Math.max(1, petStageFor(rec.length)), legendary: rec.length >= PET_LEGEND_DAYS } : {});
-      openAchievementShare({ type: 'streakSave' });
-      if (shareVideoSupported) shareStudio.value.output = 'image';
+      const pet = settings.value.pet;
+      const lostRun = rec && [pet.run, pet.prevRun].find(r => r && r.start === rec.startKey);
+      const species = rec ? (lostRun ? petSpeciesById(lostRun.species) : petSpeciesIndex(pet.seed, rec.startKey)) : petState.value.species;
+      await loadPetShareImage(rec ? { species, stage: Math.max(1, petStageFor(rec.length)), legendary: rec.length >= PET_LEGEND_DAYS } : {});
+      openAchievementShare({ type: 'streakSave', species });
     };
     // Dopo la condivisione della storia: i giorni saltati diventano protetti e la serie torna
     const applyStreakRepair = () => {
@@ -4965,16 +5051,21 @@ createApp({
         const sk = streakInfo.value;
         const activeDays = activeDaySet.value.size;
         const since = (profile.value && profile.value.createdAt) || [...activeDaySet.value].sort()[0] || toISODate();
-        const petBase = { ...base, dateLabel: formatDateLong(toISODate()), icon: '🔥', color: ps.color, petImg: petShareImg.value };
+        const petBase = { ...base, dateLabel: formatDateLong(toISODate()), icon: '🔥', color: ps.color, petImg: petShareImg.value, petSpecies: spec.species != null ? spec.species : ps.species };
         if (spec.type === 'pet') {
+          // Numero grande senza "giorni" (la g scendeva sulla riga sotto); riquadri con informazioni diverse dal numero
+          const items = petItems.value.filter(i => i.unlocked).length;
           return {
             ...petBase,
             kicker: name ? 'Il compagno di ' + name : 'Il mio compagno su STILL',
             badge: ps.name,
-            big: sk.current + (sk.current === 1 ? ' giorno' : ' giorni'),
-            caption: 'di fila su STILL',
+            big: String(sk.current),
+            caption: (sk.current === 1 ? 'giorno' : 'giorni') + ' di fila su STILL',
             sub: ps.speciesName + ' · forma ' + ps.stage + ' di 6',
-            tiles: [{ label: 'Serie migliore', value: sk.best + (sk.best === 1 ? ' giorno' : ' giorni') }, { label: 'Giorni attivi', value: String(activeDays) }]
+            tiles: [
+              ps.nextIn ? { label: 'Prossima forma', value: 'tra ' + ps.nextIn + (ps.nextIn === 1 ? ' giorno' : ' giorni') } : { label: 'Evoluzione', value: 'Completa' },
+              { label: 'Vestiti sbloccati', value: items + ' su ' + PET_ITEMS.length }
+            ]
           };
         }
         // Storia per salvare la serie: da quanto sei attivo e cosa hai ottenuto
@@ -4988,8 +5079,8 @@ createApp({
           ...petBase,
           kicker: name ? name + ' non molla' : 'Non mollo',
           badge: 'Serie salvata',
-          big: activeDays + (activeDays === 1 ? ' giorno' : ' giorni'),
-          caption: 'attivo su STILL',
+          big: String(activeDays),
+          caption: (activeDays === 1 ? 'giorno' : 'giorni') + ' di attività su STILL',
           sub: 'Dal ' + formatDate(since) + (rec ? ' · serie di ' + rec.restored + ' giorni salvata' : ''),
           tiles: tiles.slice(0, 2)
         };
@@ -5337,6 +5428,13 @@ createApp({
       petEvolutionPath,
       petAlbum,
       petEvolveModal,
+      petUnlockModal,
+      toggleSharePet,
+      petUnlockSvg,
+      petAlbumFound,
+      petDance,
+      petDanceClass,
+      PET_SPECIES,
       sharePet,
       shareStreakSave,
       PET_SLOTS,

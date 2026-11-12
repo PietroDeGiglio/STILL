@@ -111,6 +111,8 @@ html.dark .border-gray-300 { border-color: #3D3D45; }
 html.dark .sm\:border-gray-200 { border-color: #1F1F24; }
 html.dark .ring-white, html.dark .ring-white\/80 { --tw-ring-color: rgba(24, 24, 28, 0.9); }
 html.dark .shadow-soft, html.dark .shadow-sm { box-shadow: 0 4px 20px rgba(0, 0, 0, 0.35); }
+/* L'anello (ring-*) è anch'esso un box-shadow: va rimesso insieme all'ombra, altrimenti sparisce */
+html.dark .shadow-sm[class*="ring-"], html.dark .shadow-soft[class*="ring-"] { box-shadow: var(--tw-ring-offset-shadow, 0 0 #0000), var(--tw-ring-shadow, 0 0 #0000), 0 4px 20px rgba(0, 0, 0, 0.35); }
 
 /* Riquadri colorati chiari → versioni tenui su fondo scuro */
 html.dark .bg-red-50 { background-color: rgba(239, 68, 68, 0.12); }
@@ -156,4 +158,66 @@ html.dark .chart-dot { fill: #18181C; }
 }
 @media (prefers-reduced-motion: reduce) {
   .pet-bob, .pet-bob.pet-sleep, .pet-pop { animation: none; }
+}
+
+/* Balletto del compagno (al tocco): una mossa per specie, come nei video da condividere (petDancePose) */
+.pet-dance svg { width: 100%; height: 100%; display: block; }
+.pet-dance { transform-origin: 50% 90%; }
+.pet-dance-egg { animation: dEgg .5s ease-in-out 5; }
+.pet-dance-sprout { animation: dSprout 1s ease-in-out 3; }
+.pet-dance-dragon { animation: dDragon 2.4s ease-in-out 1; }
+.pet-dance-avocado { animation: dAvocado 1.25s ease-in-out 2; }
+.pet-dance-drop { animation: dDrop .9s ease-in-out 3; }
+.pet-dance-shroom { animation: dShroom .65s cubic-bezier(.3, 0, .6, 1) 4; }
+.pet-dance-star { animation: dStar 1.3s ease-in-out 2; }
+.pet-dance-cat { animation: dCat 1.2s ease-in-out 2; }
+@keyframes dEgg { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-12deg); } 75% { transform: rotate(12deg); } }
+@keyframes dSprout {
+  0%, 100% { transform: rotate(0) translateY(0); }
+  25% { transform: rotate(-10deg) translateY(-4%); }
+  50% { transform: rotate(0) translateY(0); }
+  75% { transform: rotate(10deg) translateY(-4%); }
+}
+@keyframes dDragon {
+  0%, 33%, 66%, 100% { transform: translateY(0) scale(1.06, .92); }
+  16% { transform: translateY(-22%) scale(.96, 1.04); }
+  50% { transform: translateY(-22%) scale(.96, 1.04); }
+  70% { transform: translateY(-10%) rotate(0); }
+  83% { transform: translateY(-26%) rotate(360deg); }
+  96% { transform: translateY(0) rotate(360deg); }
+}
+@keyframes dAvocado {
+  0%, 100% { transform: translateX(0) scale(1, 1); }
+  20% { transform: translateX(-8%) scale(1.1, .84); }
+  40% { transform: translateX(-8%) scale(1, 1); }
+  60% { transform: translateX(8%) scale(1.1, .84); }
+  80% { transform: translateX(8%) scale(1, 1); }
+}
+@keyframes dDrop {
+  0%, 100% { transform: translateY(0) scale(1, 1); }
+  25% { transform: translateY(-6%) scale(1.12, .88); }
+  50% { transform: translateY(-10%) scale(.9, 1.1); }
+  75% { transform: translateY(-4%) scale(1.08, .92); }
+}
+@keyframes dShroom {
+  0%, 100% { transform: translateY(0) scale(1.14, .82); }
+  15% { transform: translateY(-4%) scale(.92, 1.1); }
+  50% { transform: translateY(-20%) scale(1, 1); }
+  85% { transform: translateY(-2%) scale(.96, 1.04); }
+}
+@keyframes dStar {
+  0%, 100% { transform: rotate(0) scale(1); }
+  25% { transform: rotate(-25deg) translateY(-8%) scale(1.06); }
+  50% { transform: rotate(0) scale(.96); }
+  75% { transform: rotate(25deg) translateY(-8%) scale(1.06); }
+}
+@keyframes dCat {
+  0%, 100% { transform: translateX(0) scaleX(1); }
+  12% { transform: translateX(6%) translateY(-12%) scaleX(1) rotate(6deg); }
+  25% { transform: translateX(12%) scaleX(1); }
+  37% { transform: translateX(12%) scaleX(-1); }
+  50% { transform: translateX(6%) translateY(-12%) scaleX(-1) rotate(6deg); }
+  62% { transform: translateX(-12%) scaleX(-1); }
+  75% { transform: translateX(-12%) scaleX(1); }
+  87% { transform: translateX(-6%) translateY(-12%) scaleX(1) rotate(-6deg); }
 }

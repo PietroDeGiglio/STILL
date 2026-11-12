@@ -360,6 +360,12 @@ const drawQuoteBody = (ctx, data, o) => {
     spacedText(ctx, (data.kicker || '').toUpperCase(), M, y0 - size - (story ? 150 : 110), 6);
   });
 
+  // Compagno in alto a destra, in piedi sulla riga del titolo
+  {
+    const ps = story ? 270 : 200;
+    drawCornerPet(ctx, data, W - M - ps * 0.42, y0 - size - (story ? 150 : 110) + 14, ps, live, at(0.5, 0.5));
+  }
+
   // Virgolette grandi
   reveal(at(0.4, 0.5), 20, () => {
     setFont(ctx, 900, story ? 260 : 200);
@@ -501,6 +507,7 @@ const drawRecapBody = (ctx, data, o) => {
       setFont(ctx, 900, story ? 56 : 44); ctx.fillStyle = tight(y - 50, y, story ? 130 : 100);
       spacedText(ctx, 'STILL', W / 2, y, story ? 14 : 11, 'center');
       ctx.textAlign = 'left';
+      drawCornerPet(ctx, data, W / 2, y + (story ? 330 : 230), story ? 270 : 190, live, easeOut((local - 0.3) / 0.5));
     } else {
       setFont(ctx, 900, story ? 30 : 26); ctx.fillStyle = th.sub;
       const top = sc.calendar ? (story ? 360 : 260) : cy - (story ? 300 : 230);
@@ -543,6 +550,10 @@ const drawRecapBody = (ctx, data, o) => {
     setFont(ctx, 700, story ? 30 : 26); ctx.fillStyle = th.sub;
     ctx.fillText('su ' + data.totalDays, M + bw + 24, top + size - (story ? 14 : 8));
   });
+  {
+    const ps = story ? 310 : 230;
+    drawCornerPet(ctx, data, W - M - ps * 0.42, top + (story ? 240 : 185), ps, live, at(0.35, 0.5));
+  }
   if (story && data.calendar.length) {
     rev(at(0.3, 0.5), 20, () => drawRecapCalendar(ctx, data, M + 120, top + 330, maxW - 240, th, 1, phase));
   }
@@ -579,6 +590,31 @@ const drawRecapBody = (ctx, data, o) => {
 
 
 // ---------------------------------------------------------------
+// COMPAGNO DELLA SERIE nelle storie: appoggiato coi piedi su "bottom", fa il suo balletto nel video
+// (mosse in js/data/pets.js → petDancePose). k = ingresso (0..1).
+// ---------------------------------------------------------------
+const drawSharePet = (ctx, img, id, cx, bottom, size, live, k = 1) => {
+  if (!img || !img.complete || !img.naturalWidth || k <= 0) return;
+  const pose = live && typeof petDancePose === 'function'
+    ? petDancePose(id, performance.now() / 1000)
+    : { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1, flip: false };
+  const u = size / 240;   // le mosse sono pensate per un compagno di 240 px
+  const pop = k < 1 ? easeOut(k) * (1 + 0.2 * Math.sin(k * Math.PI)) : 1;
+  ctx.save();
+  ctx.shadowColor = 'transparent';
+  ctx.globalAlpha *= Math.min(1, k * 1.5);
+  ctx.translate(cx + pose.dx * u, bottom + pose.dy * u);
+  ctx.rotate(pose.rot);
+  ctx.scale(pose.sx * pop * (pose.flip ? -1 : 1), pose.sy * pop);
+  // Nel disegno (120×120) i piedi toccano terra a y≈108
+  ctx.drawImage(img, -size / 2, -size * (108 / 120), size, size);
+  ctx.restore();
+};
+const drawCornerPet = (ctx, data, cx, bottom, size, live, k) => {
+  if (data.pet) drawSharePet(ctx, data.pet.img, data.pet.id, cx, bottom, size, live, k);
+};
+
+// ---------------------------------------------------------------
 // TRAGUARDO (trofeo sbloccato o nuovo record): medaglia che entra con
 // un "pop", raggi che girano, coriandoli e il numero che conta.
 // ---------------------------------------------------------------
@@ -589,8 +625,8 @@ const drawAchievementBody = (ctx, data, o) => {
   const cx = W / 2;
   const sc = story ? 1 : 0.72;
   const Y = story
-    ? { kicker: 330, badge: 700, pill: 985, big: 1200, cap: 1275, sub: 1335, tiles: 1430 }
-    : { kicker: 235, badge: 490, pill: 685, big: 845, cap: 905, sub: 953, tiles: 995 };
+    ? { kicker: 330, badge: 700, pill: 985, big: 1200, cap: 1298, sub: 1358, tiles: 1440 }
+    : { kicker: 235, badge: 490, pill: 685, big: 845, cap: 918, sub: 963, tiles: 1000 };
   const R = 210 * sc;
   const color = data.color || BRAND[1];
   const text = (fill) => (th.brand ? fill : th.text);
@@ -632,14 +668,16 @@ const drawAchievementBody = (ctx, data, o) => {
     ctx.font = Math.round(R * 0.95) + 'px ' + EMOJI_FONT;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = '#FFFFFF';
-    // Compagno della serie (immagine) al posto dell'emoji: un po' più grande della medaglia, esce dal bordo
+    // Compagno della serie al posto dell'emoji: più grande della medaglia, nel video balla
     if (data.petImg && data.petImg.complete && data.petImg.naturalWidth) {
-      const S = R * 2.15;
-      ctx.drawImage(data.petImg, -S / 2, -S * 0.56, S, S);
+      drawSharePet(ctx, data.petImg, data.petDance, 0, R * 0.86, R * 2.25, live && k >= 1);
     } else ctx.fillText(data.icon || '🏆', 0, R * 0.06);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.restore();
   }
+
+  // Compagno accanto alla medaglia (trofei, livelli, benvenuto...)
+  drawCornerPet(ctx, data, cx + R * 1.22, Y.badge + R * 1.08, R * 1.3, live, at(0.8, 0.5));
 
   // Coriandoli che esplodono dalla medaglia (solo nel video)
   if (live) {
@@ -804,12 +842,18 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
   // Numero protagonista (conta da zero)
   reveal(at(0.45, 0.45), 40, () => {
     const value = countUp(data.hero.value, live ? clamp01((time - 0.45) / 1.3) : 1);
-    fitFont(ctx, data.hero.value, 900, L.heroSize, W - M * 2, 80);
+    fitFont(ctx, data.hero.value, 900, L.heroSize, W - M * 2 - (data.pet ? (story ? 270 : 210) : 0), 80);
     ctx.fillStyle = th.brand ? brandGradient(ctx, M, L.heroBase - L.heroSize, W - M, L.heroBase, phase) : th.text;
     ctx.fillText(value, M - 6, L.heroBase);
     setFont(ctx, 800, story ? 36 : 30); ctx.fillStyle = th.sub;
     ctx.fillText(ellipsize(ctx, (data.hero.label || '').toUpperCase(), W - M * 2), M, L.heroLabel);
   });
+
+  // Compagno a destra del numero protagonista
+  {
+    const ps = story ? 290 : 220;
+    drawCornerPet(ctx, data, W - M - ps * 0.42, L.heroBase + 8, ps, live, at(0.7, 0.5));
+  }
 
   // Grafico (si disegna progressivamente)
   reveal(at(0.9, 0.4), 20, () => {
