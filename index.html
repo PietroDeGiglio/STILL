@@ -258,6 +258,17 @@
               </button>
             </div>
 
+            <!-- IL TUO ANNO (dicembre e gennaio) -->
+            <button v-if="wrappedBanner" @click="openWrapped(wrappedBanner.offset)" class="w-full rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform relative overflow-hidden"
+                    style="background: linear-gradient(120deg, #7A4DF1, #EC4899, #F5A623);">
+              <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎁</div>
+              <div class="min-w-0 flex-1">
+                <div class="text-sm font-extrabold text-white">Il tuo {{ wrappedBanner.year }} su STILL è pronto</div>
+                <div class="text-[11px] font-semibold text-white/85">{{ wrappedBanner.active }} giorni attivi, numeri pazzi e che atleta sei. Guardalo!</div>
+              </div>
+              <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+            </button>
+
             <!-- RIEPILOGO DEL MESE SCORSO (primi giorni del mese) -->
             <button v-if="recapBanner" @click="openRecap(1)" class="w-full cangiante-btn rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform">
               <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎬</div>
@@ -1346,6 +1357,15 @@
               </div>
               <span class="text-xs font-bold text-gray-400 pb-1">🏆 {{ playerLevel.trophies }} su {{ playerLevel.trophyTotal }}</span>
             </div>
+
+            <!-- IL TUO ANNO -->
+            <button @click="openWrapped(0)" class="w-full rounded-3xl p-5 shadow-lg text-left relative overflow-hidden active:scale-[0.98] transition-transform"
+                    style="background: linear-gradient(135deg, #7A4DF1, #EC4899 60%, #F5A623);">
+              <div class="absolute -right-3 -bottom-6 text-[90px] opacity-25 select-none">🎁</div>
+              <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-white/80">Stile wrapped</div>
+              <div class="relative z-10 text-xl font-extrabold text-white leading-tight mt-1">Il tuo {{ new Date().getFullYear() }} su STILL</div>
+              <p class="relative z-10 text-[11px] font-medium text-white/85 mt-1 pr-12">Pizze bruciate, salti da canguro, che atleta sei. Guardalo e condividilo nelle storie.</p>
+            </button>
 
             <!-- TROFEI E LIVELLO -->
             <div class="space-y-4">
@@ -2780,7 +2800,7 @@
             <!-- Barra superiore -->
             <div class="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between gap-3 shrink-0">
               <div>
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'recap' && shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo' })[shareStudio.kind] || 'Progressi') }}</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'recap' && shareStudio.recapType === 'year' ? 'Il tuo anno' : shareStudio.kind === 'recap' && shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo' })[shareStudio.kind] || 'Progressi') }}</p>
                 <h3 class="text-lg font-extrabold leading-tight">Condividi</h3>
               </div>
               <button @click="closeShareStudio" :disabled="shareStudio.recording" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30" aria-label="Chiudi">
@@ -2839,8 +2859,8 @@
               <!-- Settimana o mese (riepilogo) -->
               <div v-if="shareStudio.kind === 'recap'" class="space-y-2">
                 <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Riepilogo</div>
-                <div class="grid grid-cols-2 gap-1.5 bg-white/5 p-1 rounded-2xl">
-                  <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }]" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
+                <div class="grid grid-cols-3 gap-1.5 bg-white/5 p-1 rounded-2xl">
+                  <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }, { v: 'year', l: '🎁 Anno' }]" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
                           class="py-2 rounded-xl text-[11px] font-bold transition-colors"
                           :class="shareStudio.recapType === t.v ? 'bg-white text-antracite' : 'text-white/70'">{{ t.l }}</button>
                 </div>
@@ -3316,6 +3336,68 @@
             <div class="flex gap-3 pt-1">
               <button @click="cancelExerciseValue" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">No</button>
               <button @click="confirmExerciseValue" class="flex-1 bg-arancione text-white font-bold py-3 rounded-xl shadow-md hover:bg-arancione/90 active:scale-95 transition-all">Sì, aggiorna</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- IL TUO ANNO: racconto a schermo intero -->
+        <div v-if="wrapped.isOpen && wrapped.data" class="fixed inset-0 z-[80] text-white select-none overflow-hidden"
+             :style="{ background: wrapped.idx < wrapped.data.slides.length ? wrapped.data.slides[wrapped.idx].bg : 'linear-gradient(160deg, #0E0E11, #2a1650 60%, #0E0E11)' }"
+             style="transition: background 0.6s ease;">
+          <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl wrap-float"></div>
+          <div class="absolute -bottom-24 -right-16 w-80 h-80 rounded-full bg-black/20 blur-3xl wrap-float" style="animation-delay: -3s;"></div>
+
+          <!-- Barre di avanzamento e chiudi -->
+          <div class="absolute top-0 inset-x-0 z-20 px-3 pt-3 space-y-3" style="padding-top: max(12px, env(safe-area-inset-top));">
+            <div class="flex gap-1">
+              <div v-for="(s, i) in wrapped.data.slides" :key="'wb' + i" class="h-1 flex-1 rounded-full bg-white/25 overflow-hidden">
+                <div class="h-full bg-white rounded-full" :style="{ width: (wrappedProgress(i) * 100) + '%' }"></div>
+              </div>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[11px] font-black tracking-[0.3em] uppercase text-white/80">STILL · {{ wrapped.data.year }}</span>
+              <button @click.stop="closeWrapped" class="w-9 h-9 rounded-full bg-black/20 flex items-center justify-center" aria-label="Chiudi">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Slide -->
+          <div v-if="wrapped.idx < wrapped.data.slides.length" class="absolute inset-0 z-10 flex flex-col justify-center px-8" @click="wrappedTap">
+            <div :key="'ws' + wrapped.idx" class="space-y-4">
+              <div class="text-7xl wrap-pop">{{ wrapped.data.slides[wrapped.idx].emoji }}</div>
+              <div class="text-xs font-black uppercase tracking-[0.25em] text-white/75 wrap-up" style="animation-delay: .15s;">{{ wrapped.data.slides[wrapped.idx].kicker }}</div>
+              <div class="font-black leading-[0.95] break-words wrap-pop" style="animation-delay: .3s;"
+                   :class="String(wrapped.data.slides[wrapped.idx].big).length > 10 ? 'text-5xl' : 'text-7xl'">{{ wrapped.data.slides[wrapped.idx].big }}</div>
+              <div class="text-2xl font-extrabold leading-tight wrap-up" style="animation-delay: .5s;">{{ wrapped.data.slides[wrapped.idx].caption }}</div>
+              <div v-if="wrapped.data.slides[wrapped.idx].sub" class="text-sm font-bold text-white/75 wrap-up" style="animation-delay: .6s;">{{ wrapped.data.slides[wrapped.idx].sub }}</div>
+              <p v-if="wrapped.data.slides[wrapped.idx].fun" class="text-base font-semibold text-white/90 leading-snug pt-2 wrap-up" style="animation-delay: 1s;">{{ wrapped.data.slides[wrapped.idx].fun }}</p>
+            </div>
+            <div class="absolute bottom-8 inset-x-0 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-white/50" style="padding-bottom: env(safe-area-inset-bottom);">Tocca per continuare</div>
+          </div>
+
+          <!-- Finale -->
+          <div v-else class="absolute inset-0 z-10 overflow-y-auto px-6 pt-24 pb-10 flex flex-col">
+            <div class="space-y-1 wrap-up">
+              <div class="text-xs font-black uppercase tracking-[0.25em] text-white/60">Il tuo {{ wrapped.data.year }} su STILL</div>
+              <div class="text-4xl font-black leading-tight">{{ wrapped.data.activeDays }} <span class="text-lg font-bold text-white/60">giorni attivi su {{ wrapped.data.totalDays }}</span></div>
+            </div>
+            <div v-if="wrapped.data.activeDays" class="mt-5 rounded-3xl p-5 bg-white/10 border border-white/15 wrap-pop" style="animation-delay: .2s;">
+              <div class="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Che atleta sei</div>
+              <div class="text-2xl font-black mt-1">{{ wrapped.data.type.emoji }} {{ wrapped.data.type.name }}</div>
+              <p class="text-sm font-medium text-white/75 mt-1 leading-snug">{{ wrapped.data.type.text }}</p>
+            </div>
+            <div v-if="wrapped.data.tiles.length" class="grid grid-cols-2 gap-3 mt-4">
+              <div v-for="(t, i) in wrapped.data.tiles" :key="'wt' + i" class="rounded-2xl p-4 bg-white/10 wrap-up" :style="{ animationDelay: (0.3 + i * 0.08) + 's' }">
+                <div class="text-[9px] font-black uppercase tracking-widest text-white/50">{{ t.label }}</div>
+                <div class="text-2xl font-black">{{ t.value }}</div>
+              </div>
+            </div>
+            <p v-if="!wrapped.data.activeDays" class="mt-6 text-sm text-white/70 font-medium">Segna allenamenti e pasti: il prossimo racconto sarà pieno di numeri da condividere.</p>
+            <div class="mt-auto pt-8 space-y-2">
+              <button v-if="wrapped.data.activeDays" @click="shareWrapped" class="w-full cangiante-btn text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">🎬 Condividi nelle storie</button>
+              <button @click="wrappedGo(-wrapped.data.slides.length)" class="w-full bg-white/10 text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all">Rivedi da capo</button>
+              <p class="text-[10px] font-medium text-white/40 text-center pt-2">Salti, km e calorie sono stime per divertirsi, non misure.</p>
             </div>
           </div>
         </div>
@@ -4107,6 +4189,7 @@
   <script src="js/data/trophies.js"></script>
   <script src="js/data/exercises.js"></script>
   <script src="js/data/nutrition.js"></script>
+  <script src="js/data/wrapped.js"></script>
   <script src="js/data/pets.js"></script>
   <script src="js/share/draw.js"></script>
   <script src="js/app.js"></script>

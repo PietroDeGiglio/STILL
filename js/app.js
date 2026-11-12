@@ -4480,11 +4480,12 @@ createApp({
       const label = first.getDate() + (m1 !== m2 ? ' ' + m1 : '') + '–' + last.getDate() + ' ' + m2;
       return { start: toISODate(first), end, first, month: label, year: last.getFullYear() };
     };
-    const recapPeriodName = (type, offset) => (type === 'week'
+    const recapPeriodName = (type, offset) => (type === 'year' ? String(new Date().getFullYear() - offset) + (offset ? '' : ' (finora)') : type === 'week'
       ? (offset ? 'Settimana scorsa' : 'Questa settimana')
       : recapRange(offset).month + (offset ? '' : ' (in corso)'));
 
     const shareRecapData = (offset, opts, type = 'month') => {
+      if (type === 'year') return shareYearData(offset);
       const week = type === 'week';
       const r = week ? weekRange(offset) : recapRange(offset);
       const recapKicker = (n) => (week ? (n ? 'La settimana di ' + n : 'La mia settimana') : (n ? 'Il mese di ' + n : 'Il mio mese'));
@@ -4706,7 +4707,7 @@ createApp({
     // --- Esportazione ---
     const shareBaseName = () => {
       const st = shareStudio.value;
-      const kind = st.kind === 'recap' && st.recapType === 'week' ? 'la-mia-settimana'
+      const kind = st.kind === 'recap' && st.recapType === 'year' ? 'il-mio-anno' : st.kind === 'recap' && st.recapType === 'week' ? 'la-mia-settimana'
         : ({ workout: 'allenamento', quote: 'frase-del-giorno', recap: 'il-mio-mese', achievement: 'traguardo' })[st.kind] || 'progressi';
       return 'still-' + kind + '-' + toISODate();
     };
@@ -4788,7 +4789,7 @@ createApp({
       try { if (navigator.clipboard) navigator.clipboard.writeText(APP_URL).catch(() => {}); } catch (e) { /* ignora */ }
       const shareText = ({
         quote: 'La mia carica di oggi 🔥 #STILL #fraseDelGiorno',
-        recap: st.recapType === 'week' ? 'La mia settimana su STILL 🎬 #STILL' : 'Il mio mese su STILL 🎬 #STILL',
+        recap: st.recapType === 'year' ? 'Il mio anno su STILL 🎁 #STILL #STILLwrapped' : st.recapType === 'week' ? 'La mia settimana su STILL 🎬 #STILL' : 'Il mio mese su STILL 🎬 #STILL',
         achievement: 'Nuovo traguardo su STILL 🏆 #STILL'
       })[st.kind] || 'Ieri. Oggi. Domani. Ancora. 💪 #STILL';
       try {
@@ -5048,6 +5049,261 @@ createApp({
       while (toISODate(d) <= r.end) { if (activeDaySet.value.has(toISODate(d))) active++; d.setDate(d.getDate() + 1); }
       return active ? { offset, active, label: r.month } : null;
     });
+
+    // ---------------------------------------------------------------
+    // IL TUO ANNO (stile "wrapped"): racconto a storie dell'anno su STILL, con paragoni divertenti
+    // (js/data/wrapped.js). Nell'app è un racconto a schermo intero; nelle storie diventa un video.
+    // ---------------------------------------------------------------
+    const buildWrapped = (year) => {
+      const start = year + '-01-01';
+      const yearEnd = year + '-12-31';
+      const today = toISODate();
+      const end = yearEnd < today ? yearEnd : today;
+      const inRange = (d) => !!d && d >= start && d <= end;
+      const fmt = (n) => Math.round(n).toLocaleString('it-IT');
+
+      // Giorni attivi, mese e giorno preferiti, serie migliore
+      const set = activeDaySet.value;
+      const perMonth = Array(12).fill(0);
+      const perDow = Array(7).fill(0);
+      let activeDays = 0, run = 0, bestRun = 0, totalDays = 0;
+      const c = new Date(start + 'T12:00:00');
+      while (toISODate(c) <= end && totalDays < 400) {
+        const k = toISODate(c);
+        totalDays++;
+        if (set.has(k)) { activeDays++; perMonth[c.getMonth()]++; perDow[c.getDay()]++; run++; bestRun = Math.max(bestRun, run); } else run = 0;
+        c.setDate(c.getDate() + 1);
+      }
+
+      // Allenamenti: palestra (log, sessioni guidate, sessioni segnate) + sport segnati come fatti
+      const secs = trainingSecondsBetween(start, end);
+      const gymDates = new Set(workoutLogs.value.filter(log => inRange(log.date)).map(log => log.date));
+      const times = [];
+      const sports = {};
+      trainingSessions.value.forEach(s => {
+        if (s.kind === 'gym') {
+          if (s.report && inRange(s.date)) { gymDates.add(s.date); if (s.time) times.push(s.time); }
+          Object.keys(s.statusByDate || {}).forEach(k => {
+            if (s.statusByDate[k] === 'done' && inRange(k)) { if (!gymDates.has(k) && s.time) times.push(s.time); gymDates.add(k); }
+          });
+        } else if (s.kind === 'sport') {
+          Object.keys(s.statusByDate || {}).forEach(k => {
+            if (s.statusByDate[k] !== 'done' || !inRange(k)) return;
+            const name = s.sport || 'Altro';
+            const sp = sports[name] || (sports[name] = { name, sessions: 0, hours: 0 });
+            sp.sessions++;
+            sp.hours += (sportDurationMin(s) || DEFAULT_TRAINING_MIN) / 60;
+            if (s.time) times.push(s.time);
+          });
+        }
+      });
+      const sportList = Object.values(sports).sort((a, b) => b.hours - a.hours);
+      const sportSessions = sportList.reduce((sum, sp) => sum + sp.sessions, 0);
+      const workouts = gymDates.size + sportSessions;
+      const hours = secs.total / 3600;
+      const weeks = Math.max(1, totalDays / 7);
+
+      // Volume sollevato ed esercizio preferito
+      let volume = 0;
+      const exCount = {};
+      workoutLogs.value.forEach(log => {
+        if (!inRange(log.date)) return;
+        const info = findExerciseInfo(log);
+        const ex = info ? info.exercise : null;
+        const name = (ex && ex.name) || log.exerciseName || '';
+        if (name) exCount[name] = (exCount[name] || 0) + 1;
+        const w = parseOptionalNumber(log.weight);
+        if (!w) return;
+        if (Array.isArray(log.setsDetail) && log.setsDetail.length) {
+          log.setsDetail.forEach(item => { const sw = parseOptionalNumber(item.weight); const r = parseInt(item.reps, 10); if (sw && r) volume += sw * r; });
+        } else {
+          const sets = parseInt(ex && ex.sets, 10) || 3;
+          const reps = parseInt(log.reps, 10) || parseInt(ex && ex.reps, 10) || 10;
+          volume += w * sets * reps;
+        }
+      });
+      const topExercise = Object.entries(exCount).sort((a, b) => b[1] - a[1])[0] || null;
+      const progress = shareProgressData(0, { focus: 'total', hero: 'auto', loadMode: 'kg', weightMode: 'percent', showName: false }, { start, end });
+      const bestLift = progress.bestLift;
+
+      // Alimentazione: pasti fatti e proteine stimate
+      let mealsDone = 0, protein = 0;
+      Object.keys(mealLogs.value).forEach(k => {
+        if (!inRange(k)) return;
+        const logs = mealLogs.value[k] || {};
+        getMealsForDate(new Date(k + 'T12:00:00')).forEach(m => {
+          if (logs[m.id] && logs[m.id].status === 'done') { mealsDone++; protein += m.protein || 0; }
+        });
+      });
+
+      // Calorie bruciate (stima): MET × peso × ore
+      const lastWeight = measurements.value.filter(m => m.weight).slice().sort((a, b) => a.date.localeCompare(b.date)).pop();
+      const kg = lastWeight ? Number(lastWeight.weight) : 70;
+      const kcal = (secs.gym / 3600) * WRAPPED_METS.gym * kg + sportList.reduce((sum, sp) => sum + sp.hours * (WRAPPED_METS[sp.name] || 5) * kg, 0);
+
+      // Orario e giorno preferiti
+      const hourCount = {};
+      times.forEach(t => { const h = parseInt(String(t).split(':')[0], 10); if (!isNaN(h)) hourCount[h] = (hourCount[h] || 0) + 1; });
+      const favHour = Object.entries(hourCount).sort((a, b) => b[1] - a[1])[0];
+      const favDow = perDow.indexOf(Math.max(...perDow));
+      const favMonth = perMonth.indexOf(Math.max(...perMonth));
+      const morning = times.filter(t => parseInt(t, 10) < 10).length;
+      const evening = times.filter(t => parseInt(t, 10) >= 20).length;
+      const weekend = perDow[0] + perDow[6];
+
+      // Che atleta sei
+      const typeId = bestRun >= 30 ? 'unstoppable'
+        : gymDates.size / weeks >= 4 ? 'machine'
+        : times.length >= 5 && morning / times.length > 0.5 ? 'early'
+        : times.length >= 5 && evening / times.length > 0.5 ? 'night'
+        : activeDays >= 8 && weekend / activeDays > 0.45 ? 'weekend'
+        : sportList.length && secs.sport > secs.gym ? 'sport'
+        : 'steady';
+      const type = WRAPPED_TYPES.find(t => t.id === typeId);
+
+      // --- Le slide ---
+      const slides = [];
+      const add = (slide) => slides.push({ bg: WRAPPED_BACKGROUNDS[slides.length % WRAPPED_BACKGROUNDS.length], ...slide });
+      add({ id: 'intro', emoji: '🎁', kicker: 'Il tuo ' + year, big: String(year), caption: 'su STILL', fun: activeDays ? 'Pronto a rivivere il tuo anno? Tocca per andare avanti.' : 'Quest\'anno è appena iniziato per te: il prossimo racconto sarà enorme.' });
+      if (activeDays) {
+        add({ id: 'days', emoji: '📅', kicker: 'Giorni attivi', big: fmt(activeDays), caption: 'giorni in movimento', sub: 'su ' + totalDays,
+          fun: 'Il tuo mese migliore è stato ' + WRAPPED_MONTHS[favMonth] + ', con ' + perMonth[favMonth] + ' giorni attivi.', scene: true });
+      }
+      if (workouts) {
+        const parts = [gymDates.size ? fmt(gymDates.size) + ' in palestra' : '', sportSessions ? fmt(sportSessions) + ' di sport' : ''].filter(Boolean).join(' · ');
+        add({ id: 'workouts', emoji: '💪', kicker: 'Allenamenti', big: fmt(workouts), caption: 'allenamenti fatti', sub: parts,
+          fun: 'In media ' + formatNumber(Math.round(workouts / weeks * 10) / 10) + ' a settimana. ' + (workouts / weeks >= 3 ? 'Costanza da atleta vero.' : 'Ogni allenamento conta, e tu li hai contati tutti.'), scene: true });
+      }
+      if (hours >= 1) {
+        const pct = Math.round(hours / WRAPPED_PRO_HOURS * 100);
+        add({ id: 'hours', emoji: '⏱️', kicker: 'Ore di allenamento', big: fmt(hours) + ' ore', caption: 'passate ad allenarti', sub: pct + '% di un professionista',
+          fun: 'Un calciatore di Serie A si allena circa ' + WRAPPED_PRO_HOURS + ' ore a stagione: tu sei al ' + pct + '%. ' + wProLine(pct), scene: true });
+      }
+      if (kcal >= 800) {
+        add({ id: 'kcal', emoji: '🍕', kicker: 'Calorie bruciate', big: fmt(kcal / 800), caption: kcal / 800 >= 2 ? 'pizze margherita' : 'pizza margherita', sub: '≈ ' + fmt(kcal) + ' kcal',
+          fun: 'Allenandoti hai bruciato circa ' + fmt(kcal) + ' kcal: l\'equivalente di ' + fmt(kcal / 800) + ' pizze margherita. Una te la sei meritata.', scene: true });
+      }
+      if (volume >= 30) {
+        const ref = WRAPPED_WEIGHTS.find(item => volume >= item.kg) || WRAPPED_WEIGHTS[WRAPPED_WEIGHTS.length - 1];
+        const n = Math.max(1, Math.round(volume / ref.kg));
+        add({ id: 'volume', emoji: ref.emoji, kicker: 'Peso sollevato', big: fmt(n), caption: n === 1 ? ref.one : ref.many, sub: '≈ ' + fmt(volume / 1000) + ' tonnellate',
+          fun: 'Sommando serie e ripetizioni hai sollevato circa ' + fmt(volume) + ' kg: come alzare ' + fmt(n) + ' ' + (n === 1 ? ref.one : ref.many) + '. Senza gru.', scene: true });
+      }
+      if (bestLift) {
+        const first = bestLift.series[0], last = bestLift.series[bestLift.series.length - 1];
+        add({ id: 'lift', emoji: '🏆', kicker: 'Miglior progresso', big: '+' + formatNumber(Math.round(bestLift.kg * 10) / 10) + ' kg', caption: bestLift.name,
+          fun: 'Da ' + formatNumber(first) + ' a ' + formatNumber(last) + ' kg. ' + (topExercise ? 'E il tuo esercizio del cuore è ' + topExercise[0] + ', registrato ' + topExercise[1] + ' volte.' : ''), scene: true });
+      } else if (topExercise) {
+        add({ id: 'fav', emoji: '❤️', kicker: 'Il tuo esercizio', big: topExercise[0], caption: 'registrato ' + topExercise[1] + ' volte', fun: 'Tra voi è amore vero.', scene: true });
+      }
+      sportList.slice(0, 2).forEach(sp => {
+        const funFn = WRAPPED_SPORT_FUN[sp.name];
+        const f = funFn ? funFn(sp.hours) : { emoji: '🏅', big: fmt(sp.hours) + ' ore', caption: 'di ' + sp.name.toLowerCase(), fun: fmt(sp.sessions) + ' sessioni segnate. Continua così.' };
+        add({ id: 'sport-' + sp.name, emoji: f.emoji, kicker: sp.name + ' · ' + fmt(sp.sessions) + ' sessioni', big: f.big, caption: f.caption, sub: fmt(sp.hours) + ' ore in campo', fun: f.fun + ' (stima)', scene: true });
+      });
+      if (activeDays >= 3) {
+        add({ id: 'when', emoji: favHour && parseInt(favHour[0], 10) < 12 ? '🌅' : '🌙', kicker: 'Il tuo momento', big: WRAPPED_DAYS[favDow].charAt(0).toUpperCase() + WRAPPED_DAYS[favDow].slice(1), caption: 'il tuo giorno preferito',
+          sub: favHour ? 'di solito alle ' + favHour[0] : '', fun: 'Il ' + WRAPPED_DAYS[favDow] + ' è il giorno in cui sei stato più attivo' + (favHour ? ', e l\'orario che scegli più spesso è intorno alle ' + favHour[0] + '.' : '.'), scene: true });
+      }
+      if (bestRun >= 2) {
+        const pet = petState.value;
+        add({ id: 'streak', emoji: '🔥', kicker: 'Serie migliore', big: bestRun + ' giorni', caption: 'di fila senza fermarti', sub: pet.stage ? 'con ' + pet.name + ' al tuo fianco' : '',
+          fun: bestRun >= 30 ? 'Più di un mese senza saltare un giorno. Questo non è un caso, è un carattere.' : 'La costanza batte il talento quando il talento non è costante.', scene: true });
+      }
+      if (mealsDone) {
+        const chicken = protein / 35;
+        add({ id: 'food', emoji: '🥗', kicker: 'Alimentazione', big: fmt(mealsDone), caption: 'pasti del piano fatti', sub: protein ? '≈ ' + formatNumber(Math.round(protein / 100) / 10) + ' kg di proteine' : '',
+          fun: protein ? 'Circa ' + fmt(protein) + ' g di proteine: come ' + fmt(chicken) + ' petti di pollo. I tuoi muscoli ringraziano.' : 'Un pasto alla volta si costruisce tutto.', scene: true });
+      }
+      const trophies = unlockedTrophies.value.length;
+      if (trophies) {
+        add({ id: 'trophies', emoji: '🏅', kicker: 'Trofei', big: String(trophies), caption: trophies === 1 ? 'trofeo sbloccato' : 'trofei sbloccati', sub: 'livello ' + playerLevel.value.level + ' · ' + playerLevel.value.title,
+          fun: 'La bacheca si sta riempiendo. Il prossimo anno serve una mensola nuova.' });
+      }
+      if (activeDays) {
+        add({ id: 'type', emoji: type.emoji, kicker: 'Che atleta sei', big: type.name, caption: 'ecco chi sei stato nel ' + year, fun: type.text, scene: true });
+      }
+
+      const tiles = [];
+      if (workouts) tiles.push({ label: 'Allenamenti', value: fmt(workouts) });
+      if (hours >= 1) tiles.push({ label: 'Ore', value: fmt(hours) });
+      if (bestRun >= 2) tiles.push({ label: 'Serie migliore', value: bestRun + ' gg' });
+      if (mealsDone) tiles.push({ label: 'Pasti fatti', value: fmt(mealsDone) });
+      if (kcal >= 800) tiles.push({ label: 'Pizze bruciate', value: fmt(kcal / 800) });
+      if (trophies) tiles.push({ label: 'Trofei', value: String(trophies) });
+
+      return { year, start, end, activeDays, totalDays, workouts, hours, bestRun, type, slides, tiles };
+    };
+
+    // Racconto a schermo intero: si avanza toccando a destra, si torna indietro a sinistra
+    const WRAPPED_SLIDE_MS = 6000;
+    const wrapped = ref({ isOpen: false, data: null, idx: 0, t0: 0, now: 0 });
+    let wrappedTimer = null;
+    const wrappedYearFor = (offset = 0) => new Date().getFullYear() - offset;
+    const openWrapped = (offset = 0) => {
+      const data = buildWrapped(wrappedYearFor(offset));
+      data.offset = offset;
+      wrapped.value = { isOpen: true, data, idx: 0, t0: Date.now(), now: Date.now() };
+      clearInterval(wrappedTimer);
+      wrappedTimer = setInterval(() => {
+        const w = wrapped.value;
+        if (!w.isOpen) { clearInterval(wrappedTimer); return; }
+        w.now = Date.now();
+        if (w.idx < w.data.slides.length && w.now - w.t0 >= WRAPPED_SLIDE_MS) wrappedGo(1);
+      }, 100);
+    };
+    const closeWrapped = () => { wrapped.value.isOpen = false; clearInterval(wrappedTimer); };
+    // L'ultima "slide" (indice = numero di slide) è il riepilogo finale con i tasti
+    const wrappedGo = (dir) => {
+      const w = wrapped.value;
+      const last = w.data.slides.length;
+      w.idx = Math.max(0, Math.min(last, w.idx + dir));
+      w.t0 = Date.now(); w.now = w.t0;
+      if (dir > 0) vibrate(15);
+    };
+    const wrappedTap = (event) => {
+      const rect = event.currentTarget.getBoundingClientRect();
+      wrappedGo(event.clientX - rect.left < rect.width * 0.3 ? -1 : 1);
+    };
+    const wrappedProgress = (i) => {
+      const w = wrapped.value;
+      if (i < w.idx) return 1;
+      if (i > w.idx) return 0;
+      return Math.min(1, (w.now - w.t0) / WRAPPED_SLIDE_MS);
+    };
+    const shareWrapped = () => {
+      const offset = wrapped.value.data ? wrapped.value.data.offset : 0;
+      closeWrapped();
+      openRecap(offset, 'year');
+    };
+
+    // Banner in dashboard: da dicembre a fine gennaio (a gennaio, l'anno appena finito)
+    const wrappedBanner = computed(() => {
+      const now = new Date();
+      const month = now.getMonth();
+      if (month !== 11 && month !== 0) return null;
+      const offset = month === 0 ? 1 : 0;
+      const year = wrappedYearFor(offset);
+      const start = year + '-01-01', end = year + '-12-31';
+      let active = 0;
+      activeDaySet.value.forEach(k => { if (k >= start && k <= end) active++; });
+      return active ? { year, offset, active } : null;
+    });
+
+    // Video per le storie: intro + le scene principali dell'anno (al massimo 8 in tutto)
+    const shareYearData = (offset) => {
+      const W = buildWrapped(wrappedYearFor(offset));
+      const name = shareFirstName();
+      const scenes = [{ type: 'intro', kicker: name ? 'Il ' + W.year + ' di ' + name : 'Il mio ' + W.year, big: String(W.year), caption: 'su STILL' }]
+        .concat(W.slides.filter(s => s.scene).slice(0, 7).map(s => ({ kicker: s.kicker, big: s.big, caption: s.caption, sub: s.sub || '' })));
+      return {
+        kind: 'recap', empty: !W.activeDays, available: [], focusAvailable: [],
+        kicker: name ? 'Il ' + W.year + ' di ' + name : 'Il mio ' + W.year,
+        emptyText: 'Il prossimo anno è tuo.',
+        dateLabel: String(W.year), month: String(W.year),
+        activeDays: W.activeDays, totalDays: W.totalDays, calendar: [], tiles: W.tiles, scenes
+      };
+    };
 
     // ---------------------------------------------------------------
     // PROMEMORIA: pasti, allenamenti e serie in pericolo.
@@ -5777,7 +6033,7 @@ createApp({
       streakInfo,
       recapBanner,
       weekBanner,
-      openRecap,
+      openRecap, wrapped, openWrapped, closeWrapped, wrappedGo, wrappedTap, wrappedProgress, shareWrapped, wrappedBanner,
       recapMonthName,
       recapPeriodName,
       trophyGroups,
