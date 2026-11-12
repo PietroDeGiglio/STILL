@@ -1,5 +1,7 @@
-// Tema di Tailwind: colori e font del brand STILL
-tailwind.config = {
+// Tailwind: genera css/tailwind.css con solo le classi usate dall'app (npm run build:css).
+// Va rigenerato ogni volta che si usano classi nuove in index.html o nei file js.
+module.exports = {
+  content: ['./index.html', './js/**/*.js', '!./js/vendor/**'],
   theme: {
     extend: {
       colors: {
@@ -18,4 +20,4 @@ tailwind.config = {
       }
     }
   }
-}
+};

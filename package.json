@@ -1,0 +1,17 @@
+{
+  "name": "still",
+  "private": true,
+  "description": "STILL: strumenti per generare i file locali (CSS di Tailwind, Vue, font). L'app non ha bisogno di Node per girare.",
+  "scripts": {
+    "build:css": "tailwindcss -c tailwind.build.config.js -i css/tailwind.src.css -o css/tailwind.css --minify",
+    "watch:css": "tailwindcss -c tailwind.build.config.js -i css/tailwind.src.css -o css/tailwind.css --watch",
+    "vendor": "node scripts/vendor.js",
+    "build": "npm run vendor && npm run build:css"
+  },
+  "devDependencies": {
+    "@fontsource-variable/plus-jakarta-sans": "5.2.8",
+    "pdfjs-dist": "3.11.174",
+    "tailwindcss": "3.4.17",
+    "vue": "3.5.13"
+  }
+}

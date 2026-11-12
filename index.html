@@ -17,19 +17,12 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
   <meta name="apple-mobile-web-app-title" content="STILL">
   
-  <!-- Google Fonts: Plus Jakarta Sans -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Vue 3 CDN -->
-  <script src="https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js"></script>
-  
-  <script src="js/tailwind.config.js"></script>
-  
+  <!-- Tutto salvato nell'app, niente siti esterni: font + classi Tailwind (css/tailwind.css, generato
+       con "npm run build:css") e Vue 3 (js/vendor, copiato con "npm run vendor") -->
+  <link rel="preload" href="assets/fonts/plus-jakarta-sans-latin-normal.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="css/tailwind.css">
+  <script src="js/vendor/vue.global.prod.js"></script>
+
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Tema scuro applicato subito (prima che parta l'app), così non c'è il lampo bianco -->
@@ -230,6 +223,19 @@
                 "{{ dailyBar.pre }} <span class="text-salvia font-bold not-italic ml-1">{{ dailyBar.hi }}</span>"
               </p>
               <p v-if="dailyBar.by" class="relative z-10 mt-2 text-[11px] font-bold text-white/50">— {{ dailyBar.by }}</p>
+            </div>
+
+            <!-- Promemoria backup: i dati sono solo su questo telefono -->
+            <div v-if="backupDue" class="bg-white border border-arancione/40 rounded-2xl p-4 shadow-soft flex items-start gap-3">
+              <div class="w-10 h-10 rounded-xl bg-arancione/15 flex items-center justify-center text-lg flex-shrink-0">💾</div>
+              <div class="flex-1 min-w-0">
+                <div class="text-sm font-extrabold text-antracite">Salva una copia dei tuoi progressi</div>
+                <p class="text-[11px] font-medium text-gray-500 leading-snug mt-0.5">Sono solo su questo telefono. Ultimo backup: <span class="font-bold">{{ lastBackupLabel }}</span>.</p>
+                <div class="flex gap-2 mt-3">
+                  <button @click="exportBackup" class="flex-1 bg-salvia text-white font-bold py-2 rounded-xl text-xs active:scale-95 transition-all">Salva backup</button>
+                  <button @click="snoozeBackup" class="flex-1 bg-gray-100 text-gray-600 font-bold py-2 rounded-xl text-xs active:scale-95 transition-all">Più tardi</button>
+                </div>
+              </div>
             </div>
 
             <!-- User Greeting -->
@@ -1973,6 +1979,15 @@
               <div class="space-y-2">
                 <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Backup</div>
                 <p class="text-xs text-gray-500 font-medium leading-relaxed">I tuoi dati sono salvati solo su questo dispositivo. Scarica un backup per non perderli o per trasferirli su un altro telefono.</p>
+                <div class="bg-gray-50 border border-gray-100 rounded-2xl px-3 py-2.5 space-y-1 text-[11px] font-medium text-gray-500">
+                  <div class="flex justify-between gap-2"><span>Ultimo backup</span><span class="font-bold" :class="backupDue || lastBackupLabel === 'mai' ? 'text-arancione' : 'text-antracite'">{{ lastBackupLabel }}</span></div>
+                  <div class="flex justify-between gap-2"><span>Spazio usato</span><span class="font-bold text-antracite">{{ backupModal.sizeKB }} KB di ~5000</span></div>
+                  <div v-if="storagePersisted !== null" class="flex justify-between gap-2">
+                    <span>Memoria protetta</span>
+                    <span class="font-bold" :class="storagePersisted ? 'text-salvia' : 'text-arancione'">{{ storagePersisted ? 'Sì' : 'No' }}</span>
+                  </div>
+                  <p v-if="storagePersisted === false" class="text-[10px] text-gray-400 leading-snug pt-1">Il browser potrebbe cancellare i dati se non apri STILL per un po'. Installa l'app sulla schermata Home e fai backup spesso.</p>
+                </div>
                 <button @click="exportBackup" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5m0 0l5-5m-5 5V4"/></svg>
                   Esporta backup

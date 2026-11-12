@@ -1,14 +1,20 @@
 // STILL: service worker. Rende l'app installabile e la fa funzionare anche senza internet.
 // - File dell'app: prima la rete (così gli aggiornamenti arrivano subito), se offline la copia salvata.
-// - Librerie esterne (Vue, Tailwind, font, pdf.js): la copia salvata, aggiornata in background.
+// - Vue, Tailwind, font e pdf.js sono salvati nell'app stessa (js/vendor, css/tailwind.css, assets/fonts).
+// - Eventuali file di altri siti: la copia salvata, aggiornata in background.
 // Quando si aggiungono file all'app, aggiungerli a APP_FILES e cambiare VERSION.
-const VERSION = 'still-v5';
+// pdf.js (js/vendor/pdfjs, ~1,4 MB) non è in elenco: viene salvato la prima volta che si importa una dieta.
+const VERSION = 'still-v6';
 const APP_FILES = [
   './',
   'index.html',
   'manifest.webmanifest',
+  'css/tailwind.css',
   'css/style.css',
-  'js/tailwind.config.js',
+  'js/vendor/vue.global.prod.js',
+  'assets/fonts/plus-jakarta-sans-latin-normal.woff2',
+  'assets/fonts/plus-jakarta-sans-latin-italic.woff2',
+  'assets/fonts/plus-jakarta-sans-latin-ext-normal.woff2',
   'js/utils/format.js',
   'js/utils/calories.js',
   'js/data/foods.js',
@@ -23,10 +29,7 @@ const APP_FILES = [
   'assets/icon-512.png',
   'assets/apple-touch-icon.png'
 ];
-const LIBS = [
-  'https://cdn.tailwindcss.com',
-  'https://unpkg.com/vue@3.5.13/dist/vue.global.prod.js'
-];
+const LIBS = [];
 
 self.addEventListener('install', (event) => {
   event.waitUntil((async () => {

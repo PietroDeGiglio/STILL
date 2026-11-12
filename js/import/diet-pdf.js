@@ -16,7 +16,7 @@
 //     le note lunghe spariscono, "uguale" copia il pasto del giorno prima, "a scelta tra" → "oppure")
 // Il risultato va sempre ricontrollato dall'utente nel menù prima di salvare.
 // ---------------------------------------------------------------
-const PDFJS_BASE = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/';
+const PDFJS_BASE = 'js/vendor/pdfjs/';   // pdf.js 3.11.174, salvato nell'app (npm run vendor)
 let pdfJsLoading = null;
 const loadPdfJs = () => {
   if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);

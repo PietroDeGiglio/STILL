@@ -21,6 +21,21 @@ createApp({
       'still_profile', 'still_plans', 'still_meal_logs', 'still_measurements', 'still_workout_logs',
       'still_workout_sheets', 'still_training_sessions', 'still_comments', 'still_settings'
     ];
+    // Se il telefono non riesce a salvare (memoria piena o bloccata) l'utente deve saperlo subito:
+    // avviso a schermo, al massimo una volta al minuto per non bloccare l'app.
+    let lastSaveWarning = 0;
+    function warnSaveFailed() {
+      const now = Date.now();
+      if (now - lastSaveWarning < 60000) return;
+      lastSaveWarning = now;
+      try {
+        customModal.value = {
+          isOpen: true, type: 'alert', title: 'Salvataggio non riuscito',
+          message: "Il telefono non ha salvato le ultime modifiche (memoria piena o bloccata dal browser). Esporta subito un backup dal Profilo e libera spazio, poi riprova.",
+          onConfirm: null
+        };
+      } catch (e) { /* l'app non è ancora pronta: resta l'errore in console */ }
+    }
     const storage = {
       // Restituisce il JSON grezzo, oppure null se mancante o corrotto
       getRaw(key) {
@@ -37,8 +52,11 @@ createApp({
       save(key, value) {
         try {
           localStorage.setItem(key, JSON.stringify(value));
+          return true;
         } catch (e) {
           console.error(`Salvataggio non riuscito per ${key}`, e);
+          warnSaveFailed();
+          return false;
         }
       },
       remove(key) {
@@ -52,10 +70,30 @@ createApp({
         });
         return data;
       },
+      // Ripristino tutto-o-niente: se un dato non entra, rimette com'era prima e restituisce false
       importAll(data) {
-        STORAGE_KEYS.forEach(key => {
-          if (key in data) localStorage.setItem(key, JSON.stringify(data[key]));
-        });
+        const before = {};
+        STORAGE_KEYS.forEach(key => { before[key] = localStorage.getItem(key); });
+        try {
+          STORAGE_KEYS.forEach(key => {
+            if (key in data) localStorage.setItem(key, JSON.stringify(data[key]));
+          });
+          return true;
+        } catch (e) {
+          console.error('Ripristino non riuscito', e);
+          STORAGE_KEYS.forEach(key => {
+            try {
+              if (before[key] === null) localStorage.removeItem(key); else localStorage.setItem(key, before[key]);
+            } catch (err) { /* ignora */ }
+          });
+          return false;
+        }
+      },
+      // Spazio occupato dai dati di STILL, in KB (il browser ne concede circa 5000)
+      sizeKB() {
+        let chars = 0;
+        STORAGE_KEYS.forEach(key => { const raw = localStorage.getItem(key); if (raw) chars += raw.length + key.length; });
+        return Math.round(chars * 2 / 1024);
       }
     };
     
@@ -3569,6 +3607,7 @@ createApp({
 
     const enterApp = () => {
       isAuthenticated.value = true;
+      requestPersistentStorage();
       if (activeTab.value === 'dashboard') scrollToCurrentMeal();
       checkSavedWorkout();
       // Chiede com'è andato lo sport dei giorni scorsi (dopo eventuali altri avvisi)
@@ -4405,13 +4444,52 @@ createApp({
     // ---------------------------------------------------------------
     // BACKUP: esporta / importa tutti i dati in un file JSON
     // ---------------------------------------------------------------
-    const backupModal = ref({ isOpen: false, error: '' });
+    const backupModal = ref({ isOpen: false, error: '', sizeKB: 0 });
     const backupFileInput = ref(null);
-    const openBackupModal = () => { backupModal.value = { isOpen: true, error: '' }; };
+    const openBackupModal = () => {
+      let sizeKB = 0;
+      try { sizeKB = storage.sizeKB(); } catch (e) { /* ignora */ }
+      backupModal.value = { isOpen: true, error: '', sizeKB };
+    };
     const closeBackupModal = () => { backupModal.value.isOpen = false; };
 
+    // --- Protezione dei dati ---
+    // 1) Memoria "persistente": chiede al browser di non cancellare i dati di STILL quando
+    //    serve spazio o se l'app non si apre per un po' (Safari altrimenti li cancella dopo ~7 giorni).
+    const storagePersisted = ref(null); // null = non si sa / non supportato
+    const requestPersistentStorage = async () => {
+      try {
+        if (!navigator.storage || !navigator.storage.persist) return;
+        let ok = await navigator.storage.persisted();
+        if (!ok) ok = await navigator.storage.persist();
+        storagePersisted.value = !!ok;
+      } catch (e) { /* non supportato */ }
+    };
+
+    // 2) Promemoria di backup: la prima volta dopo una settimana d'uso, poi ogni 2 settimane.
+    const DAY_MS = 86400000;
+    const lastBackupLabel = computed(() => {
+      const at = settings.value.lastBackupAt;
+      if (!at) return 'mai';
+      const days = Math.floor((Date.now() - new Date(at).getTime()) / DAY_MS);
+      if (days <= 0) return 'oggi';
+      if (days === 1) return 'ieri';
+      return `${days} giorni fa`;
+    });
+    const backupDue = computed(() => {
+      const now = Date.now();
+      const s = settings.value;
+      if (s.backupSnoozeUntil && new Date(s.backupSnoozeUntil).getTime() > now) return false;
+      if (s.lastBackupAt) return now - new Date(s.lastBackupAt).getTime() > 14 * DAY_MS;
+      return now - new Date(s.firstUseAt).getTime() > 7 * DAY_MS;
+    });
+    const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
+
     const exportBackup = () => {
-      const payload = { app: 'STILL', version: 1, exportedAt: new Date().toISOString(), data: storage.exportAll() };
+      settings.value.lastBackupAt = new Date().toISOString();
+      delete settings.value.backupSnoozeUntil;
+      storage.save('still_settings', settings.value);
+      const payload ={ app: 'STILL', version: 1, exportedAt: new Date().toISOString(), data: storage.exportAll() };
       const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -4468,8 +4546,8 @@ createApp({
     // Primo avvio: non ci sono dati da sovrascrivere, si ripristina subito
     const handleOnboardingBackup = (event) => {
       readBackupFile(event, (msg) => { onboarding.value.error = msg; }, (data) => {
-        storage.importAll(data);
-        window.location.reload();
+        if (storage.importAll(data)) window.location.reload();
+        else onboarding.value.error = 'Spazio insufficiente sul dispositivo: il backup non è stato ripristinato.';
       });
     };
 
@@ -4480,8 +4558,8 @@ createApp({
           'Ripristinare il backup?',
           `Backup del ${when}. I dati attuali verranno sostituiti con quelli del file. L'operazione non si può annullare.`,
           () => {
-            storage.importAll(data);
-            window.location.reload();
+            if (storage.importAll(data)) window.location.reload();
+            else setTimeout(() => showToastMessage('Spazio insufficiente sul dispositivo: il backup non è stato ripristinato e i tuoi dati attuali sono rimasti com\'erano.'), 50);
           }
         );
       });
@@ -4622,6 +4700,8 @@ createApp({
       }
     });
     watch(settings, (v) => storage.save('still_settings', v), { deep: true });
+    // Giorno del primo uso: serve al promemoria di backup (sezione BACKUP)
+    if (!settings.value.firstUseAt) settings.value.firstUseAt = (profile.value && profile.value.createdAt) || new Date().toISOString();
 
     // ---------------------------------------------------------------
     // ASPETTO: chiaro, scuro o automatico (segue il telefono). Colori scuri in css/style.css
@@ -5405,7 +5485,7 @@ createApp({
       backupFileInput,
       openBackupModal,
       closeBackupModal,
-      exportBackup,
+      exportBackup, storagePersisted, lastBackupLabel, backupDue, snoozeBackup,
       triggerImportBackup,
       handleBackupFile,
       profile,

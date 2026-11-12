@@ -1,4 +1,4 @@
-/* STILL: stili dell'app (i colori del tema sono in js/tailwind.config.js) */
+/* STILL: stili dell'app (i colori del tema sono in tailwind.build.config.js) */
 /* Custom Scrollbar */
 ::-webkit-scrollbar { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track { background: transparent; }
