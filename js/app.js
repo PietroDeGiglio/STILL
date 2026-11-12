@@ -502,7 +502,8 @@ createApp({
       return (dayMeals || []).map((m, i) => {
         const typeInfo = mealTypes.find(t => t.id === m.type) || mealTypes[0];
         const written = normalizeCalories(m.calories);
-        const estimate = written === null ? estimateMealKcal(m.items).kcal : null;
+        const auto = estimateMealKcal(m.items);
+        const estimate = written === null ? auto.kcal : null;
         return {
           id: m.type + '_' + i,
           type: m.type,
@@ -510,6 +511,7 @@ createApp({
           icon: typeInfo.icon,
           calories: written !== null ? written : estimate,
           caloriesEstimated: written === null && estimate !== null,
+          protein: auto.protein,   // grammi stimati dagli alimenti (null se nessuno è riconosciuto)
           description: (m.items || []).filter(it => it && it.trim() !== '').join(', ') || 'Nessun dettaglio.'
         };
       });
@@ -567,6 +569,17 @@ createApp({
 
     const todayDateKey = computed(() => toISODate(new Date()));
     const todayMealLogs = computed(() => mealLogs.value[todayDateKey.value] || {});
+
+    const mealProteinLabel = (meal) => (meal && meal.protein ? ' · ' + meal.protein + ' g prot' : '');
+
+    // Proteine di oggi: quelle del menù e quelle dei pasti già segnati come fatti
+    const todayProtein = computed(() => {
+      const meals = todayActiveMeals.value.filter(m => m.protein !== null && m.protein !== undefined);
+      if (!meals.length) return null;
+      const planned = meals.reduce((sum, m) => sum + m.protein, 0);
+      const eaten = meals.filter(m => (todayMealLogs.value[m.id] || {}).status === 'done').reduce((sum, m) => sum + m.protein, 0);
+      return { planned, eaten };
+    });
 
     // Si possono segnare solo pasti di oggi o dei giorni passati
     const isFutureDateKey = (dateKey) => !!dateKey && dateKey > todayDateKey.value;
@@ -913,6 +926,11 @@ createApp({
         return mapDayMeals(plan.weeks[weekIdx]?.days?.[selectedNutritionDay.value] || []);
       }
       return plan.meals || [];
+    });
+
+    const selectedPlanDayProtein = computed(() => {
+      const list = selectedPlanDayMeals.value.filter(m => m.protein !== null && m.protein !== undefined);
+      return list.length ? list.reduce((sum, m) => sum + m.protein, 0) : null;
     });
 
     const selectedPlanDayCalories = computed(() => {
@@ -1752,6 +1770,63 @@ createApp({
       return Math.round((current - start) * 10) / 10;
     };
 
+    // ---------------------------------------------------------------
+    // PROSSIMA VOLTA: consiglio di carico (sovraccarico progressivo) per gli esercizi di forza.
+    // Si basa sugli ultimi pesi registrati e, se c'è, su "com'è andata" (facile / giusto / duro).
+    //  - facile → sali · giusto due volte di fila allo stesso peso → sali · giusto una volta → ripeti
+    //  - duro → resta · duro due volte di fila allo stesso peso → scendi un po'
+    //  - senza risposta: dopo 3 sessioni allo stesso peso → sali
+    // ---------------------------------------------------------------
+    const EXERCISE_FEELS = [
+      { id: 'easy', icon: '😌', label: 'Facile' },
+      { id: 'ok', icon: '💪', label: 'Giusto' },
+      { id: 'hard', icon: '🥵', label: 'Duro' }
+    ];
+    const loadStep = (weight) => (weight < 20 ? 1 : 2.5);
+    const roundLoad = (value, step) => Math.max(0, Math.round(value / step) * step);
+    const exerciseSuggestion = (exercise) => {
+      if (!exercise || exercise.type === 'cardio') return null;
+      const logs = exerciseLogsFor(exercise).filter(log => parseOptionalNumber(log.weight) !== null);
+      if (!logs.length) return null;
+      const last = logs[logs.length - 1];
+      const prev = logs.length > 1 ? logs[logs.length - 2] : null;
+      const w = parseOptionalNumber(last.weight);
+      if (w <= 0) return null;
+      const step = loadStep(w);
+      const up = roundLoad(w + step, step);
+      const down = roundLoad(w - step, step);
+      const samePrev = prev && parseOptionalNumber(prev.weight) === w;
+      const top = exercise.pyramid ? ' (serie più pesante)' : '';
+      const fw = formatNumber(w) + ' kg';
+      const make = (value, kind, reason) => ({ value, kind, reason, unit: 'kg', delta: Math.round((value - w) * 10) / 10, top });
+      if (last.feel === 'easy') return make(up, 'up', `L'ultima volta ${fw} era facile: è ora di salire.`);
+      if (last.feel === 'hard') {
+        if (samePrev && prev.feel === 'hard' && down > 0) return make(down, 'down', `${fw} è stato duro due volte di fila: scendi un po' e cura la tecnica.`);
+        return make(w, 'same', `${fw} è stato duro: resta qui finché non diventa giusto.`);
+      }
+      if (last.feel === 'ok') {
+        if (samePrev && (prev.feel === 'ok' || prev.feel === 'easy')) return make(up, 'up', `Due sessioni solide a ${fw}: prova a salire.`);
+        return make(w, 'same', `Ripeti ${fw}: se va di nuovo bene, la prossima volta sali.`);
+      }
+      // Nessuna risposta: conta le sessioni di fila allo stesso peso
+      let streak = 0;
+      for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w; i--) streak++;
+      if (streak >= 3) return make(up, 'up', `Sei a ${fw} da ${streak} sessioni: prova a salire.`);
+      return make(w, 'same', `Consolida ${fw} (${streak} di 3 sessioni prima di salire). Dimmi com'è andata per consigli più precisi.`);
+    };
+
+    // Salva "com'è andata" sulla registrazione di oggi dell'esercizio
+    const setExerciseFeel = (exercise, feel) => {
+      if (!exercise) return;
+      const log = workoutLogs.value.find(item => item.date === toISODate() && sameExercise(item, exercise));
+      if (log) log.feel = log.feel === feel ? '' : feel;
+    };
+    const todayExerciseFeel = (exercise) => {
+      if (!exercise) return '';
+      const log = workoutLogs.value.find(item => item.date === toISODate() && sameExercise(item, exercise));
+      return (log && log.feel) || '';
+    };
+
     // Crea o aggiorna la registrazione di oggi per l'esercizio (una per giorno)
     const upsertTodayExerciseLog = (exercise, payload) => {
       const date = toISODate();
@@ -1776,7 +1851,7 @@ createApp({
     const exerciseInputs = ref({});
 
     // Richiesta di conferma prima di aggiornare peso/durata
-    const weightConfirmModal = ref({ isOpen: false, exerciseId: null, exerciseName: '', value: null, unit: 'kg', isCardio: false });
+    const weightConfirmModal = ref({ isOpen: false, exerciseId: null, exerciseName: '', value: null, unit: 'kg', isCardio: false, feel: '' });
 
     const setExerciseValue = (exercise) => {
       const value = parseOptionalNumber(exerciseInputs.value[exercise.id]);
@@ -1791,7 +1866,8 @@ createApp({
         exerciseName: exercise.name,
         value: rounded,
         unit: exerciseUnit(exercise),
-        isCardio: exercise.type === 'cardio'
+        isCardio: exercise.type === 'cardio',
+        feel: ''
       };
     };
 
@@ -1818,6 +1894,7 @@ createApp({
         return;
       }
       applyExerciseValue(exercise, modal.value);
+      if (modal.feel && !modal.isCardio) setExerciseFeel(exercise, modal.feel);
       modal.isOpen = false;
     };
 
@@ -2061,6 +2138,17 @@ createApp({
       if (!exerciseHistoryModal.value.isOpen) return [];
       const modal = exerciseHistoryModal.value;
       return exerciseLogsFor({ id: modal.exerciseId, name: modal.exerciseName }).slice().reverse().map(decorateLog);
+    });
+
+    // Consiglio di carico nello storico (l'esercizio può essere di un'altra scheda)
+    const exerciseHistorySuggestion = computed(() => {
+      const modal = exerciseHistoryModal.value;
+      if (!modal.isOpen) return null;
+      const target = { id: modal.exerciseId, name: modal.exerciseName };
+      const logs = exerciseLogsFor(target);
+      if (!logs.length) return null;
+      const info = findExerciseInfo(logs[logs.length - 1]);
+      return exerciseSuggestion(info ? info.exercise : { ...target, type: 'strength' });
     });
 
     // Grafico andamento esercizio (ordine cronologico, un punto per sessione)
@@ -2333,6 +2421,23 @@ createApp({
     const playerStep = computed(() => workoutPlayer.value.steps[workoutPlayer.value.stepIdx] || null);
     const playerNextStep = computed(() => workoutPlayer.value.steps[workoutPlayer.value.stepIdx + 1] || null);
     const playerExercise = computed(() => playerStep.value ? findSelectedExerciseById(playerStep.value.exId) : null);
+    // Esercizio di forza appena concluso: durante il recupero dopo l'ultima serie, o a fine allenamento
+    const playerFeelExercise = computed(() => {
+      const p = workoutPlayer.value;
+      let step = null;
+      if (p.phase === 'rest' && playerStep.value && playerStep.value.isLastSetOfExercise) step = playerStep.value;
+      else if (p.phase === 'done' && p.steps.length) step = p.steps[p.steps.length - 1];
+      const ex = step ? findSelectedExerciseById(step.exId) : null;
+      return ex && ex.type !== 'cardio' && todayExerciseLogExists(ex) ? ex : null;
+    });
+    const todayExerciseLogExists = (exercise) => workoutLogs.value.some(item => item.date === toISODate() && sameExercise(item, exercise));
+    // Consiglio di carico per l'esercizio in arrivo (solo prima di registrarlo oggi)
+    const playerSuggestion = computed(() => {
+      const ex = playerTargetExercise.value;
+      if (!ex || ex.type === 'cardio' || ex.pyramid || todayExerciseLogExists(ex)) return null;
+      const sugg = exerciseSuggestion(ex);
+      return sugg && sugg.value !== playerCurrentValue.value ? sugg : null;
+    });
     const playerNextExercise = computed(() => playerNextStep.value ? findSelectedExerciseById(playerNextStep.value.exId) : null);
     const playerProgressPct = computed(() => {
       const p = workoutPlayer.value;
@@ -3763,6 +3868,8 @@ createApp({
       }
       return out;
     });
+    // Obiettivo di proteine per la barra in dashboard: il minimo consigliato, altrimenti quanto prevede il menù
+    const proteinGoal = computed(() => (bodyStats.value.protein ? bodyStats.value.protein.min : (todayProtein.value ? todayProtein.value.planned : 0)));
 
     const openProfileCompletion = () => { openBackupModal(); openProfileEdit(); };
 
@@ -5577,7 +5684,8 @@ createApp({
       todayWeekDay,
       selectedNutritionDay,
       selectedPlanDayMeals,
-      selectedPlanDayCalories,
+      selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
+      EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,
       formatDate,
       sharePendingGrocery,

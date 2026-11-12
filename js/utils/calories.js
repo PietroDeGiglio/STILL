@@ -1,4 +1,4 @@
-// Stima automatica delle calorie dal testo degli alimenti (es. "80g pasta", "2 uova", "1 cucchiaio di olio").
+// Stima automatica di calorie e proteine dal testo degli alimenti (es. "80g pasta", "2 uova", "1 cucchiaio di olio").
 // Usa la tabella FOODS di js/data/foods.js. Funzioni pure: nessun accesso ai dati dell'app.
 
 // Testo semplificato: minuscolo, senza accenti e punteggiatura (l'apostrofo diventa spazio)
@@ -58,26 +58,37 @@ const foodGrams = (text, food) => {
   return null;
 };
 
-// Calorie di un alimento scritto a testo: { kcal, food } oppure null se non riconosciuto
+// Calorie e proteine di un alimento scritto a testo: { kcal, protein, grams, food } oppure null se non riconosciuto
 const estimateFoodKcal = (text) => {
   // Con le alternative ("pasta oppure riso") si considera la prima
   const first = String(text || '').split(/\s+oppure\s+|\s+in alternativa\s+|\//i)[0];
   if (!normFood(first)) return null;
   const food = findFood(first);
   if (!food) return null;
-  if (food.k === 0) return { kcal: 0, grams: 0, food };   // caffè, spezie, aceto…
-  const grams = foodGrams(first, food);
+  if (food.k === 0) return { kcal: 0, protein: 0, grams: 0, food };   // caffè, spezie, aceto…
+  // La quantità può stare dopo l'alternativa: "pasta oppure riso 80g"
+  let grams = foodGrams(first, food);
+  if (grams === null && first !== String(text)) grams = foodGrams(text, food);
   if (grams === null) return null;
-  return { kcal: Math.round((food.k * grams) / 100), grams: Math.round(grams), food };
+  return {
+    kcal: Math.round((food.k * grams) / 100),
+    protein: Math.round(((food.p || 0) * grams) / 100 * 10) / 10,
+    grams: Math.round(grams),
+    food
+  };
 };
 
-// Somma di un pasto: { kcal, found, total } (kcal null se nessun alimento è riconosciuto)
+// Somma di un pasto: { kcal, protein, found, total } (kcal e protein null se nessun alimento è riconosciuto)
 const estimateMealKcal = (items) => {
   const list = (items || []).map(i => String(i || '').trim()).filter(Boolean);
-  let kcal = 0, found = 0;
+  let kcal = 0, protein = 0, found = 0;
   list.forEach(item => {
     const e = estimateFoodKcal(item);
-    if (e) { kcal += e.kcal; found++; }
+    if (e) { kcal += e.kcal; protein += e.protein; found++; }
   });
-  return { kcal: found ? Math.round(kcal / 5) * 5 : null, found, total: list.length };
+  return {
+    kcal: found ? Math.round(kcal / 5) * 5 : null,
+    protein: found ? Math.round(protein) : null,
+    found, total: list.length
+  };
 };

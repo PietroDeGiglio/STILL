@@ -377,6 +377,22 @@
               <div class="flex justify-between items-center px-1">
                 <h3 class="text-lg font-bold text-antracite">Il tuo menù di oggi</h3>
               </div>
+
+              <!-- Proteine di oggi (stimate dagli alimenti del menù) -->
+              <div v-if="todayProtein && todayActiveMeals.length" class="bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm mx-1">
+                <div class="flex justify-between items-baseline gap-2">
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">🥩 Proteine di oggi</span>
+                  <span class="text-sm font-extrabold text-antracite">{{ todayProtein.eaten }} <span class="text-[11px] font-bold text-gray-400">/ {{ proteinGoal }} g</span></span>
+                </div>
+                <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden mt-2">
+                  <div class="h-full rounded-full bg-salvia transition-all duration-500" :style="{ width: Math.min(100, Math.round(todayProtein.eaten / Math.max(1, proteinGoal) * 100)) + '%' }"></div>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 mt-1.5 leading-snug">
+                  <template v-if="bodyStats.protein">Obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g · il menù di oggi ne ha <b :class="todayProtein.planned < bodyStats.protein.min ? 'text-arancione' : 'text-salvia'">≈ {{ todayProtein.planned }} g</b>.</template>
+                  <template v-else>Il menù di oggi ne ha ≈ {{ todayProtein.planned }} g. Aggiungi il peso in Progressi per il tuo obiettivo.</template>
+                  Segna i pasti fatti per riempire la barra.
+                </p>
+              </div>
               
               <div v-if="todayActiveMeals.length === 0" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft text-center mx-1">
                 <p class="text-sm text-gray-500 font-medium">Riposo o nessun pasto programmato per oggi.</p>
@@ -400,7 +416,7 @@
                         <div>
                           <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
                           <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
-                            {{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'Calorie n.d.' }}
+                            {{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'Calorie n.d.' }}{{ mealProteinLabel(meal) }}
                           </span>
                         </div>
                       </div>
@@ -973,6 +989,11 @@
                             </span>
                           </div>
                           <p class="text-[9px] font-medium text-gray-400 mt-0.5">{{ lastExerciseLog(ex) ? 'Ultima: ' + formatDate(lastExerciseLog(ex).date) : 'Nessun dato registrato' }}</p>
+                          <template v-for="sg in [exerciseSuggestion(ex)]" :key="'sg' + ex.id">
+                            <p v-if="sg" class="text-[10px] font-bold mt-1" :class="sg.kind === 'up' ? 'text-salvia' : (sg.kind === 'down' ? 'text-sky-600' : 'text-gray-500')">
+                              {{ sg.kind === 'up' ? '⬆️' : (sg.kind === 'down' ? '⬇️' : '🎯') }} Prossima volta: {{ formatNumber(sg.value) }} kg<span v-if="sg.delta" class="font-semibold"> ({{ sg.delta > 0 ? '+' : '' }}{{ formatNumber(sg.delta) }})</span>
+                            </p>
+                          </template>
                         </div>
                         <div class="flex items-center gap-1.5 flex-shrink-0">
                           <template v-if="ex.type === 'strength' && ex.pyramid">
@@ -1580,7 +1601,7 @@
                     <span class="text-[10px] font-bold text-gray-400">kcal</span>
                   </div>
                   <p v-if="!meal.calories && builderMealEstimate(meal).total" class="text-[10px] font-medium leading-snug -mt-1 pl-1" :class="builderMealEstimate(meal).kcal !== null ? 'text-salvia' : 'text-gray-400'">
-                    <template v-if="builderMealEstimate(meal).kcal !== null">✨ Calcolate in automatico: ≈ {{ builderMealEstimate(meal).kcal }} kcal<span v-if="builderMealEstimate(meal).found < builderMealEstimate(meal).total" class="text-gray-400"> ({{ builderMealEstimate(meal).total - builderMealEstimate(meal).found }} {{ builderMealEstimate(meal).total - builderMealEstimate(meal).found === 1 ? 'alimento non riconosciuto' : 'alimenti non riconosciuti' }})</span>.</template>
+                    <template v-if="builderMealEstimate(meal).kcal !== null">✨ Calcolate in automatico: ≈ {{ builderMealEstimate(meal).kcal }} kcal · {{ builderMealEstimate(meal).protein }} g proteine<span v-if="builderMealEstimate(meal).found < builderMealEstimate(meal).total" class="text-gray-400"> ({{ builderMealEstimate(meal).total - builderMealEstimate(meal).found }} {{ builderMealEstimate(meal).total - builderMealEstimate(meal).found === 1 ? 'alimento non riconosciuto' : 'alimenti non riconosciuti' }})</span>.</template>
                     <template v-else>Scrivi gli alimenti con la quantità (es. "80g pasta", "2 uova") e le calorie si calcolano da sole.</template>
                   </p>
 
@@ -1668,6 +1689,12 @@
                   <span class="text-xs font-bold text-gray-500 uppercase">Obiettivo {{ selectedNutritionDay }}</span>
                   <span class="text-lg font-extrabold text-antracite">{{ selectedPlanDayCalories }} <span class="text-xs font-medium text-gray-400">kcal totali</span></span>
                 </div>
+                <div v-if="selectedPlanDayProtein !== null" class="flex justify-between items-center -mt-2 mb-4">
+                  <span class="text-xs font-bold text-gray-500 uppercase">🥩 Proteine</span>
+                  <span class="text-sm font-extrabold text-antracite">≈ {{ selectedPlanDayProtein }} g
+                    <span v-if="bodyStats.protein" class="text-[11px] font-medium" :class="selectedPlanDayProtein >= bodyStats.protein.min ? 'text-salvia' : 'text-arancione'">· obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g</span>
+                  </span>
+                </div>
                 <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4">
                   <div class="bg-salvia h-full rounded-full" style="width: 100%"></div>
                 </div>
@@ -1684,7 +1711,7 @@
                   <div class="flex-1">
                     <div class="flex justify-between items-center mb-1">
                       <h5 class="text-sm font-bold text-antracite">{{ meal.name }}</h5>
-                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}</span>
+                      <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}{{ mealProteinLabel(meal) }}</span>
                     </div>
                     <p class="text-xs text-gray-500 leading-relaxed">{{ meal.description }}</p>
                   </div>
@@ -2044,7 +2071,7 @@
                   <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
                   <p class="text-[10px] text-gray-500 line-clamp-1">{{ meal.description }}</p>
                 </div>
-                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}</span>
+                <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}{{ mealProteinLabel(meal) }}</span>
               </div>
             </div>
 
@@ -2112,7 +2139,7 @@
                       <h5 class="text-xs font-bold text-antracite">{{ meal.name }}</h5>
                       <p class="text-[10px] text-gray-500 line-clamp-2 leading-snug">{{ meal.description }}</p>
                     </div>
-                    <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : '—' }}</span>
+                    <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : '—' }}{{ mealProteinLabel(meal) }}</span>
                   </div>
 
                   <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
@@ -2478,6 +2505,17 @@
             </div>
 
             <div v-else class="overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar">
+              <!-- Consiglio per la prossima volta -->
+              <div v-if="exerciseHistorySuggestion" class="rounded-2xl p-4 border mb-2"
+                   :class="exerciseHistorySuggestion.kind === 'up' ? 'bg-salvia/10 border-salvia/30' : (exerciseHistorySuggestion.kind === 'down' ? 'bg-sky-500/10 border-sky-500/30' : 'bg-gray-50 border-gray-100')">
+                <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Prossima volta{{ exerciseHistorySuggestion.top }}</div>
+                <div class="text-2xl font-extrabold text-antracite leading-tight">
+                  {{ formatNumber(exerciseHistorySuggestion.value) }} <span class="text-xs font-bold text-gray-400">kg</span>
+                  <span v-if="exerciseHistorySuggestion.delta" class="text-sm font-bold ml-1" :class="exerciseHistorySuggestion.delta > 0 ? 'text-salvia' : 'text-sky-600'">{{ exerciseHistorySuggestion.delta > 0 ? '+' : '' }}{{ formatNumber(exerciseHistorySuggestion.delta) }}</span>
+                </div>
+                <p class="text-[11px] font-medium text-gray-500 leading-snug mt-1">{{ exerciseHistorySuggestion.reason }}</p>
+              </div>
+
               <!-- Grafico andamento -->
               <div v-if="exerciseChart" class="bg-white border border-gray-100 rounded-2xl p-4 space-y-3 shadow-sm mb-2">
                 <div class="grid grid-cols-3 gap-2">
@@ -2547,6 +2585,7 @@
                     <span v-if="log.displayDelta !== null && log.displayDelta !== 0" class="text-[10px] font-bold" :class="log.displayDelta > 0 ? 'text-salvia' : 'text-red-500'">{{ log.displayDelta > 0 ? '+' : '' }}{{ formatNumber(log.displayDelta) }} {{ log.unit }}</span>
                   </div>
                   <p v-if="log.intensity" class="text-[10px] font-medium text-gray-400 mt-0.5">{{ log.intensity }}</p>
+                  <p v-if="log.feel" class="text-[10px] font-medium text-gray-500 mt-0.5">{{ (EXERCISE_FEELS.find(f => f.id === log.feel) || {}).icon }} {{ (EXERCISE_FEELS.find(f => f.id === log.feel) || {}).label }}</p>
                   <p v-if="log.logSets && log.logSets.length" class="text-[9px] font-medium text-amber-700 mt-0.5 leading-snug break-words">{{ log.logSets.map(set => formatNumber(set.weight) + '×' + (set.reps || '—')).join(' · ') }}</p>
                 </div>
                 <button @click="deleteWorkoutLog(log)" class="p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0" aria-label="Elimina registrazione">
@@ -2958,6 +2997,14 @@
                 </div>
                 <button @click="openAchievementShare(workoutPlayer.summary.records[0])" class="w-full bg-arancione text-white font-extrabold py-2.5 rounded-xl text-xs active:scale-95 transition-all">🏆 Condividi il record nella storia</button>
               </div>
+              <div v-if="playerFeelExercise" class="w-full bg-white/5 rounded-2xl p-3 space-y-2">
+                <p class="text-[11px] font-bold text-white/70">Com'era {{ playerFeelExercise.name }}?</p>
+                <div class="grid grid-cols-3 gap-2">
+                  <button v-for="f in EXERCISE_FEELS" :key="'df' + f.id" @click="setExerciseFeel(playerFeelExercise, f.id)"
+                          class="py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                          :class="todayExerciseFeel(playerFeelExercise) === f.id ? 'bg-arancione text-white' : 'bg-white/10 text-white/80 hover:bg-white/20'">{{ f.icon }} {{ f.label }}</button>
+                </div>
+              </div>
               <div class="grid grid-cols-2 gap-3 w-full">
                 <div class="bg-white/10 rounded-2xl p-4">
                   <div class="text-[9px] font-bold text-white/50 uppercase tracking-widest">Durata</div>
@@ -3051,6 +3098,13 @@
                     <button @click="playerAdjustValue(1)" class="w-11 h-11 rounded-xl bg-white/10 hover:bg-white/20 text-xl font-bold active:scale-90 transition-all flex-shrink-0" aria-label="Aumenta">+</button>
                   </div>
                   <p class="text-[9px] font-medium text-white/40 text-center">{{ playerUnit === 'min' ? '± 1 min' : '± 2,5 kg' }} · oppure scrivi il valore</p>
+                  <div v-if="playerSuggestion" class="flex items-center gap-2 rounded-xl px-3 py-2"
+                       :class="playerSuggestion.kind === 'down' ? 'bg-sky-500/15' : 'bg-salvia/15'">
+                    <p class="flex-1 min-w-0 text-[11px] font-medium text-white/80 leading-snug text-left">
+                      <b class="text-white">{{ playerSuggestion.kind === 'down' ? '⬇️' : '⬆️' }} Consiglio: {{ formatNumber(playerSuggestion.value) }} kg.</b> {{ playerSuggestion.reason }}
+                    </p>
+                    <button @click="playerSetValue(playerSuggestion.value)" class="shrink-0 bg-white text-antracite text-[11px] font-extrabold px-3 py-1.5 rounded-lg active:scale-95 transition-all">Usa</button>
+                  </div>
                 </div>
               </div>
 
@@ -3093,6 +3147,14 @@
                     </div>
                   </div>
                   <p v-if="playerNextExercise && playerNextStep.exId !== playerStep.exId" class="text-xs font-bold text-white/60 mt-3">Esercizio completato! Prepara il prossimo.</p>
+                </div>
+                <div v-if="playerFeelExercise" class="bg-white/5 rounded-2xl p-3 space-y-2">
+                  <p class="text-[11px] font-bold text-white/70 text-center">Com'era {{ playerFeelExercise.name }}?</p>
+                  <div class="grid grid-cols-3 gap-2">
+                    <button v-for="f in EXERCISE_FEELS" :key="'rf' + f.id" @click="setExerciseFeel(playerFeelExercise, f.id)"
+                          class="py-2 rounded-xl text-xs font-bold transition-all active:scale-95"
+                          :class="todayExerciseFeel(playerFeelExercise) === f.id ? 'bg-arancione text-white' : 'bg-white/10 text-white/80 hover:bg-white/20'">{{ f.icon }} {{ f.label }}</button>
+                  </div>
                 </div>
                 <div class="flex gap-2">
                   <button @click="playerAddRest(15)" class="flex-1 bg-white/10 hover:bg-white/20 font-bold py-3.5 rounded-2xl active:scale-95 transition-all">+15s</button>
@@ -3221,6 +3283,15 @@
                 Sei sicuro di voler aggiornare <b class="text-antracite">{{ weightConfirmModal.exerciseName }}</b> a
                 <b class="text-arancione">{{ formatNumber(weightConfirmModal.value) }} {{ weightConfirmModal.unit }}</b>?
               </p>
+            </div>
+            <div v-if="!weightConfirmModal.isCardio" class="space-y-1.5">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Com'è andata?</div>
+              <div class="grid grid-cols-3 gap-2">
+                <button v-for="f in EXERCISE_FEELS" :key="'wf' + f.id" type="button" @click="weightConfirmModal.feel = weightConfirmModal.feel === f.id ? '' : f.id"
+                        class="py-2 rounded-xl text-xs font-bold border transition-all"
+                        :class="weightConfirmModal.feel === f.id ? 'bg-arancione/10 border-arancione text-arancione' : 'bg-white border-gray-200 text-gray-500'">{{ f.icon }} {{ f.label }}</button>
+              </div>
+              <p class="text-[10px] font-medium text-gray-400">Facoltativo: serve per il consiglio della prossima volta.</p>
             </div>
             <div class="flex gap-3 pt-1">
               <button @click="cancelExerciseValue" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">No</button>
