@@ -1662,6 +1662,164 @@ createApp({
       workoutView.value = 'detail';
     };
 
+    // ---------------------------------------------------------------
+    // GUIDA ESERCIZI (js/data/exercises.js): per chi si allena senza personal trainer.
+    // Esercizi per muscolo (palestra o casa), esercizi mirati per sport e programmi pronti;
+    // si scelgono e si aggiungono a una scheda esistente o nuova.
+    // ---------------------------------------------------------------
+    const EXERCISE_BY_ID = {};
+    EXERCISE_LIBRARY.forEach(item => { EXERCISE_BY_ID[item.id] = item; });
+    const EXERCISE_BY_NAME = {};
+    EXERCISE_LIBRARY.forEach(item => { EXERCISE_BY_NAME[item.n.trim().toLowerCase()] = item; });
+
+    const guide = ref({ isOpen: false, tab: 'muscle', muscle: 'petto', place: 'gym', sport: '', selected: [], picker: false, sheetId: 'new', dayIdx: 0, newName: '' });
+
+    // Sport dell'utente (dal calendario) prima degli altri
+    const userSports = computed(() => {
+      const mine = [];
+      trainingSessions.value.forEach(s => { if (s.kind === 'sport' && s.sport && SPORT_PROGRAMS[s.sport] && !mine.includes(s.sport)) mine.push(s.sport); });
+      return mine;
+    });
+    const guideSports = computed(() => [...userSports.value, ...Object.keys(SPORT_PROGRAMS).filter(s => !userSports.value.includes(s))]);
+
+    const openGuide = (tab = 'muscle', extra = {}) => {
+      guide.value = {
+        ...guide.value, isOpen: true, tab, selected: [], picker: false,
+        sport: guide.value.sport || userSports.value[0] || 'Calcio',
+        place: workoutSheets.value.length ? guide.value.place : 'home',
+        ...extra
+      };
+    };
+    const closeGuide = () => { guide.value.isOpen = false; guide.value.picker = false; };
+    const setGuideTab = (tab) => { guide.value.tab = tab; guide.value.selected = []; guide.value.picker = false; };
+
+    // In palestra si possono fare anche gli esercizi a corpo libero: se quelli da palestra sono pochi, si aggiungono
+    const guideExercises = computed(() => {
+      const g = guide.value;
+      if (g.tab === 'sport') {
+        const program = SPORT_PROGRAMS[g.sport];
+        return program ? program.ex.map(item => ({ ...EXERCISE_BY_ID[item.id], why: item.why })).filter(item => item.id) : [];
+      }
+      if (g.tab !== 'muscle') return [];
+      const own = EXERCISE_LIBRARY.filter(item => item.m === g.muscle && item.w === g.place);
+      if (g.place === 'gym' && own.length < 5) return [...own, ...EXERCISE_LIBRARY.filter(item => item.m === g.muscle && item.w === 'home')];
+      return own;
+    });
+
+    const guidePrescription = (item) => {
+      if (!item) return '';
+      if (item.t === 'cardio') return item.d + ' min · ' + item.i;
+      return item.s + ' × ' + item.r + (item.rec ? ' · rec. ' + item.rec + 's' : '');
+    };
+
+    const toggleGuideSelect = (id) => {
+      const list = guide.value.selected;
+      const i = list.indexOf(id);
+      if (i > -1) list.splice(i, 1); else list.push(id);
+    };
+    const selectAllGuide = () => {
+      const all = guideExercises.value.map(item => item.id);
+      guide.value.selected = guide.value.selected.length === all.length ? [] : all;
+    };
+
+    // Esercizio della libreria → esercizio di una scheda
+    const libraryToExercise = (item) => {
+      const ex = createEmptyExercise();
+      ex.name = item.n;
+      if (item.t === 'cardio') {
+        ex.type = 'cardio';
+        ex.duration = item.d;
+        ex.intensity = item.i || '';
+      } else {
+        ex.type = 'strength';
+        ex.sets = String(item.s);
+        ex.reps = String(item.r);
+        ex.rest = item.rec || '';
+      }
+      return ex;
+    };
+
+    const guideDefaultName = () => {
+      const g = guide.value;
+      if (g.tab === 'sport') return g.sport + ' · Preparazione';
+      const muscle = MUSCLE_GROUPS.find(m => m.id === g.muscle);
+      return (muscle ? muscle.name : 'Allenamento') + (g.place === 'home' ? ' · Casa' : ' · Palestra');
+    };
+    const guideDayName = () => {
+      const g = guide.value;
+      if (g.tab === 'sport') return g.sport;
+      const muscle = MUSCLE_GROUPS.find(m => m.id === g.muscle);
+      return muscle ? muscle.name : 'Giorno A';
+    };
+
+    const openGuidePicker = () => {
+      if (!guide.value.selected.length) return;
+      const first = workoutSheets.value[0];
+      guide.value.picker = true;
+      guide.value.sheetId = first ? first.id : 'new';
+      guide.value.dayIdx = 0;
+      guide.value.newName = guideDefaultName();
+    };
+    const guidePickerSheet = computed(() => workoutSheets.value.find(sheet => sheet.id === guide.value.sheetId) || null);
+
+    const confirmGuideAdd = () => {
+      const g = guide.value;
+      const items = g.selected.map(id => EXERCISE_BY_ID[id]).filter(Boolean);
+      if (!items.length) return;
+      let sheet;
+      if (g.sheetId === 'new') {
+        const name = (g.newName || '').trim() || guideDefaultName();
+        const nextId = Math.max(Date.now(), ...workoutSheets.value.map(item => (Number(item.id) || 0) + 1));
+        sheet = { id: nextId, createdAt: toISODate(), name, days: [{ name: guideDayName(), exercises: items.map(libraryToExercise) }] };
+        workoutSheets.value.unshift(sheet);
+        sheet = workoutSheets.value[0];
+      } else {
+        sheet = guidePickerSheet.value;
+        if (!sheet) return;
+        if (g.dayIdx === 'new') sheet.days.push({ name: guideDayName(), exercises: [] });
+        const day = g.dayIdx === 'new' ? sheet.days[sheet.days.length - 1] : sheet.days[g.dayIdx];
+        if (!day) return;
+        const existing = new Set(day.exercises.map(ex => (ex.name || '').trim().toLowerCase()));
+        items.forEach(item => { if (!existing.has(item.n.toLowerCase())) day.exercises.push(libraryToExercise(item)); });
+      }
+      closeGuide();
+      openSheet(sheet);
+      showToastMessage(items.length + (items.length === 1 ? ' esercizio aggiunto' : ' esercizi aggiunti') + ' a "' + sheet.name + '". Nella scheda puoi cambiare serie, ripetizioni e pesi. 💪');
+    };
+
+    // Programma pronto → nuova scheda
+    const createProgramSheet = (program) => {
+      const nextId = Math.max(Date.now(), ...workoutSheets.value.map(item => (Number(item.id) || 0) + 1));
+      workoutSheets.value.unshift({
+        id: nextId, createdAt: toISODate(), name: program.name,
+        days: program.days.map(day => ({ name: day.name, exercises: day.ex.map(id => EXERCISE_BY_ID[id]).filter(Boolean).map(libraryToExercise) }))
+      });
+      closeGuide();
+      openSheet(workoutSheets.value[0]);
+      showToastMessage('Scheda "' + program.name + '" creata! Inserisci i pesi la prima volta che la fai. 💪');
+    };
+    const programExerciseNames = (day) => day.ex.map(id => (EXERCISE_BY_ID[id] || {}).n).filter(Boolean).join(' · ');
+
+    // Mentre scrivi una scheda: se il nome è nella libreria, completa serie, ripetizioni e recupero vuoti
+    const fillFromLibrary = (ex) => {
+      const item = EXERCISE_BY_NAME[(ex.name || '').trim().toLowerCase()];
+      if (!item) return;
+      if (item.t === 'cardio') {
+        if (ex.type !== 'cardio') return;
+        if (!ex.duration) ex.duration = item.d;
+        if (!ex.intensity) ex.intensity = item.i || '';
+      } else {
+        if (ex.type !== 'strength') return;
+        if (!ex.sets) ex.sets = String(item.s);
+        if (!ex.reps) ex.reps = String(item.r);
+        if (!ex.rest) ex.rest = item.rec || '';
+      }
+    };
+    const libraryTip = (name) => {
+      const item = EXERCISE_BY_NAME[(name || '').trim().toLowerCase()];
+      return item ? item.tip : '';
+    };
+
     const currentSheetDay = computed(() => {
       if (!selectedSheet.value) return null;
       return selectedSheet.value.days?.[selectedSheetDayIdx.value] || selectedSheet.value.days?.[0] || null;
@@ -5685,6 +5843,7 @@ createApp({
       selectedNutritionDay,
       selectedPlanDayMeals,
       selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
+      EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip,
       EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,
       formatDate,

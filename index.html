@@ -625,6 +625,17 @@
                 </button>
               </div>
 
+              <!-- GUIDA: allenamenti consigliati -->
+              <button @click="openGuide(userSports.length ? 'sport' : 'muscle')" class="w-full text-left bg-antracite rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all">
+                <div class="absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none">📚</div>
+                <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-arancione">Senza personal trainer?</div>
+                <div class="relative z-10 text-lg font-extrabold text-white mt-1 leading-tight">Allenamenti consigliati</div>
+                <p class="relative z-10 text-[11px] font-medium text-white/60 mt-1 leading-snug pr-10">
+                  <template v-if="userSports.length">Fai {{ userSports[0] }}? Ci sono esercizi mirati per migliorare. E poi esercizi per muscolo e programmi pronti, in palestra o a casa.</template>
+                  <template v-else>Esercizi per muscolo, programmi pronti ed esercizi per il tuo sport. In palestra o a casa, da aggiungere alla tua scheda.</template>
+                </p>
+              </button>
+
               <!-- EMPTY STATE -->
               <div v-if="workoutSheets.length === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
                 <div class="w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20">
@@ -772,7 +783,7 @@
                       <button @click="ex.type = 'strength'" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors" :class="ex.type === 'strength' ? 'bg-arancione text-white' : 'text-gray-400'">Forza</button>
                       <button @click="ex.type = 'cardio'" class="px-2.5 py-1 rounded-md text-[10px] font-bold transition-colors" :class="ex.type === 'cardio' ? 'bg-arancione text-white' : 'text-gray-400'">Cardio</button>
                     </div>
-                    <input type="text" v-model="ex.name" placeholder="Nome esercizio"
+                    <input type="text" v-model="ex.name" placeholder="Nome esercizio" list="still-exercise-list" @change="fillFromLibrary(ex)"
                            class="flex-1 min-w-0 bg-white border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all">
                     <button @click="removeExercise(day, eIdx)" class="p-1.5 text-gray-400 hover:text-red-500 flex-shrink-0" aria-label="Rimuovi esercizio">
                       <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -966,6 +977,7 @@
                             <template v-else>{{ ex.sets ? ex.sets + '×' + (ex.reps || '—') + ' • ' : '' }}rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
                           </p>
                           <p v-if="ex.type === 'strength' && ex.pyramid" class="text-[10px] text-amber-700 font-medium mt-1 leading-snug break-words">{{ pyramidSummary(ex) }}</p>
+                          <p v-if="libraryTip(ex.name)" class="text-[10px] text-gray-500 font-medium mt-1 leading-snug">💡 {{ libraryTip(ex.name) }}</p>
                         </div>
                         <button @click="openExerciseHistory(ex)" class="p-1.5 text-gray-400 hover:text-arancione flex-shrink-0" aria-label="Storico esercizio">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -3300,6 +3312,145 @@
           </div>
         </div>
 
+        <!-- GUIDA ESERCIZI: allenamenti consigliati (js/data/exercises.js) -->
+        <datalist id="still-exercise-list">
+          <option v-for="item in EXERCISE_LIBRARY" :key="'dl' + item.id" :value="item.n"></option>
+        </datalist>
+        <div v-if="guide.isOpen" class="fixed inset-0 z-50 bg-bianco flex flex-col animate-fadeIn">
+          <div class="shrink-0 px-5 pt-5 pb-3 bg-bianco border-b border-gray-100 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">Guida</div>
+                <h2 class="text-xl font-extrabold text-antracite leading-tight">Allenamenti consigliati</h2>
+              </div>
+              <button @click="closeGuide" class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center" aria-label="Chiudi">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="grid grid-cols-3 gap-1 bg-white rounded-2xl p-1 border border-gray-100">
+              <button v-for="t in [{ id: 'muscle', label: 'Per muscolo' }, { id: 'sport', label: 'Per sport' }, { id: 'programs', label: 'Programmi' }]" :key="'gt' + t.id"
+                      @click="setGuideTab(t.id)" class="py-2 rounded-xl text-xs font-bold transition-all"
+                      :class="guide.tab === t.id ? 'bg-arancione text-white shadow-sm' : 'text-gray-500'">{{ t.label }}</button>
+            </div>
+            <!-- Filtri -->
+            <template v-if="guide.tab === 'muscle'">
+              <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
+                <button v-for="m in MUSCLE_GROUPS" :key="'gm' + m.id" @click="guide.muscle = m.id; guide.selected = []"
+                        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                        :class="guide.muscle === m.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ m.icon }} {{ m.name }}</button>
+              </div>
+              <div class="grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100">
+                <button @click="guide.place = 'gym'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
+                <button @click="guide.place = 'home'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
+              </div>
+            </template>
+            <div v-if="guide.tab === 'sport'" class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
+              <button v-for="sp in guideSports" :key="'gs' + sp" @click="guide.sport = sp; guide.selected = []"
+                      class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                      :class="guide.sport === sp ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3" :class="guide.selected.length ? 'pb-28' : 'pb-8'">
+            <!-- Per sport: a cosa servono -->
+            <div v-if="guide.tab === 'sport' && SPORT_PROGRAMS[guide.sport]" class="bg-arancione/10 border border-arancione/30 rounded-2xl p-4">
+              <div class="text-[10px] font-bold text-arancione uppercase tracking-widest">Per migliorare a {{ guide.sport }}</div>
+              <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ SPORT_PROGRAMS[guide.sport].focus }}</p>
+              <p class="text-[11px] font-medium text-gray-500 mt-1">2 volte a settimana, nei giorni senza partita o allenamento intenso.</p>
+            </div>
+
+            <!-- Elenco esercizi (muscolo / sport) -->
+            <template v-if="guide.tab !== 'programs'">
+              <div class="flex items-center justify-between px-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ guideExercises.length }} esercizi · tocca per sceglierli</span>
+                <button @click="selectAllGuide" class="text-[11px] font-bold text-arancione">{{ guide.selected.length === guideExercises.length ? 'Nessuno' : 'Tutti' }}</button>
+              </div>
+              <button v-for="item in guideExercises" :key="'ge' + item.id" @click="toggleGuideSelect(item.id)"
+                      class="w-full text-left bg-white rounded-2xl p-4 border shadow-sm flex gap-3 items-start transition-all"
+                      :class="guide.selected.includes(item.id) ? 'border-arancione ring-2 ring-arancione/20' : 'border-gray-100'">
+                <div class="w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all"
+                     :class="guide.selected.includes(item.id) ? 'bg-arancione border-arancione text-white' : 'border-gray-300'">
+                  <svg v-if="guide.selected.includes(item.id)" class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <div class="flex items-center gap-1.5 flex-wrap">
+                    <span class="text-sm font-extrabold text-antracite">{{ item.n }}</span>
+                    <span v-if="item.w === 'home' && guide.tab === 'sport'" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">a casa</span>
+                    <span v-if="item.w === 'gym' && guide.tab === 'sport'" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">palestra</span>
+                  </div>
+                  <div class="text-[11px] font-bold mt-0.5" :class="item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'">{{ guidePrescription(item) }}</div>
+                  <p v-if="item.why" class="text-[11px] font-bold text-antracite/80 mt-1 leading-snug">🎯 {{ item.why }}</p>
+                  <p class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ item.tip }}</p>
+                </div>
+              </button>
+            </template>
+
+            <!-- Programmi pronti -->
+            <template v-else>
+              <div v-for="program in WORKOUT_PROGRAMS" :key="'gp' + program.id" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+                <div class="flex items-start gap-3">
+                  <div class="w-11 h-11 rounded-xl bg-arancione/10 flex items-center justify-center text-xl flex-shrink-0">{{ program.icon }}</div>
+                  <div class="min-w-0">
+                    <div class="text-sm font-extrabold text-antracite">{{ program.name }}</div>
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ program.level }} · {{ program.place === 'home' ? 'A casa' : 'In palestra' }} · {{ program.days.length }} {{ program.days.length === 1 ? 'giorno' : 'giorni' }}</div>
+                    <p class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ program.desc }}</p>
+                  </div>
+                </div>
+                <div class="space-y-1.5">
+                  <div v-for="day in program.days" :key="program.id + day.name" class="bg-gray-50 rounded-xl px-3 py-2">
+                    <div class="text-[10px] font-black text-antracite uppercase tracking-wider">{{ day.name }}</div>
+                    <div class="text-[11px] font-medium text-gray-500 leading-snug">{{ programExerciseNames(day) }}</div>
+                  </div>
+                </div>
+                <button @click="createProgramSheet(program)" class="w-full bg-arancione text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition-all">Crea questa scheda</button>
+              </div>
+            </template>
+
+            <p class="text-[10px] font-medium text-gray-400 leading-relaxed text-center px-4 pt-2">Consigli generali per chi si allena da solo. Se hai dolori, infortuni o problemi di salute, chiedi prima a un medico o a un personal trainer.</p>
+          </div>
+
+          <!-- Barra: aggiungi alla scheda -->
+          <div v-if="guide.selected.length && !guide.picker" class="absolute bottom-0 inset-x-0 p-4 bg-bianco/95 backdrop-blur border-t border-gray-100">
+            <button @click="openGuidePicker" class="w-full bg-arancione text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">
+              Aggiungi {{ guide.selected.length }} {{ guide.selected.length === 1 ? 'esercizio' : 'esercizi' }} alla scheda
+            </button>
+          </div>
+
+          <!-- Scelta della scheda -->
+          <div v-if="guide.picker" class="absolute inset-0 bg-antracite/40 backdrop-blur-sm flex items-end" @click.self="guide.picker = false">
+            <div class="bg-white rounded-t-3xl p-6 w-full space-y-4 max-h-[80vh] overflow-y-auto">
+              <div class="flex items-center justify-between">
+                <h3 class="text-lg font-bold text-antracite">Dove li aggiungo?</h3>
+                <button @click="guide.picker = false" class="p-1 text-gray-400" aria-label="Chiudi">
+                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+              </div>
+              <div class="space-y-2">
+                <button v-for="sheet in workoutSheets" :key="'gps' + sheet.id" @click="guide.sheetId = sheet.id; guide.dayIdx = 0"
+                        class="w-full text-left px-4 py-3 rounded-2xl border text-sm font-bold transition-all"
+                        :class="guide.sheetId === sheet.id ? 'border-arancione bg-arancione/10 text-antracite' : 'border-gray-200 text-gray-600'">{{ sheet.name }}</button>
+                <button @click="guide.sheetId = 'new'" class="w-full text-left px-4 py-3 rounded-2xl border text-sm font-bold transition-all"
+                        :class="guide.sheetId === 'new' ? 'border-arancione bg-arancione/10 text-antracite' : 'border-gray-200 text-gray-600'">＋ Nuova scheda</button>
+              </div>
+              <div v-if="guide.sheetId === 'new'">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">Nome della scheda</label>
+                <input type="text" v-model="guide.newName" class="w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-3 text-sm font-bold text-antracite outline-none">
+              </div>
+              <div v-else-if="guidePickerSheet" class="space-y-1.5">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">In quale giorno?</div>
+                <div class="flex flex-wrap gap-2">
+                  <button v-for="(day, i) in guidePickerSheet.days" :key="'gpd' + i" @click="guide.dayIdx = i"
+                          class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                          :class="guide.dayIdx === i ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ day.name }}</button>
+                  <button @click="guide.dayIdx = 'new'" class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                          :class="guide.dayIdx === 'new' ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">＋ Nuovo giorno</button>
+                </div>
+              </div>
+              <button @click="confirmGuideAdd" class="w-full bg-arancione text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Aggiungi</button>
+            </div>
+          </div>
+        </div>
+
         <!-- COMPAGNO DELLA SERIE: evoluzioni, vestiti, album -->
         <div v-if="petModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="petModal.isOpen = false">
           <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto">
@@ -3873,6 +4024,7 @@
   <script src="js/import/diet-pdf.js"></script>
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
+  <script src="js/data/exercises.js"></script>
   <script src="js/data/pets.js"></script>
   <script src="js/share/draw.js"></script>
   <script src="js/app.js"></script>
