@@ -207,38 +207,43 @@ createApp({
       nutritionView.value = 'builder';
     };
 
-    // Importa la dieta da un PDF del nutrizionista (js/import/diet-pdf.js).
+    // Importa la dieta da un PDF o da un documento Word (.docx) del nutrizionista (js/import/diet-pdf.js).
     // Riempie il builder: l'utente controlla, corregge e salva come sempre.
     const pdfImport = ref({ busy: false, error: '', summary: null });
+    const DIET_IMPORT_ERRORS = {
+      scan: 'Questo PDF sembra una scansione (un\'immagine): non riesco a leggere il testo. Se hai la versione Word o un PDF esportato dal computer, carica quello; altrimenti inserisci la dieta a mano qui sotto.',
+      doc: 'Questo è un file Word del vecchio formato (.doc). Aprilo e salvalo come .docx o come PDF, poi caricalo di nuovo.',
+      type: 'Il file deve essere un PDF o un documento Word (.docx).',
+      empty: 'Non ho trovato pasti nel file. Puoi inserire la dieta a mano qui sotto.'
+    };
     const importPlanPdf = async (event) => {
       const input = event.target;
       const file = input.files && input.files[0];
       input.value = '';
       if (!file) return;
-      if (!/\.pdf$/i.test(file.name) && file.type !== 'application/pdf') {
-        pdfImport.value = { busy: false, error: 'Il file deve essere un PDF.', summary: null };
+      const kind = dietFileKind(file);
+      if (!kind) {
+        pdfImport.value = { busy: false, error: DIET_IMPORT_ERRORS.type, summary: null };
         return;
       }
       pdfImport.value = { busy: true, error: '', summary: null };
       try {
-        const res = await importDietPdf(file);
+        const res = await importDietFile(file);
         if (res.error) {
-          pdfImport.value = { busy: false, summary: null, error: res.error === 'scan'
-            ? 'Questo PDF sembra una scansione (un\'immagine): non riesco a leggere il testo. Inserisci la dieta a mano qui sotto.'
-            : 'Non ho trovato pasti nel PDF. Puoi inserire la dieta a mano qui sotto.' };
+          pdfImport.value = { busy: false, summary: null, error: DIET_IMPORT_ERRORS[res.error] || DIET_IMPORT_ERRORS.empty };
           return;
         }
         newPlanBuilder.value = { currentWeekIdx: 0, currentDay: 'Lunedì', weeks: res.weeks };
         if (!newPlanData.value.name.trim()) {
-          newPlanData.value.name = file.name.replace(/\.pdf$/i, '').replace(/[_-]+/g, ' ').trim().slice(0, 40) || 'Dieta';
+          newPlanData.value.name = file.name.replace(/\.(pdf|docx?)$/i, '').replace(/[_-]+/g, ' ').trim().slice(0, 40) || 'Dieta';
         }
         pdfImport.value = { busy: false, error: '', summary: { file: file.name, weeks: res.weeks.length, meals: res.meals, foods: res.foods, missing: res.missing } };
         goToBuilder();
       } catch (e) {
         console.error(e);
-        pdfImport.value = { busy: false, summary: null, error: navigator.onLine === false
+        pdfImport.value = { busy: false, summary: null, error: kind === 'pdf' && navigator.onLine === false
           ? 'Per leggere il PDF serve la connessione la prima volta. Riprova online o inserisci la dieta a mano.'
-          : 'Non sono riuscito ad aprire il PDF. Inserisci la dieta a mano qui sotto.' };
+          : 'Non sono riuscito ad aprire il file. Se è protetto da password toglila e riprova, altrimenti inserisci la dieta a mano qui sotto.' };
       }
     };
 
@@ -4671,7 +4676,8 @@ createApp({
           big: 'Giorno 1',
           caption: 'Il mio percorso su STILL inizia oggi',
           sub: 'Non serve essere perfetti, serve esserci. Ogni giorno.',
-          tiles: [{ label: 'Si parte il', value: formatDate(start) }, { label: 'Prossimo passo', value: 'Domani, ancora' }]
+          startLabel: 'Si parte il', startDate: formatDate(start),
+          tiles: []
         };
       }
       if (spec && spec.type === 'record') {

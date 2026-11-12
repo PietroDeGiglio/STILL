@@ -689,6 +689,23 @@ const drawAchievementBody = (ctx, data, o) => {
     ctx.textAlign = 'left';
   });
 
+  // Data d'inizio in evidenza (benvenuto): etichetta piccola bianca + data grande arcobaleno, senza riquadri
+  if (data.startDate) {
+    reveal(at(1.6, 0.5), 30, () => {
+      const ly = Y.tiles + (story ? 40 : 30);
+      ctx.textAlign = 'center';
+      setFont(ctx, 800, story ? 26 : 22); ctx.fillStyle = th.text;
+      spacedText(ctx, (data.startLabel || '').toUpperCase(), cx, ly, 5, 'center');
+      const dy = ly + (story ? 120 : 92);
+      fitFont(ctx, data.startDate, 900, story ? 110 : 84, maxW, 40);
+      const dw = ctx.measureText(data.startDate).width;
+      ctx.fillStyle = text(brandGradient(ctx, cx - dw / 2, dy - 100, cx + dw / 2, dy, phase));
+      ctx.textAlign = 'center';
+      ctx.fillText(data.startDate, cx, dy);
+      ctx.textAlign = 'left';
+    });
+  }
+
   // Riquadri (livello, trofei, ...)
   const tiles = (data.tiles || []).slice(0, 2);
   const gap = story ? 24 : 20, tileH = story ? 150 : 120;
