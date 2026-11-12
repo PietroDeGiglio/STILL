@@ -4026,6 +4026,109 @@ createApp({
       }
       return out;
     });
+    // ---------------------------------------------------------------
+    // MANGIARE MEGLIO (js/data/nutrition.js): consigli pratici e giornate tipo per chi vuole iniziare.
+    // Non sostituisce il nutrizionista: una giornata tipo si può provare per una settimana come piano.
+    // ---------------------------------------------------------------
+    const eatGuide = ref({ isOpen: false, tab: 'tips', goal: 'keep' });
+    const suggestedEatGoal = computed(() => {
+      const s = bodyStats.value;
+      if (s.bmi && s.bmi.value >= 25) return 'lose';
+      if (s.activity && s.activity.weeklyHours >= 4 && s.bmi && s.bmi.value < 22) return 'gain';
+      return 'keep';
+    });
+    const openEatGuide = (tab = 'tips') => { eatGuide.value = { isOpen: true, tab, goal: suggestedEatGoal.value }; };
+
+    const eatTipStat = (tip) => {
+      const s = bodyStats.value;
+      if (tip.stat === 'protein' && s.protein) return 'Per te: ' + s.protein.min + '–' + s.protein.max + ' g al giorno.';
+      if (tip.stat === 'water' && s.water) return 'Per te: circa ' + formatNumber(s.water) + ' litri al giorno.';
+      return '';
+    };
+
+    // Il tuo menù sotto la lente: media dei prossimi 7 giorni del piano attivo
+    const menuCheck = computed(() => {
+      if (!activePlan.value) return null;
+      let kcal = 0, protein = 0, days = 0, kcalDays = 0, proteinDays = 0;
+      for (let i = 0; i < 7; i++) {
+        const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
+        const meals = getMealsForDate(d);
+        if (!meals.length) continue;
+        days++;
+        const k = meals.reduce((sum, m) => sum + (Number(m.calories) || 0), 0);
+        const p = meals.filter(m => m.protein !== null && m.protein !== undefined);
+        if (k > 0) { kcal += k; kcalDays++; }
+        if (p.length) { protein += p.reduce((sum, m) => sum + m.protein, 0); proteinDays++; }
+      }
+      if (!days) return null;
+      const s = bodyStats.value;
+      const notes = [];
+      const avgProtein = proteinDays ? Math.round(protein / proteinDays) : null;
+      const avgKcal = kcalDays ? Math.round(kcal / kcalDays / 10) * 10 : null;
+      if (avgProtein !== null && s.protein) {
+        if (avgProtein < s.protein.min) notes.push({ ok: false, text: 'Proteine: in media ≈ ' + avgProtein + ' g al giorno, sotto il tuo obiettivo di ' + s.protein.min + '–' + s.protein.max + ' g. Prova ad aggiungere uno yogurt greco o delle uova.' });
+        else notes.push({ ok: true, text: 'Proteine: in media ≈ ' + avgProtein + ' g al giorno, in linea con il tuo obiettivo.' });
+      }
+      if (avgKcal !== null && s.energy) {
+        const diff = avgKcal - s.energy.tdee;
+        if (diff < -900) notes.push({ ok: false, text: 'Calorie: ≈ ' + avgKcal + ' kcal al giorno, molto sotto il tuo fabbisogno (≈ ' + s.energy.tdee + '). Mangiare troppo poco rallenta i risultati: parlane con un nutrizionista.' });
+        else if (diff < -200) notes.push({ ok: true, text: 'Calorie: ≈ ' + avgKcal + ' kcal al giorno, un po\' sotto il fabbisogno (≈ ' + s.energy.tdee + '): adatto per dimagrire.' });
+        else if (diff > 400) notes.push({ ok: true, text: 'Calorie: ≈ ' + avgKcal + ' kcal al giorno, sopra il fabbisogno (≈ ' + s.energy.tdee + '): adatto per mettere massa.' });
+        else notes.push({ ok: true, text: 'Calorie: ≈ ' + avgKcal + ' kcal al giorno, vicino al tuo fabbisogno (≈ ' + s.energy.tdee + '): adatto per mantenere.' });
+      }
+      return notes.length ? { notes, name: activePlan.value.name } : null;
+    });
+
+    const MEAL_ORDER = ['colazione', 'spuntino_mattina', 'pranzo', 'spuntino_pomeriggio', 'post_workout', 'cena'];
+    const eatGoal = computed(() => NUTRITION_GOALS.find(g => g.id === eatGuide.value.goal) || NUTRITION_GOALS[0]);
+    const eatGoalDays = computed(() => eatGoal.value.days.map(day => {
+      const meals = MEAL_ORDER.filter(type => day.meals[type]).map(type => {
+        const info = mealTypes.find(t => t.id === type) || mealTypes[0];
+        const est = estimateMealKcal(day.meals[type]);
+        return { type, label: info.label, icon: info.icon, items: day.meals[type], kcal: est.kcal, protein: est.protein };
+      });
+      return {
+        name: day.name, meals,
+        kcal: Math.round(meals.reduce((sum, m) => sum + (m.kcal || 0), 0) / 10) * 10,
+        protein: meals.reduce((sum, m) => sum + (m.protein || 0), 0)
+      };
+    }));
+
+    // Prova per una settimana: le 3 giornate si alternano dal lunedì alla domenica
+    const createTrialPlan = () => {
+      const goal = eatGoal.value;
+      const build = () => {
+        const toMeals = (day) => MEAL_ORDER.filter(type => day.meals[type]).map(type => ({ type, items: [...day.meals[type]], calories: '' }));
+        const days = {};
+        weekDays.forEach((name, i) => { days[name] = toMeals(goal.days[i % goal.days.length]); });
+        const grocery = [];
+        goal.days.forEach(day => Object.values(day.meals).forEach(items => items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
+        plans.value.forEach(p => { if (p.status === 'active') { p.status = 'inactive'; p.results = 'Terminato'; } });
+        const end = new Date(); end.setDate(end.getDate() + 6);
+        const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
+        plans.value.unshift({
+          id: nextId,
+          name: 'Settimana di prova · ' + goal.name,
+          status: 'active',
+          results: 'Appena Iniziato',
+          startDate: toISODate(),
+          endDate: toISODate(end),
+          grocery,
+          weeks: [{ days }],
+          meals: mapDayMeals(days[weekDays[0]]),
+          trial: goal.id
+        });
+        eatGuide.value.isOpen = false;
+        nutritionView.value = 'list';
+        showToastMessage('Settimana di prova "' + goal.name + '" attiva da oggi! La trovi in dashboard, con la lista della spesa. Se qualcosa non ti piace, modifica il piano. 🥗');
+      };
+      if (activePlan.value) {
+        showConfirm('Provare questa settimana?', 'Diventerà il piano in corso al posto di "' + activePlan.value.name + '" (che resta salvato e puoi riattivare quando vuoi).', build);
+      } else {
+        build();
+      }
+    };
+
     // Obiettivo di proteine per la barra in dashboard: il minimo consigliato, altrimenti quanto prevede il menù
     const proteinGoal = computed(() => (bodyStats.value.protein ? bodyStats.value.protein.min : (todayProtein.value ? todayProtein.value.planned : 0)));
 
@@ -5843,6 +5946,7 @@ createApp({
       selectedNutritionDay,
       selectedPlanDayMeals,
       selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
+      NUTRITION_TIPS, NUTRITION_GOALS, eatGuide, openEatGuide, eatTipStat, menuCheck, eatGoalDays, createTrialPlan, suggestedEatGoal,
       EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip,
       EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,

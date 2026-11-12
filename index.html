@@ -1416,6 +1416,14 @@
                 </button>
               </div>
 
+              <!-- MANGIARE MEGLIO -->
+              <button @click="openEatGuide()" class="w-full text-left bg-salvia rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all">
+                <div class="absolute -right-4 -bottom-8 text-[90px] opacity-20 select-none">🥗</div>
+                <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-white/70">Vuoi mangiare meglio?</div>
+                <div class="relative z-10 text-lg font-extrabold text-white mt-1 leading-tight">Consigli e giornate tipo</div>
+                <p class="relative z-10 text-[11px] font-medium text-white/80 mt-1 leading-snug pr-10">Abitudini semplici e menù di esempio da provare per una settimana. Un aiuto per iniziare, poi il nutrizionista.</p>
+              </button>
+
               <!-- EMPTY STATE -->
               <div v-if="plans.length === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
                 <div class="w-16 h-16 bg-salvia/10 rounded-full flex items-center justify-center text-salvia border border-salvia/20">
@@ -3312,6 +3320,79 @@
           </div>
         </div>
 
+        <!-- MANGIARE MEGLIO: consigli e giornate tipo (js/data/nutrition.js) -->
+        <div v-if="eatGuide.isOpen" class="fixed inset-0 z-50 bg-bianco flex flex-col animate-fadeIn">
+          <div class="shrink-0 px-5 pt-5 pb-3 border-b border-gray-100 space-y-3">
+            <div class="flex items-center justify-between gap-3">
+              <div>
+                <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">Guida</div>
+                <h2 class="text-xl font-extrabold text-antracite leading-tight">Mangiare meglio</h2>
+              </div>
+              <button @click="eatGuide.isOpen = false" class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center" aria-label="Chiudi">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-1 bg-white rounded-2xl p-1 border border-gray-100">
+              <button @click="eatGuide.tab = 'tips'" class="py-2 rounded-xl text-xs font-bold transition-all" :class="eatGuide.tab === 'tips' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500'">Consigli</button>
+              <button @click="eatGuide.tab = 'days'" class="py-2 rounded-xl text-xs font-bold transition-all" :class="eatGuide.tab === 'days' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500'">Giornate tipo</button>
+            </div>
+          </div>
+
+          <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3 pb-10">
+            <template v-if="eatGuide.tab === 'tips'">
+              <!-- Il tuo menù sotto la lente -->
+              <div v-if="menuCheck" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-2">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Il tuo piano: {{ menuCheck.name }}</div>
+                <p v-for="(n, i) in menuCheck.notes" :key="'mc' + i" class="text-[12px] font-medium leading-snug flex gap-2" :class="n.ok ? 'text-antracite' : 'text-arancione'">
+                  <span>{{ n.ok ? '✅' : '⚠️' }}</span><span>{{ n.text }}</span>
+                </p>
+              </div>
+              <div v-for="tip in NUTRITION_TIPS" :key="tip.title" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm flex gap-3">
+                <div class="w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-xl flex-shrink-0">{{ tip.icon }}</div>
+                <div class="min-w-0">
+                  <div class="text-sm font-extrabold text-antracite">{{ tip.title }}</div>
+                  <p class="text-[12px] font-medium text-gray-500 leading-snug mt-0.5">{{ tip.text }}</p>
+                  <p v-if="eatTipStat(tip)" class="text-[11px] font-bold text-salvia mt-1">{{ eatTipStat(tip) }}</p>
+                </div>
+              </div>
+              <button @click="eatGuide.tab = 'days'" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all">Guarda le giornate tipo →</button>
+            </template>
+
+            <template v-else>
+              <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
+                <button v-for="g in NUTRITION_GOALS" :key="'eg' + g.id" @click="eatGuide.goal = g.id"
+                        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                        :class="eatGuide.goal === g.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ g.icon }} {{ g.name }}<span v-if="suggestedEatGoal === g.id"> ⭐</span></button>
+              </div>
+              <div class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4">
+                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ NUTRITION_GOALS.find(g => g.id === eatGuide.goal).range }} · 3 giornate da alternare</div>
+                <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ NUTRITION_GOALS.find(g => g.id === eatGuide.goal).desc }}</p>
+                <p v-if="bodyStats.energy" class="text-[11px] font-medium text-gray-500 mt-1">Il tuo fabbisogno stimato è ≈ {{ bodyStats.energy.tdee }} kcal (per dimagrire ≈ {{ bodyStats.energy.lose }}, per crescere ≈ {{ bodyStats.energy.gain }}). ⭐ = l'obiettivo che ti suggeriamo.</p>
+              </div>
+              <div v-for="day in eatGoalDays" :key="'ed' + day.name" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+                <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
+                  <span class="text-sm font-extrabold text-antracite">{{ day.name }}</span>
+                  <span class="text-[11px] font-bold text-salvia">≈ {{ day.kcal }} kcal · {{ day.protein }} g prot</span>
+                </div>
+                <div class="divide-y divide-gray-100">
+                  <div v-for="m in day.meals" :key="day.name + m.type" class="px-4 py-2.5 flex gap-3">
+                    <span class="text-lg">{{ m.icon }}</span>
+                    <div class="min-w-0 flex-1">
+                      <div class="flex justify-between gap-2">
+                        <span class="text-xs font-bold text-antracite">{{ m.label }}</span>
+                        <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">≈ {{ m.kcal }} kcal</span>
+                      </div>
+                      <p class="text-[11px] font-medium text-gray-500 leading-snug">{{ m.items.join(', ') }}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <button @click="createTrialPlan" class="w-full bg-salvia text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Prova per una settimana</button>
+              <p class="text-[10px] font-medium text-gray-400 leading-relaxed text-center px-2">Esempi generici, non una dieta personalizzata. Se hai patologie, allergie, sei in gravidanza o segui terapie, chiedi prima al medico. Per un piano su misura vai da un nutrizionista.</p>
+            </template>
+          </div>
+        </div>
+
         <!-- GUIDA ESERCIZI: allenamenti consigliati (js/data/exercises.js) -->
         <datalist id="still-exercise-list">
           <option v-for="item in EXERCISE_LIBRARY" :key="'dl' + item.id" :value="item.n"></option>
@@ -4025,6 +4106,7 @@
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
   <script src="js/data/exercises.js"></script>
+  <script src="js/data/nutrition.js"></script>
   <script src="js/data/pets.js"></script>
   <script src="js/share/draw.js"></script>
   <script src="js/app.js"></script>
