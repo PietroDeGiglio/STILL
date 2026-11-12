@@ -2819,6 +2819,84 @@ createApp({
       else editTrainingSession(session, dateKey);
     };
 
+    // ---------------------------------------------------------------
+    // DASHBOARD: card "Allenamento di oggi"
+    // free = niente in programma · planned = promemoria · done = recap
+    // ---------------------------------------------------------------
+    const minutesLabel = (min) => {
+      const m = Math.max(1, Math.round(min));
+      if (m < 60) return m + ' min';
+      const h = Math.floor(m / 60), r = m % 60;
+      return h + 'h' + (r ? ' ' + String(r).padStart(2, '0') + 'm' : '');
+    };
+
+    const todayWorkout = computed(() => {
+      const today = toISODate();
+      const now = new Date();
+      const nowMin = now.getHours() * 60 + now.getMinutes();
+      const done = [], planned = [];
+      let totalMin = 0;
+      trainingSessionsOnDateKey(today).forEach(session => {
+        const status = session.statusByDate && session.statusByDate[today];
+        const hasReport = session.kind === 'gym' && session.report && session.date === today;
+        if (hasReport || status === 'done') {
+          const min = hasReport ? session.report.totalSeconds / 60 : (sportDurationMin(session) || DEFAULT_TRAINING_MIN);
+          totalMin += min;
+          let detail = '';
+          if (hasReport) {
+            const r = session.report;
+            detail = (r.exercises || []).length + ' esercizi · ' + (r.sets || 0) + ' serie';
+          } else detail = session.kind === 'gym' ? 'Palestra' : 'Sport';
+          done.push({ id: session.id, kind: session.kind, title: trainingSessionLabel(session), dayName: session.kind === 'gym' ? session.dayName || '' : '', detail, duration: minutesLabel(min) });
+        } else if (status !== 'skipped') {
+          const start = hhmmToMin(session.time);
+          planned.push({
+            session,
+            kind: session.kind,
+            title: trainingSessionLabel(session),
+            dayName: session.kind === 'gym' ? session.dayName || '' : '',
+            time: sessionTimeLabel(session),
+            started: start !== null && nowMin >= start
+          });
+        }
+      });
+      // Carichi registrati a mano oggi, senza un allenamento guidato salvato
+      if (!done.some(item => item.kind === 'gym')) {
+        const logs = workoutLogs.value.filter(log => log.date === today);
+        if (logs.length) {
+          totalMin += DEFAULT_TRAINING_MIN;
+          done.push({ id: 'logs', kind: 'gym', title: logs[0].sheetName || 'Palestra', dayName: '', detail: logs.length + (logs.length === 1 ? ' esercizio registrato' : ' esercizi registrati'), duration: '' });
+        }
+      }
+      const state = done.length ? 'done' : (planned.length ? 'planned' : 'free');
+      return { state, done, planned, totalLabel: totalMin ? minutesLabel(totalMin) : '' };
+    });
+
+    // Tocco su un allenamento in programma oggi
+    const openTodayPlanned = (item) => {
+      const session = item && item.session;
+      if (!session) return;
+      activeTab.value = 'allenamento';
+      if (session.kind === 'gym') {
+        const sheet = workoutSheets.value.find(s => String(s.id) === String(session.sheetId));
+        if (sheet) {
+          openSheet(sheet);
+          const idx = (sheet.days || []).findIndex(d => d.name && d.name === session.dayName);
+          if (idx > -1) selectedSheetDayIdx.value = idx;
+          return;
+        }
+      } else if (item.started) {
+        openSportCheck(session, toISODate());
+        return;
+      }
+      workoutView.value = 'calendar';
+    };
+
+    const goTrainNow = () => {
+      activeTab.value = 'allenamento';
+      workoutView.value = 'list';
+    };
+
     const sessionStats = computed(() => {
       const modal = sessionStatsModal.value;
       if (!modal.isOpen) return null;
@@ -3511,6 +3589,18 @@ createApp({
         measurements.value.push({ id: Date.now(), ...entry });
       }
       enterApp();
+      // Primo accesso: benvenuto con la card da condividere nelle storie
+      setTimeout(() => { welcomeModal.value.isOpen = true; }, 400);
+    };
+
+    // Benvenuto dopo la registrazione
+    const welcomeModal = ref({ isOpen: false });
+    const closeWelcome = () => { welcomeModal.value.isOpen = false; };
+    const shareWelcome = () => {
+      welcomeModal.value.isOpen = false;
+      openAchievementShare({ type: 'welcome' });
+      if (shareVideoSupported) shareStudio.value.output = 'video';
+      shareStudio.value.format = 'story';
     };
 
     // Modifica profilo (dalla modale Profilo)
@@ -4571,6 +4661,19 @@ createApp({
           tiles: [{ label: 'Trofei', value: lv.trophies + ' su ' + lv.trophyTotal }, { label: 'Serie migliore', value: streakInfo.value.best + (streakInfo.value.best === 1 ? ' giorno' : ' giorni') }]
         };
       }
+      if (spec && spec.type === 'welcome') {
+        const start = (profile.value && profile.value.createdAt) || toISODate();
+        return {
+          ...base,
+          kicker: name ? name + ' ha iniziato il suo percorso' : 'Ho iniziato il mio percorso',
+          dateLabel: formatDateLong(start),
+          icon: '🌱', color: '#20C997', badge: 'Nuovo inizio',
+          big: 'Giorno 1',
+          caption: 'Il mio percorso su STILL inizia oggi',
+          sub: 'Non serve essere perfetti, serve esserci. Ogni giorno.',
+          tiles: [{ label: 'Si parte il', value: formatDate(start) }, { label: 'Prossimo passo', value: 'Domani, ancora' }]
+        };
+      }
       if (spec && spec.type === 'record') {
         return {
           ...base,
@@ -4889,6 +4992,9 @@ createApp({
       onboardingNext,
       onboardingBack,
       completeOnboarding,
+      welcomeModal,
+      closeWelcome,
+      shareWelcome,
       triggerOnboardingImport,
       handleOnboardingBackup,
       profileEdit,
@@ -5058,6 +5164,9 @@ createApp({
       openSessionStats,
       closeSessionStats,
       openTrainingSessionItem,
+      todayWorkout,
+      openTodayPlanned,
+      goTrainNow,
       sessionStats,
       statsDelta,
       statsBaseDelta,

@@ -415,23 +415,69 @@
               </div>
             </div>
 
-            <!-- ALLENAMENTO DI OGGI (NEW PREVIEW) -->
+            <!-- ALLENAMENTO DI OGGI -->
             <div class="space-y-3">
               <div class="flex justify-between items-center px-1">
-                <h3 class="text-lg font-bold text-antracite">Workout di oggi</h3>
-                <span class="text-xs font-bold text-arancione bg-arancione/10 px-2 py-1 rounded-md">Push Upper</span>
+                <h3 class="text-lg font-bold text-antracite">Allenamento di oggi</h3>
+                <span v-if="todayWorkout.state === 'done'" class="text-xs font-bold text-salvia bg-salvia/10 px-2 py-1 rounded-md">Fatto ✓</span>
+                <span v-else-if="todayWorkout.state === 'planned'" class="text-xs font-bold text-arancione bg-arancione/10 px-2 py-1 rounded-md">In programma</span>
               </div>
-              
-              <div @click="activeTab = 'allenamento'" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-colors flex items-center gap-4 relative overflow-hidden">
+
+              <!-- Fatto: recap -->
+              <div v-if="todayWorkout.state === 'done'" class="bg-white rounded-3xl p-5 border border-salvia/30 shadow-soft space-y-3">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="font-extrabold text-antracite">Ottimo lavoro oggi! 💪</h4>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">{{ todayWorkout.totalLabel ? todayWorkout.totalLabel + ' di allenamento' : 'Allenamento registrato' }}</p>
+                  </div>
+                </div>
+                <div v-for="item in todayWorkout.done" :key="'tw-done-' + item.id" class="flex items-center justify-between gap-3 rounded-2xl bg-gray-50 border border-gray-100 px-3 py-2.5">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-antracite truncate">{{ item.title }}<span v-if="item.dayName" class="text-gray-400 font-semibold"> · {{ item.dayName }}</span></p>
+                    <p class="text-[11px] text-gray-500 font-medium truncate">{{ item.detail }}</p>
+                  </div>
+                  <span v-if="item.duration" class="text-xs font-extrabold text-salvia bg-salvia/10 px-2 py-1 rounded-md shrink-0">{{ item.duration }}</span>
+                </div>
+                <button v-for="item in todayWorkout.planned" :key="'tw-next-' + item.session.id" @click="openTodayPlanned(item)" class="w-full text-left text-xs font-semibold text-gray-500 hover:text-arancione transition-colors">
+                  Ancora in programma: <span class="font-bold text-antracite">{{ item.title }}</span><span v-if="item.time"> alle {{ item.time }}</span>
+                </button>
+              </div>
+
+              <!-- In programma: promemoria -->
+              <div v-else-if="todayWorkout.state === 'planned'" class="bg-white rounded-3xl p-5 border border-arancione/30 shadow-soft space-y-3">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 00-4-5.66V5a2 2 0 10-4 0v.34A6 6 0 006 11v3.2c0 .53-.21 1.04-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                  </div>
+                  <div class="min-w-0">
+                    <h4 class="font-extrabold text-antracite">Oggi hai allenamento</h4>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">Non mancare, ogni sessione conta.</p>
+                  </div>
+                </div>
+                <button v-for="item in todayWorkout.planned" :key="'tw-plan-' + item.session.id" @click="openTodayPlanned(item)"
+                        class="w-full flex items-center justify-between gap-3 rounded-2xl bg-arancione/5 border border-arancione/15 px-3 py-2.5 text-left hover:border-arancione/40 transition-colors">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-antracite truncate">{{ item.title }}<span v-if="item.dayName" class="text-gray-400 font-semibold"> · {{ item.dayName }}</span></p>
+                    <p class="text-[11px] text-gray-500 font-medium">{{ item.time ? 'Alle ' + item.time : 'Oggi' }}</p>
+                  </div>
+                  <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0">{{ item.kind === 'gym' ? 'Inizia' : (item.started ? "Com'è andata?" : 'Dettagli') }}</span>
+                </button>
+              </div>
+
+              <!-- Niente in programma -->
+              <div v-else @click="goTrainNow()" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-colors flex items-center gap-4 relative overflow-hidden">
                 <div class="absolute right-0 top-0 bottom-0 w-12 bg-arancione/5 flex items-center justify-center text-arancione">
                   <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20">
+                <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0">
                   <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
                 </div>
-                <div>
-                  <h4 class="font-extrabold text-antracite">Allenamento Forza</h4>
-                  <p class="text-xs text-gray-500 font-medium mt-0.5">4 Esercizi • 45 min stimati</p>
+                <div class="pr-10">
+                  <h4 class="font-extrabold text-antracite">È ora di allenarsi! 🔥</h4>
+                  <p class="text-xs text-gray-500 font-medium mt-0.5">Niente in programma oggi: scegli una scheda e parti.</p>
                 </div>
               </div>
             </div>
@@ -2979,6 +3025,28 @@
             <div class="flex gap-3 pt-1">
               <button @click="cancelExerciseValue" class="flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">No</button>
               <button @click="confirmExerciseValue" class="flex-1 bg-arancione text-white font-bold py-3 rounded-xl shadow-md hover:bg-arancione/90 active:scale-95 transition-all">Sì, aggiorna</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- WELCOME MODAL (dopo la registrazione) -->
+        <div v-if="welcomeModal.isOpen" class="fixed inset-0 z-[67] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+          <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden">
+            <div class="relative px-6 pt-8 pb-6 text-center bg-gradient-to-br from-salvia/15 via-arancione/10 to-viola/15">
+              <div class="w-20 h-20 mx-auto rounded-full bg-white shadow-soft flex items-center justify-center text-4xl border-4 border-salvia/30">🌱</div>
+              <p class="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Giorno 1</p>
+              <h3 class="mt-1 text-2xl font-extrabold text-antracite leading-tight">Ciao {{ profile && profile.firstName }}, il tuo percorso inizia oggi</h3>
+            </div>
+            <div class="p-6 space-y-4">
+              <p class="text-sm text-gray-500 font-medium leading-relaxed text-center">
+                Ti diamo il benvenuto su STILL. Non serve essere perfetti, serve esserci: un allenamento, un pasto, un giorno alla volta.
+              </p>
+              <p class="text-sm text-antracite font-bold text-center">Rendilo ufficiale: condividi l'inizio nelle tue storie e fatti tenere d'occhio da chi ti segue.</p>
+              <button @click="shareWelcome" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+                Condividi nelle storie
+              </button>
+              <button @click="closeWelcome" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all text-sm">Inizia subito</button>
             </div>
           </div>
         </div>
