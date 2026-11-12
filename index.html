@@ -275,18 +275,21 @@
             <!-- SERIE DI GIORNI DI FILA -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-gray-100">
               <div class="flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0">
-                  <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shrink-0"
-                       :class="streakInfo.todayDone ? 'bg-arancione/15' : 'bg-gray-100'">
-                    <span :class="streakInfo.current ? '' : 'grayscale opacity-50'">🔥</span>
+                <button @click="openPetModal" class="flex items-center gap-3 min-w-0 text-left active:scale-[0.98] transition-transform">
+                  <div class="pet-stage w-16 h-16 rounded-2xl shrink-0 relative"
+                       :style="{ background: petState.color + '22' }">
+                    <div class="pet-bob w-full h-full" :class="petState.mood === 'sleepy' ? 'pet-sleep' : ''" v-html="petMainSvg"></div>
                   </div>
                   <div class="min-w-0">
                     <div class="text-2xl font-black text-antracite leading-none">
                       {{ streakInfo.current }} <span class="text-sm font-bold text-gray-400">{{ streakInfo.current === 1 ? 'giorno' : 'giorni' }} di fila</span>
                     </div>
-                    <div class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ streakInfo.message }}</div>
+                    <div class="text-[11px] font-extrabold mt-1 leading-snug" :style="{ color: petState.color }">
+                      {{ petState.name }}<span v-if="petState.nextIn" class="font-bold text-gray-400"> · si evolve tra {{ petState.nextIn }} {{ petState.nextIn === 1 ? 'giorno' : 'giorni' }}</span>
+                    </div>
+                    <div class="text-[11px] font-medium text-gray-500 mt-0.5 leading-snug">{{ streakInfo.message }}</div>
                   </div>
-                </div>
+                </button>
                 <button @click="openRecap(0, 'week')" class="shrink-0 flex flex-col items-center gap-0.5 cangiante-btn text-white px-3.5 py-2.5 rounded-2xl shadow-md active:scale-95 transition-transform">
                   <span class="text-lg leading-none">🎬</span>
                   <span class="text-[11px] font-extrabold">Riepilogo</span>
@@ -303,6 +306,15 @@
                   🛡️ {{ streakInfo.shieldReady ? 'Proteggi serie pronto: se salti un giorno la serie è salva' : 'Proteggi serie in ricarica: ' + streakInfo.shieldIn + (streakInfo.shieldIn === 1 ? ' giorno attivo' : ' giorni attivi') }}
                 </span>
                 <span v-if="streakInfo.best > 1" class="text-[10px] font-bold text-gray-400 shrink-0">Record: {{ streakInfo.best }}</span>
+              </div>
+              <!-- Serie persa da poco: si recupera condividendo una storia -->
+              <div v-if="streakInfo.recoverable" class="mt-3 rounded-2xl p-3 bg-arancione/10 border border-arancione/30 flex items-center gap-3">
+                <div class="text-2xl shrink-0">🆘</div>
+                <div class="min-w-0 flex-1">
+                  <div class="text-xs font-black text-antracite leading-tight">Hai perso una serie di {{ streakInfo.recoverable.length }} giorni</div>
+                  <div class="text-[11px] font-medium text-gray-500 leading-snug mt-0.5">Condividi una storia con i tuoi risultati su STILL e la serie torna com'era.</div>
+                </div>
+                <button @click="shareStreakSave" class="shrink-0 cangiante-btn text-white text-[11px] font-extrabold px-3 py-2 rounded-xl shadow-md active:scale-95 transition-transform">Salva la serie</button>
               </div>
             </div>
 
@@ -3187,6 +3199,94 @@
           </div>
         </div>
 
+        <!-- COMPAGNO DELLA SERIE: evoluzioni, vestiti, album -->
+        <div v-if="petModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="petModal.isOpen = false">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto">
+            <div class="relative px-6 pt-6 pb-5 text-center" :style="{ background: 'linear-gradient(160deg, ' + petState.color + '33, transparent 75%)' }">
+              <button @click="petModal.isOpen = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/70 text-gray-500 flex items-center justify-center text-lg font-bold">×</button>
+              <div class="pet-bob w-36 h-36 mx-auto" :class="petState.mood === 'sleepy' ? 'pet-sleep' : ''" v-html="petMainSvg"></div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ petState.speciesName }}<span v-if="petState.legendary"> · leggendario ✨</span></p>
+              <h3 class="text-2xl font-extrabold text-antracite leading-tight">{{ petState.name }}</h3>
+              <p class="text-xs font-medium text-gray-500 mt-1">
+                <template v-if="petState.stage === 0">Fai qualcosa oggi (un allenamento o un pasto) e l'uovo si schiude. Chissà chi c'è dentro…</template>
+                <template v-else-if="petState.nextIn">Ancora {{ petState.nextIn }} {{ petState.nextIn === 1 ? 'giorno' : 'giorni' }} di fila e diventa <b>{{ petState.nextName }}</b></template>
+                <template v-else>Forma finale raggiunta. Che spettacolo! 🌈</template>
+              </p>
+              <div v-if="petState.nextIn" class="h-2 rounded-full bg-gray-100 mt-3 overflow-hidden max-w-[220px] mx-auto">
+                <div class="h-full rounded-full transition-all" :style="{ width: petState.progress + '%', background: petState.color }"></div>
+              </div>
+              <p v-if="petState.mood === 'worried'" class="text-[11px] font-bold text-arancione mt-2">Ha un po' di ansia: oggi non hai ancora fatto niente 😬</p>
+            </div>
+
+            <div class="px-5 pb-6 space-y-5">
+              <!-- Evoluzioni -->
+              <div>
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Evoluzioni</h4>
+                <div class="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                  <div v-for="e in petEvolutionPath" :key="'pe' + e.stage" class="shrink-0 w-[72px] text-center">
+                    <div class="w-[72px] h-[72px] rounded-2xl p-1 border-2" :class="e.current ? 'border-arancione bg-arancione/10' : (e.reached ? 'border-transparent bg-gray-50' : 'border-transparent bg-gray-100')" v-html="e.svg"></div>
+                    <div class="text-[9px] font-extrabold mt-1 leading-tight" :class="e.reached ? 'text-antracite' : 'text-gray-400'">{{ e.name }}</div>
+                    <div class="text-[9px] font-bold text-gray-400">{{ e.days === 0 ? 'inizio' : e.days + (e.days === 1 ? ' giorno' : ' gg') }}</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Guardaroba -->
+              <div>
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Guardaroba</h4>
+                <div class="flex gap-1.5 mb-3">
+                  <button v-for="slot in PET_SLOTS" :key="'ps' + slot.id" @click="petModal.tab = slot.id"
+                          class="flex-1 py-2 rounded-xl text-xs font-extrabold transition-colors"
+                          :class="petModal.tab === slot.id ? 'bg-antracite text-white' : 'bg-gray-100 text-gray-500'">{{ slot.label }}</button>
+                </div>
+                <div class="grid grid-cols-4 gap-2">
+                  <button v-for="item in petItems.filter(i => i.slot === petModal.tab)" :key="'pi' + item.id" @click="togglePetItem(item)"
+                          class="relative rounded-2xl p-1 border-2 text-center active:scale-95 transition-transform"
+                          :class="item.worn ? 'border-arancione bg-arancione/10' : 'border-transparent bg-gray-50'">
+                    <div class="w-full aspect-square" :class="item.unlocked ? '' : 'opacity-30 grayscale'" v-html="petItemPreview(item)"></div>
+                    <div class="text-[9px] font-extrabold leading-tight pb-1" :class="item.unlocked ? 'text-antracite' : 'text-gray-400'">{{ item.name }}</div>
+                    <div v-if="!item.unlocked" class="absolute top-1 right-1 text-[9px] font-black bg-white rounded-full px-1.5 py-0.5 shadow-sm text-gray-500">🔒 {{ item.unlock }}g</div>
+                  </button>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 mt-2">I vestiti si sbloccano con la tua serie migliore e restano tuoi per sempre.</p>
+              </div>
+
+              <!-- Album -->
+              <div>
+                <h4 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">Album dei compagni</h4>
+                <div class="grid grid-cols-4 gap-2">
+                  <div v-for="a in petAlbum" :key="'pa' + a.id" class="text-center">
+                    <div class="w-full aspect-square rounded-2xl bg-gray-50 p-1" v-html="a.svg"></div>
+                    <div class="text-[9px] font-extrabold mt-1" :class="a.max ? 'text-antracite' : 'text-gray-400'">{{ a.name }}</div>
+                  </div>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 mt-2">Ogni nuova serie fa nascere un compagno a sorpresa. Riuscirai a trovarli tutti?</p>
+              </div>
+
+              <button v-if="petState.stage > 0" @click="sharePet" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2 shadow-sm">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>
+                Mostralo nelle storie
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- EVOLUZIONE DEL COMPAGNO -->
+        <div v-if="petEvolveModal.isOpen" class="fixed inset-0 z-[68] flex items-center justify-center p-4 bg-antracite/50 backdrop-blur-sm animate-fadeIn" @click.self="petEvolveModal.isOpen = false">
+          <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center">
+            <div class="px-6 pt-8 pb-5 pet-glow" :style="{ background: 'radial-gradient(circle at 50% 45%, ' + petState.color + '55, transparent 70%)' }">
+              <div class="pet-pop w-40 h-40 mx-auto" v-html="petMainSvg"></div>
+              <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">{{ petEvolveModal.hatched ? 'L\'uovo si è schiuso!' : 'Evoluzione!' }}</p>
+              <h3 class="text-2xl font-extrabold text-antracite leading-tight mt-1">{{ petEvolveModal.hatched ? 'È nato ' + petState.name : 'È diventato ' + petState.name }}</h3>
+              <p class="text-sm text-gray-500 font-medium mt-2">{{ streakInfo.current }} {{ streakInfo.current === 1 ? 'giorno' : 'giorni' }} di fila<span v-if="petState.nextIn">. Prossima forma tra {{ petState.nextIn }} {{ petState.nextIn === 1 ? 'giorno' : 'giorni' }}</span>.</p>
+            </div>
+            <div class="p-6 pt-2 space-y-2">
+              <button @click="sharePet" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm">Condividi nelle storie</button>
+              <button @click="petEvolveModal.isOpen = false" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl active:scale-95 transition-all text-sm">Evvai!</button>
+            </div>
+          </div>
+        </div>
+
         <!-- WELCOME MODAL (dopo la registrazione) -->
         <div v-if="welcomeModal.isOpen" class="fixed inset-0 z-[67] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
           <div class="bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden">
@@ -3653,6 +3753,7 @@
   <script src="js/import/diet-pdf.js"></script>
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
+  <script src="js/data/pets.js"></script>
   <script src="js/share/draw.js"></script>
   <script src="js/app.js"></script>
 </body>

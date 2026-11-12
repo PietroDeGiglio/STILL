@@ -632,7 +632,11 @@ const drawAchievementBody = (ctx, data, o) => {
     ctx.font = Math.round(R * 0.95) + 'px ' + EMOJI_FONT;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillText(data.icon || '🏆', 0, R * 0.06);
+    // Compagno della serie (immagine) al posto dell'emoji: un po' più grande della medaglia, esce dal bordo
+    if (data.petImg && data.petImg.complete && data.petImg.naturalWidth) {
+      const S = R * 2.15;
+      ctx.drawImage(data.petImg, -S / 2, -S * 0.56, S, S);
+    } else ctx.fillText(data.icon || '🏆', 0, R * 0.06);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.restore();
   }

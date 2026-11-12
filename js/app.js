@@ -1,6 +1,6 @@
 // STILL: logica dell'app (Vue 3). Il markup è in index.html.
 // Vue Application Setup
-const { createApp, ref, onMounted, watch, nextTick, computed } = Vue;
+const { createApp, ref, shallowRef, onMounted, watch, nextTick, computed } = Vue;
 
 createApp({
   setup() {
@@ -4485,14 +4485,21 @@ createApp({
     // PROTEGGI SERIE: se salti UN giorno la serie non si azzera (il giorno salvato non si conta).
     // Si ricarica dopo SHIELD_RECHARGE giorni attivi. Calcolato sempre dallo storico: niente stato da salvare.
     const SHIELD_RECHARGE = 7;
+    // RECUPERO SERIE: se la serie si è appena interrotta (1 o 2 giorni saltati) si può salvare
+    // condividendo una storia. I giorni salvati sono in settings.streakRepairs (contano come protetti).
+    const STREAK_REPAIR_COOLDOWN = 14;   // giorni tra un recupero e l'altro
     const streakInfo = computed(() => {
       const set = activeDaySet.value;
+      const repairs = new Set(settings.value.streakRepairs || []);
       const today = toISODate();
       const keys = [...set].filter(k => k <= today).sort();
       let current = 0, best = 0, shields = 1, sinceUse = SHIELD_RECHARGE;
+      let startKey = '', lastActive = '', lastBreak = null;
       const protectedDays = new Set();
-      const activeDay = () => {
+      const activeDay = (key) => {
+        if (current === 0) startKey = key;  // inizio della serie in corso
         current++; sinceUse++;
+        lastActive = key;
         if (!shields && sinceUse >= SHIELD_RECHARGE) shields = 1;
         best = Math.max(best, current);
       };
@@ -4501,16 +4508,35 @@ createApp({
         let guard = 0;
         while (toISODate(d) < today && guard++ < 5000) {
           const key = toISODate(d);
-          if (set.has(key)) activeDay();
+          if (set.has(key)) activeDay(key);
+          else if (current > 0 && repairs.has(key)) protectedDays.add(key);
           else if (current > 0 && shields) { shields = 0; sinceUse = 0; protectedDays.add(key); }
-          else current = 0;
+          else {
+            if (current > 0) lastBreak = { length: current, lastActive, brokeAt: key, startKey };
+            current = 0;
+          }
           d.setDate(d.getDate() + 1);
         }
-        if (set.has(today)) activeDay();
+        if (set.has(today)) activeDay(today);
       }
       const todayDone = set.has(today);
       const y = new Date(); y.setHours(12, 0, 0, 0); y.setDate(y.getDate() - 1);
-      const protectedYesterday = protectedDays.has(toISODate(y));
+      const yesterday = toISODate(y);
+      const protectedYesterday = protectedDays.has(yesterday);
+
+      // Serie appena persa: interrotta ieri o l'altro ieri, e dopo nessun altro giorno attivo (a parte oggi)
+      let recoverable = null;
+      if (lastBreak && lastBreak.length >= 2 && current <= 1) {
+        const missed = [];
+        const d = new Date(lastBreak.lastActive + 'T12:00:00');
+        d.setDate(d.getDate() + 1);
+        while (toISODate(d) < today) { const k = toISODate(d); if (!set.has(k) && !protectedDays.has(k)) missed.push(k); d.setDate(d.getDate() + 1); }
+        const lastRepair = settings.value.lastRepairAt || '';
+        const cooledDown = !lastRepair || daysBetween(lastRepair, today) >= STREAK_REPAIR_COOLDOWN;
+        if (missed.length && missed.length <= 2 && daysBetween(lastBreak.brokeAt, today) <= 2 && cooledDown) {
+          recoverable = { length: lastBreak.length, missed, restored: lastBreak.length + (todayDone ? 1 : 0), startKey: lastBreak.startKey };
+        }
+      }
 
       const week = [];
       for (let i = 6; i >= 0; i--) {
@@ -4525,7 +4551,7 @@ createApp({
       else if (current > 0) message = 'Segna un pasto o un allenamento oggi per non perdere la serie.';
       else message = 'Segna un pasto o un allenamento e inizia la tua serie.';
       return {
-        current, best, todayDone, week, message, protectedYesterday,
+        current, best, todayDone, week, message, protectedYesterday, startKey, recoverable,
         shieldReady: !!shields,
         shieldIn: shields ? 0 : Math.max(1, SHIELD_RECHARGE - sinceUse)
       };
@@ -4589,6 +4615,127 @@ createApp({
       const meta = document.querySelector('meta[name="theme-color"]');
       if (meta) meta.setAttribute('content', dark ? '#0E0E11' : '#F6F5F2');
     }, { immediate: true });
+    // ---------------------------------------------------------------
+    // COMPAGNO DELLA SERIE (js/data/pets.js): uovo → personaggio a caso che si evolve con i giorni di fila.
+    // In settings.pet: seme personale, vestiti scelti, album delle specie incontrate, ultima forma vista.
+    // ---------------------------------------------------------------
+    if (!settings.value.pet || typeof settings.value.pet !== 'object') settings.value.pet = {};
+    {
+      const pet = settings.value.pet;
+      if (!pet.seed) pet.seed = Math.random().toString(36).slice(2, 10);
+      if (!pet.outfit) pet.outfit = { hat: '', eyes: '', neck: '' };
+      if (!pet.album) pet.album = {};
+    }
+    const petNow = ref(Date.now());
+    setInterval(() => { petNow.value = Date.now(); }, 5 * 60 * 1000);
+    const petState = computed(() => {
+      const s = streakInfo.value;
+      const pet = settings.value.pet;
+      const stage = s.current > 0 ? petStageFor(s.current) : 0;
+      const species = s.current > 0 ? petSpeciesIndex(pet.seed, s.startKey) : 0;
+      const hour = new Date(petNow.value).getHours();
+      const mood = stage === 0 ? 'sleepy' : s.todayDone ? 'happy' : (s.protectedYesterday || hour >= 18 ? 'worried' : 'normal');
+      const nextAt = PET_THRESHOLDS[stage + 1];
+      const prevAt = PET_THRESHOLDS[stage];
+      return {
+        stage, species, mood,
+        legendary: s.current >= PET_LEGEND_DAYS,
+        name: petStageName(species, stage),
+        speciesName: stage ? PET_SPECIES[species].name : 'Uovo misterioso',
+        color: stage ? PET_SPECIES[species].color : '#F5A623',
+        nextIn: nextAt ? nextAt - s.current : null,
+        nextName: nextAt ? (stage === 0 ? 'una sorpresa' : petStageName(species, stage + 1)) : null,
+        progress: nextAt ? Math.round(((s.current - prevAt) / (nextAt - prevAt)) * 100) : 100
+      };
+    });
+    const petMarkup = (opts = {}) => {
+      const st = petState.value;
+      return petSvg({ species: st.species, stage: st.stage, mood: st.mood, legendary: st.legendary, outfit: settings.value.pet.outfit, ...opts });
+    };
+    const petMainSvg = computed(() => petMarkup({ uid: 'petMain' }));
+
+    // Album: forma più alta raggiunta per ogni specie
+    watch(() => [petState.value.species, petState.value.stage], ([species, stage]) => {
+      if (!stage) return;
+      const id = PET_SPECIES[species].id;
+      const album = settings.value.pet.album;
+      if ((album[id] || 0) < stage) album[id] = stage;
+    }, { immediate: true });
+
+    // Evoluzione: festa quando cambia forma (non alla prima apertura)
+    const petEvolveModal = ref({ isOpen: false });
+    watch(() => petState.value.stage + '|' + streakInfo.value.startKey, () => {
+      const st = petState.value;
+      const pet = settings.value.pet;
+      const run = streakInfo.value.startKey;
+      if (pet.lastStage !== undefined && pet.lastRun === run && st.stage > pet.lastStage) {
+        petEvolveModal.value = { isOpen: true, hatched: pet.lastStage === 0 || st.stage === 1 };
+      } else if (pet.lastStage !== undefined && pet.lastRun !== run && st.stage >= 1 && pet.lastStage === 0) {
+        petEvolveModal.value = { isOpen: true, hatched: true };
+      }
+      pet.lastStage = st.stage;
+      pet.lastRun = run;
+    }, { immediate: true });
+
+    // Finestra del compagno: evoluzioni, vestiti, album
+    const petModal = ref({ isOpen: false, tab: 'hat' });
+    const openPetModal = () => { petModal.value = { isOpen: true, tab: petModal.value.tab || 'hat' }; };
+    const petItems = computed(() => PET_ITEMS.map(item => ({ ...item, unlocked: streakInfo.value.best >= item.unlock, worn: settings.value.pet.outfit[item.slot] === item.id })));
+    const togglePetItem = (item) => {
+      if (!item.unlocked) { showToastMessage(item.name + ': si sblocca con una serie di ' + item.unlock + ' giorni. 🔒'); return; }
+      const outfit = settings.value.pet.outfit;
+      outfit[item.slot] = outfit[item.slot] === item.id ? '' : item.id;
+    };
+    const petItemPreview = (item) => petMarkup({ uid: 'pi' + item.id, stage: Math.max(petState.value.stage, 3), mood: 'happy', outfit: { hat: '', eyes: '', neck: '', [item.slot]: item.id } });
+    const petEvolutionPath = computed(() => {
+      const st = petState.value;
+      return PET_THRESHOLDS.map((days, stage) => ({
+        stage, days,
+        reached: stage <= st.stage,
+        current: stage === st.stage,
+        name: stage === 0 || stage <= st.stage ? petStageName(st.species, stage) : '???',
+        svg: petSvg({ species: st.species, stage, mood: 'happy', uid: 'pe' + stage, silhouette: stage > st.stage && st.stage > 0 || (st.stage === 0 && stage > 0) })
+      }));
+    });
+    const petAlbum = computed(() => PET_SPECIES.map((sp, i) => {
+      const max = settings.value.pet.album[sp.id] || 0;
+      return { id: sp.id, name: max ? sp.name : '???', max, svg: petSvg({ species: i, stage: max || 6, mood: 'happy', uid: 'pa' + sp.id, silhouette: !max }) };
+    }));
+
+    // Immagine del compagno per le card da condividere (canvas)
+    const petShareImg = shallowRef(null);
+    // L'immagine va caricata PRIMA di aprire la card, altrimenti il canvas disegna l'emoji
+    const loadPetShareImage = async (over = {}) => {
+      const st = petState.value;
+      try {
+        petShareImg.value = await petImage({ species: st.species, stage: Math.max(1, st.stage), mood: 'happy', legendary: st.legendary, outfit: settings.value.pet.outfit, uid: 'petShare', ...over });
+      } catch (e) { petShareImg.value = null; }
+    };
+    const sharePet = async () => {
+      petModal.value.isOpen = false;
+      petEvolveModal.value.isOpen = false;
+      await loadPetShareImage();
+      openAchievementShare({ type: 'pet' });
+    };
+    // Storia "salva la serie": mostra il compagno della serie persa, nella forma che aveva raggiunto
+    const shareStreakSave = async () => {
+      const rec = streakInfo.value.recoverable;
+      await loadPetShareImage(rec ? { species: petSpeciesIndex(settings.value.pet.seed, rec.startKey), stage: Math.max(1, petStageFor(rec.length)), legendary: rec.length >= PET_LEGEND_DAYS } : {});
+      openAchievementShare({ type: 'streakSave' });
+      if (shareVideoSupported) shareStudio.value.output = 'image';
+    };
+    // Dopo la condivisione della storia: i giorni saltati diventano protetti e la serie torna
+    const applyStreakRepair = () => {
+      const rec = streakInfo.value.recoverable;
+      if (!rec) return;
+      settings.value.streakRepairs = [...new Set([...(settings.value.streakRepairs || []), ...rec.missed])];
+      settings.value.lastRepairAt = toISODate();
+      // Il compagno torna com'era: niente festa di "nascita"
+      settings.value.pet.lastRun = rec.startKey;
+      settings.value.pet.lastStage = petStageFor(rec.restored);
+      showToastMessage('Serie salvata! 🔥 Sei di nuovo a ' + rec.restored + (rec.restored === 1 ? ' giorno' : ' giorni') + ' di fila.');
+    };
+
     const themeOptions = [
       { id: 'light', label: 'Chiaro', icon: '☀️' },
       { id: 'dark', label: 'Scuro', icon: '🌙' },
@@ -4627,7 +4774,12 @@ createApp({
     };
     const dismissInstall = () => { settings.value.installDismissed = true; };
 
-    const countShare = () => { settings.value.shares = (settings.value.shares || 0) + 1; };
+    const countShare = () => {
+      settings.value.shares = (settings.value.shares || 0) + 1;
+      // Storia per salvare la serie: condivisa (o salvata) → serie recuperata
+      const st = shareStudio.value;
+      if (st.kind === 'achievement' && st.achievement && st.achievement.type === 'streakSave') applyStreakRepair();
+    };
 
     // Giorni di allenamento da sempre (palestra + sport fatti)
     const trainingDaySet = computed(() => {
@@ -4806,6 +4958,40 @@ createApp({
           caption: lv.title,
           sub: formatNumber(lv.xp) + ' XP guadagnati su STILL',
           tiles: [{ label: 'Trofei', value: lv.trophies + ' su ' + lv.trophyTotal }, { label: 'Serie migliore', value: streakInfo.value.best + (streakInfo.value.best === 1 ? ' giorno' : ' giorni') }]
+        };
+      }
+      if (spec && (spec.type === 'pet' || spec.type === 'streakSave')) {
+        const ps = petState.value;
+        const sk = streakInfo.value;
+        const activeDays = activeDaySet.value.size;
+        const since = (profile.value && profile.value.createdAt) || [...activeDaySet.value].sort()[0] || toISODate();
+        const petBase = { ...base, dateLabel: formatDateLong(toISODate()), icon: '🔥', color: ps.color, petImg: petShareImg.value };
+        if (spec.type === 'pet') {
+          return {
+            ...petBase,
+            kicker: name ? 'Il compagno di ' + name : 'Il mio compagno su STILL',
+            badge: ps.name,
+            big: sk.current + (sk.current === 1 ? ' giorno' : ' giorni'),
+            caption: 'di fila su STILL',
+            sub: ps.speciesName + ' · forma ' + ps.stage + ' di 6',
+            tiles: [{ label: 'Serie migliore', value: sk.best + (sk.best === 1 ? ' giorno' : ' giorni') }, { label: 'Giorni attivi', value: String(activeDays) }]
+          };
+        }
+        // Storia per salvare la serie: da quanto sei attivo e cosa hai ottenuto
+        const rec = sk.recoverable;
+        const tiles = [];
+        if (weightDelta.value && Math.abs(weightDelta.value.value) >= 0.1) tiles.push({ label: 'Peso', value: weightDelta.value.text });
+        if (trainingDaySet.value.size) tiles.push({ label: 'Allenamenti', value: String(trainingDaySet.value.size) });
+        if (tiles.length < 2 && trainingTimeSummary.value.total >= 3600) tiles.push({ label: 'Ore di allenamento', value: Math.round(trainingTimeSummary.value.total / 3600) + ' h' });
+        if (tiles.length < 2) tiles.push({ label: 'Serie migliore', value: sk.best + (sk.best === 1 ? ' giorno' : ' giorni') });
+        return {
+          ...petBase,
+          kicker: name ? name + ' non molla' : 'Non mollo',
+          badge: 'Serie salvata',
+          big: activeDays + (activeDays === 1 ? ' giorno' : ' giorni'),
+          caption: 'attivo su STILL',
+          sub: 'Dal ' + formatDate(since) + (rec ? ' · serie di ' + rec.restored + ' giorni salvata' : ''),
+          tiles: tiles.slice(0, 2)
         };
       }
       if (spec && spec.type === 'welcome') {
@@ -5141,6 +5327,20 @@ createApp({
       onboardingBack,
       completeOnboarding,
       sexOptions,
+      petState,
+      petMainSvg,
+      petModal,
+      openPetModal,
+      petItems,
+      togglePetItem,
+      petItemPreview,
+      petEvolutionPath,
+      petAlbum,
+      petEvolveModal,
+      sharePet,
+      shareStreakSave,
+      PET_SLOTS,
+      PET_THRESHOLDS,
       bodyStats,
       bodyInfoOpen,
       toggleBodyInfo,

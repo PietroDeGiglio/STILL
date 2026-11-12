@@ -2,7 +2,7 @@
 // - File dell'app: prima la rete (così gli aggiornamenti arrivano subito), se offline la copia salvata.
 // - Librerie esterne (Vue, Tailwind, font, pdf.js): la copia salvata, aggiornata in background.
 // Quando si aggiungono file all'app, aggiungerli a APP_FILES e cambiare VERSION.
-const VERSION = 'still-v3';
+const VERSION = 'still-v4';
 const APP_FILES = [
   './',
   'index.html',
@@ -15,6 +15,7 @@ const APP_FILES = [
   'js/import/diet-pdf.js',
   'js/data/quotes.js',
   'js/data/trophies.js',
+  'js/data/pets.js',
   'js/share/draw.js',
   'js/app.js',
   'assets/LOGO.svg',
