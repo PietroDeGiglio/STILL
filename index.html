@@ -264,7 +264,7 @@
               <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎁</div>
               <div class="min-w-0 flex-1">
                 <div class="text-sm font-extrabold text-white">Il tuo {{ wrappedBanner.year }} su STILL è pronto</div>
-                <div class="text-[11px] font-semibold text-white/85">{{ wrappedBanner.active }} giorni attivi, numeri pazzi e che atleta sei. Guardalo!</div>
+                <div class="text-[11px] font-semibold text-white/85">{{ wrappedBanner.active }} {{ (wrappedBanner.active) === 1 ? 'giorno' : 'giorni' }} attivi, numeri pazzi e che atleta sei. Guardalo!</div>
               </div>
               <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
@@ -274,7 +274,7 @@
               <div class="w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0">🎬</div>
               <div class="min-w-0 flex-1">
                 <div class="text-sm font-extrabold text-white">Il tuo {{ recapBanner.month.toLowerCase() }} è pronto</div>
-                <div class="text-[11px] font-semibold text-white/85">{{ recapBanner.active }} giorni attivi. Guardalo e condividilo nelle storie.</div>
+                <div class="text-[11px] font-semibold text-white/85">{{ recapBanner.active }} {{ (recapBanner.active) === 1 ? 'giorno' : 'giorni' }} attivi. Guardalo e condividilo nelle storie.</div>
               </div>
               <svg class="w-5 h-5 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
             </button>
@@ -328,7 +328,7 @@
               <div v-if="streakInfo.recoverable" class="mt-3 rounded-2xl p-3 bg-arancione/10 border border-arancione/30 flex items-center gap-3">
                 <div class="text-2xl shrink-0">🆘</div>
                 <div class="min-w-0 flex-1">
-                  <div class="text-xs font-black text-antracite leading-tight">Hai perso una serie di {{ streakInfo.recoverable.length }} giorni</div>
+                  <div class="text-xs font-black text-antracite leading-tight">Hai perso una serie di {{ streakInfo.recoverable.length }} {{ (streakInfo.recoverable.length) === 1 ? 'giorno' : 'giorni' }}</div>
                   <div class="text-[11px] font-medium text-gray-500 leading-snug mt-0.5">Condividi una storia con i tuoi risultati su STILL e la serie torna com'era.</div>
                 </div>
                 <button @click="shareStreakSave" class="shrink-0 cangiante-btn text-white text-[11px] font-extrabold px-3 py-2 rounded-xl shadow-md active:scale-95 transition-transform">Salva la serie</button>
@@ -461,7 +461,7 @@
                     <span class="text-2xl font-extrabold" :class="weightDelta.value <= 0 ? 'text-salvia' : 'text-arancione'">{{ formatNumber(weightDelta.value) }}</span>
                     <span class="text-sm font-semibold text-gray-500">kg</span>
                   </div>
-                  <p class="text-[10px] font-bold text-gray-400 mt-1">{{ weightDelta.days }} giorni</p>
+                  <p class="text-[10px] font-bold text-gray-400 mt-1">{{ weightDelta.days }} {{ weightDelta.days === 1 ? 'giorno' : 'giorni' }}</p>
                 </template>
                 <template v-else>
                   <div class="text-sm font-bold text-gray-400 mt-2">Dati insufficienti</div>
@@ -553,7 +553,7 @@
                 <button @click="startActiveSheet" class="w-full flex items-center justify-between gap-3 rounded-2xl bg-arancione/5 border border-arancione/15 px-3 py-2.5 text-left hover:border-arancione/40 transition-colors">
                   <div class="min-w-0">
                     <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Oggi tocca a</p>
-                    <p class="text-sm font-bold text-antracite truncate">{{ activeSheetNext.day.name }} <span class="text-gray-400 font-semibold">· {{ activeSheetNext.day.exercises.length }} esercizi</span></p>
+                    <p class="text-sm font-bold text-antracite truncate">{{ activeSheetNext.day.name }} <span class="text-gray-400 font-semibold">· {{ activeSheetNext.day.exercises.length }} {{ activeSheetNext.day.exercises.length === 1 ? 'esercizio' : 'esercizi' }}</span></p>
                   </div>
                   <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Inizia</span>
                 </button>
@@ -708,7 +708,7 @@
                     <div class="min-w-0">
                       <span v-if="isActiveSheet(sheet)" class="inline-block text-[9px] font-black uppercase tracking-widest text-white bg-arancione px-2 py-0.5 rounded-md mb-1">Attiva · prossimo {{ activeSheetNext.day ? activeSheetNext.day.name : '' }}</span>
                       <h4 class="font-extrabold text-antracite text-base group-hover:text-arancione transition-colors truncate">{{ sheet.name }}</h4>
-                      <p class="text-xs text-gray-500 font-medium mt-0.5">{{ sheet.days.length }} {{ sheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sheet) }} esercizi</p>
+                      <p class="text-xs text-gray-500 font-medium mt-0.5">{{ sheet.days.length }} {{ sheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sheet) }} {{ totalSheetExercises(sheet) === 1 ? 'esercizio' : 'esercizi' }}</p>
                       <p class="text-[10px] font-bold text-gray-400 mt-1">{{ sheetLastSessionDate(sheet) ? 'Ultima sessione: ' + formatDate(sheetLastSessionDate(sheet)) : 'Mai allenata' }}</p>
                     </div>
                   </div>
@@ -951,7 +951,7 @@
                     Torna alle schede
                   </button>
                   <h2 class="text-2xl font-bold text-antracite leading-tight truncate">{{ selectedSheet.name }}</h2>
-                  <div class="text-[10px] font-bold text-gray-400 uppercase mt-1">{{ selectedSheet.days.length }} {{ selectedSheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(selectedSheet) }} esercizi</div>
+                  <div class="text-[10px] font-bold text-gray-400 uppercase mt-1">{{ selectedSheet.days.length }} {{ selectedSheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(selectedSheet) }} {{ (totalSheetExercises(selectedSheet)) === 1 ? 'esercizio' : 'esercizi' }}</div>
                 </div>
                 <div class="flex items-center gap-2 flex-shrink-0">
                   <button @click="editSheet(selectedSheet)" class="p-2 bg-arancione/10 text-arancione rounded-xl hover:bg-arancione/20 transition-colors shadow-sm" aria-label="Modifica scheda">
@@ -1008,7 +1008,7 @@
               <div class="space-y-3">
                 <div class="flex justify-between items-center px-1">
                   <h4 class="text-xs font-bold text-gray-500 uppercase tracking-widest">{{ currentSheetDay ? currentSheetDay.name : 'Esercizi' }}</h4>
-                  <span class="text-[10px] font-medium text-gray-400">{{ currentSheetDay ? currentSheetDay.exercises.length : 0 }} esercizi</span>
+                  <span class="text-[10px] font-medium text-gray-400">{{ currentSheetDay ? currentSheetDay.exercises.length : 0 }} {{ (currentSheetDay ? currentSheetDay.exercises.length : 0) === 1 ? 'esercizio' : 'esercizi' }}</span>
                 </div>
 
                 <div v-if="!currentSheetDay || currentSheetDay.exercises.length === 0" class="bg-white border border-dashed border-gray-200 rounded-2xl p-5 text-center text-xs text-gray-400 font-medium">
@@ -1176,7 +1176,7 @@
 
                 <p class="text-[11px] text-gray-400 font-medium text-center">
                   Dal {{ formatDate(weightEntries[0].date) }} al {{ formatDate(weightEntries[weightEntries.length - 1].date) }}
-                  <span v-if="weightDelta && weightDelta.days > 0"> • {{ weightDelta.days }} giorni</span>
+                  <span v-if="weightDelta && weightDelta.days > 0"> • {{ weightDelta.days }} {{ weightDelta.days === 1 ? 'giorno' : 'giorni' }}</span>
                 </p>
               </div>
 
@@ -1443,7 +1443,7 @@
                   <div class="flex-1 min-w-0">
                     <div class="flex justify-between gap-2 text-xs font-extrabold text-antracite"><span class="truncate">{{ g.name }} · {{ g.next.tier.name }}</span><span class="shrink-0 text-gray-400 font-bold">{{ Math.round(g.progress * 100) }}%</span></div>
                     <div class="h-1.5 bg-gray-100 rounded-full mt-1.5 overflow-hidden"><div class="h-full rounded-full" :style="{ width: Math.round(g.progress * 100) + '%', background: g.next.tier.color }"></div></div>
-                    <div class="text-[10px] font-semibold text-gray-400 mt-1">Mancano {{ formatNumber(g.next.target - g.value) }} {{ g.next.target - g.value === 1 ? g.one : g.unit }}</div>
+                    <div class="text-[10px] font-semibold text-gray-400 mt-1">{{ g.next.target - g.value === 1 ? 'Manca' : 'Mancano' }} {{ formatNumber(g.next.target - g.value) }} {{ g.next.target - g.value === 1 ? g.one : g.unit }}</div>
                   </div>
                 </button>
               </div>
@@ -2128,11 +2128,22 @@
                 <p v-if="backupModal.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{{ backupModal.error }}</p>
               </div>
 
+              <!-- Prova con gli amici: segnalazioni -->
+              <div class="space-y-2">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Aiutaci a migliorare</div>
+                <button @click="sendFeedback" class="w-full bg-viola/10 text-viola font-bold py-3.5 rounded-2xl hover:bg-viola/15 transition-all active:scale-95 flex items-center justify-center gap-2">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 10h8M8 14h5M21 12c0 4.4-4 8-9 8-1.5 0-2.9-.3-4.1-.9L3 20l1.3-3.9C3.5 14.9 3 13.5 3 12c0-4.4 4-8 9-8s9 3.6 9 8z"/></svg>
+                  Segnala un problema o un'idea
+                </button>
+                <p class="text-[10px] text-gray-400 leading-snug">Si apre un messaggio già pronto con la versione dell'app: scrivi cosa è successo e mandalo a chi ti ha fatto provare STILL.</p>
+              </div>
+
               <!-- Zona pericolosa -->
               <div class="space-y-2 pt-1">
                 <div class="text-[10px] font-bold text-red-400 uppercase tracking-widest">Zona pericolosa</div>
                 <button @click="promptResetAllData" class="w-full bg-white border border-red-200 text-red-500 font-bold py-3 rounded-2xl hover:bg-red-50 transition-all active:scale-95 text-sm">Elimina tutti i dati</button>
               </div>
+              <p class="text-center text-[10px] font-bold text-gray-300 uppercase tracking-widest">STILL · {{ APP_VERSION }}</p>
             </div>
           </div>
         </div>
@@ -2671,7 +2682,7 @@
                     <div class="text-xs font-extrabold">{{ formatNumber(exerciseChart.points[exerciseChartActive].value) }} {{ exerciseChart.unit }}<span v-if="exerciseChart.points[exerciseChartActive].reps" class="font-semibold text-white/70"> × {{ exerciseChart.points[exerciseChartActive].reps }}</span></div>
                   </div>
                 </div>
-                <p class="text-[9px] font-medium text-gray-400 text-center">{{ exerciseChart.sessions }} sessioni · tocca il grafico per i dettagli</p>
+                <p class="text-[9px] font-medium text-gray-400 text-center">{{ exerciseChart.sessions }} {{ (exerciseChart.sessions) === 1 ? 'sessione' : 'sessioni' }} · tocca il grafico per i dettagli</p>
               </div>
               <p v-else class="text-[10px] font-medium text-gray-400 text-center px-2 pb-1">Il grafico comparirà dalla seconda sessione registrata.</p>
 
@@ -3740,7 +3751,7 @@
             <!-- Elenco esercizi (muscolo / sport) -->
             <template v-if="guide.tab !== 'programs'">
               <div class="flex items-center justify-between px-1">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ guideExercises.length }} esercizi · tocca per sceglierli</span>
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ guideExercises.length }} {{ (guideExercises.length) === 1 ? 'esercizio' : 'esercizi' }} · tocca per sceglierli</span>
                 <button @click="selectAllGuide" class="text-[11px] font-bold text-arancione">{{ guide.selected.length === guideExercises.length ? 'Nessuno' : 'Tutti' }}</button>
               </div>
               <button v-for="item in guideExercises" :key="'ge' + item.id" @click="toggleGuideSelect(item.id)"

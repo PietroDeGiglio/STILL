@@ -96,6 +96,8 @@ const wCleanName = (raw) => String(raw)
 const wCap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
 // Una riga è un titolo di giorno?
+// "GIORNO 1 - PETTO" → "Giorno 1 - Petto": i titoli tutti maiuscoli diventano normali
+const wTidy = (s) => (s === s.toUpperCase() && /[A-Z]/.test(s) ? wCap(s.toLowerCase()) : wCap(s));
 const wDayName = (line) => {
   const raw = String(line).trim().replace(/^[#*\s•\-–—=_]+|[#*\s=_]+$/g, '');
   const t = wNorm(raw).replace(/[:.]+$/, '');
@@ -103,12 +105,12 @@ const wDayName = (line) => {
   const hasNumbers = /\d+\s*[x*]\s*\d|\d+\s*(kg|serie|rip)/.test(t);
   if (hasNumbers) return null;
   const wd = W_WEEKDAYS.findIndex(d => t === d || t.startsWith(d + ' ') || t.startsWith(d + ':') || t.startsWith(d.slice(0, 3) + ' ') && t.length < 30);
-  if (wd > -1 && t.length < 30) return raw.length <= 30 ? wCap(raw.replace(/[:.]+$/, '')) : W_WEEKDAY_NAMES[wd];
+  if (wd > -1 && t.length < 30) return raw.length <= 30 ? wTidy(raw.replace(/[:.]+$/, '')) : W_WEEKDAY_NAMES[wd];
   const m = W_DAY_WORDS.exec(t);
-  if (m) return wCap(raw.replace(/[:.]+$/, ''));
+  if (m) return wTidy(raw.replace(/[:.]+$/, ''));
   if (/^[a-e]\s*[):.-]?$/.test(t)) return 'Giorno ' + t.charAt(0).toUpperCase();
-  if (wIsSplitTitle(t)) return wCap(raw.replace(/[:.]+$/, ''));
-  if (raw.endsWith(':') && t.split(' ').length <= 5) return wCap(raw.replace(/[:.]+$/, ''));
+  if (wIsSplitTitle(t)) return wTidy(raw.replace(/[:.]+$/, ''));
+  if (raw.endsWith(':') && t.split(' ').length <= 5) return wTidy(raw.replace(/[:.]+$/, ''));
   if (raw.length >= 3 && raw === raw.toUpperCase() && /[A-Z]/.test(raw) && t.split(' ').length <= 5) return wCap(raw.toLowerCase());
   return null;
 };
@@ -161,11 +163,25 @@ const parseWorkoutText = (text, fileName = '') => {
   let day = null;
   let ssCount = 0, ssOpen = null;
   let title = '';
+  // Titolo in prima riga ("Scheda Palestra Ottobre", "Il mio programma"): senza numeri,
+  // e la riga piena dopo è un giorno oppure inizia con scheda/programma/allenamento
+  const filled = lines.map((l, i) => [l, i]).filter(([l]) => l && !/^[-=_*~.\s]+$/.test(l));
+  let titleIdx = -1;
+  if (filled.length > 1) {
+    const [first, i0] = filled[0];
+    const f = wNorm(first);
+    const looksTitle = !/\d+\s*[x×*]\s*\d|\d+\s*(kg|min|serie|rip)/.test(f) && first.length <= 50;
+    if (looksTitle && !wDayName(first) && (/^(scheda|programma|allenamento|workout|piano|il mio|la mia)/.test(f) || wDayName(filled[1][0]))) {
+      title = first.replace(/[:.]+$/, '').trim();
+      titleIdx = i0;
+    }
+  }
   const ensureDay = () => {
     if (!day) { day = { name: 'Giorno ' + String.fromCharCode(65 + days.length), exercises: [] }; days.push(day); }
     return day;
   };
   lines.forEach((line, idx) => {
+    if (idx === titleIdx) return;
     if (!line || /^[-=_*~.\s]+$/.test(line)) { ssOpen = null; return; }
     const n = wNorm(line);
     if (W_SKIP.test(n) && !/\d+\s*x\s*\d/.test(n)) {

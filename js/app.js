@@ -75,8 +75,10 @@ createApp({
         const before = {};
         STORAGE_KEYS.forEach(key => { before[key] = localStorage.getItem(key); });
         try {
+          // Sostituisce tutto: quello che nel backup non c'è viene tolto (niente dati mescolati)
           STORAGE_KEYS.forEach(key => {
             if (key in data) localStorage.setItem(key, JSON.stringify(data[key]));
+            else localStorage.removeItem(key);
           });
           return true;
         } catch (e) {
@@ -5127,16 +5129,60 @@ createApp({
     });
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
-    const exportBackup = () => {
-      settings.value.lastBackupAt = new Date().toISOString();
-      delete settings.value.backupSnoozeUntil;
-      storage.save('still_settings', settings.value);
-      const payload ={ app: 'STILL', version: 1, exportedAt: new Date().toISOString(), data: storage.exportAll() };
-      const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+    // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
+    const APP_VERSION = 'beta 14';
+    // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
+    const sendFeedback = async () => {
+      const ua = navigator.userAgent;
+      const device = /iPhone|iPad/.test(ua) ? 'iPhone/iPad' : /Android/.test(ua) ? 'Android' : 'Computer';
+      const installed = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches ? 'app installata' : 'dal browser';
+      const text = ['Segnalazione STILL (' + APP_VERSION + ', ' + device + ', ' + installed + ')', '',
+        'Cosa stavo facendo:', '', 'Cosa è successo (o la mia idea):', '', ''].join('\n');
+      try {
+        if (navigator.share) { await navigator.share({ text }); return; }
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+      try { await navigator.clipboard.writeText(text); showToastMessage('Messaggio copiato! Incollalo in chat a chi ti ha fatto provare STILL. 🙏'); }
+      catch (e) { showToastMessage('Scrivi a chi ti ha fatto provare STILL indicando: ' + APP_VERSION + ', ' + device + '.'); }
+    };
+
+    const exportBackup = async () => {
+      const markDone = () => {
+        settings.value.lastBackupAt = new Date().toISOString();
+        delete settings.value.backupSnoozeUntil;
+        storage.save('still_settings', settings.value);
+      };
+      // La data del backup va dentro il file stesso
+      const previous = { at: settings.value.lastBackupAt, snooze: settings.value.backupSnoozeUntil };
+      markDone();
+      const payload = { app: 'STILL', version: 1, exportedAt: new Date().toISOString(), data: storage.exportAll() };
+      const name = `still-backup-${toISODate()}.json`;
+      const text = JSON.stringify(payload, null, 2);
+      // Sul telefono (soprattutto iPhone con l'app sulla Home) il download spesso non parte:
+      // si apre il menu di condivisione per salvarlo in File, Drive, WhatsApp…
+      const touch = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+      if (touch && navigator.canShare) {
+        try {
+          const file = new File([text], name, { type: 'application/json' });
+          if (navigator.canShare({ files: [file] })) {
+            await navigator.share({ files: [file], title: 'Backup STILL' });
+            showToastMessage('Backup salvato! 💾 Tienilo in un posto sicuro (File, Drive o una chat con te stesso).');
+            return;
+          }
+        } catch (e) {
+          if (e && e.name === 'AbortError') {
+            // Annullato: il backup non è stato fatto
+            settings.value.lastBackupAt = previous.at;
+            if (previous.snooze) settings.value.backupSnoozeUntil = previous.snooze;
+            storage.save('still_settings', settings.value);
+            return;
+          }
+        }
+      }
+      const blob = new Blob([text], { type: 'application/json' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `still-backup-${toISODate()}.json`;
+      a.download = name;
       document.body.appendChild(a);
       a.click();
       a.remove();
@@ -6565,7 +6611,7 @@ createApp({
       addSupersetPair,
       removeSuperset,
       supersetPairCount,
-      totalSheetExercises,
+      totalSheetExercises, APP_VERSION, sendFeedback,
       activeSheet, isActiveSheet, activeSheetNext, sortedWorkoutSheets, toggleActiveSheet, startActiveSheet,
       saveSheet,
       promptDeleteSheet,
