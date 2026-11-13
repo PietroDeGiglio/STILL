@@ -769,6 +769,89 @@ const drawAchievementBody = (ctx, data, o) => {
   });
 };
 
+// ---------------------------------------------------------------
+// MUSCOLI DELLA SETTIMANA: mappa del corpo colorata (più scuro = più allenato)
+// e la classifica dei muscoli più allenati con le barre che crescono.
+// ---------------------------------------------------------------
+const drawMusclesBody = (ctx, data, o) => {
+  const { W, M, story, th, phase, at, reveal, live, time } = o;
+  const maxW = W - M * 2;
+  const cx = W / 2;
+  const Y = story
+    ? { kicker: 300, mapTop: 345, mapW: 860, big: 1235, cap: 1300, list: 1385, row: 70, rows: 4 }
+    : { kicker: 225, mapTop: 250, mapW: 600, big: 868, cap: 920, list: 985, row: 60, rows: 3 };
+  const text = (fill) => (th.brand ? fill : th.text);
+
+  reveal(at(0.1, 0.5), 20, () => {
+    fitFont(ctx, (data.kicker || '').toUpperCase(), 900, story ? 36 : 30, maxW, 22);
+    ctx.fillStyle = text(brandGradient(ctx, M, 0, W - M, 0, phase));
+    spacedText(ctx, (data.kicker || '').toUpperCase(), cx, Y.kicker, 6, 'center');
+  });
+
+  // Mappa del corpo: entra con un piccolo "pop"
+  const img = data.mapImg;
+  const mapH = Y.mapW * 104 / 120;
+  if (img && img.complete && img.naturalWidth) {
+    const k = live ? clamp01((time - 0.3) / 0.8) : 1;
+    if (k > 0) {
+      const s = 0.9 + 0.1 * easeOut(k);
+      ctx.save();
+      ctx.shadowColor = 'transparent';
+      ctx.globalAlpha *= Math.min(1, k * 1.4);
+      ctx.translate(cx, Y.mapTop + mapH / 2);
+      ctx.scale(s, s);
+      ctx.drawImage(img, -Y.mapW / 2, -mapH / 2, Y.mapW, mapH);
+      ctx.restore();
+    }
+  }
+
+  if (data.empty) {
+    reveal(at(1.0, 0.5), 30, () => {
+      ctx.textAlign = 'center';
+      fitFont(ctx, 'La mappa si colora quando ti alleni', 800, story ? 46 : 36, maxW, 24);
+      ctx.fillStyle = th.text;
+      ctx.fillText('La mappa si colora quando ti alleni', cx, Y.big);
+      ctx.textAlign = 'left';
+    });
+    return;
+  }
+
+  // Serie totali + giorni
+  reveal(at(1.0, 0.5), 30, () => {
+    ctx.textAlign = 'center';
+    fitFont(ctx, data.big || '', 900, story ? 150 : 104, maxW, 50);
+    ctx.fillStyle = text(brandGradient(ctx, M, Y.big - 150, W - M, Y.big, phase));
+    ctx.fillText(countUp(data.big || '', live ? clamp01((time - 1.0) / 1.2) : 1), cx, Y.big);
+    fitFont(ctx, data.caption || '', 800, story ? 42 : 32, maxW, 22);
+    ctx.fillStyle = th.text;
+    ctx.fillText(data.caption || '', cx, Y.cap);
+    ctx.textAlign = 'left';
+  });
+
+  // I muscoli più allenati
+  (data.top || []).slice(0, Y.rows).forEach((t, i) => {
+    reveal(at(1.5 + i * 0.15, 0.4), 20, () => {
+      const y = Y.list + i * Y.row;
+      setFont(ctx, 800, story ? 32 : 26);
+      ctx.fillStyle = th.text;
+      ctx.textAlign = 'right';
+      const vw = ctx.measureText(t.value).width;
+      ctx.fillText(t.value, W - M, y);
+      ctx.textAlign = 'left';
+      ctx.fillText(ellipsize(ctx, t.name, maxW - vw - 30), M, y);
+      const by = y + (story ? 16 : 13), bh = story ? 12 : 10;
+      roundRect(ctx, M, by, maxW, bh, bh / 2);
+      ctx.fillStyle = th.faint || 'rgba(150,150,160,0.25)';
+      ctx.fill();
+      const grow = live ? easeOut((time - 1.6 - i * 0.15) / 0.8) : 1;
+      const bw = Math.max(bh, maxW * (t.k || 0) * grow);
+      roundRect(ctx, M, by, bw, bh, bh / 2);
+      ctx.fillStyle = th.brand ? brandGradient(ctx, M, 0, M + maxW, 0, phase) : '#F5A623';
+      ctx.fill();
+    });
+  });
+};
+
 const drawShareCard = (canvas, data, opts, time = Infinity) => {
   const story = opts.format === 'story';
   const W = 1080, H = story ? 1920 : 1350;
@@ -823,6 +906,11 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
   }
   if (data.kind === 'achievement') {
     drawAchievementBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time });
+    ctx.shadowColor = 'transparent';
+    return;
+  }
+  if (data.kind === 'muscles') {
+    drawMusclesBody(ctx, data, { W, H, M, story, th, phase, at, reveal, live, time });
     ctx.shadowColor = 'transparent';
     return;
   }

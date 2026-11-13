@@ -317,6 +317,20 @@
                 </span>
                 <span v-if="streakInfo.best > 1" class="text-[10px] font-bold text-gray-400 shrink-0">Record: {{ streakInfo.best }}</span>
               </div>
+              <!-- Giorno leggero: anche 10 minuti di movimento tengono viva la serie -->
+              <button v-if="lightToday" @click="openLightDay" class="mt-3 w-full rounded-2xl px-3 py-2.5 bg-salvia/10 border border-salvia/20 flex items-center gap-2.5 text-left active:scale-[0.99] transition-all">
+                <span class="text-lg leading-none">{{ lightActivity(lightToday.type).icon }}</span>
+                <span class="flex-1 min-w-0 text-[11px] font-bold text-antracite">Giornata leggera: {{ lightToday.min }} min di {{ lightActivity(lightToday.type).label.toLowerCase() }} ✓</span>
+                <span class="text-[10px] font-bold text-salvia shrink-0">Modifica</span>
+              </button>
+              <button v-else-if="!streakInfo.todayDone" @click="openLightDay" class="mt-3 w-full rounded-2xl px-3 py-2.5 bg-gray-50 border border-dashed border-gray-200 flex items-center gap-2.5 text-left active:scale-[0.99] transition-all">
+                <span class="text-lg leading-none">🌱</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-[11px] font-extrabold text-antracite">Giornata no? Bastano 10 minuti</span>
+                  <span class="block text-[10px] font-medium text-gray-500 leading-snug">Una camminata o un po' di stretching e la serie continua.</span>
+                </span>
+                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+              </button>
               <!-- Serie persa da poco: si recupera condividendo una storia -->
               <div v-if="streakInfo.recoverable" class="mt-3 rounded-2xl p-3 bg-arancione/10 border border-arancione/30 flex items-center gap-3">
                 <div class="text-2xl shrink-0">🆘</div>
@@ -420,6 +434,10 @@
                     <span class="text-[10px] font-extrabold" :class="todayIntake.diary[m.id] ? 'text-salvia' : 'text-gray-300'">{{ todayIntake.diary[m.id] ? (todayIntake.diary[m.id].kcal ?? '?') + ' kcal' : '+' }}</span>
                   </button>
                 </div>
+                <button v-if="!todayIntake.entries && diaryCopySource(todayDateKey)" @click="copyDiaryFromPrev(todayDateKey)"
+                        class="w-full bg-salvia/10 border border-salvia/20 text-salvia rounded-xl py-2.5 text-[11px] font-bold active:scale-[0.99] transition-all">
+                  ↺ Mangi come ieri? Copia i pasti di ieri<span v-if="diaryCopySource(todayDateKey).kcal"> (≈ {{ formatNumber(diaryCopySource(todayDateKey).kcal) }} kcal)</span>
+                </button>
                 <p class="text-[10px] font-medium text-gray-400 leading-snug text-center">Non segui una dieta? Segna cosa mangi: ti dico se sei nelle tue calorie.</p>
               </div>
 
@@ -464,6 +482,49 @@
                     </button>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- ACQUA E DIGIUNO (facoltativi: si attivano in Profilo o nel Diario) -->
+            <div v-if="habitOn('water') || habitOn('fasting')" class="space-y-3">
+              <div v-if="habitOn('water')" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-soft mx-1">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">💧 Acqua di oggi</div>
+                  <span class="text-sm font-extrabold" :class="waterToday >= waterGoal ? 'text-sky-600' : 'text-antracite'">{{ formatNumber(waterToday * 0.25) }} <span class="text-[11px] font-bold text-gray-400">/ {{ formatNumber(waterGoal * 0.25) }} L</span></span>
+                </div>
+                <div class="flex flex-wrap items-end gap-1.5 mt-3">
+                  <button v-for="i in Math.max(waterGoal, waterToday)" :key="'wg' + i" @click="tapWaterGlass(i - 1)" :aria-label="'Bicchiere ' + i"
+                          class="w-7 h-9 rounded-b-lg rounded-t-sm border-2 flex items-end overflow-hidden transition-all active:scale-90"
+                          :class="i <= waterToday ? 'border-sky-500' : 'border-gray-200'">
+                    <span class="w-full transition-all duration-300" :class="i <= waterToday ? 'h-full bg-sky-400' : 'h-0'"></span>
+                  </button>
+                  <button @click="setWater(waterToday + 1)" class="w-9 h-9 rounded-xl bg-sky-500/10 text-sky-600 font-bold text-lg active:scale-90 transition-all" aria-label="Aggiungi un bicchiere">+</button>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 mt-2">{{ waterToday >= waterGoal ? 'Obiettivo raggiunto! 💙' : 'Un bicchiere = 250 ml. Tocca per segnarlo.' }}</p>
+              </div>
+              <div v-if="habitOn('fasting')" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-soft mx-1 space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">⏱️ Digiuno intermittente</div>
+                  <span v-if="fasting.running" class="text-[10px] font-bold px-2 py-1 rounded-md" :class="fasting.done ? 'bg-salvia/10 text-salvia' : 'bg-viola/10 text-viola'">{{ fasting.done ? 'Obiettivo raggiunto' : 'In corso' }}</span>
+                  <span v-else-if="fasting.last" class="text-[10px] font-bold text-gray-400">Ultimo: {{ formatNumber(fasting.last.hours) }} h{{ fasting.last.hours >= fasting.last.goal ? ' ✓' : '' }}</span>
+                </div>
+                <template v-if="fasting.running">
+                  <div class="flex items-baseline justify-between gap-2">
+                    <span class="text-2xl font-extrabold text-antracite">{{ hoursLabel(fasting.elapsed) }}</span>
+                    <span class="text-[11px] font-semibold text-gray-500">su {{ fasting.goal }} h · fine alle {{ clockLabel(fasting.endsAt) }}</span>
+                  </div>
+                  <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                    <div class="h-full rounded-full transition-all duration-500" :class="fasting.done ? 'bg-salvia' : 'bg-viola'" :style="{ width: fasting.pct + '%' }"></div>
+                  </div>
+                  <button @click="endFast" class="w-full py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all" :class="fasting.done ? 'bg-salvia text-white' : 'bg-gray-100 text-gray-600'">{{ fasting.done ? 'Ho mangiato: chiudi il digiuno' : 'Interrompi il digiuno' }}</button>
+                </template>
+                <template v-else>
+                  <div class="grid grid-cols-4 gap-1.5">
+                    <button v-for="g in FAST_GOALS" :key="'fg' + g" @click="setFastGoal(g)" class="py-2 rounded-xl text-xs font-bold border transition-all"
+                            :class="fasting.goal === g ? 'bg-viola text-white border-viola' : 'bg-gray-50 text-gray-500 border-gray-100'">{{ g }}:{{ 24 - g }}</button>
+                  </div>
+                  <button @click="startFast(fasting.goal)" class="w-full bg-viola text-white py-2.5 rounded-xl text-xs font-bold active:scale-95 transition-all">Inizia ora · {{ fasting.goal }} ore senza mangiare</button>
+                </template>
               </div>
             </div>
 
@@ -574,17 +635,20 @@
                 </button>
               </div>
 
-              <!-- Niente in programma -->
-              <div v-else @click="goTrainNow()" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-colors flex items-center gap-4 relative overflow-hidden">
-                <div class="absolute right-0 top-0 bottom-0 w-12 bg-arancione/5 flex items-center justify-center text-arancione">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+              <!-- Niente in programma: allenamento consigliato in base ai muscoli riposati -->
+              <div v-else class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-3.5">
+                <div class="flex items-center gap-4">
+                  <div class="w-16 h-14 shrink-0 rounded-2xl bg-gray-50 border border-gray-100 p-1" v-html="muscleRecoverySvg"></div>
+                  <div class="min-w-0">
+                    <h4 class="font-extrabold text-antracite">{{ todaySuggestion.recovery ? 'Oggi recupero attivo 🌿' : 'È ora di allenarsi! 🔥' }}</h4>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5 leading-snug">Ti consiglio <b class="text-antracite">{{ todaySuggestion.title }}</b> · circa {{ todaySuggestion.minutes }} min</p>
+                  </div>
                 </div>
-                <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0">
-                  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
-                </div>
-                <div class="pr-10">
-                  <h4 class="font-extrabold text-antracite">È ora di allenarsi! 🔥</h4>
-                  <p class="text-xs text-gray-500 font-medium mt-0.5">Niente in programma oggi: scegli una scheda e parti.</p>
+                <div class="flex gap-2">
+                  <button @click="startTodaySuggestion" class="flex-1 bg-arancione text-white font-bold py-2.5 rounded-xl text-xs shadow-sm active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Inizia
+                  </button>
+                  <button @click="goTrainNow()" class="px-3.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-xs active:scale-95 transition-all">Le mie schede</button>
                 </div>
               </div>
             </div>
@@ -679,14 +743,75 @@
                 </button>
               </div>
 
+              <!-- SU MISURA PER OGGI: in base ai muscoli riposati (js/utils/coach.js) -->
+              <div class="bg-white rounded-3xl p-5 border border-arancione/30 shadow-soft space-y-4">
+                <div class="flex items-start justify-between gap-3">
+                  <div class="min-w-0">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-arancione">Su misura per oggi</div>
+                    <h3 class="text-base font-extrabold text-antracite leading-tight mt-0.5">{{ todaySuggestion.title }}</h3>
+                  </div>
+                  <div class="flex bg-gray-50 border border-gray-100 rounded-xl p-0.5 shrink-0">
+                    <button v-for="p in [{ id: 'gym', l: 'Palestra' }, { id: 'home', l: 'Casa' }]" :key="'tp' + p.id" @click="setTrainPlace(p.id)"
+                            class="px-2.5 py-1.5 rounded-lg text-[10px] font-bold transition-all"
+                            :class="trainPlace === p.id ? 'bg-white text-antracite shadow-sm border border-gray-200' : 'text-gray-400 border border-transparent'">{{ p.l }}</button>
+                  </div>
+                </div>
+                <p class="text-[11px] font-medium text-gray-500 leading-snug -mt-2">
+                  <template v-if="todaySuggestion.recovery">I muscoli sono ancora stanchi<span v-if="todaySuggestion.tired.length"> ({{ todaySuggestion.tired.join(', ').toLowerCase() }})</span>: oggi muoviti leggero, così recuperi meglio.</template>
+                  <template v-else-if="todaySuggestion.beginner">Tutto il corpo in un solo allenamento: perfetto per iniziare. Quando ti alleni più spesso alterno i muscoli in base al recupero.</template>
+                  <template v-else>Scelto sui muscoli più riposati: {{ todaySuggestion.groups.map(g => g.name.toLowerCase() + ' ' + g.fresh + '%').join(', ') }}.</template>
+                </p>
+                <div class="grid grid-cols-[112px_1fr] gap-3 items-center">
+                  <div class="rounded-2xl bg-gray-50 border border-gray-100 p-1.5" v-html="muscleRecoverySvg"></div>
+                  <ol class="space-y-1.5 min-w-0">
+                    <li v-for="(it, i) in todaySuggestion.items" :key="'ts' + it.id" class="text-xs font-bold text-antracite truncate"><span class="text-gray-400 font-extrabold">{{ i + 1 }}.</span> {{ it.n }}</li>
+                  </ol>
+                </div>
+                <div class="flex items-center gap-3 text-[10px] font-bold text-gray-400">
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#20C997]"></span>Pronto</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#F5C042]"></span>In recupero</span>
+                  <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-[#EF6B5B]"></span>Stanco</span>
+                </div>
+                <div class="flex gap-2">
+                  <button @click="startTodaySuggestion" class="flex-1 bg-arancione text-white font-bold py-3 rounded-2xl text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Inizia · circa {{ todaySuggestion.minutes }} min
+                  </button>
+                  <button @click="shuffleTodayPlan" class="px-4 rounded-2xl bg-gray-100 text-gray-600 font-bold text-xs active:scale-95 transition-all">🔀 Cambia</button>
+                </div>
+              </div>
+
+              <!-- MUSCOLI DELLA SETTIMANA: mappa da condividere -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="min-w-0">
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">💪 I tuoi muscoli in 7 giorni</div>
+                    <div class="text-sm font-extrabold text-antracite mt-0.5">{{ weekMuscles.empty ? 'Ancora nessun allenamento' : weekMuscles.sets + ' serie · ' + weekMuscles.days + (weekMuscles.days === 1 ? ' giorno' : ' giorni') }}</div>
+                  </div>
+                  <button v-if="!weekMuscles.empty" @click="openMuscleShare" class="shrink-0 cangiante-btn text-white text-[11px] font-extrabold px-3 py-2 rounded-xl shadow-sm active:scale-95 transition-all">📸 Condividi</button>
+                </div>
+                <div class="grid grid-cols-[124px_1fr] gap-3 items-center">
+                  <div class="rounded-2xl bg-gray-50 border border-gray-100 p-1.5" v-html="weekMusclesSvg"></div>
+                  <div v-if="!weekMuscles.empty" class="space-y-2 min-w-0">
+                    <div v-for="t in weekMuscles.top.slice(0, 4)" :key="'wm' + t.id">
+                      <div class="flex items-center justify-between gap-2 text-[11px] font-bold">
+                        <span class="text-antracite truncate">{{ t.name }}</span>
+                        <span class="text-gray-400 shrink-0">{{ t.sets }} serie</span>
+                      </div>
+                      <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mt-1"><div class="h-full rounded-full bg-arancione" :style="{ width: Math.max(6, Math.round(t.k * 100)) + '%' }"></div></div>
+                    </div>
+                  </div>
+                  <p v-else class="text-[11px] font-medium text-gray-500 leading-snug">Segna i carichi o fai un allenamento guidato: qui si colorano i muscoli che hai lavorato, da condividere nelle storie.</p>
+                </div>
+              </div>
+
               <!-- GUIDA: allenamenti consigliati -->
               <button @click="openGuide(userSports.length ? 'sport' : 'muscle')" class="w-full text-left bg-antracite rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all">
                 <div class="absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none">🏋️</div>
                 <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-arancione">Non sai cosa fare?</div>
                 <div class="relative z-10 text-lg font-extrabold text-white mt-1 leading-tight">Allenamenti consigliati</div>
                 <p class="relative z-10 text-[11px] font-medium text-white/60 mt-1 leading-snug pr-10">
-                  <template v-if="userSports.length">Esercizi scelti per chi gioca a {{ userSports[0].toLowerCase() }}, schede pronte e oltre 100 esercizi con le foto di come si fanno.</template>
-                  <template v-else>Schede pronte e oltre 100 esercizi con le foto di come si fanno e i muscoli che lavorano.</template>
+                  <template v-if="userSports.length">Esercizi scelti per chi gioca a {{ userSports[0].toLowerCase() }}, schede pronte e oltre 180 esercizi con le foto di come si fanno.</template>
+                  <template v-else>Schede pronte, stretching e oltre 180 esercizi con le foto di come si fanno e i muscoli che lavorano.</template>
                 </p>
               </button>
 
@@ -726,6 +851,7 @@
                     </div>
                     <div class="min-w-0">
                       <span v-if="isActiveSheet(sheet)" class="inline-block text-[9px] font-black uppercase tracking-widest text-white bg-arancione px-2 py-0.5 rounded-md mb-1">Attiva · prossimo {{ activeSheetNext.day ? activeSheetNext.day.name : '' }}</span>
+                      <span v-if="sheet.auto" class="inline-block text-[9px] font-black uppercase tracking-widest text-arancione bg-arancione/10 px-2 py-0.5 rounded-md mb-1">Preparata da STILL</span>
                       <h4 class="font-extrabold text-antracite text-base group-hover:text-arancione transition-colors truncate">{{ sheet.name }}</h4>
                       <p class="text-xs text-gray-500 font-medium mt-0.5">{{ sheet.days.length }} {{ sheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sheet) }} {{ totalSheetExercises(sheet) === 1 ? 'esercizio' : 'esercizi' }}</p>
                       <p class="text-[10px] font-bold text-gray-400 mt-1">{{ sheetLastSessionDate(sheet) ? 'Ultima sessione: ' + formatDate(sheetLastSessionDate(sheet)) : 'Mai allenata' }}</p>
@@ -1253,6 +1379,50 @@
                   </p>
                 </div>
 
+                <!-- Consumo reale (calorie adattive): dai pasti segnati e dalle pesate -->
+                <div v-if="bodyStats.energy || realExpenditure.ready" @click="toggleBodyInfo('real')" role="button" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer space-y-3">
+                  <div class="flex items-start justify-between gap-3">
+                    <div class="min-w-0">
+                      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">📈 Consumo reale</div>
+                      <template v-if="realExpenditure.ready">
+                        <div class="text-3xl font-extrabold text-antracite mt-1">{{ formatNumber(realExpenditure.tdee) }} <span class="text-sm font-bold text-gray-400">kcal</span></div>
+                        <div class="text-[11px] font-medium text-gray-500 mt-0.5">Mangi in media {{ formatNumber(realExpenditure.avgIntake) }} kcal · peso {{ realExpenditure.perWeek > 0 ? '+' : '' }}{{ formatNumber(Math.round(realExpenditure.perWeek * 10) / 10) }} kg/sett</div>
+                      </template>
+                      <template v-else>
+                        <div class="text-sm font-extrabold text-antracite mt-1">Lo calcolo dai tuoi dati veri</div>
+                        <div class="text-[11px] font-medium text-gray-500 mt-0.5 leading-snug">{{ realExpNeedText }}</div>
+                      </template>
+                    </div>
+                    <span v-if="realExpenditure.ready && bodyStats.energy" class="text-[10px] font-bold px-2 py-1 rounded-md shrink-0" :class="Math.abs(realExpenditure.diff) < 100 ? 'bg-salvia/10 text-salvia' : 'bg-viola/10 text-viola'">{{ Math.abs(realExpenditure.diff) < 100 ? 'come la stima' : (realExpenditure.diff > 0 ? '+' : '') + realExpenditure.diff + ' sulla stima' }}</span>
+                  </div>
+                  <div v-if="!realExpenditure.ready" class="w-full bg-gray-100 h-2 rounded-full overflow-hidden"><div class="h-full cangiante-btn rounded-full transition-all" :style="{ width: Math.max(4, realExpenditure.progress) + '%' }"></div></div>
+                  <template v-else>
+                    <div class="grid grid-cols-3 gap-2">
+                      <div class="rounded-2xl bg-sky-500/10 px-2 py-2.5 text-center">
+                        <div class="text-[9px] font-bold text-sky-600 uppercase tracking-wider">Dimagrire</div>
+                        <div class="text-sm font-extrabold text-antracite mt-0.5">{{ formatNumber(realExpenditure.lose) }}</div>
+                      </div>
+                      <div class="rounded-2xl bg-salvia/10 px-2 py-2.5 text-center">
+                        <div class="text-[9px] font-bold text-salvia uppercase tracking-wider">Mantenere</div>
+                        <div class="text-sm font-extrabold text-antracite mt-0.5">{{ formatNumber(realExpenditure.tdee) }}</div>
+                      </div>
+                      <div class="rounded-2xl bg-arancione/10 px-2 py-2.5 text-center">
+                        <div class="text-[9px] font-bold text-arancione uppercase tracking-wider">Aumentare</div>
+                        <div class="text-sm font-extrabold text-antracite mt-0.5">{{ formatNumber(realExpenditure.gain) }}</div>
+                      </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="text-[10px] font-bold text-gray-400 shrink-0">Precisione</span>
+                      <div class="flex-1 h-1.5 bg-gray-100 rounded-full overflow-hidden"><div class="h-full bg-salvia rounded-full" :style="{ width: Math.round(realExpenditure.confidence * 100) + '%' }"></div></div>
+                      <span class="text-[10px] font-bold text-gray-400 shrink-0">{{ realExpenditure.days }} giorni · {{ realExpenditure.weighIns }} pesate</span>
+                    </div>
+                    <p v-if="realExpenditure.suspicious" class="text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 leading-snug">Risulta che mangi molto meno di quanto servirebbe per il tuo peso: forse non segni proprio tutto (condimenti, bevande, assaggi). Il calcolo è preciso solo se segni tutto.</p>
+                  </template>
+                  <p v-if="bodyInfoOpen === 'real'" class="text-[11px] font-medium text-gray-500 leading-relaxed">
+                    Il fabbisogno qui sopra è una formula uguale per tutti. Questo invece è il <b>tuo</b>: guardo le giornate segnate per intero delle ultime 4 settimane (tutti i pasti del piano, oppure almeno pranzo e cena nel diario) e come cambia il peso. Se mangi 2.000 kcal e perdi mezzo chilo a settimana, in realtà ne consumi circa 2.550. Più giorni segni, più è preciso. Pesati sempre nelle stesse condizioni (mattina, a digiuno).
+                  </p>
+                </div>
+
                 <div class="grid grid-cols-2 gap-3">
                   <!-- BMI -->
                   <div v-if="bodyStats.bmi" @click="toggleBodyInfo('bmi')" role="button" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm cursor-pointer" :class="bodyInfoOpen === 'bmi' ? 'col-span-2' : ''">
@@ -1582,6 +1752,11 @@
                 </button>
               </div>
 
+              <button v-if="!diaryDay.plan && diaryCopySource(diaryDate)" @click="copyDiaryFromPrev(diaryDate)"
+                      class="w-full bg-salvia/10 border border-salvia/20 text-salvia rounded-2xl py-3 text-xs font-bold active:scale-[0.99] transition-all">
+                ↺ Copia dal giorno prima: {{ diaryCopySource(diaryDate).slots.length }} {{ diaryCopySource(diaryDate).slots.length === 1 ? 'pasto' : 'pasti' }}<span v-if="diaryCopySource(diaryDate).kcal"> · ≈ {{ formatNumber(diaryCopySource(diaryDate).kcal) }} kcal</span>
+              </button>
+
               <!-- Obiettivo -->
               <div v-if="!diaryDay.plan" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3">
                 <div class="flex items-center justify-between gap-2">
@@ -1589,7 +1764,7 @@
                   <span class="text-xs font-extrabold text-antracite">{{ formatNumber(diaryTarget.kcal) }} kcal al giorno</span>
                 </div>
                 <div v-if="bodyStats.energy" class="grid grid-cols-3 gap-1.5">
-                  <button v-for="g in [{ id: 'lose', l: 'Dimagrire', k: bodyStats.energy.lose }, { id: 'keep', l: 'Mantenere', k: bodyStats.energy.tdee }, { id: 'gain', l: 'Crescere', k: bodyStats.energy.gain }]" :key="'dg' + g.id"
+                  <button v-for="g in (diaryTarget.adaptive ? [{ id: 'lose', l: 'Dimagrire', k: realExpenditure.lose }, { id: 'keep', l: 'Mantenere', k: realExpenditure.tdee }, { id: 'gain', l: 'Crescere', k: realExpenditure.gain }] : [{ id: 'lose', l: 'Dimagrire', k: bodyStats.energy.lose }, { id: 'keep', l: 'Mantenere', k: bodyStats.energy.tdee }, { id: 'gain', l: 'Crescere', k: bodyStats.energy.gain }])" :key="'dg' + g.id"
                           @click="setDiaryGoal(g.id)" class="rounded-xl py-2 px-1 text-center border transition-all"
                           :class="!diaryTarget.custom && diaryGoal === g.id ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-100'">
                     <span class="block text-[11px] font-bold">{{ g.l }}</span>
@@ -1597,6 +1772,14 @@
                   </button>
                 </div>
                 <p v-else class="text-[11px] font-medium text-gray-500 leading-snug">Per ora uso 2000 kcal. Aggiungi età, altezza e peso nel profilo e in Progressi: calcolo il tuo fabbisogno.</p>
+                <div v-if="realExpenditure.ready" class="rounded-2xl border px-3 py-2.5 flex items-center justify-between gap-3 transition-all" :class="diaryTarget.adaptive ? 'bg-salvia/10 border-salvia/30' : 'bg-gray-50 border-gray-100'">
+                  <div class="min-w-0">
+                    <div class="text-xs font-bold text-antracite">📈 Segui il consumo reale</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Dai tuoi pasti e dal peso consumi ≈ {{ formatNumber(realExpenditure.tdee) }} kcal. L'obiettivo si aggiorna da solo.</p>
+                  </div>
+                  <button @click="toggleDiaryAdaptive" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0" :class="diaryTarget.adaptive ? 'bg-salvia' : 'bg-gray-300'" aria-label="Segui il consumo reale"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="diaryTarget.adaptive ? 'translate-x-5' : ''"></div></button>
+                </div>
+                <p v-else-if="bodyStats.energy" class="text-[10px] font-medium text-gray-400 leading-snug">📈 {{ realExpNeedText }} Poi calcolo il tuo consumo reale e l'obiettivo si regola da solo.</p>
                 <label class="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
                   Oppure scrivi il tuo:
                   <input type="text" inputmode="numeric" :value="diaryTarget.custom ? diaryTarget.kcal : ''" @change="setDiaryKcal($event.target.value)" placeholder="es. 2200"
@@ -1626,6 +1809,24 @@
                   <template v-if="diaryWeek.tracked">{{ diaryWeek.good }} {{ diaryWeek.good === 1 ? 'giorno' : 'giorni' }} su {{ diaryWeek.tracked }} nelle tue calorie. <span class="text-gray-400">Verde: entro l'obiettivo · viola: un po' sopra · rosso: molto sopra · grigio: mancano pranzo o cena.</span></template>
                   <template v-else>Segna cosa mangi per qualche giorno: qui vedrai come va la settimana.</template>
                 </p>
+              </div>
+              <!-- Altro da tracciare (facoltativo): compare nella home -->
+              <div class="space-y-2">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1">Altro da tracciare</div>
+                <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-antracite">💧 Acqua</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Bicchieri bevuti ogni giorno, nella home.</p>
+                  </div>
+                  <button @click="toggleHabit('water')" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0" :class="habitOn('water') ? 'bg-salvia' : 'bg-gray-300'" aria-label="Traccia l'acqua"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="habitOn('water') ? 'translate-x-5' : ''"></div></button>
+                </div>
+                <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-antracite">⏱️ Digiuno intermittente</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Timer 12, 14, 16 o 18 ore, nella home.</p>
+                  </div>
+                  <button @click="toggleHabit('fasting')" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0" :class="habitOn('fasting') ? 'bg-salvia' : 'bg-gray-300'" aria-label="Traccia il digiuno"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="habitOn('fasting') ? 'translate-x-5' : ''"></div></button>
+                </div>
               </div>
               <p class="text-[10px] font-medium text-gray-400 text-center leading-snug px-4">Stime da valori medi: servono a regolarti, non a contare ogni caloria. Per una dieta su misura chiedi a un nutrizionista.</p>
             </div>
@@ -2176,6 +2377,25 @@
                   </button>
                 </div>
                 <p v-if="settings.theme === 'system'" class="text-[10px] font-medium text-gray-400 -mt-1">Segue il tema del telefono: scuro di sera se l'hai impostato così.</p>
+              </div>
+
+              <!-- Da tracciare (facoltativo) -->
+              <div class="space-y-3">
+                <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Da tracciare</div>
+                <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-antracite">💧 Acqua</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Bicchieri bevuti ogni giorno, nella home.</p>
+                  </div>
+                  <button @click="toggleHabit('water')" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0" :class="habitOn('water') ? 'bg-salvia' : 'bg-gray-300'" aria-label="Traccia l'acqua"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="habitOn('water') ? 'translate-x-5' : ''"></div></button>
+                </div>
+                <div class="flex items-center justify-between gap-3 bg-gray-50 border border-gray-100 rounded-2xl p-3.5">
+                  <div class="min-w-0">
+                    <div class="text-sm font-bold text-antracite">⏱️ Digiuno intermittente</div>
+                    <p class="text-[10px] font-medium text-gray-500 leading-snug">Timer 12, 14, 16 o 18 ore, nella home.</p>
+                  </div>
+                  <button @click="toggleHabit('fasting')" class="w-11 h-6 rounded-full relative transition-colors flex-shrink-0" :class="habitOn('fasting') ? 'bg-salvia' : 'bg-gray-300'" aria-label="Traccia il digiuno"><div class="w-5 h-5 bg-white rounded-full absolute top-0.5 left-0.5 transition-transform shadow" :class="habitOn('fasting') ? 'translate-x-5' : ''"></div></button>
+                </div>
               </div>
 
               <!-- App sul telefono -->
@@ -3124,7 +3344,7 @@
             <!-- Barra superiore -->
             <div class="relative z-10 px-5 pt-5 pb-3 flex items-center justify-between gap-3 shrink-0">
               <div>
-                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'recap' && shareStudio.recapType === 'year' ? 'Il tuo anno' : shareStudio.kind === 'recap' && shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo' })[shareStudio.kind] || 'Progressi') }}</p>
+                <p class="text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ shareStudio.kind === 'recap' && shareStudio.recapType === 'year' ? 'Il tuo anno' : shareStudio.kind === 'recap' && shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo', muscles: 'Muscoli della settimana' })[shareStudio.kind] || 'Progressi') }}</p>
                 <h3 class="text-lg font-extrabold leading-tight">Condividi</h3>
               </div>
               <button @click="closeShareStudio" :disabled="shareStudio.recording" class="p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30" aria-label="Chiudi">
@@ -4611,6 +4831,59 @@
           </div>
         </div>
 
+        <!-- GIORNO LEGGERO -->
+        <div v-if="lightDayModal.isOpen" class="fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="lightDayModal.isOpen = false">
+          <div class="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5">
+            <div class="text-center">
+              <div class="text-4xl">🌱</div>
+              <h3 class="text-lg font-extrabold text-antracite mt-2">Anche i giorni piccoli contano</h3>
+              <p class="text-xs text-gray-500 font-medium mt-1 leading-relaxed">Oggi non è giornata? Bastano 10 minuti di movimento per tenere viva la serie. Niente sensi di colpa.</p>
+            </div>
+            <div class="space-y-2">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cosa hai fatto</div>
+              <div class="grid grid-cols-4 gap-1.5">
+                <button v-for="a in LIGHT_ACTIVITIES" :key="'la' + a.id" @click="lightDayModal.type = a.id"
+                        class="rounded-2xl py-2.5 px-1 flex flex-col items-center gap-1 border transition-all active:scale-95"
+                        :class="lightDayModal.type === a.id ? 'bg-salvia/10 border-salvia text-antracite' : 'bg-gray-50 border-gray-100 text-gray-500'">
+                  <span class="text-xl leading-none">{{ a.icon }}</span>
+                  <span class="text-[10px] font-bold leading-tight text-center">{{ a.label }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Per quanto</div>
+              <div class="grid grid-cols-5 gap-1.5">
+                <button v-for="m in LIGHT_MINUTES" :key="'lm' + m" @click="lightDayModal.min = m"
+                        class="py-2 rounded-xl text-xs font-bold border transition-all"
+                        :class="lightDayModal.min === m ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-100'">{{ m }}'</button>
+              </div>
+            </div>
+            <div class="space-y-2">
+              <button @click="saveLightDay" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all">Segna come fatto</button>
+              <button v-if="lightToday" @click="removeLightDay" class="w-full text-xs font-bold text-red-500 py-2">Togli la giornata leggera</button>
+              <button v-else @click="lightDayModal.isOpen = false" class="w-full text-xs font-bold text-gray-400 py-2">Non ora</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- NUOVO RECORD PERSONALE -->
+        <div v-if="recordModal.isOpen && recordModal.record" class="fixed inset-0 z-[75] flex items-center justify-center p-4 bg-antracite/60 backdrop-blur-sm animate-fadeIn">
+          <div class="record-pop bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center relative overflow-hidden">
+            <div class="record-confetti" aria-hidden="true"><i v-for="n in 18" :key="'rc' + n"></i></div>
+            <div class="relative">
+              <div class="w-20 h-20 mx-auto rounded-full bg-arancione/15 border-4 border-arancione/40 flex items-center justify-center text-4xl record-medal">🏆</div>
+              <div class="text-[10px] font-black uppercase tracking-[0.2em] text-arancione mt-3">Nuovo record personale</div>
+              <h3 class="text-xl font-extrabold text-antracite mt-1 leading-tight">{{ recordModal.record.name }}</h3>
+              <div class="text-4xl font-black text-antracite mt-2">{{ formatNumber(recordModal.record.value) }} <span class="text-lg font-bold text-gray-400">kg</span></div>
+              <p class="text-xs font-semibold text-gray-500 mt-1">Prima {{ formatNumber(recordModal.record.prev) }} kg · <b class="text-salvia">+{{ formatNumber(Math.round((recordModal.record.value - recordModal.record.prev) * 10) / 10) }} kg</b></p>
+            </div>
+            <div class="space-y-2 relative">
+              <button @click="shareRecordFromModal" class="w-full cangiante-btn text-white font-extrabold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all">📸 Condividi nella storia</button>
+              <button @click="recordModal.isOpen = false" class="w-full text-xs font-bold text-gray-400 py-2">Continua</button>
+            </div>
+          </div>
+        </div>
+
         <!-- BOTTOM NAVIGATION TABS -->
         <nav class="bg-white/95 backdrop-blur-lg border-t border-gray-200 px-2 py-2.5 flex justify-between items-center z-20 absolute bottom-0 left-0 right-0 pb-6 sm:pb-2.5">
           <!-- Dashboard (Viola) -->
@@ -4672,6 +4945,7 @@
   <script src="js/data/trophies.js"></script>
   <script src="js/data/exercises.js"></script>
   <script src="js/data/exercise-art.js"></script>
+  <script src="js/utils/coach.js"></script>
   <script src="js/data/nutrition.js"></script>
   <script src="js/data/wrapped.js"></script>
   <script src="js/data/pets.js"></script>

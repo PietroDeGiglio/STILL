@@ -409,3 +409,31 @@ html.dark .mm-sec { fill: #8A6420; }
 .ex-frame2 { animation: exFrame2 2.4s ease-in-out infinite; }
 @keyframes exFrame2 { 0%, 35% { opacity: 0; } 50%, 85% { opacity: 1; } 100% { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .ex-frame2 { animation-duration: 6s; } }
+
+/* Nuovo record personale: la card entra con un pop, la medaglia oscilla, cadono i coriandoli */
+.record-pop { animation: recordPop .5s cubic-bezier(.2, 1.4, .4, 1) both; }
+@keyframes recordPop { from { transform: scale(.7); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.record-medal { animation: recordMedal 1.6s ease-in-out infinite; }
+@keyframes recordMedal { 0%, 100% { transform: rotate(-6deg) scale(1); } 50% { transform: rotate(6deg) scale(1.06); } }
+.record-confetti { position: absolute; inset: 0; pointer-events: none; }
+.record-confetti i { position: absolute; top: -14px; width: 8px; height: 14px; border-radius: 2px; opacity: 0; animation: recordFall 2s ease-in forwards; }
+@keyframes recordFall { 0% { opacity: 1; transform: translateY(0) rotate(0); } 100% { opacity: 0; transform: translateY(440px) rotate(560deg); } }
+.record-confetti i:nth-child(1) { left: 9%; background: #20C997; animation-delay: 0.00s; animation-duration: 1.80s; }
+.record-confetti i:nth-child(2) { left: 46%; background: #F5A623; animation-delay: 0.35s; animation-duration: 2.05s; }
+.record-confetti i:nth-child(3) { left: 83%; background: #7A4DF1; animation-delay: 0.20s; animation-duration: 2.30s; }
+.record-confetti i:nth-child(4) { left: 24%; background: #EF6B5B; animation-delay: 0.05s; animation-duration: 2.55s; }
+.record-confetti i:nth-child(5) { left: 61%; background: #38BDF8; animation-delay: 0.40s; animation-duration: 1.80s; }
+.record-confetti i:nth-child(6) { left: 2%; background: #FBBF24; animation-delay: 0.25s; animation-duration: 2.05s; }
+.record-confetti i:nth-child(7) { left: 39%; background: #20C997; animation-delay: 0.10s; animation-duration: 2.30s; }
+.record-confetti i:nth-child(8) { left: 76%; background: #F5A623; animation-delay: 0.45s; animation-duration: 2.55s; }
+.record-confetti i:nth-child(9) { left: 17%; background: #7A4DF1; animation-delay: 0.30s; animation-duration: 1.80s; }
+.record-confetti i:nth-child(10) { left: 54%; background: #EF6B5B; animation-delay: 0.15s; animation-duration: 2.05s; }
+.record-confetti i:nth-child(11) { left: 91%; background: #38BDF8; animation-delay: 0.00s; animation-duration: 2.30s; }
+.record-confetti i:nth-child(12) { left: 32%; background: #FBBF24; animation-delay: 0.35s; animation-duration: 2.55s; }
+.record-confetti i:nth-child(13) { left: 69%; background: #20C997; animation-delay: 0.20s; animation-duration: 1.80s; }
+.record-confetti i:nth-child(14) { left: 10%; background: #F5A623; animation-delay: 0.05s; animation-duration: 2.05s; }
+.record-confetti i:nth-child(15) { left: 47%; background: #7A4DF1; animation-delay: 0.40s; animation-duration: 2.30s; }
+.record-confetti i:nth-child(16) { left: 84%; background: #EF6B5B; animation-delay: 0.25s; animation-duration: 2.55s; }
+.record-confetti i:nth-child(17) { left: 25%; background: #38BDF8; animation-delay: 0.10s; animation-duration: 1.80s; }
+.record-confetti i:nth-child(18) { left: 62%; background: #FBBF24; animation-delay: 0.45s; animation-duration: 2.05s; }
+@media (prefers-reduced-motion: reduce) { .record-pop, .record-medal, .record-confetti i { animation: none; } }

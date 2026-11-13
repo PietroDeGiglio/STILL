@@ -604,15 +604,26 @@ createApp({
 
     // Obiettivo calorico del diario: dal profilo (mantenere / dimagrire / crescere) o scritto a mano
     const diaryGoal = computed(() => (settings.value.diary && settings.value.diary.goal) || suggestedEatGoal.value);
+    // Consumo reale (sezione CONSUMO REALE, più sotto): qui si legge da un contenitore perché è definito dopo
+    const realExpHolder = shallowRef(null);
     const diaryTarget = computed(() => {
       const custom = settings.value.diary && Number(settings.value.diary.kcal);
       if (custom > 0) return { kcal: Math.round(custom), custom: true };
+      const real = realExpHolder.value && realExpHolder.value.value;
+      if (settings.value.diary && settings.value.diary.adaptive && real && real.ready) {
+        const g = diaryGoal.value;
+        return { kcal: g === 'lose' ? real.lose : g === 'gain' ? real.gain : real.tdee, adaptive: true };
+      }
       const e = bodyStats.value.energy;
       if (!e) return { kcal: 2000, fallback: true };
       const g = diaryGoal.value;
       return { kcal: g === 'lose' ? e.lose : g === 'gain' ? e.gain : e.tdee };
     });
     const setDiaryGoal = (goal) => { settings.value.diary = { ...(settings.value.diary || {}), goal, kcal: null }; };
+    const toggleDiaryAdaptive = () => {
+      const d = settings.value.diary || {};
+      settings.value.diary = { ...d, adaptive: !d.adaptive, kcal: null };
+    };
     const setDiaryKcal = (value) => {
       const n = parseOptionalNumber(value);
       settings.value.diary = { ...(settings.value.diary || {}), kcal: n && n >= 800 && n <= 6000 ? Math.round(n) : null };
@@ -830,6 +841,25 @@ createApp({
       const key = toISODate(d);
       if (key > todayDateKey.value) return;
       diaryDate.value = key;
+    };
+    // "Come ieri": copia i pasti del giorno prima negli spazi ancora vuoti
+    const diaryPrevKey = (key) => { const d = new Date(key + 'T00:00:00'); d.setDate(d.getDate() - 1); return toISODate(d); };
+    const diaryHas = (e) => !!(e && (e.text || e.kcal));
+    const diaryCopySource = (key) => {
+      const from = diaryPrevKey(key);
+      const src = foodDiary.value[from] || {};
+      const dest = foodDiary.value[key] || {};
+      const slots = DIARY_MEALS.map(m => m.id).filter(k => diaryHas(src[k]) && !diaryHas(dest[k]));
+      if (!slots.length) return null;
+      return { from, slots, kcal: slots.reduce((s, k) => s + (src[k].kcal || 0), 0), unknown: slots.some(k => src[k].kcal === null || src[k].kcal === undefined) };
+    };
+    const copyDiaryFromPrev = (key) => {
+      const info = diaryCopySource(key);
+      if (!info || isFutureDateKey(key)) return;
+      const src = foodDiary.value[info.from];
+      const dest = { ...(foodDiary.value[key] || {}) };
+      info.slots.forEach(k => { dest[k] = { ...src[k], copied: true }; });
+      foodDiary.value[key] = dest;
     };
     const diaryDay = computed(() => {
       const info = dayIntake(diaryDate.value);
@@ -2237,7 +2267,8 @@ createApp({
     // Solo i log vecchi senza ID vengono abbinati per nome.
     const sameExercise = (log, target) => {
       if (!log || !target) return false;
-      if (target.id && log.exerciseId) return String(log.exerciseId) === String(target.id);
+      const auto = String(target.id || '').startsWith('auto-') || String(log.exerciseId || '').startsWith('auto-');
+      if (target.id && log.exerciseId && !auto) return String(log.exerciseId) === String(target.id);
       const a = (log.exerciseName || log.exercise || '').trim().toLowerCase();
       const b = (target.name || '').trim().toLowerCase();
       return !!b && a === b;
@@ -2417,10 +2448,33 @@ createApp({
         upsertTodayExerciseLog(exercise, { weight: null, reps: null, duration: rounded, intensity: exercise.intensity || '' });
         showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' min registrati per oggi.');
       } else {
+        const record = newRecordFor(exercise, rounded);
         upsertTodayExerciseLog(exercise, { weight: rounded, reps: parseOptionalNumber(exercise.reps) });
-        showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' kg registrati per oggi.');
+        if (record) celebrateRecord(record);
+        else showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' kg registrati per oggi.');
       }
       exerciseInputs.value[exercise.id] = '';
+    };
+
+    // Nuovo record personale: il carico di oggi supera il migliore dei giorni precedenti
+    const recordModal = ref({ isOpen: false, record: null });
+    const newRecordFor = (exercise, value) => {
+      if (!exercise || exercise.type === 'cardio' || !(value > 0)) return null;
+      const today = toISODate();
+      const before = exerciseLogsFor(exercise).filter(log => log.date < today)
+        .map(log => parseOptionalNumber(log.weight)).filter(v => v !== null && v > 0);
+      if (!before.length) return null;
+      const best = Math.max(...before);
+      return value > best ? { type: 'record', name: exercise.name, value, prev: best, unit: 'kg', date: today } : null;
+    };
+    const celebrateRecord = (record) => {
+      recordModal.value = { isOpen: true, record };
+      vibrate([60, 40, 60, 40, 220]);
+    };
+    const shareRecordFromModal = () => {
+      const record = recordModal.value.record;
+      recordModal.value.isOpen = false;
+      if (record) openAchievementShare(record);
     };
 
     const cancelExerciseValue = () => {
@@ -2584,13 +2638,15 @@ createApp({
       const top = cleaned.reduce((max, set) => Math.max(max, set.weight), -Infinity);
       const topSet = cleaned.find(set => set.weight === top) || cleaned[0];
       const rounded = Math.round(top * 10) / 10;
+      const record = newRecordFor(exercise, rounded);
       upsertTodayExerciseLog(exercise, {
         weight: rounded,
         reps: parseOptionalNumber(topSet.reps),
         setsDetail: cleaned.map(set => ({ weight: Math.round(set.weight * 10) / 10, reps: set.reps }))
       });
       modal.isOpen = false;
-      showToastMessage(exercise.name + ': peso massimo ' + formatNumber(rounded) + ' kg registrato per oggi.');
+      if (record) celebrateRecord(record);
+      else showToastMessage(exercise.name + ': peso massimo ' + formatNumber(rounded) + ' kg registrato per oggi.');
     };
 
     const sheetSessionDates = computed(() => {
@@ -3586,6 +3642,178 @@ createApp({
       workoutView.value = 'list';
     };
 
+    // ---------------------------------------------------------------
+    // ALLENAMENTO DI OGGI SU MISURA (js/utils/coach.js): dai muscoli che hai allenato (schede e sport)
+    // capisce quali sono riposati e propone l'allenamento di oggi con gli esercizi della libreria.
+    // ---------------------------------------------------------------
+    const libFromLogCache = new Map();
+    const libraryForName = (name) => {
+      const key = String(name || '').trim().toLowerCase();
+      if (!key) return null;
+      if (!libFromLogCache.has(key)) libFromLogCache.set(key, matchLibraryName(name) || null);
+      return libFromLogCache.get(key);
+    };
+    // Si sa il giorno ma non l'ora: si conta come allenamento delle 18 (o di adesso, se è oggi prima delle 18)
+    const logTime = (dateKey, now) => Math.min(now, new Date(dateKey + 'T18:00:00').getTime());
+    const sheetSetsFor = (log) => {
+      if (!log.exerciseId) return 0;
+      for (const sheet of workoutSheets.value) {
+        for (const day of (sheet.days || [])) {
+          const ex = (day.exercises || []).find(item => String(item.id) === String(log.exerciseId));
+          if (ex) return parseInt(ex.sets, 10) || 0;
+        }
+      }
+      return 0;
+    };
+    const muscleEvents = (fromKey, now) => {
+      const events = [];
+      workoutLogs.value.forEach(log => {
+        if (!log.date || log.date < fromKey) return;
+        const item = libraryForName(log.exerciseName || log.exercise);
+        const art = item && item.t !== 'cardio' ? exerciseArt(item) : null;
+        if (art) events.push({ time: logTime(log.date, now), date: log.date, primary: art.primary, secondary: art.secondary, item, log });
+      });
+      trainingSessions.value.forEach(s => {
+        const muscles = s.kind === 'sport' && SPORT_MUSCLES[s.sport];
+        if (!muscles || !s.statusByDate) return;
+        Object.entries(s.statusByDate).forEach(([key, status]) => {
+          if (status === 'done' && key >= fromKey) events.push({ time: logTime(key, now), date: key, primary: muscles, secondary: [], sport: s.sport });
+        });
+      });
+      return events;
+    };
+    const muscleRecovery = computed(() => {
+      const now = petNow.value;
+      const fatigue = muscleFatigue(muscleEvents(toISODate(new Date(now - 4 * 86400000)), now), now);
+      const groups = {};
+      Object.entries(MUSCLE_GROUP_OF).forEach(([m, g]) => { groups[g] = Math.max(groups[g] || 0, fatigue[m]); });
+      // Ultima volta (in ms) che ogni gruppo è stato allenato nelle ultime 2 settimane
+      const last = {};
+      muscleEvents(toISODate(new Date(now - 14 * 86400000)), now).forEach(ev => {
+        ev.primary.forEach(m => { const g = MUSCLE_GROUP_OF[m]; if (g) last[g] = Math.max(last[g] || 0, ev.time); });
+      });
+      const colors = {};
+      Object.keys(fatigue).forEach(m => { colors[m] = fatigueColor(fatigue[m]); });
+      return { fatigue, groups, last, colors };
+    });
+    const muscleRecoverySvg = computed(() => muscleColorSvg(muscleRecovery.value.colors));
+
+    const TODAY_SPLITS = [
+      { id: 'push', title: 'Spinta: petto, spalle e tricipiti', groups: ['petto', 'spalle', 'braccia'], slots: [['petto', 2], ['spalle', 1, 'spalle'], ['braccia', 1, 'tricipiti'], ['addome', 1]] },
+      { id: 'pull', title: 'Tirata: schiena e bicipiti', groups: ['schiena', 'braccia'], slots: [['schiena', 3], ['spalle', 1, 'spalle-post'], ['braccia', 1, 'bicipiti']] },
+      { id: 'legs', title: 'Gambe e glutei', groups: ['gambe', 'glutei'], slots: [['gambe', 2], ['glutei', 2], ['addome', 1]] },
+      { id: 'full', title: 'Total body', groups: ['petto', 'schiena', 'gambe', 'spalle', 'glutei'], slots: [['gambe', 1], ['petto', 1], ['schiena', 1], ['glutei', 1], ['spalle', 1, 'spalle'], ['addome', 1]] },
+      { id: 'recovery', title: 'Recupero attivo: cardio leggero e mobilità', groups: [], slots: [['cardio', 1], ['mobilita', 4]] }
+    ];
+    const LIGHT_CARDIO = ['camminata-veloce', 'cyclette', 'bici-reclinata', 'ellittica'];
+    const todayPlanVariant = ref(0);
+    const trainPlace = computed(() => settings.value.trainPlace || (workoutSheets.value.some(s => !s.auto) ? 'gym' : 'home'));
+    const setTrainPlace = (place) => { settings.value.trainPlace = place; todayPlanVariant.value = 0; };
+    const shuffleTodayPlan = () => { todayPlanVariant.value += 1; };
+    const seededRank = (text) => {
+      let h = 2166136261;
+      for (let i = 0; i < text.length; i++) { h ^= text.charCodeAt(i); h = Math.imul(h, 16777619); }
+      return (h >>> 0) / 4294967296;
+    };
+    const familiarLibraryIds = computed(() => {
+      const ids = new Set();
+      workoutLogs.value.forEach(log => { const item = libraryForName(log.exerciseName || log.exercise); if (item) ids.add(item.id); });
+      return ids;
+    });
+    const todaySuggestion = computed(() => {
+      const now = petNow.value;
+      const today = toISODate(new Date(now));
+      const rec = muscleRecovery.value;
+      const place = trainPlace.value;
+      const fresh = (g) => 1 - (rec.groups[g] || 0);
+      const trainedDays = new Set(muscleEvents(toISODate(new Date(now - 14 * 86400000)), now).map(ev => ev.date)).size;
+      const scored = TODAY_SPLITS.filter(s => s.id !== 'recovery').map(s => ({
+        split: s, score: Math.min(...s.groups.map(fresh)), last: Math.max(0, ...s.groups.map(g => rec.last[g] || 0))
+      }));
+      // Chi si allena poco fa tutto il corpo; chi si allena spesso alterna spinta, tirata e gambe
+      let pick = trainedDays < 3 ? scored.find(x => x.split.id === 'full')
+        : scored.filter(x => x.split.id !== 'full').sort((a, b) => (b.score - a.score) || (a.last - b.last))[0];
+      const recovery = !pick || pick.score < 0.6;
+      const split = recovery ? TODAY_SPLITS.find(s => s.id === 'recovery') : pick.split;
+      const used = new Set();
+      const items = [];
+      split.slots.forEach(([group, count, muscle]) => {
+        const okPlace = (it) => group === 'mobilita' || it.w === place;
+        let pool = EXERCISE_LIBRARY.filter(it => it.m === group && okPlace(it) && !used.has(it.id)
+          && (group === 'cardio' ? LIGHT_CARDIO.includes(it.id) : it.t !== 'cardio'));
+        if (muscle) {
+          const narrowed = pool.filter(it => { const a = exerciseArt(it); return a && a.primary.includes(muscle); });
+          if (narrowed.length) pool = narrowed;
+        }
+        if (!pool.length) pool = EXERCISE_LIBRARY.filter(it => it.m === group && !used.has(it.id) && (group === 'cardio' ? LIGHT_CARDIO.includes(it.id) : it.t !== 'cardio'));
+        pool.map(it => ({ it, r: (familiarLibraryIds.value.has(it.id) ? 0 : 0.5) + seededRank(today + ':' + todayPlanVariant.value + ':' + it.id) * 0.9 }))
+          .sort((a, b) => a.r - b.r).slice(0, count)
+          .forEach(x => { used.add(x.it.id); items.push(x.it); });
+      });
+      const seconds = items.reduce((s, it) => s + (it.t === 'cardio' ? (it.d || 15) * 60 : (it.s || 3) * (40 + (it.rec || 60))), 0);
+      const groupName = (g) => (MUSCLE_GROUPS.find(x => x.id === g) || {}).name || g;
+      return {
+        id: split.id, title: split.title, recovery, place, items,
+        minutes: Math.max(10, Math.round(seconds / 60 / 5) * 5),
+        groups: split.groups.map(g => ({ id: g, name: groupName(g), fresh: Math.round(fresh(g) * 100) })),
+        tired: Object.entries(rec.groups).filter(([, f]) => f >= 0.45).map(([g]) => groupName(g)),
+        beginner: trainedDays < 3
+      };
+    });
+    const startTodaySuggestion = () => {
+      const plan = todaySuggestion.value;
+      if (!plan || !plan.items.length) return;
+      const exercises = plan.items.map(item => ({ ...libraryToExercise(item), id: 'auto-' + item.id }));
+      let sheet = workoutSheets.value.find(s => s.auto === 'today');
+      if (!sheet) {
+        const nextId = Math.max(Date.now(), ...workoutSheets.value.map(item => (Number(item.id) || 0) + 1));
+        workoutSheets.value.push({ id: nextId, createdAt: toISODate(), name: 'Allenamento del giorno', auto: 'today', days: [] });
+        sheet = workoutSheets.value[workoutSheets.value.length - 1];
+      }
+      sheet.days = [{ name: plan.title, exercises }];
+      activeTab.value = 'allenamento';
+      openSheet(sheet);
+      openSessionPreview();
+    };
+
+    // Mappa dei muscoli della settimana: quante serie per muscolo negli ultimi 7 giorni
+    const weekMuscles = computed(() => {
+      const now = petNow.value;
+      const from = toISODate(new Date(now - 6 * 86400000));
+      const vol = {};
+      const days = new Set();
+      let sets = 0, sports = 0;
+      muscleEvents(from, now).forEach(ev => {
+        days.add(ev.date);
+        if (ev.sport) { sports++; return; }
+        const n = (Array.isArray(ev.log.setsDetail) && ev.log.setsDetail.length) || sheetSetsFor(ev.log) || 3;
+        sets += n;
+        ev.primary.forEach(m => { vol[m] = (vol[m] || 0) + n; });
+        ev.secondary.forEach(m => { vol[m] = (vol[m] || 0) + n / 2; });
+      });
+      const max = Math.max(0, ...Object.values(vol));
+      const colors = {};
+      Object.entries(vol).forEach(([m, v]) => { const c = volumeColor(max ? v / max : 0); if (c) colors[m] = c; });
+      const top = Object.entries(vol).sort((a, b) => b[1] - a[1]).slice(0, 5)
+        .map(([id, v]) => ({ id, name: MUSCLE_NAMES[id] || id, sets: Math.round(v), k: max ? v / max : 0 }));
+      return { sets, days: days.size, sports, top, colors, empty: !sets };
+    });
+    const weekMusclesSvg = computed(() => muscleColorSvg(weekMuscles.value.colors));
+    const muscleShareImg = shallowRef(null);
+    const loadMuscleShareImage = () => {
+      const img = new Image();
+      img.onload = () => { muscleShareImg.value = img; };
+      img.onerror = () => { muscleShareImg.value = null; };
+      img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(muscleColorSvg(weekMuscles.value.colors, {
+        inline: true, size: 960, base: 'rgba(150,150,160,0.28)', empty: 'rgba(150,150,160,0.5)', label: 'rgba(150,150,160,0.95)'
+      }));
+    };
+    const openMuscleShare = () => {
+      muscleShareImg.value = null;
+      loadMuscleShareImage();
+      openShareStudio('muscles');
+    };
+
     const sessionStats = computed(() => {
       const modal = sessionStatsModal.value;
       if (!modal.isOpen) return null;
@@ -4407,6 +4635,63 @@ createApp({
       }
       return out;
     });
+
+    // ---------------------------------------------------------------
+    // CONSUMO REALE (calorie adattive, js/utils/coach.js): dalle giornate segnate per intero
+    // e dalle pesate delle ultime 4 settimane calcola quanto consumi davvero.
+    // ---------------------------------------------------------------
+    // Calorie di una giornata segnata per intero (tutti i pasti del piano, oppure almeno pranzo e cena), altrimenti null
+    const dayEatenComplete = (dateKey) => {
+      const meals = getMealsForDate(new Date(dateKey + 'T00:00:00'));
+      const logs = mealLogs.value[dateKey] || {};
+      const diary = foodDiary.value[dateKey] || {};
+      let kcal = 0, unknown = 0, logged = 0;
+      meals.forEach(m => {
+        const l = logs[m.id];
+        if (!l) return;
+        logged++;
+        if (l.status === 'done') { if (m.calories) kcal += m.calories; else unknown++; }
+        else if (l.status === 'other') { if (l.kcal !== null && l.kcal !== undefined) kcal += l.kcal; else unknown++; }
+      });
+      Object.values(diary).forEach(e => {
+        if (!e || !(e.text || e.kcal)) return;
+        if (e.kcal !== null && e.kcal !== undefined) kcal += e.kcal; else unknown++;
+      });
+      const complete = unknown === 0 && (meals.length ? logged === meals.length : !!(diary.pranzo && diary.cena));
+      return complete && kcal > 0 ? Math.round(kcal) : null;
+    };
+    const realExpenditure = computed(() => {
+      const today = todayDateKey.value;
+      const days = [];
+      for (let i = 1; i <= 28; i++) {
+        const d = new Date(today + 'T12:00:00');
+        d.setDate(d.getDate() - i);
+        const key = toISODate(d);
+        const kcal = dayEatenComplete(key);
+        if (kcal !== null) days.push({ date: key, kcal });
+      }
+      const weights = weightEntries.value.filter(e => daysBetween(e.date, today) <= 31)
+        .map(e => ({ date: e.date, weight: Number(e.weight) }));
+      const energy = bodyStats.value.energy;
+      const r = adaptiveExpenditure({ days, weights, formula: energy ? energy.tdee : null });
+      if (r.ready) {
+        r.lose = Math.round(Math.max(energy ? energy.bmr : 1200, r.tdee - 500) / 10) * 10;
+        r.gain = r.tdee + 300;
+      }
+      return r;
+    });
+    realExpHolder.value = realExpenditure;
+    const realExpNeedText = computed(() => {
+      const r = realExpenditure.value;
+      if (r.ready) return '';
+      const parts = [];
+      if (r.needDays) parts.push(r.needDays + (r.needDays === 1 ? ' giornata segnata' : ' giornate segnate') + ' per intero');
+      if (r.needWeighIns === 2) parts.push('2 pesate a distanza di almeno 10 giorni');
+      else if (r.needWeighIns === 1) parts.push('un\'altra pesata, almeno 10 giorni dopo la prima');
+      else if (r.needSpan) parts.push('una pesata tra ' + r.needSpan + (r.needSpan === 1 ? ' giorno' : ' giorni'));
+      return 'Mi servono ancora ' + parts.join(' e ') + '.';
+    });
+
     // ---------------------------------------------------------------
     // MANGIARE MEGLIO (js/data/nutrition.js): consigli pratici e giornate tipo per chi vuole iniziare.
     // Non sostituisce il nutrizionista: una giornata tipo si può provare per una settimana come piano.
@@ -5094,6 +5379,19 @@ createApp({
       }
       if (st.kind === 'recap') return shareRecapData(st.recapMonth || 0, opts, st.recapType);
       if (st.kind === 'achievement') return shareAchievementData(st.achievement);
+      if (st.kind === 'muscles') {
+        const w = weekMuscles.value;
+        const name = shareFirstName();
+        return {
+          kind: 'muscles', empty: w.empty, available: [], focusAvailable: [],
+          kicker: name ? 'La settimana di ' + name : 'La mia settimana di allenamento',
+          dateLabel: 'Ultimi 7 giorni',
+          mapImg: muscleShareImg.value,
+          big: w.sets + ' serie',
+          caption: w.days + (w.days === 1 ? ' giorno' : ' giorni') + ' di allenamento' + (w.sports ? ' · ' + w.sports + ' sport' : ''),
+          top: w.top.slice(0, 4).map(t => ({ name: t.name, value: t.sets + (t.sets === 1 ? ' serie' : ' serie'), k: t.k }))
+        };
+      }
       return st.kind === 'workout' ? shareWorkoutData(st.sessionId, opts) : shareProgressData(st.period, opts);
     };
 
@@ -5160,7 +5458,7 @@ createApp({
     };
     watch(() => {
       const st = shareStudio.value;
-      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.showPet, petCornerImg.value, petShareImg.value, st.weightMode, st.loadMode, st.hasPhoto];
+      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.showPet, petCornerImg.value, petShareImg.value, muscleShareImg.value, st.weightMode, st.loadMode, st.hasPhoto];
     }, () => { if (shareStudio.value.isOpen) refreshSharePreview(); else stopShareAnimation(); });
 
     const openShareStudio = (kind, sessionId = null) => {
@@ -5359,7 +5657,7 @@ createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 16';
+    const APP_VERSION = 'beta 17';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -5510,8 +5808,32 @@ createApp({
       Object.entries(foodDiary.value).forEach(([key, day]) => {
         if (Object.values(day || {}).some(e => e && (e.text || e.kcal))) set.add(key);
       });
+      // Giorni leggeri: anche 10 minuti di camminata o stretching tengono viva la serie
+      Object.keys(settings.value.lightDays || {}).forEach(key => set.add(key));
       return set;
     });
+
+    // GIORNO LEGGERO: niente sensi di colpa, basta poco movimento (js/utils/coach.js, LIGHT_ACTIVITIES)
+    const lightDayModal = ref({ isOpen: false, type: 'walk', min: 15 });
+    const lightToday = computed(() => (settings.value.lightDays || {})[todayDateKey.value] || null);
+    const lightActivity = (id) => LIGHT_ACTIVITIES.find(a => a.id === id) || LIGHT_ACTIVITIES[LIGHT_ACTIVITIES.length - 1];
+    const openLightDay = () => {
+      const cur = lightToday.value;
+      lightDayModal.value = { isOpen: true, type: cur ? cur.type : 'walk', min: cur ? cur.min : 15 };
+    };
+    const saveLightDay = () => {
+      const m = lightDayModal.value;
+      const wasDone = streakInfo.value.todayDone;
+      settings.value.lightDays = { ...(settings.value.lightDays || {}), [todayDateKey.value]: { type: m.type, min: m.min } };
+      m.isOpen = false;
+      if (!wasDone) showToastMessage('Fatto! Anche i giorni piccoli contano: la serie continua. 🌱');
+    };
+    const removeLightDay = () => {
+      const days = { ...(settings.value.lightDays || {}) };
+      delete days[todayDateKey.value];
+      settings.value.lightDays = days;
+      lightDayModal.value.isOpen = false;
+    };
 
     // PROTEGGI SERIE: se salti UN giorno la serie non si azzera (il giorno salvato non si conta).
     // Si ricarica dopo SHIELD_RECHARGE giorni attivi. Calcolato sempre dallo storico: niente stato da salvare.
@@ -5579,8 +5901,8 @@ createApp({
       let message;
       if (todayDone) message = current > 1 ? 'Oggi è fatto. Domani si continua.' : 'Primo giorno fatto. Domani si continua.';
       else if (protectedYesterday) message = 'Ieri il proteggi serie ha salvato la tua serie: segna qualcosa oggi per non perderla.';
-      else if (current > 0) message = 'Segna un pasto o un allenamento oggi per non perdere la serie.';
-      else message = 'Segna un pasto o un allenamento e inizia la tua serie.';
+      else if (current > 0) message = 'Segna un pasto, un allenamento o anche solo 10 minuti di movimento per non perdere la serie.';
+      else message = 'Segna un pasto, un allenamento o 10 minuti di movimento e inizia la tua serie.';
       return {
         current, best, todayDone, week, message, protectedYesterday, startKey, recoverable,
         shieldReady: !!shields,
@@ -5978,6 +6300,64 @@ createApp({
 
     const petNow = ref(Date.now());
     setInterval(() => { petNow.value = Date.now(); }, 5 * 60 * 1000);
+
+    // ---------------------------------------------------------------
+    // ACQUA E DIGIUNO: facoltativi, si attivano in Profilo o nel Diario (settings.habits).
+    // Acqua: bicchieri da 250 ml al giorno (settings.waterLog). Digiuno: inizio, obiettivo e storico (settings.fasting).
+    // ---------------------------------------------------------------
+    const habitOn = (id) => !!(settings.value.habits && settings.value.habits[id]);
+    const toggleHabit = (id) => { settings.value.habits = { ...(settings.value.habits || {}), [id]: !habitOn(id) }; };
+    const waterGoal = computed(() => Math.max(6, Math.min(16, Math.round((bodyStats.value.water || 2) / 0.25))));
+    const waterToday = computed(() => (settings.value.waterLog || {})[todayDateKey.value] || 0);
+    const setWater = (count) => {
+      const key = todayDateKey.value;
+      const log = { ...(settings.value.waterLog || {}) };
+      const value = Math.max(0, Math.min(30, count));
+      if (value) log[key] = value; else delete log[key];
+      // Si tengono solo gli ultimi 4 mesi
+      const oldest = toISODate(new Date(Date.now() - 120 * 86400000));
+      Object.keys(log).forEach(k => { if (k < oldest) delete log[k]; });
+      const reached = value >= waterGoal.value && (settings.value.waterLog || {})[key] < waterGoal.value;
+      settings.value.waterLog = log;
+      if (reached) vibrate([60, 40, 120]);
+    };
+    const tapWaterGlass = (i) => setWater(waterToday.value === i + 1 ? i : i + 1);
+
+    const FAST_GOALS = [12, 14, 16, 18];
+    const fastNow = ref(Date.now());
+    let fastTimer = null;
+    const fasting = computed(() => {
+      const f = settings.value.fasting || {};
+      const goal = f.goal || 16;
+      const last = (f.log || [])[0] || null;
+      if (!f.start) return { running: false, goal, last };
+      const elapsed = Math.max(0, (fastNow.value - f.start) / 3600000);
+      return { running: true, goal, last, start: f.start, elapsed, pct: Math.min(100, Math.round(elapsed / goal * 100)), endsAt: f.start + goal * 3600000, done: elapsed >= goal };
+    });
+    watch(() => !!(settings.value.fasting && settings.value.fasting.start), (running) => {
+      if (fastTimer) { clearInterval(fastTimer); fastTimer = null; }
+      if (running) { fastNow.value = Date.now(); fastTimer = setInterval(() => { fastNow.value = Date.now(); }, 30 * 1000); }
+    }, { immediate: true });
+    const hoursLabel = (h) => {
+      const total = Math.floor(h * 60);
+      return Math.floor(total / 60) + ' h ' + String(total % 60).padStart(2, '0') + ' min';
+    };
+    const clockLabel = (ms) => new Date(ms).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const startFast = (goal) => {
+      settings.value.fasting = { ...(settings.value.fasting || {}), start: Date.now(), goal };
+      fastNow.value = Date.now();
+    };
+    const setFastGoal = (goal) => { settings.value.fasting = { ...(settings.value.fasting || {}), goal }; };
+    const endFast = () => {
+      const f = settings.value.fasting || {};
+      if (!f.start) return;
+      const hours = (Date.now() - f.start) / 3600000;
+      const goal = f.goal || 16;
+      const entry = { start: f.start, end: Date.now(), goal, hours: Math.round(hours * 10) / 10 };
+      settings.value.fasting = { goal, start: null, log: [entry, ...(f.log || [])].slice(0, 60) };
+      if (hours >= goal) { vibrate([80, 50, 160]); showToastMessage('Digiuno completato: ' + hoursLabel(hours) + '. 💪'); }
+      else showToastMessage('Digiuno chiuso dopo ' + hoursLabel(hours) + '. Va bene così: la prossima volta un po\' di più.');
+    };
     const petState = computed(() => {
       const s = streakInfo.value;
       const pet = settings.value.pet;
@@ -6605,6 +6985,13 @@ createApp({
 
     return {
       activeTab,
+      realExpenditure, realExpNeedText, toggleDiaryAdaptive, diaryCopySource, copyDiaryFromPrev,
+      recordModal, shareRecordFromModal,
+      muscleRecovery, muscleRecoverySvg, todaySuggestion, trainPlace, setTrainPlace, shuffleTodayPlan, startTodaySuggestion,
+      weekMuscles, weekMusclesSvg, openMuscleShare,
+      LIGHT_ACTIVITIES, LIGHT_MINUTES, lightDayModal, lightToday, lightActivity, openLightDay, saveLightDay, removeLightDay,
+      habitOn, toggleHabit, waterGoal, waterToday, setWater, tapWaterGlass,
+      FAST_GOALS, fasting, startFast, setFastGoal, endFast, hoursLabel, clockLabel,
       pastChecksModal,
       pastChecksSession,
       setPastCheck,

@@ -17,7 +17,8 @@ const MUSCLE_GROUPS = [
   { id: 'glutei', name: 'Glutei', icon: '🍑' },
   { id: 'addome', name: 'Addome', icon: '🧱' },
   { id: 'cardio', name: 'Cardio', icon: '❤️' },
-  { id: 'atletici', name: 'Atletici', icon: '⚡' }
+  { id: 'atletici', name: 'Atletici', icon: '⚡' },
+  { id: 'mobilita', name: 'Mobilità', icon: '🧘' }
 ];
 
 const EXERCISE_LIBRARY = [
@@ -147,7 +148,98 @@ const EXERCISE_LIBRARY = [
   { id: 'spinta-slitta', n: 'Spinta della slitta', m: 'atletici', w: 'gym', s: 5, r: '15 m', rec: 90, tip: 'Busto inclinato, passi corti e potenti: accelerazione senza impatti.' },
   { id: 'curl-polsi', n: 'Curl per i polsi con manubrio', m: 'braccia', w: 'gym', s: 3, r: '15', rec: 30, tip: 'Avambraccio sulla panca, muovi solo il polso: previene i fastidi al gomito.' },
   { id: 'rematore-cavi-una-mano', n: 'Rematore ai cavi a un braccio', m: 'schiena', w: 'gym', s: 3, r: '12 per lato', rec: 60, tip: 'Tira verso il fianco ruotando appena il busto.' },
-  { id: 'panca-presa-stretta', n: 'Panca presa stretta', m: 'braccia', w: 'gym', s: 3, r: '8-10', rec: 90, tip: 'Mani alla larghezza delle spalle, gomiti vicini al corpo: tricipiti e spinta.' }
+  { id: 'panca-presa-stretta', n: 'Panca presa stretta', m: 'braccia', w: 'gym', s: 3, r: '8-10', rec: 90, tip: 'Mani alla larghezza delle spalle, gomiti vicini al corpo: tricipiti e spinta.' },
+  // --- Petto (altri esercizi) ---
+  { id: 'panca-manubri', n: 'Panca piana con manubri', m: 'petto', w: 'gym', s: 4, r: '8-10', rec: 90, tip: 'Manubri sopra il petto, scendi lento fino a sentire l\'allungamento.' },
+  { id: 'panca-inclinata-bilanciere', n: 'Panca inclinata con bilanciere', m: 'petto', w: 'gym', s: 4, r: '8', rec: 90, tip: 'Panca a 30°, bilanciere sotto le clavicole: lavora la parte alta del petto.' },
+  { id: 'panca-declinata', n: 'Panca declinata', m: 'petto', w: 'gym', s: 3, r: '8-10', rec: 90, tip: 'Piedi bloccati, bilanciere verso la parte bassa del petto.' },
+  { id: 'croci-manubri', n: 'Croci con manubri', m: 'petto', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Braccia aperte con gomiti morbidi, come se abbracciassi un albero.' },
+  { id: 'croci-inclinate', n: 'Croci su panca inclinata', m: 'petto', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Come le croci, ma con la panca a 30° per la parte alta del petto.' },
+  { id: 'pectoral-machine', n: 'Pectoral machine (butterfly)', m: 'petto', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Chiudi le braccia davanti al petto e stringi un secondo.' },
+  { id: 'panca-multipower', n: 'Panca al multipower', m: 'petto', w: 'gym', s: 3, r: '10', rec: 75, tip: 'Il bilanciere è guidato: ottimo per spingere in sicurezza anche da solo.' },
+  { id: 'pullover-manubrio', n: 'Pullover con manubrio', m: 'petto', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Sdraiato, porta il manubrio dietro la testa a braccia quasi tese e torna su.' },
+  { id: 'push-up-inclinati', n: 'Piegamenti inclinati (mani rialzate)', m: 'petto', w: 'home', s: 3, r: '12-15', rec: 45, tip: 'Mani su tavolo o divano: più facili dei piegamenti a terra.' },
+  { id: 'push-up-esplosivi', n: 'Piegamenti esplosivi', m: 'petto', w: 'home', s: 3, r: '6-8', rec: 75, tip: 'Spingi forte da staccare le mani da terra; atterra morbido.' },
+
+  // --- Schiena (altri esercizi) ---
+  { id: 't-bar', n: 'Rematore T-bar', m: 'schiena', w: 'gym', s: 4, r: '8-10', rec: 90, tip: 'Petto in fuori e schiena dritta, tira la maniglia verso lo sterno.' },
+  { id: 'lat-presa-stretta', n: 'Lat machine presa stretta', m: 'schiena', w: 'gym', s: 3, r: '10-12', rec: 75, tip: 'Maniglia stretta, tira verso il petto portando giù i gomiti.' },
+  { id: 'trazioni-supine', n: 'Trazioni a presa supina (chin-up)', m: 'schiena', w: 'gym', s: 3, r: 'max', rec: 90, tip: 'Palmi verso di te: lavorano molto anche i bicipiti.' },
+  { id: 'pulldown-braccia-tese', n: 'Pulldown a braccia tese', m: 'schiena', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Braccia quasi tese, spingi la barra fino alle cosce usando i dorsali.' },
+  { id: 'iperestensioni', n: 'Iperestensioni (panca lombare)', m: 'schiena', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Scendi lento e risali fino ad avere il corpo in linea, non oltre.' },
+  { id: 'scrollate-bilanciere', n: 'Scrollate con bilanciere', m: 'schiena', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Alza le spalle verso le orecchie e tieni un secondo, braccia tese.' },
+  { id: 'scrollate-manubri', n: 'Scrollate con manubri', m: 'schiena', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Spalle su dritte verso le orecchie, senza ruotarle.' },
+  { id: 'rematore-macchina', n: 'Rematore alla macchina', m: 'schiena', w: 'gym', s: 3, r: '10-12', rec: 75, tip: 'Petto contro il supporto, tira e stringi le scapole.' },
+  { id: 'stacco-sumo', n: 'Stacco sumo', m: 'schiena', w: 'gym', s: 4, r: '5-6', rec: 120, tip: 'Piedi larghi e punte in fuori, mani dentro le gambe; spingi il pavimento.' },
+  { id: 'good-morning', n: 'Good morning', m: 'schiena', w: 'gym', s: 3, r: '10', rec: 90, tip: 'Bilanciere leggero sulle spalle, piega il busto in avanti con la schiena dritta.' },
+
+  // --- Spalle (altri esercizi) ---
+  { id: 'lento-manubri', n: 'Lento avanti con manubri', m: 'spalle', w: 'gym', s: 4, r: '8-10', rec: 90, tip: 'Seduto con lo schienale dritto, spingi i manubri sopra la testa.' },
+  { id: 'lento-seduto-bilanciere', n: 'Lento avanti seduto con bilanciere', m: 'spalle', w: 'gym', s: 4, r: '8', rec: 90, tip: 'Schiena appoggiata, il bilanciere passa davanti al viso.' },
+  { id: 'shoulder-press-macchina', n: 'Shoulder press alla macchina', m: 'spalle', w: 'gym', s: 3, r: '10-12', rec: 75, tip: 'La macchina guida il movimento: ottima per iniziare.' },
+  { id: 'alzate-frontali', n: 'Alzate frontali con manubri', m: 'spalle', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Sali davanti fino all\'altezza delle spalle, senza dondolare.' },
+  { id: 'alzate-laterali-cavi', n: 'Alzate laterali ai cavi', m: 'spalle', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Il cavo tiene la tensione anche in basso: movimento lento.' },
+  { id: 'tirate-mento', n: 'Tirate al mento', m: 'spalle', w: 'gym', s: 3, r: '10-12', rec: 60, tip: 'Presa media, gomiti alti ma non oltre le spalle.' },
+  { id: 'reverse-fly-macchina', n: 'Reverse fly alla macchina', m: 'spalle', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Apri le braccia all\'indietro: lavora la spalla dietro e la postura.' },
+  { id: 'aperture-elastico', n: 'Aperture con elastico', m: 'spalle', w: 'home', s: 3, r: '15-20', rec: 30, tip: 'Braccia tese davanti, apri l\'elastico fino al petto stringendo le scapole.' },
+
+  // --- Braccia (altri esercizi) ---
+  { id: 'curl-concentrato', n: 'Curl concentrato', m: 'braccia', w: 'gym', s: 3, r: '10-12', rec: 45, tip: 'Seduto, gomito appoggiato all\'interno della coscia: niente slanci.' },
+  { id: 'curl-panca-scott', n: 'Curl alla panca Scott', m: 'braccia', w: 'gym', s: 3, r: '10', rec: 60, tip: 'Braccia appoggiate sul cuscino: scendi fin quasi a braccio teso.' },
+  { id: 'curl-inclinato', n: 'Curl su panca inclinata', m: 'braccia', w: 'gym', s: 3, r: '10-12', rec: 60, tip: 'Braccia lasciate cadere dietro il busto: allungamento massimo del bicipite.' },
+  { id: 'curl-ez', n: 'Curl con bilanciere EZ', m: 'braccia', w: 'gym', s: 3, r: '10', rec: 60, tip: 'La barra sagomata è più comoda per i polsi del bilanciere dritto.' },
+  { id: 'curl-inverso', n: 'Curl inverso', m: 'braccia', w: 'gym', s: 3, r: '12', rec: 45, tip: 'Presa con i palmi in giù: lavora avambracci e brachiale.' },
+  { id: 'estensioni-sopra-testa', n: 'Estensioni tricipiti sopra la testa', m: 'braccia', w: 'gym', s: 3, r: '10-12', rec: 60, tip: 'Manubrio dietro la testa, gomiti fermi e puntati in alto.' },
+  { id: 'kickback-tricipiti', n: 'Kickback per tricipiti', m: 'braccia', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Busto inclinato, gomito fermo vicino al fianco: distendi il braccio indietro.' },
+  { id: 'pushdown-corda', n: 'Pushdown con la corda', m: 'braccia', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'In fondo apri la corda verso l\'esterno e stringi.' },
+  { id: 'estensioni-cavi-sopra-testa', n: 'Estensioni ai cavi sopra la testa', m: 'braccia', w: 'gym', s: 3, r: '12', rec: 45, tip: 'Di spalle al cavo, distendi le braccia in avanti sopra la testa.' },
+
+  // --- Gambe (altri esercizi) ---
+  { id: 'front-squat', n: 'Front squat', m: 'gambe', w: 'gym', s: 4, r: '6-8', rec: 120, tip: 'Bilanciere davanti sulle spalle e gomiti alti: busto più dritto.' },
+  { id: 'goblet-squat', n: 'Goblet squat', m: 'gambe', w: 'gym', s: 3, r: '10-12', rec: 75, tip: 'Manubrio al petto: il modo più semplice per imparare lo squat.' },
+  { id: 'hack-squat', n: 'Hack squat', m: 'gambe', w: 'gym', s: 4, r: '8-10', rec: 90, tip: 'Schiena contro lo schienale, scendi finché le cosce sono parallele.' },
+  { id: 'squat-multipower', n: 'Squat al multipower', m: 'gambe', w: 'gym', s: 3, r: '8-10', rec: 90, tip: 'Il bilanciere guidato aiuta a stare stabili: piedi un po\' avanti.' },
+  { id: 'squat-sumo-manubrio', n: 'Squat sumo con manubrio', m: 'gambe', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Piedi larghi e punte in fuori: lavorano anche interno coscia e glutei.' },
+  { id: 'affondi-indietro', n: 'Affondi indietro con manubri', m: 'gambe', w: 'gym', s: 3, r: '10 per gamba', rec: 75, tip: 'Il passo indietro carica meno il ginocchio degli affondi in avanti.' },
+  { id: 'leg-curl-seduto', n: 'Leg curl seduto', m: 'gambe', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Piega le gambe fino in fondo e torna su lentamente.' },
+  { id: 'stacco-gambe-tese-manubri', n: 'Stacco a gambe tese con manubri', m: 'gambe', w: 'gym', s: 3, r: '10', rec: 90, tip: 'Gambe quasi tese, manubri vicini alle gambe; senti tirare dietro le cosce.' },
+  { id: 'affondi-saltati', n: 'Affondi saltati', m: 'gambe', w: 'home', s: 3, r: '8 per gamba', rec: 75, tip: 'Dall\'affondo salta e cambia gamba in aria; atterra morbido.' },
+  { id: 'affondi-incrociati', n: 'Affondi incrociati indietro', m: 'gambe', w: 'home', s: 3, r: '10 per gamba', rec: 60, tip: 'La gamba va indietro in diagonale: più lavoro per il gluteo laterale.' },
+
+  // --- Glutei (altri esercizi) ---
+  { id: 'pull-through', n: 'Pull through ai cavi', m: 'glutei', w: 'gym', s: 3, r: '12-15', rec: 60, tip: 'Di spalle al cavo, la corda tra le gambe: spingi il bacino in avanti.' },
+  { id: 'ponte-bilanciere', n: 'Ponte glutei con bilanciere', m: 'glutei', w: 'gym', s: 4, r: '12', rec: 75, tip: 'Schiena a terra e bilanciere sul bacino: sali e stringi i glutei.' },
+  { id: 'affondi-camminati-bilanciere', n: 'Affondi camminati con bilanciere', m: 'glutei', w: 'gym', s: 3, r: '10 per gamba', rec: 90, tip: 'Passi lunghi e busto dritto: più lungo il passo, più lavorano i glutei.' },
+
+  // --- Addome (altri esercizi) ---
+  { id: 'bicicletta', n: 'Crunch a bicicletta', m: 'addome', w: 'home', s: 3, r: '20', rec: 45, tip: 'Gomito verso il ginocchio opposto, lentamente: lavora anche gli obliqui.' },
+  { id: 'crunch-inverso', n: 'Crunch inverso', m: 'addome', w: 'home', s: 3, r: '12-15', rec: 45, tip: 'Ginocchia al petto e solleva il bacino da terra, senza slancio.' },
+  { id: 'ginocchia-parallele', n: 'Ginocchia al petto alle parallele', m: 'addome', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Appoggiato sugli avambracci, porta le ginocchia verso il petto.' },
+  { id: 'sit-up', n: 'Sit-up', m: 'addome', w: 'home', s: 3, r: '15', rec: 45, tip: 'Piedi bloccati, sali fino a sederti e scendi controllando.' },
+  { id: 'flutter-kick', n: 'Sforbiciate (flutter kick)', m: 'addome', w: 'home', s: 3, r: '30 s', rec: 45, tip: 'Schiena attaccata a terra, gambe tese che si alternano su e giù.' },
+  { id: 'jackknife', n: 'Jackknife (sit-up a libro)', m: 'addome', w: 'home', s: 3, r: '10-12', rec: 60, tip: 'Braccia e gambe tese si chiudono insieme sopra la pancia.' },
+  { id: 'crunch-obliqui', n: 'Crunch per gli obliqui', m: 'addome', w: 'home', s: 3, r: '15 per lato', rec: 45, tip: 'Su un fianco o ruotando il busto: porta la spalla verso l\'anca.' },
+  { id: 'crunch-declinato', n: 'Crunch su panca declinata', m: 'addome', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Piedi bloccati sulla panca inclinata: più difficile del crunch a terra.' },
+  { id: 'crunch-macchina', n: 'Crunch alla macchina', m: 'addome', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Arrotonda la schiena portando il petto verso il bacino.' },
+
+  // --- Cardio (altri esercizi) ---
+  { id: 'stepper', n: 'Stepper (scale)', m: 'cardio', w: 'gym', t: 'cardio', d: 15, i: 'Moderata', tip: 'Come salire le scale: busto dritto, non appoggiarti troppo alle maniglie.' },
+  { id: 'bici-reclinata', n: 'Bici reclinata', m: 'cardio', w: 'gym', t: 'cardio', d: 25, i: 'Moderata', tip: 'Schiena appoggiata: perfetta se hai mal di schiena o sei all\'inizio.' },
+  { id: 'battle-rope', n: 'Corde (battle rope)', m: 'cardio', w: 'gym', s: 5, r: '30 s', rec: 45, tip: 'Gambe piegate e busto fermo: fai onde veloci con le braccia.' },
+
+  // --- Mobilità e stretching (giorni leggeri, riscaldamento e defaticamento) ---
+  { id: 'gatto-mucca', n: 'Gatto e mucca', m: 'mobilita', w: 'home', s: 2, r: '10', rec: 15, tip: 'A quattro zampe, inarca e arrotonda la schiena con il respiro.' },
+  { id: 'posizione-bambino', n: 'Posizione del bambino', m: 'mobilita', w: 'home', s: 2, r: '30-45 s', rec: 15, tip: 'Seduto sui talloni, allunga le braccia avanti e rilassa la schiena.' },
+  { id: 'flessori-anca', n: 'Allungamento flessori dell\'anca', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'In affondo con il ginocchio a terra, spingi il bacino in avanti.' },
+  { id: 'allungamento-femorali', n: 'Allungamento femorali', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'Gamba tesa davanti, piegati in avanti con la schiena dritta.' },
+  { id: 'allungamento-quadricipiti', n: 'Allungamento quadricipiti', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'In piedi, porta il tallone al gluteo tenendo le ginocchia vicine.' },
+  { id: 'allungamento-polpacci', n: 'Allungamento polpacci al muro', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'Mani al muro, gamba dietro tesa e tallone a terra.' },
+  { id: 'allungamento-petto', n: 'Allungamento petto e spalle', m: 'mobilita', w: 'home', s: 2, r: '30 s', rec: 15, tip: 'Mani dietro la schiena o al muro, apri il petto senza inarcare.' },
+  { id: 'allungamento-spalle', n: 'Allungamento spalle', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'Porta il braccio teso davanti al petto e tiralo piano con l\'altra mano.' },
+  { id: 'allungamento-glutei', n: 'Allungamento glutei a terra', m: 'mobilita', w: 'home', s: 2, r: '30 s per lato', rec: 15, tip: 'Sdraiato, caviglia sul ginocchio opposto e tira la gamba verso il petto.' },
+  { id: 'worlds-greatest', n: 'Allungamento completo (world\'s greatest)', m: 'mobilita', w: 'home', s: 2, r: '5 per lato', rec: 20, tip: 'Affondo, mano a terra e rotazione del busto verso l\'alto: scioglie tutto.' },
+  { id: 'cerchi-braccia', n: 'Cerchi con le braccia', m: 'mobilita', w: 'home', s: 2, r: '15 per verso', rec: 15, tip: 'Braccia tese di lato, cerchi piccoli che diventano grandi.' },
+  { id: 'rotazioni-busto', n: 'Rotazioni del busto', m: 'mobilita', w: 'home', s: 2, r: '10 per lato', rec: 15, tip: 'In piedi, ruota busto e braccia da un lato all\'altro senza spostare i piedi.' }
 ];
 
 // Programmi pronti: diventano una scheda nuova con un tocco
