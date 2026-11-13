@@ -533,9 +533,10 @@ const petLimb = (cls, x, y, inner) => `<g class="pl ${cls}" style="transform-ori
 const petLimbs = (L) => {
   const c = L.color, s = Math.max(0.7, Math.min(1.25, L.s || 1));
   const w = pn(4.2 * s);
-  let legs = '', arms = '';
+  let legs = '', arms = '', legLen = 0;
   if (L.legs !== false) {
     const top = petLiftY(L.bottom) - 2;
+    legLen = 106 - top;
     legs = [-1, 1].map(k => {
       const x = 60 + k * L.hip * PET_LIFT.s;
       const inner = `<path d="M${pn(x)} ${pn(top)} L${pn(x + k * 0.6)} 104.5" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>` +
@@ -562,8 +563,10 @@ const petLimbs = (L) => {
       return petLimb(k < 0 ? 'pl-al' : 'pl-ar', x, y, inner);
     }).join('');
   }
-  return { legs, arms };
+  return { legs, arms, legLen };
 };
+// Ritardo diverso per ogni compagno: in una griglia non si muovono tutti insieme
+const petDelay = (uid) => { let h = 0; for (const ch of String(uid)) h = (h * 31 + ch.charCodeAt(0)) % 997; return -(h % 80) / 10; };
 
 // SVG completo. opts: { species, stage, mood, outfit: { hat, eyes, neck }, legendary, uid, size }
 let petUidCounter = 0;
@@ -582,14 +585,20 @@ const petSvg = (opts = {}) => {
   // Il cappello va sopra al corpo ma sotto a foglie, fiori e corna
   const hat = a && o.hat ? petHat(o.hat, a.top, a.eyes) : '';
   const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
-  const silhouette = opts.silhouette ? ` style="filter: brightness(0); opacity: .18"` : '';
+  const silhouette = opts.silhouette ? `filter: brightness(0); opacity: .18;` : '';
   const inner = `${art.back}${backItem.back}${art.body}${wear}${hat}${art.top}`;
-  if (!art.limbs) return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${inner}</svg>`;
+  if (!art.limbs) return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette ? ` style="${silhouette}"` : ''}>${aura}${inner}</svg>`;
   // Con gli arti: l'ombra resta a terra, il corpo sale sulle gambe
   const shadow = (inner.match(/<ellipse data-shadow="1"[^>]*\/>/) || [''])[0];
   const limbs = petLimbs(art.limbs);
   const lifted = `<g transform="translate(60 ${PET_LIFT.y}) scale(${PET_LIFT.s}) translate(-60 -${PET_LIFT.base})">${inner.replace(shadow, '')}</g>`;
-  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${shadow}${limbs.legs}${lifted}${limbs.arms}</svg>`;
+  // Pezzi separati per le mosse (css/style.css): ombra a terra, tutto il corpo (salti),
+  // gambe (si piegano dal piede) e parte alta (si abbassa quando le gambe si piegano, si gira, respira)
+  const style = `--leg:${pn(limbs.legLen)}px;--pd:${petDelay(uid)}s;${silhouette}`;
+  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg" style="${style}">${aura}` +
+    `<g class="pet-sh" style="transform-origin:60px 109px">${shadow}</g>` +
+    `<g class="pet-all" style="transform-origin:60px 107px"><g class="pet-legs" style="transform-origin:60px 106px">${limbs.legs}</g>` +
+    `<g class="pet-up" style="transform-origin:60px 100px">${lifted}${limbs.arms}</g></g></svg>`;
 };
 
 // Immagine (per le card da condividere su canvas)

@@ -509,6 +509,9 @@
                   </div>
                   <span v-if="item.duration" class="text-xs font-extrabold text-salvia bg-salvia/10 px-2 py-1 rounded-md shrink-0">{{ item.duration }}</span>
                 </div>
+                <p v-if="activeSheet && activeSheetNext.upcoming && !todayWorkout.planned.length" class="text-xs font-semibold text-gray-500">
+                  Prossima volta con <span class="font-bold text-antracite">{{ activeSheet.name }}</span>: <span class="font-bold text-arancione">{{ activeSheetNext.upcoming.name }}</span>
+                </p>
                 <button v-for="item in todayWorkout.planned" :key="'tw-next-' + item.session.id" @click="openTodayPlanned(item)" class="w-full text-left text-xs font-semibold text-gray-500 hover:text-arancione transition-colors">
                   Ancora in programma: <span class="font-bold text-antracite">{{ item.title }}</span><span v-if="item.time"> alle {{ item.time }}</span>
                 </button>
@@ -532,6 +535,27 @@
                     <p class="text-[11px] text-gray-500 font-medium">{{ item.time ? 'Alle ' + item.time : 'Oggi' }}</p>
                   </div>
                   <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0">{{ item.kind === 'gym' ? 'Inizia' : (item.started ? "Com'è andata?" : 'Dettagli') }}</span>
+                </button>
+              </div>
+
+              <!-- Niente in programma, ma c'è una scheda attiva: dice che giorno tocca -->
+              <div v-else-if="activeSheet && activeSheetNext.day" class="bg-white rounded-3xl p-5 border border-arancione/30 shadow-soft space-y-3">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[10px] font-black uppercase tracking-widest text-arancione">Scheda attiva</div>
+                    <h4 class="font-extrabold text-antracite truncate">{{ activeSheet.name }}</h4>
+                    <p class="text-xs text-gray-500 font-medium mt-0.5">{{ activeSheetNext.lastDate ? 'Ultima volta ' + formatDate(activeSheetNext.lastDate) : 'Non l\'hai ancora iniziata' }}</p>
+                  </div>
+                </div>
+                <button @click="startActiveSheet" class="w-full flex items-center justify-between gap-3 rounded-2xl bg-arancione/5 border border-arancione/15 px-3 py-2.5 text-left hover:border-arancione/40 transition-colors">
+                  <div class="min-w-0">
+                    <p class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Oggi tocca a</p>
+                    <p class="text-sm font-bold text-antracite truncate">{{ activeSheetNext.day.name }} <span class="text-gray-400 font-semibold">· {{ activeSheetNext.day.exercises.length }} esercizi</span></p>
+                  </div>
+                  <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0 flex items-center gap-1"><svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Inizia</span>
                 </button>
               </div>
 
@@ -674,13 +698,15 @@
 
               <!-- LISTA -->
               <div v-else class="space-y-3">
-                <div v-for="sheet in workoutSheets" :key="sheet.id" @click="openSheet(sheet)"
-                     class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft cursor-pointer hover:border-arancione/50 transition-all flex items-center justify-between gap-3 group">
+                <div v-for="sheet in sortedWorkoutSheets" :key="sheet.id" @click="openSheet(sheet)"
+                     class="bg-white rounded-3xl p-5 border shadow-soft cursor-pointer hover:border-arancione/50 transition-all flex items-center justify-between gap-3 group"
+                     :class="isActiveSheet(sheet) ? 'border-arancione ring-2 ring-arancione/15' : 'border-gray-100'">
                   <div class="flex items-center gap-4 min-w-0">
                     <div class="w-12 h-12 rounded-2xl bg-arancione/10 text-arancione border border-arancione/20 flex items-center justify-center flex-shrink-0">
                       <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 6v12M17 6v12M3 9v6h4V9H3zm14 0v6h4V9h-4zM7 12h10"/></svg>
                     </div>
                     <div class="min-w-0">
+                      <span v-if="isActiveSheet(sheet)" class="inline-block text-[9px] font-black uppercase tracking-widest text-white bg-arancione px-2 py-0.5 rounded-md mb-1">Attiva · prossimo {{ activeSheetNext.day ? activeSheetNext.day.name : '' }}</span>
                       <h4 class="font-extrabold text-antracite text-base group-hover:text-arancione transition-colors truncate">{{ sheet.name }}</h4>
                       <p class="text-xs text-gray-500 font-medium mt-0.5">{{ sheet.days.length }} {{ sheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sheet) }} esercizi</p>
                       <p class="text-[10px] font-bold text-gray-400 mt-1">{{ sheetLastSessionDate(sheet) ? 'Ultima sessione: ' + formatDate(sheetLastSessionDate(sheet)) : 'Mai allenata' }}</p>
@@ -937,12 +963,22 @@
                 </div>
               </div>
 
+              <!-- Scheda attiva -->
+              <button @click="toggleActiveSheet(selectedSheet)" class="w-full rounded-2xl px-4 py-3 flex items-center gap-3 text-left transition-all active:scale-[0.98]"
+                      :class="isActiveSheet(selectedSheet) ? 'bg-arancione/10 border border-arancione/30' : 'bg-white border border-dashed border-gray-300'">
+                <span class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 text-base" :class="isActiveSheet(selectedSheet) ? 'bg-arancione text-white' : 'bg-gray-100 text-gray-400'">{{ isActiveSheet(selectedSheet) ? '✓' : '★' }}</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-extrabold" :class="isActiveSheet(selectedSheet) ? 'text-arancione' : 'text-antracite'">{{ isActiveSheet(selectedSheet) ? 'Scheda attiva' : 'Rendi attiva questa scheda' }}</span>
+                  <span class="block text-[11px] font-medium text-gray-500 leading-snug">{{ isActiveSheet(selectedSheet) ? 'In home ti dico quale giorno tocca. Tocca per disattivarla.' : 'È quella che segui ora: la trovi in home con il giorno da fare.' }}</span>
+                </span>
+              </button>
+
               <!-- Giorni -->
               <div class="bg-white rounded-3xl p-2 border border-gray-100 shadow-soft flex overflow-x-auto hide-scrollbar gap-1">
                 <button v-for="(day, idx) in selectedSheet.days" :key="'sheet-day-' + idx" @click="selectedSheetDayIdx = idx"
                         class="flex-1 min-w-[80px] py-3 px-2 rounded-2xl text-[11px] font-bold transition-all truncate"
                         :class="selectedSheetDayIdx === idx ? 'bg-arancione/10 text-arancione' : 'text-gray-400 hover:bg-gray-50'">
-                  {{ day.name }}
+                  {{ day.name }}<span v-if="isActiveSheet(selectedSheet) && activeSheetNext.idx === idx" class="block text-[9px] font-black uppercase tracking-wider" :class="activeSheetNext.doneToday ? 'text-salvia' : 'text-arancione'">{{ activeSheetNext.doneToday ? 'Fatto oggi' : 'Tocca a te' }}</span>
                 </button>
               </div>
 
@@ -1369,11 +1405,11 @@
             </div>
 
             <!-- IL TUO ANNO -->
-            <button @click="openWrapped(0)" class="w-full rounded-3xl p-5 shadow-lg text-left relative overflow-hidden active:scale-[0.98] transition-transform"
+            <button v-if="wrappedSeason" @click="openWrapped(wrappedSeason.offset)" class="w-full rounded-3xl p-5 shadow-lg text-left relative overflow-hidden active:scale-[0.98] transition-transform"
                     style="background: linear-gradient(135deg, #7A4DF1, #EC4899 60%, #F5A623);">
               <div class="absolute -right-3 -bottom-6 text-[90px] opacity-25 select-none">🎁</div>
               <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-white/80">Stile wrapped</div>
-              <div class="relative z-10 text-xl font-extrabold text-white leading-tight mt-1">Il tuo {{ new Date().getFullYear() }} su STILL</div>
+              <div class="relative z-10 text-xl font-extrabold text-white leading-tight mt-1">Il tuo {{ wrappedSeason.year }} su STILL</div>
               <p class="relative z-10 text-[11px] font-medium text-white/85 mt-1 pr-12">Pizze bruciate, salti da canguro, che atleta sei. Guardalo e condividilo nelle storie.</p>
             </button>
 
@@ -2885,7 +2921,7 @@
               <div v-if="shareStudio.kind === 'recap'" class="space-y-2">
                 <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Riepilogo</div>
                 <div class="grid grid-cols-3 gap-1.5 bg-white/5 p-1 rounded-2xl">
-                  <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }, { v: 'year', l: '🎁 Anno' }]" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
+                  <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }, { v: 'year', l: '🎁 Anno' }].filter(t => t.v !== 'year' || wrappedSeason || shareStudio.recapType === 'year')" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
                           class="py-2 rounded-xl text-[11px] font-bold transition-colors"
                           :class="shareStudio.recapType === t.v ? 'bg-white text-antracite' : 'text-white/70'">{{ t.l }}</button>
                 </div>

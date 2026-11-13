@@ -1276,7 +1276,7 @@ createApp({
           sport: session.sport || 'Calcio',
           weekdays: (session.weekdays || []).slice(),
           recurring: !!session.recurring,
-          sheetId: session.sheetId !== undefined && session.sheetId !== null ? session.sheetId : (workoutSheets.value[0] ? workoutSheets.value[0].id : null),
+          sheetId: session.sheetId !== undefined && session.sheetId !== null ? session.sheetId : ((activeSheet.value || workoutSheets.value[0] || {}).id ?? null),
           dayName: session.dayName || '',
           note: session.note || '',
           error: ''
@@ -1284,7 +1284,7 @@ createApp({
         return;
       }
       const date = dateKey || toISODate();
-      const firstSheet = workoutSheets.value[0];
+      const firstSheet = activeSheet.value || workoutSheets.value[0];
       const weekday = new Date(date + 'T00:00:00').getDay();
       trainingFormModal.value = {
         isOpen: true,
@@ -1630,6 +1630,7 @@ createApp({
     const deleteSheetById = (sheetId) => {
       const idx = workoutSheets.value.findIndex(sheet => sheet.id === sheetId);
       if (idx > -1) workoutSheets.value.splice(idx, 1);
+      if (String(settings.value.activeSheetId) === String(sheetId)) settings.value.activeSheetId = null;
       if (selectedSheet.value && selectedSheet.value.id === sheetId) {
         selectedSheet.value = null;
         workoutView.value = 'list';
@@ -1658,8 +1659,52 @@ createApp({
 
     const openSheet = (sheet) => {
       selectedSheet.value = sheet;
-      selectedSheetDayIdx.value = 0;
+      selectedSheetDayIdx.value = activeSheet.value && activeSheet.value.id === sheet.id ? activeSheetNext.value.idx : 0;
       workoutView.value = 'detail';
+    };
+
+    // Scheda attiva: quella che stai seguendo ora (settings.activeSheetId, finisce nel backup).
+    // Il prossimo giorno è quello dopo l'ultimo fatto; se l'hai fatto oggi resta quello di oggi.
+    const activeSheet = computed(() => {
+      const id = settings.value.activeSheetId;
+      return id == null ? null : workoutSheets.value.find(sheet => String(sheet.id) === String(id)) || null;
+    });
+    const isActiveSheet = (sheet) => !!sheet && !!activeSheet.value && String(activeSheet.value.id) === String(sheet.id);
+    const activeSheetNext = computed(() => {
+      const sheet = activeSheet.value;
+      if (!sheet || !sheet.days.length) return { idx: 0, day: null, doneToday: false, lastDate: null, upcoming: null };
+      let last = null;
+      workoutLogs.value.forEach(log => {
+        if (String(log.sheetId ?? '') !== String(sheet.id) || !log.date) return;
+        if (!last || log.date > last.date || (log.date === last.date && (Number(log.id) || 0) > (Number(last.id) || 0))) last = log;
+      });
+      const lastIdx = last ? sheet.days.findIndex(day => day.name === last.dayName) : -1;
+      const doneToday = !!last && last.date === toISODate() && lastIdx > -1;
+      const idx = lastIdx < 0 ? 0 : doneToday ? lastIdx : (lastIdx + 1) % sheet.days.length;
+      // upcoming: il giorno della prossima sessione (se oggi l'hai già fatta, quello dopo)
+      const upcoming = sheet.days[doneToday ? (idx + 1) % sheet.days.length : idx];
+      return { idx, day: sheet.days[idx], doneToday, lastDate: last ? last.date : null, upcoming };
+    });
+    const sortedWorkoutSheets = computed(() => {
+      const active = activeSheet.value;
+      return active ? [active, ...workoutSheets.value.filter(sheet => sheet !== active)] : workoutSheets.value;
+    });
+    const toggleActiveSheet = (sheet) => {
+      if (isActiveSheet(sheet)) {
+        settings.value.activeSheetId = null;
+        showToastMessage('"' + sheet.name + '" non è più la scheda attiva.');
+      } else {
+        settings.value.activeSheetId = sheet.id;
+        showToastMessage('"' + sheet.name + '" è la tua scheda attiva! 💪 La trovi in home con il giorno da fare.');
+      }
+    };
+    // Dalla home: apre la scheda attiva sul giorno giusto e prepara la sessione
+    const startActiveSheet = () => {
+      const sheet = activeSheet.value;
+      if (!sheet) return goTrainNow();
+      activeTab.value = 'allenamento';
+      openSheet(sheet);
+      openSessionPreview();
     };
 
     // ---------------------------------------------------------------
@@ -5524,6 +5569,13 @@ createApp({
     };
 
     // Banner in dashboard: da dicembre a fine gennaio (a gennaio, l'anno appena finito)
+    // Il racconto dell'anno si apre solo a dicembre (e a gennaio per l'anno appena finito)
+    const wrappedSeason = computed(() => {
+      const month = new Date().getMonth();
+      if (month !== 11 && month !== 0) return null;
+      const offset = month === 0 ? 1 : 0;
+      return { offset, year: wrappedYearFor(offset) };
+    });
     const wrappedBanner = computed(() => {
       const now = new Date();
       const month = now.getMonth();
@@ -6279,7 +6331,7 @@ createApp({
       streakInfo,
       recapBanner,
       weekBanner,
-      openRecap, wrapped, openWrapped, closeWrapped, wrappedGo, wrappedTap, wrappedProgress, shareWrapped, wrappedBanner, wrappedConfetti,
+      openRecap, wrapped, openWrapped, closeWrapped, wrappedGo, wrappedSeason, wrappedTap, wrappedProgress, shareWrapped, wrappedBanner, wrappedConfetti,
       recapMonthName,
       recapPeriodName,
       trophyGroups,
@@ -6514,6 +6566,7 @@ createApp({
       removeSuperset,
       supersetPairCount,
       totalSheetExercises,
+      activeSheet, isActiveSheet, activeSheetNext, sortedWorkoutSheets, toggleActiveSheet, startActiveSheet,
       saveSheet,
       promptDeleteSheet,
       promptDeleteSelectedSheet,
