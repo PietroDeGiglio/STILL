@@ -1822,6 +1822,84 @@ createApp({
     };
     const libraryItem = (name) => EXERCISE_BY_NAME[(name || '').trim().toLowerCase()] || null;
 
+    // Importa scheda (js/import/workout-text.js): da PDF, Word, testo o incollata dalle Note
+    const workoutImport = ref({ isOpen: false, busy: false, error: '', text: '' });
+    const WORKOUT_IMPORT_ERRORS = {
+      doc: 'I file .doc vecchi non si leggono: salvalo come .docx o PDF, oppure copia e incolla il testo qui sotto.',
+      scan: 'Il PDF sembra una foto o una scansione e non contiene testo. Copia e incolla gli esercizi qui sotto.',
+      empty: 'Il file è vuoto o non contiene esercizi riconoscibili.',
+      type: 'Formato non supportato: usa PDF, Word (.docx) o testo (.txt).',
+      none: 'Non ho trovato esercizi. Scrivi un esercizio per riga, tipo "Panca piana 4x8 60kg".'
+    };
+    const openWorkoutImport = () => { workoutImport.value = { isOpen: true, busy: false, error: '', text: '' }; };
+    const closeWorkoutImport = () => { workoutImport.value.isOpen = false; };
+    // "Panca piana" → "Panca piana con bilanciere" se nella libreria c'è un solo esercizio che lo contiene
+    const IMPORT_STOP = new Set(['con', 'al', 'ai', 'alla', 'alle', 'allo', 'di', 'da', 'e', 'il', 'la', 'le', 'lo', 'a', 'in', 'su', 'the', 'with']);
+    const importTokens = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter(t => t && !IMPORT_STOP.has(t));
+    const matchLibraryName = (name) => {
+      const exact = libraryItem(name);
+      if (exact) return exact;
+      const want = importTokens(name);
+      if (!want.length) return null;
+      const hits = EXERCISE_LIBRARY.filter(item => { const have = importTokens(item.n); return want.every(t => have.includes(t)); });
+      return hits.length === 1 ? hits[0] : null;
+    };
+    const importedToExercise = (row, ssPrefix) => {
+      const ex = createEmptyExercise();
+      const lib = matchLibraryName(row.name);
+      ex.name = lib ? lib.n : row.name;
+      if (row.cardio || (lib && lib.t === 'cardio' && !row.sets)) {
+        ex.type = 'cardio';
+        ex.duration = String(row.duration || (lib && lib.d) || '');
+        ex.intensity = (lib && lib.i) || '';
+      } else {
+        ex.sets = String(row.sets || '');
+        ex.reps = String(row.reps || '');
+        ex.weight = String(row.weight || '');
+        ex.rest = row.rest ? String(row.rest) : '';
+        ex.superset = row.superset ? ssPrefix + row.superset : '';
+      }
+      return ex;
+    };
+    const applyWorkoutImport = (parsed) => {
+      const days = (parsed.days || []).filter(d => d.exercises.length);
+      if (!days.length) { workoutImport.value.error = WORKOUT_IMPORT_ERRORS.none; return; }
+      editingSheetId.value = null;
+      const stamp = Date.now();
+      newSheet.value = {
+        name: (parsed.name || 'Scheda importata').slice(0, 40),
+        days: days.map((d, i) => ({ name: d.name || 'Giorno ' + dayLetter(i), exercises: d.exercises.map(row => importedToExercise(row, 'ss_' + stamp + '_' + i + '_')) }))
+      };
+      workoutImport.value.isOpen = false;
+      workoutView.value = 'builder';
+      const n = days.reduce((sum, d) => sum + d.exercises.length, 0);
+      showToastMessage('Ho letto ' + n + (n === 1 ? ' esercizio' : ' esercizi') + ' in ' + days.length + (days.length === 1 ? ' giorno' : ' giorni') +
+        '. Controlla che sia tutto giusto, poi salva la scheda.');
+    };
+    const importWorkoutFile = async (event) => {
+      const file = event.target.files && event.target.files[0];
+      event.target.value = '';
+      if (!file) return;
+      workoutImport.value.busy = true;
+      workoutImport.value.error = '';
+      try {
+        const res = await readWorkoutFileText(file);
+        if (res.error) { workoutImport.value.error = WORKOUT_IMPORT_ERRORS[res.error] || WORKOUT_IMPORT_ERRORS.empty; return; }
+        applyWorkoutImport(parseWorkoutText(res.text, file.name));
+      } catch (e) {
+        console.error(e);
+        workoutImport.value.error = 'Non riesco a leggere questo file. Prova a copiare e incollare il testo qui sotto.';
+      } finally {
+        workoutImport.value.busy = false;
+      }
+    };
+    const importWorkoutText = () => {
+      const text = workoutImport.value.text || '';
+      if (!text.trim()) { workoutImport.value.error = WORKOUT_IMPORT_ERRORS.none; return; }
+      workoutImport.value.error = '';
+      applyWorkoutImport(parseWorkoutText(text));
+    };
+
     // Come si fa (js/data/exercise-art.js): omino animato + muscoli allenati evidenziati
     const exerciseThumbCache = {};
     const exerciseThumb = (item) => {
@@ -1832,13 +1910,15 @@ createApp({
       }
       return exerciseThumbCache[item.id];
     };
-    const exerciseInfo = ref({ isOpen: false, item: null, pose: '', map: '', primary: [], secondary: [] });
+    const exercisePhoto = (item) => { const ph = exercisePhotos(item); return ph ? ph[0] : ''; };
+    const exerciseInfo = ref({ isOpen: false, item: null, photos: null, pose: '', map: '', primary: [], secondary: [] });
     const openExerciseInfo = (item) => {
       const art = exerciseArt(item);
       if (!art) return;
+      const photos = exercisePhotos(item);
       exerciseInfo.value = {
-        isOpen: true, item,
-        pose: exercisePoseSvg(art.pattern, true),
+        isOpen: true, item, photos,
+        pose: photos ? '' : exercisePoseSvg(art.pattern, true),
         map: muscleMapSvg(art.primary, art.secondary),
         primary: art.primary.map(id => MUSCLE_NAMES[id]),
         secondary: art.secondary.map(id => MUSCLE_NAMES[id])
@@ -6369,7 +6449,7 @@ createApp({
       selectedPlanDayMeals,
       selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
       NUTRITION_TIPS, NUTRITION_GOALS, eatGuide, openEatGuide, eatTipStat, menuCheck, eatGoalDays, createTrialPlan, suggestedEatGoal, EAT_EXCLUDES, eatPrefs, eatTarget, eatFactor, eatSwapCount, toggleEatExclude, removeEatDislike, eatSwap, openEatSwap, chooseEatSwap, resetEatSwap, dislikeEatFood,
-      EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip, libraryItem, exerciseThumb, exerciseInfo, openExerciseInfo,
+      EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip, libraryItem, exerciseThumb, exercisePhoto, exerciseInfo, openExerciseInfo, workoutImport, openWorkoutImport, closeWorkoutImport, importWorkoutFile, importWorkoutText,
       EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,
       formatDate,

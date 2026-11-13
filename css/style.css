@@ -291,3 +291,8 @@ html.dark .ea-prop-line { stroke: #4B4B55; }
 html.dark .mm-base { fill: #34343C; }
 html.dark .mm-m { fill: #45454F; }
 html.dark .mm-sec { fill: #8A6420; }
+
+/* Come si fa: seconda foto (fine del movimento) che compare e scompare */
+.ex-frame2 { animation: exFrame2 2.4s ease-in-out infinite; }
+@keyframes exFrame2 { 0%, 35% { opacity: 0; } 50%, 85% { opacity: 1; } 100% { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .ex-frame2 { animation-duration: 6s; } }

@@ -4,7 +4,7 @@
 // - Eventuali file di altri siti: la copia salvata, aggiornata in background.
 // Quando si aggiungono file all'app, aggiungerli a APP_FILES e cambiare VERSION.
 // pdf.js (js/vendor/pdfjs, ~1,4 MB) non è in elenco: viene salvato la prima volta che si importa una dieta.
-const VERSION = 'still-v11';
+const VERSION = 'still-v12';
 const APP_FILES = [
   './',
   'index.html',
@@ -19,6 +19,7 @@ const APP_FILES = [
   'js/utils/calories.js',
   'js/data/foods.js',
   'js/import/diet-pdf.js',
+  'js/import/workout-text.js',
   'js/data/quotes.js',
   'js/data/trophies.js',
   'js/data/exercises.js',

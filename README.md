@@ -8,6 +8,7 @@ Online: https://pietrodegiglio.github.io/STILL/
 
 - App web (PWA) in Vue 3, senza server: tutti i dati restano sul telefono (`localStorage`), con backup in JSON dal Profilo.
 - Nessuna dipendenza da siti esterni: Vue, pdf.js e il font sono in `js/vendor` e `assets/fonts`, le classi Tailwind in `css/tailwind.css`.
+- Le foto degli esercizi (`assets/exercises`) vengono da [Free Exercise DB](https://github.com/yuhonas/free-exercise-db), pubblico dominio (Unlicense).
 - `index.html`: markup · `js/app.js`: logica · `js/data`, `js/utils`, `js/import`, `js/share`: moduli · `sw.js`: funzionamento offline.
 
 ## Quando si modifica qualcosa

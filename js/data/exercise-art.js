@@ -338,3 +338,47 @@ const exercisePoseSvg = (patternId, animate = true) => {
     path('ea-limb', q => eaLimbPath(q.p, q.k1, q.f1)) + head + hand + path('ea-limb', q => eaLimbPath(q.n, q.e1, q.w1)) +
     `</svg>`;
 };
+
+
+// --- Foto vere (Free Exercise DB, github.com/yuhonas/free-exercise-db, pubblico dominio / Unlicense) ---
+// Due foto per esercizio (inizio e fine del movimento) in assets/exercises, alternate per farlo vedere in movimento.
+// Gli esercizi senza foto usano l'omino disegnato qui sopra.
+const EXERCISE_PHOTOS = {
+  'panca-piana': 'Barbell_Bench_Press_-_Medium_Grip', 'panca-inclinata-manubri': 'Incline_Dumbbell_Press', 'chest-press': 'Leverage_Chest_Press',
+  'croci-cavi': 'Cable_Crossover', 'dip-parallele': 'Dips_-_Chest_Version', 'push-up': 'Pushups',
+  'push-up-larghi': 'Push-Up_Wide', 'push-up-declinati': 'Push-Ups_With_Feet_Elevated', 'dip-sedie': 'Dips_-_Chest_Version',
+  'lat-machine': 'Wide-Grip_Lat_Pulldown', 'rematore-bilanciere': 'Bent_Over_Barbell_Row', 'pulley': 'Seated_Cable_Rows',
+  'rematore-manubrio': 'One-Arm_Dumbbell_Row', 'trazioni': 'Pullups', 'stacco': 'Barbell_Deadlift',
+  'rematore-zaino': 'Bent_Over_Two-Dumbbell_Row', 'rematore-inverso': 'Inverted_Row', 'superman': 'Superman',
+  'trazioni-casa': 'Pullups', 'military-press': 'Standing_Military_Press', 'arnold-press': 'Arnold_Dumbbell_Press',
+  'alzate-laterali': 'Side_Lateral_Raise', 'alzate-posteriori': 'Seated_Bent-Over_Rear_Delt_Raise', 'face-pull': 'Face_Pull',
+  'alzate-bottiglie': 'Side_Lateral_Raise', 'verticale-muro': 'Handstand_Push-Ups', 'curl-bilanciere': 'Barbell_Curl',
+  'curl-martello': 'Hammer_Curls', 'curl-cavi': 'Standing_Biceps_Cable_Curl', 'pushdown': 'Triceps_Pushdown',
+  'french-press': 'EZ-Bar_Skullcrusher', 'diamond-push-up': 'Push-Ups_-_Close_Triceps_Position', 'dip-sedia': 'Bench_Dips',
+  'curl-zaino': 'Dumbbell_Bicep_Curl', 'curl-elastico': 'Dumbbell_Bicep_Curl', 'squat': 'Barbell_Squat',
+  'leg-press': 'Leg_Press', 'affondi-manubri': 'Dumbbell_Lunges', 'leg-extension': 'Leg_Extensions',
+  'leg-curl': 'Lying_Leg_Curls', 'calf-macchina': 'Standing_Calf_Raises', 'squat-libero': 'Bodyweight_Squat',
+  'affondi': 'Bodyweight_Walking_Lunge', 'bulgaro': 'Split_Squat_with_Dumbbells', 'calf-gradino': 'Standing_Dumbbell_Calf_Raise',
+  'squat-pistol-assistito': 'Kettlebell_Pistol_Squat', 'hip-thrust': 'Barbell_Hip_Thrust', 'stacco-rumeno': 'Romanian_Deadlift',
+  'abductor': 'Thigh_Abductor', 'kickback-cavi': 'One-Legged_Cable_Kickback', 'ponte-glutei': 'Butt_Lift_Bridge',
+  'ponte-una-gamba': 'Single_Leg_Glute_Bridge', 'donkey-kick': 'Glute_Kickback', 'plank': 'Plank',
+  'plank-laterale': 'Side_Bridge', 'crunch': 'Crunches', 'russian-twist': 'Russian_Twist',
+  'leg-raise': 'Flat_Bench_Lying_Leg_Raise', 'mountain-climber': 'Mountain_Climbers', 'dead-bug': 'Dead_Bug',
+  'crunch-cavi': 'Cable_Crunch', 'hanging-leg-raise': 'Hanging_Leg_Raise', 'ab-wheel': 'Ab_Roller',
+  'tapis': 'Jogging_Treadmill', 'cyclette': 'Bicycling_Stationary', 'ellittica': 'Elliptical_Trainer',
+  'vogatore': 'Rowing_Stationary', 'hiit-bici': 'Bicycling_Stationary', 'corsa': 'Trail_Running_Walking',
+  'camminata-veloce': 'Walking_Treadmill', 'corda': 'Rope_Jumping', 'jumping-jack': 'Star_Jump',
+  'squat-jump': 'Freehand_Jump_Squat', 'box-jump': 'Front_Box_Jump', 'salti-laterali': 'Lateral_Cone_Hops',
+  'skip-alto': 'Fast_Skipping', 'scatti': 'Wind_Sprints', 'navette': 'Single-Cone_Sprint_Drill',
+  'nordic-curl': 'Natural_Glute_Ham_Raise', 'extrarotazioni': 'External_Rotation_with_Band', 'pallof-press': 'Pallof_Press',
+  'rotazioni-elastico': 'Pallof_Press_With_Rotation', 'lanci-palla-medica': 'Medicine_Ball_Chest_Pass', 'farmer-walk': 'Farmers_Walk',
+  'polsi-avambracci': 'Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench', 'nuoto-dorsali': 'Straight-Arm_Pulldown', 'step-up-manubri': 'Dumbbell_Step_Ups',
+  'leg-press-una-gamba': 'Leg_Press', 'calf-seduto': 'Seated_Calf_Raise', 'adductor-machine': 'Thigh_Adductor',
+  'girata-kettlebell': 'One-Arm_Kettlebell_Swings', 'woodchop-cavi': 'Standing_Cable_Wood_Chop', 'pallof-cavi': 'Pallof_Press',
+  'extrarotazioni-cavi': 'External_Rotation_with_Cable', 'spinta-slitta': 'Sled_Push', 'curl-polsi': 'Palms-Up_Dumbbell_Wrist_Curl_Over_A_Bench',
+  'rematore-cavi-una-mano': 'Seated_One-arm_Cable_Pulley_Rows', 'panca-presa-stretta': 'Close-Grip_Barbell_Bench_Press'
+};
+const exercisePhotos = (item) => {
+  const id = item && EXERCISE_PHOTOS[item.id];
+  return id ? ['assets/exercises/' + id + '-0.webp', 'assets/exercises/' + id + '-1.webp'] : null;
+};

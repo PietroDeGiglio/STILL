@@ -642,9 +642,19 @@
                 <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-arancione">Non sai cosa fare?</div>
                 <div class="relative z-10 text-lg font-extrabold text-white mt-1 leading-tight">Allenamenti consigliati</div>
                 <p class="relative z-10 text-[11px] font-medium text-white/60 mt-1 leading-snug pr-10">
-                  <template v-if="userSports.length">Esercizi scelti per chi gioca a {{ userSports[0].toLowerCase() }}, schede pronte e oltre 100 esercizi con il disegno di come si fanno.</template>
-                  <template v-else>Schede pronte e oltre 100 esercizi con il disegno di come si fanno e i muscoli che lavorano.</template>
+                  <template v-if="userSports.length">Esercizi scelti per chi gioca a {{ userSports[0].toLowerCase() }}, schede pronte e oltre 100 esercizi con le foto di come si fanno.</template>
+                  <template v-else>Schede pronte e oltre 100 esercizi con le foto di come si fanno e i muscoli che lavorano.</template>
                 </p>
+              </button>
+
+              <!-- IMPORTA SCHEDA: da PDF, Word, testo o incollata dalle Note -->
+              <button @click="openWorkoutImport" class="w-full text-left bg-white rounded-3xl p-4 border border-gray-100 shadow-soft flex items-center gap-3 active:scale-[0.98] transition-all">
+                <span class="w-11 h-11 shrink-0 rounded-2xl bg-arancione/10 text-arancione flex items-center justify-center text-xl">📄</span>
+                <span class="flex-1 min-w-0">
+                  <span class="block text-sm font-extrabold text-antracite">Hai già una scheda?</span>
+                  <span class="block text-[11px] font-medium text-gray-500 leading-snug">Importala da PDF, Word o testo, oppure incollala dalle Note.</span>
+                </span>
+                <svg class="w-4 h-4 text-gray-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
               </button>
 
               <!-- EMPTY STATE -->
@@ -3586,16 +3596,55 @@
                 <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
               </button>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <div class="rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square" v-html="exerciseInfo.pose"></div>
-              <div class="rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square flex items-center" v-html="exerciseInfo.map"></div>
+            <!-- Foto vere: inizio e fine del movimento che si alternano -->
+            <div v-if="exerciseInfo.photos" class="relative w-full rounded-2xl overflow-hidden bg-gray-100" style="aspect-ratio: 3 / 2;">
+              <img :src="exerciseInfo.photos[0]" alt="Inizio del movimento" class="absolute inset-0 w-full h-full object-cover">
+              <img :src="exerciseInfo.photos[1]" alt="Fine del movimento" class="absolute inset-0 w-full h-full object-cover ex-frame2">
             </div>
-            <div class="flex flex-wrap gap-1.5">
+            <div class="grid gap-3" :class="exerciseInfo.photos ? 'grid-cols-[1fr_auto]' : 'grid-cols-2'">
+              <div v-if="!exerciseInfo.photos" class="rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square" v-html="exerciseInfo.pose"></div>
+              <div class="rounded-2xl bg-gray-50 border border-gray-100 p-2 flex items-center" :class="exerciseInfo.photos ? 'w-36 h-32' : 'aspect-square'" v-html="exerciseInfo.map"></div>
+              <div v-if="exerciseInfo.photos" class="flex flex-wrap content-center gap-1.5 order-first">
+                <span v-for="m in exerciseInfo.primary" :key="'mpp' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione text-white">{{ m }}</span>
+                <span v-for="m in exerciseInfo.secondary" :key="'msp' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione/15 text-arancione">{{ m }}</span>
+              </div>
+            </div>
+            <div v-if="!exerciseInfo.photos" class="flex flex-wrap gap-1.5">
               <span v-for="m in exerciseInfo.primary" :key="'mp' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione text-white">{{ m }}</span>
               <span v-for="m in exerciseInfo.secondary" :key="'ms' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione/15 text-arancione">{{ m }}</span>
             </div>
             <p class="text-sm font-medium text-antracite leading-snug">💡 {{ exerciseInfo.item.tip }}</p>
-            <p class="text-[10px] font-medium text-gray-400 leading-snug">Disegno indicativo del movimento. Arancione pieno: muscoli principali; chiaro: quelli che aiutano.</p>
+            <p class="text-[10px] font-medium text-gray-400 leading-snug">{{ exerciseInfo.photos ? 'Foto: Free Exercise DB (pubblico dominio).' : 'Disegno indicativo del movimento.' }} Arancione pieno: muscoli principali; chiaro: quelli che aiutano.</p>
+          </div>
+        </div>
+
+        <!-- IMPORTA SCHEDA -->
+        <div v-if="workoutImport.isOpen" class="fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn" @click.self="closeWorkoutImport">
+          <div class="w-full max-w-md bg-bianco rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-3">
+              <div>
+                <div class="text-[10px] font-bold text-arancione tracking-widest uppercase">Importa</div>
+                <h3 class="text-lg font-extrabold text-antracite leading-tight">La tua scheda</h3>
+              </div>
+              <button @click="closeWorkoutImport" class="w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center" aria-label="Chiudi">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <label class="w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer"
+                   :class="workoutImport.busy ? 'opacity-60 pointer-events-none' : ''">
+              <input type="file" class="hidden" accept=".pdf,.docx,.doc,.txt,.md,.rtf,text/plain,application/pdf" @change="importWorkoutFile">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 4v12m0-12l-4 4m4-4l4 4"/></svg>
+              {{ workoutImport.busy ? 'Sto leggendo…' : 'Scegli un file (PDF, Word, testo)' }}
+            </label>
+            <div class="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400"><span class="flex-1 h-px bg-gray-200"></span>oppure incollala<span class="flex-1 h-px bg-gray-200"></span></div>
+            <div class="space-y-1.5">
+              <p class="text-[11px] font-medium text-gray-500 leading-snug">Dalle Note: apri la nota, <b>Seleziona tutto → Copia</b> e incolla qui. Un esercizio per riga; i giorni come titoli.</p>
+              <textarea v-model="workoutImport.text" rows="8" class="w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-antracite font-medium focus:outline-none focus:border-arancione"
+                        placeholder="Giorno A - Petto e tricipiti&#10;Panca piana 4x8 60kg rec 90&#10;Croci ai cavi 3x12-15&#10;Pushdown 3x12&#10;&#10;Giorno B - Schiena&#10;Lat machine 4x10 50kg&#10;Curl bilanciere + curl martello 3x12"></textarea>
+            </div>
+            <p v-if="workoutImport.error" class="text-xs font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl p-3 leading-snug">{{ workoutImport.error }}</p>
+            <button @click="importWorkoutText" :disabled="!workoutImport.text.trim()" class="w-full bg-antracite text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all disabled:opacity-40">Leggi scheda</button>
+            <p class="text-[10px] font-medium text-gray-400 leading-snug">Riconosco serie e ripetizioni (4x8, 4 serie da 12, 12/10/8), carichi (60kg), recuperi (rec 90, 2 min) e superserie (A + B). Prima di salvare puoi correggere tutto.</p>
           </div>
         </div>
 
@@ -3675,7 +3724,8 @@
                 </div>
                 <span v-if="exerciseThumb(item)" @click.stop="openExerciseInfo(item)" role="button" aria-label="Come si fa"
                       class="w-16 shrink-0 rounded-xl bg-gray-50 border border-gray-100 p-1 flex flex-col items-center active:scale-95 transition-transform">
-                  <span class="block w-full aspect-square" v-html="exerciseThumb(item)"></span>
+                  <img v-if="exercisePhoto(item)" :src="exercisePhoto(item)" alt="" loading="lazy" class="block w-full aspect-square object-cover rounded-lg">
+                  <span v-else class="block w-full aspect-square" v-html="exerciseThumb(item)"></span>
                   <span class="text-[8px] font-black uppercase tracking-wider text-arancione mt-0.5">Come si fa</span>
                 </span>
               </button>
@@ -4318,6 +4368,7 @@
   <script src="js/data/foods.js"></script>
   <script src="js/utils/calories.js"></script>
   <script src="js/import/diet-pdf.js"></script>
+  <script src="js/import/workout-text.js"></script>
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
   <script src="js/data/exercises.js"></script>
