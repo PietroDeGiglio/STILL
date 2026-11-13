@@ -610,7 +610,7 @@
                     <p class="text-sm font-bold text-antracite truncate">{{ item.title }}<span v-if="item.dayName" class="text-gray-400 font-semibold"> · {{ item.dayName }}</span></p>
                     <p class="text-[11px] text-gray-500 font-medium">{{ item.time ? 'Alle ' + item.time : 'Oggi' }}</p>
                   </div>
-                  <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0">{{ item.kind === 'gym' ? 'Inizia' : (item.started ? "Com'è andata?" : 'Dettagli') }}</span>
+                  <span class="text-xs font-bold text-white bg-arancione px-2.5 py-1.5 rounded-lg shrink-0">{{ item.kind === 'gym' ? (item.ended ? 'Ti sei allenato?' : 'Inizia') : (item.started ? 'Ti sei allenato?' : 'Dettagli') }}</span>
                 </button>
               </div>
 
@@ -4656,7 +4656,7 @@
           <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5">
             <div class="flex justify-between items-start gap-3">
               <div class="flex items-center gap-3 min-w-0">
-                <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-2xl flex-shrink-0">🏅</div>
+                <div class="w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-2xl flex-shrink-0">{{ sportCheckSession.kind === 'gym' ? '💪' : '🏅' }}</div>
                 <div class="min-w-0">
                   <h3 class="text-lg font-bold text-antracite leading-tight truncate">{{ trainingSessionLabel(sportCheckSession) }}</h3>
                   <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate">
@@ -4670,8 +4670,8 @@
             </div>
 
             <div class="text-center space-y-1">
-              <p class="text-base font-extrabold text-antracite">Com'è andata?</p>
-              <p class="text-[11px] font-medium text-gray-400">Solo gli allenamenti fatti contano nei tuoi progressi.</p>
+              <p class="text-base font-extrabold text-antracite">Ti sei allenato?</p>
+              <p class="text-[11px] font-medium text-gray-400">Solo gli allenamenti fatti contano nei tuoi progressi e nella serie.</p>
               <p v-if="sportCheckModal.total > 1" class="text-[10px] font-bold text-sky-600 uppercase tracking-widest pt-1">{{ sportCheckModal.index }} di {{ sportCheckModal.total }}</p>
             </div>
 
@@ -4741,7 +4741,7 @@
             <p class="text-[10px] font-medium text-gray-400 -mt-1 shrink-0">⏱️ {{ trainingFormModal.kind === 'sport' ? 'Il tempo si aggiunge alle tue ore di allenamento quando segni lo sport come fatto.' : "Se usi l'allenamento guidato la durata si misura da sola; altrimenti contano inizio e fine." }}</p>
 
             <!-- Allenamento passato: com'è andata -->
-            <div v-if="!(trainingFormModal.kind === 'sport' && trainingFormModal.recurring) && trainingFormModal.date && trainingFormModal.date <= todayDateKey" class="shrink-0 space-y-1.5">
+            <div v-if="!(trainingFormModal.kind === 'sport' && trainingFormModal.recurring) && trainingFormModal.date && trainingFormModal.date <= todayDateKey && !(trainingFormModal.date === todayDateKey && timeIsAhead(trainingFormModal.time))" class="shrink-0 space-y-1.5">
               <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider">Com'è andata?</label>
               <div class="grid grid-cols-2 gap-1.5">
                 <button @click="trainingFormModal.pastStatus = trainingFormModal.pastStatus === 'done' ? '' : 'done'" class="py-2 rounded-xl text-xs font-bold border transition-colors"

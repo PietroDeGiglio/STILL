@@ -1420,6 +1420,27 @@ createApp({
       if (a === null || b === null || a === b) return 0;
       return b > a ? b - a : b + 1440 - a;
     };
+    // Orologio che avanza ogni minuto: serve per capire se l'allenamento di oggi è già iniziato o finito
+    const clockNow = ref(Date.now());
+    const SESSION_DEFAULT_MIN = 90;   // durata se non c'è l'orario di fine
+    const nowMinutesOf = (ms) => { const d = new Date(ms); return d.getHours() * 60 + d.getMinutes(); };
+    // Orario non ancora arrivato oggi (es. allenamento alle 17:30 e sono le 10)
+    const timeIsAhead = (hhmm) => { const m = hhmmToMin(hhmm); return m !== null && m > nowMinutesOf(clockNow.value); };
+    // Allenamento di oggi già finito? (fine indicata, altrimenti inizio + 1h30)
+    const sessionEndedToday = (session) => {
+      const start = hhmmToMin(session && session.time);
+      if (start === null) return false;
+      return start + (sportDurationMin(session) || SESSION_DEFAULT_MIN) <= nowMinutesOf(clockNow.value);
+    };
+    // I carichi aggiornati oggi nella scheda contano come allenamento solo se oggi non c'è una palestra
+    // in programma ancora da confermare: puoi sistemare i pesi la mattina e andarci la sera.
+    const todayLogsCount = computed(() => {
+      const today = toISODate(new Date(clockNow.value));
+      return !trainingSessionsOnDateKey(today).some(s => s.kind === 'gym'
+        && !(s.report && s.date === today) && !(s.statusByDate && s.statusByDate[today] === 'done'));
+    });
+    const logCountsAsTraining = (log) => !!log.date && (log.date !== toISODate(new Date(clockNow.value)) || todayLogsCount.value);
+
     // "18:00–19:30" per gli sport con orario di fine, altrimenti solo l'inizio
     const sessionTimeLabel = (session) => {
       if (!session || !session.time) return '';
@@ -1631,7 +1652,7 @@ createApp({
       // Singolo allenamento passato (o di oggi): com'è andata
       if (!base.recurring) {
         const map = {};
-        if (form.date <= today && form.pastStatus) map[form.date] = form.pastStatus;
+        if (form.date <= today && form.pastStatus && !(form.date === today && timeIsAhead(form.time))) map[form.date] = form.pastStatus;
         base.statusByDate = map;
       }
 
@@ -3470,6 +3491,7 @@ createApp({
       return (original.statusByDate && original.statusByDate[dateKey]) || null;
     };
     const sportCanCheck = (session, dateKey) => !!session && !!dateKey && dateKey <= toISODate()
+      && !(dateKey === toISODate() && timeIsAhead(session.time))
       && (session.kind === 'sport' || !(session.report && session.date === dateKey));
 
     const sportCheckModal = ref({ isOpen: false, sessionId: null, dateKey: '', queue: [], index: 0, total: 0 });
@@ -3484,7 +3506,11 @@ createApp({
     const openSportCheck = (session, dateKey, queue = []) => {
       sportCheckModal.value = { isOpen: true, sessionId: session.id, dateKey, queue, index: 1, total: queue.length + 1 };
     };
-    const closeSportCheck = () => { sportCheckModal.value.isOpen = false; };
+    const closeSportCheck = () => {
+      const modal = sportCheckModal.value;
+      if (modal.sessionId) sportCheckSnoozed.add(modal.sessionId + '|' + modal.dateKey);   // non richiederlo subito di nuovo
+      modal.isOpen = false;
+    };
 
     const nextSportCheck = () => {
       const modal = sportCheckModal.value;
@@ -3519,13 +3545,14 @@ createApp({
       if (session) editTrainingSession(session);
     };
 
-    // Sport degli ultimi 7 giorni ancora da segnare (oggi solo se l'orario è passato da un'ora e mezza)
+    // Allenamenti degli ultimi 7 giorni ancora da segnare (oggi solo a sessione finita).
+    // Sport e palestra senza allenamento guidato: l'app non può sapere se ci sei andato, quindi chiede.
     const pendingSportChecks = () => {
       const out = [];
       const now = new Date();
       const todayKey = toISODate(now);
       const nowMinutes = now.getHours() * 60 + now.getMinutes();
-      const sports = trainingSessions.value.filter(s => s.kind === 'sport');
+      const sports = trainingSessions.value.filter(s => s.kind === 'sport' || (s.kind === 'gym' && !s.report));
       if (!sports.length) return out;
       for (let offset = 7; offset >= 0; offset--) {
         const d = new Date(now);
@@ -3540,7 +3567,7 @@ createApp({
             const start = hhmmToMin(session.time);
             if (start === null) return;
             const dur = sportDurationMin(session);
-            if (start + (dur || 90) > nowMinutes) return;
+            if (start + (dur || SESSION_DEFAULT_MIN) > nowMinutes) return;
           }
           out.push({ sessionId: session.id, dateKey: key });
         });
@@ -3576,8 +3603,8 @@ createApp({
     };
 
     const todayWorkout = computed(() => {
-      const today = toISODate();
-      const now = new Date();
+      const now = new Date(clockNow.value);
+      const today = toISODate(now);
       const nowMin = now.getHours() * 60 + now.getMinutes();
       const done = [], planned = [];
       let totalMin = 0;
@@ -3601,12 +3628,14 @@ createApp({
             title: trainingSessionLabel(session),
             dayName: session.kind === 'gym' ? session.dayName || '' : '',
             time: sessionTimeLabel(session),
-            started: start !== null && nowMin >= start
+            started: start !== null && nowMin >= start,
+            ended: sessionEndedToday(session)
           });
         }
       });
       // Carichi registrati a mano oggi, senza un allenamento guidato salvato
-      if (!done.some(item => item.kind === 'gym')) {
+      // (non se la palestra di oggi deve ancora essere confermata: aggiornare i pesi non vuol dire esserci andati)
+      if (!done.some(item => item.kind === 'gym') && todayLogsCount.value) {
         const logs = workoutLogs.value.filter(log => log.date === today);
         if (logs.length) {
           totalMin += DEFAULT_TRAINING_MIN;
@@ -3621,6 +3650,8 @@ createApp({
     const openTodayPlanned = (item) => {
       const session = item && item.session;
       if (!session) return;
+      // Palestra già finita (senza allenamento guidato): chiede se ci sei andato
+      if (session.kind === 'gym' && item.ended && sportCanCheck(session, toISODate())) { openSportCheck(session, toISODate()); return; }
       activeTab.value = 'allenamento';
       if (session.kind === 'gym') {
         const sheet = workoutSheets.value.find(s => String(s.id) === String(session.sheetId));
@@ -4476,6 +4507,20 @@ createApp({
       onboarding.value.error = '';
       onboarding.value.step = Math.max(0, onboarding.value.step - 1);
     };
+
+    // Ogni minuto: aggiorna l'orologio e, se un allenamento è appena finito, chiede se ti sei allenato
+    const autoPromptChecks = () => {
+      if (!isAuthenticated.value || document.visibilityState !== 'visible') return;
+      if (workoutPlayer.value && workoutPlayer.value.isOpen) return;
+      if (trainingFormModal.value.isOpen || pastChecksModal.value.isOpen || lightDayModal.value.isOpen || recordModal.value.isOpen) return;
+      promptPendingSportChecks();
+    };
+    setInterval(() => { clockNow.value = Date.now(); autoPromptChecks(); }, 60 * 1000);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState !== 'visible') return;
+      clockNow.value = Date.now();
+      setTimeout(autoPromptChecks, 500);
+    });
 
     const enterApp = () => {
       isAuthenticated.value = true;
@@ -5657,7 +5702,7 @@ createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 17';
+    const APP_VERSION = 'beta 18';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -5795,7 +5840,7 @@ createApp({
     // ---------------------------------------------------------------
     const activeDaySet = computed(() => {
       const set = new Set();
-      workoutLogs.value.forEach(log => { if (log.date) set.add(log.date); });
+      workoutLogs.value.forEach(log => { if (logCountsAsTraining(log)) set.add(log.date); });
       trainingSessions.value.forEach(s => {
         if (s.kind === 'gym' && s.date && (s.report || (s.statusByDate && s.statusByDate[s.date] === 'done'))) set.add(s.date);
         if (s.kind === 'sport' && s.statusByDate) {
@@ -6540,7 +6585,7 @@ createApp({
     const trainingDaySet = computed(() => {
       const set = new Set();
       const today = toISODate();
-      workoutLogs.value.forEach(log => { if (log.date && log.date <= today) set.add(log.date); });
+      workoutLogs.value.forEach(log => { if (log.date <= today && logCountsAsTraining(log)) set.add(log.date); });
       trainingSessions.value.forEach(s => {
         if (s.kind === 'gym' && s.date && s.date <= today && (s.report || (s.statusByDate && s.statusByDate[s.date] === 'done'))) set.add(s.date);
         if (s.kind === 'sport' && s.statusByDate) {
@@ -6819,8 +6864,7 @@ createApp({
     };
     const MEAL_OUTROS = ['Facci sapere com\'è andata.', 'Segnalo in app quando hai finito.', 'Un pasto alla volta si arriva lontano.', 'Spunta il pasto e tieni viva la serie.'];
     const SPORT_EMOJI = { Calcio: '⚽', Pallavolo: '🏐', Basket: '🏀', Lotta: '🤼', Tennis: '🎾', Padel: '🎾', Nuoto: '🏊', Corsa: '🏃', Ciclismo: '🚴', Boxe: '🥊', Rugby: '🏉', 'Arti marziali': '🥋' };
-    const CHECKIN_TITLES = ['Hai spaccato anche oggi?', 'Sei stato un fenomeno anche oggi?', 'Missione compiuta?', 'Allenamento chiuso?'];
-    const CHECKIN_BODIES = ['Faccelo sapere: segnalo in app e tieni viva la serie.', 'Entra e segnalo: ogni allenamento conta.', 'Raccontacelo in app, la tua serie ti aspetta.'];
+    const CHECKIN_BODIES = ['Tocca qui e segna fatto o non fatto: conta per la serie.', 'Entra e segnalo: ogni allenamento conta.', 'Dicci com\'è andata, la tua serie ti aspetta.'];
     const SPORT_CHECK_DELAY = 120;   // minuti dopo l'inizio
 
     // Elenco dei promemoria dei prossimi 3 giorni
@@ -6878,14 +6922,13 @@ createApp({
           if (r.checkins) {
             const already = !!sportStatus(session, key) || !!(session.report && session.date === key);
             // Mai dopo mezzanotte: al massimo alle 23:30 dello stesso giorno
-            const after = isSport && sportDurationMin(session) ? sportDurationMin(session) + 15 : SPORT_CHECK_DELAY;   // 15 min dopo la fine
+            const after = sportDurationMin(session) ? sportDurationMin(session) + 15 : SPORT_CHECK_DELAY;   // 15 min dopo la fine
             const at = Math.min(start + after * 60000, atTime(key, '23:30'));
             if (!already && at > start && at > now) {
-              const what = isSport ? (session.sport || 'sport').toLowerCase() : 'in palestra';
               out.push({
                 id: reminderId('check' + key + session.id), at,
-                title: emoji + ' ' + pickText(CHECKIN_TITLES, key + session.id),
-                body: (isSport ? 'Com\'è andata a ' + what + '? ' : 'Com\'è andata ' + what + '? ') + pickText(CHECKIN_BODIES, 'b' + key + session.id)
+                title: emoji + ' Ti sei allenato?',
+                body: label + (session.time ? ' delle ' + session.time : '') + ' è finito. ' + pickText(CHECKIN_BODIES, 'b' + key + session.id)
               });
             }
           }
@@ -6924,7 +6967,11 @@ createApp({
 
     let webReminderTimers = [];
     const showWebNotification = (n) => {
-      try { new Notification(n.title, { body: n.body, tag: String(n.id) }); } catch (e) { /* alcuni browser non le permettono senza service worker */ }
+      try {
+        const notif = new Notification(n.title, { body: n.body, tag: String(n.id) });
+        // Tocco sulla notifica: apre l'app e chiede subito fatto / non fatto
+        notif.onclick = () => { try { window.focus(); } catch (e) { /* ignora */ } notif.close(); clockNow.value = Date.now(); promptPendingSportChecks(); };
+      } catch (e) { /* alcuni browser non le permettono senza service worker */ }
     };
     const applyReminders = async () => {
       webReminderTimers.forEach(clearTimeout);
@@ -6957,6 +7004,11 @@ createApp({
     watch([settings, plans, mealLogs, trainingSessions], scheduleReminders, { deep: true });
     onMounted(() => {
       scheduleReminders();
+      // App per telefono: tocco sulla notifica "Ti sei allenato?" → si apre la domanda
+      const native = nativeNotifications();
+      if (native && native.addListener) {
+        try { native.addListener('localNotificationActionPerformed', () => { clockNow.value = Date.now(); setTimeout(promptPendingSportChecks, 600); }); } catch (e) { /* ignora */ }
+      }
       setInterval(scheduleReminders, 60 * 60 * 1000);   // sposta avanti la finestra dei 3 giorni
     });
 
@@ -6985,6 +7037,7 @@ createApp({
 
     return {
       activeTab,
+      timeIsAhead,
       realExpenditure, realExpNeedText, toggleDiaryAdaptive, diaryCopySource, copyDiaryFromPrev,
       recordModal, shareRecordFromModal,
       muscleRecovery, muscleRecoverySvg, todaySuggestion, trainPlace, setTrainPlace, shuffleTodayPlan, startTodaySuggestion,
