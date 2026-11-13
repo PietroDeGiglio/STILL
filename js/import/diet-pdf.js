@@ -57,12 +57,17 @@ const pdfPageItems = (content, viewport) => {
   return items;
 };
 
+// Limiti per i file caricati: una dieta o una scheda non pesa mai così tanto,
+// un file enorme o costruito apposta bloccherebbe solo il telefono
+const IMPORT_MAX_BYTES = 20 * 1024 * 1024;
+const IMPORT_MAX_PAGES = 60;
 const readPdfPages = async (file, lib) => {
   const pdfLib = lib || await loadPdfJs();
   const data = new Uint8Array(await file.arrayBuffer());
-  const pdf = await pdfLib.getDocument({ data }).promise;
+  // isEvalSupported: false → pdf.js non genera codice dai font del file (CVE-2024-4367)
+  const pdf = await pdfLib.getDocument({ data, isEvalSupported: false, enableXfa: false }).promise;
   const pages = [];
-  for (let p = 1; p <= pdf.numPages; p++) {
+  for (let p = 1; p <= Math.min(pdf.numPages, IMPORT_MAX_PAGES); p++) {
     const page = await pdf.getPage(p);
     const viewport = page.getViewport({ scale: 1 });
     const content = await page.getTextContent();
@@ -87,6 +92,7 @@ const unzipEntry = async (buffer, wanted) => {
     if (view.getUint32(ptr, true) !== 0x02014b50) break;
     const method = view.getUint16(ptr + 10, true);
     const size = view.getUint32(ptr + 20, true);
+    const fullSize = view.getUint32(ptr + 24, true);
     const nameLen = view.getUint16(ptr + 28, true);
     const extraLen = view.getUint16(ptr + 30, true);
     const commentLen = view.getUint16(ptr + 32, true);
@@ -94,6 +100,8 @@ const unzipEntry = async (buffer, wanted) => {
     const name = decoder.decode(new Uint8Array(buffer, ptr + 46, nameLen));
     ptr += 46 + nameLen + extraLen + commentLen;
     if (name !== wanted) continue;
+    // Uno zip "bomba" (pochi KB che diventano GB) bloccherebbe la pagina
+    if (fullSize > 4 * IMPORT_MAX_BYTES) throw new Error('zip-size');
     const start = local + 30 + view.getUint16(local + 26, true) + view.getUint16(local + 28, true);
     const raw = new Uint8Array(buffer, start, size);
     if (method === 0) return decoder.decode(raw);
@@ -794,6 +802,7 @@ const importDietFile = async (file) => {
   const kind = dietFileKind(file);
   if (kind === 'doc') return { error: 'doc' };
   if (!kind) return { error: 'type' };
+  if (file.size > IMPORT_MAX_BYTES) return { error: 'big' };
   const pages = kind === 'pdf' ? await readPdfPages(file) : await readDocxPages(file);
   const chars = pages.reduce((n, p) => n + p.items.reduce((s, i) => s + i.str.trim().length, 0), 0);
   if (chars < 20) return { error: kind === 'pdf' ? 'scan' : 'empty' };

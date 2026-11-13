@@ -21,6 +21,18 @@ createApp({
       'still_profile', 'still_plans', 'still_meal_logs', 'still_measurements', 'still_workout_logs',
       'still_workout_sheets', 'still_training_sessions', 'still_comments', 'still_settings', 'still_food_diary'
     ];
+    // Che forma deve avere ogni dato: un backup modificato o rovinato non deve poter bloccare l'app
+    const STORAGE_SHAPES = {
+      still_profile: 'object', still_plans: 'array', still_meal_logs: 'object', still_measurements: 'array',
+      still_workout_logs: 'array', still_workout_sheets: 'array', still_training_sessions: 'array',
+      still_comments: 'object', still_settings: 'object', still_food_diary: 'object'
+    };
+    const hasShape = (key, value) => {
+      const shape = STORAGE_SHAPES[key];
+      if (shape === 'array') return Array.isArray(value);
+      if (shape === 'object') return (value === null && key === 'still_profile') || (!!value && typeof value === 'object' && !Array.isArray(value));
+      return true;
+    };
     // Se il telefono non riesce a salvare (memoria piena o bloccata) l'utente deve saperlo subito:
     // avviso a schermo, al massimo una volta al minuto per non bloccare l'app.
     let lastSaveWarning = 0;
@@ -61,6 +73,15 @@ createApp({
       },
       remove(key) {
         try { localStorage.removeItem(key); } catch (e) { /* ignora */ }
+      },
+      // Legge un dato già controllato: se manca o ha una forma sbagliata usa il valore di partenza
+      load(key, fallback) {
+        const raw = this.getRaw(key);
+        if (raw === null) return fallback;
+        const value = JSON.parse(raw);
+        if (hasShape(key, value)) return value;
+        console.warn(`Dati con forma inattesa per ${key}: ignorati`);
+        return fallback;
       },
       exportAll() {
         const data = {};
@@ -162,8 +183,7 @@ createApp({
     };
 
     // Nutritional Plans Logic
-    const savedPlans = storage.getRaw('still_plans');
-    const plans = ref(savedPlans ? JSON.parse(savedPlans) : []);
+    const plans = ref(storage.load('still_plans', []));
 
     // Auto-salvataggio dei piani nella memoria del telefono
     watch(plans, (newPlans) => {
@@ -254,6 +274,7 @@ createApp({
       scan: 'Questo PDF sembra una scansione (un\'immagine): non riesco a leggere il testo. Se hai la versione Word o un PDF esportato dal computer, carica quello; altrimenti inserisci la dieta a mano qui sotto.',
       doc: 'Questo è un file Word del vecchio formato (.doc). Aprilo e salvalo come .docx o come PDF, poi caricalo di nuovo.',
       type: 'Il file deve essere un PDF o un documento Word (.docx).',
+      big: 'Il file è troppo grande (massimo 20 MB). Prova a esportare solo le pagine della dieta.',
       empty: 'Non ho trovato pasti nel file. Puoi inserire la dieta a mano qui sotto.'
     };
     const importPlanPdf = async (event) => {
@@ -562,8 +583,7 @@ createApp({
     // ---------------------------------------------------------------
     // PASTI: check giornaliero, commenti e calendario dashboard
     // ---------------------------------------------------------------
-    const savedMealLogs = storage.getRaw('still_meal_logs');
-    const mealLogs = ref(savedMealLogs ? JSON.parse(savedMealLogs) : {});
+    const mealLogs = ref(storage.load('still_meal_logs', {}));
 
     watch(mealLogs, (logs) => {
       storage.save('still_meal_logs', logs);
@@ -571,8 +591,7 @@ createApp({
 
     // DIARIO ALIMENTARE: per chi non segue un piano (o per i fuori pasto di chi lo segue).
     // { 'YYYY-MM-DD': { colazione: { text, kcal, protein, manual, unknown }, pranzo: {…}, … } }
-    const savedFoodDiary = storage.getRaw('still_food_diary');
-    const foodDiary = ref(savedFoodDiary ? JSON.parse(savedFoodDiary) : {});
+    const foodDiary = ref(storage.load('still_food_diary', {}));
     watch(foodDiary, (d) => storage.save('still_food_diary', d), { deep: true });
     const DIARY_MEALS = [
       { id: 'colazione', label: 'Colazione', icon: '🥣', from: 5 },
@@ -1250,8 +1269,7 @@ createApp({
     // ---------------------------------------------------------------
     // PROGRESSI: misurazioni corpo + carichi allenamento
     // ---------------------------------------------------------------
-    const savedMeasurements = storage.getRaw('still_measurements');
-    const measurements = ref(savedMeasurements ? JSON.parse(savedMeasurements) : []);
+    const measurements = ref(storage.load('still_measurements', []));
 
     // Auto-salvataggio delle misurazioni nella memoria del telefono
     watch(measurements, (newMeasurements) => {
@@ -1260,8 +1278,7 @@ createApp({
 
     // Log allenamenti: la sezione Allenamento scriverà qui le sessioni delle schede.
     // Formato consigliato: { id, date, sheetId, sheetName, exerciseId, exerciseName, weight, reps }
-    const savedWorkoutLogs = storage.getRaw('still_workout_logs');
-    const workoutLogs = ref(savedWorkoutLogs ? JSON.parse(savedWorkoutLogs) : []);
+    const workoutLogs = ref(storage.load('still_workout_logs', []));
 
     watch(workoutLogs, (newLogs) => {
       storage.save('still_workout_logs', newLogs);
@@ -1290,8 +1307,7 @@ createApp({
     // ---------------------------------------------------------------
     // ALLENAMENTO: schede, giorni, esercizi e progressi
     // ---------------------------------------------------------------
-    const savedSheets = storage.getRaw('still_workout_sheets');
-    const workoutSheets = ref(savedSheets ? JSON.parse(savedSheets) : []);
+    const workoutSheets = ref(storage.load('still_workout_sheets', []));
 
     watch(workoutSheets, (sheets) => {
       storage.save('still_workout_sheets', sheets);
@@ -1306,8 +1322,7 @@ createApp({
       { label: 'G', value: 4 }, { label: 'V', value: 5 }, { label: 'S', value: 6 }, { label: 'D', value: 0 }
     ];
 
-    const savedTrainingSessions = storage.getRaw('still_training_sessions');
-    const trainingSessions = ref(savedTrainingSessions ? JSON.parse(savedTrainingSessions) : []);
+    const trainingSessions = ref(storage.load('still_training_sessions', []));
 
     watch(trainingSessions, (sessions) => {
       storage.save('still_training_sessions', sessions);
@@ -2091,6 +2106,7 @@ createApp({
       scan: 'Il PDF sembra una foto o una scansione e non contiene testo. Copia e incolla gli esercizi qui sotto.',
       empty: 'Il file è vuoto o non contiene esercizi riconoscibili.',
       type: 'Formato non supportato: usa PDF, Word (.docx) o testo (.txt).',
+      big: 'Il file è troppo grande (massimo 20 MB). Copia e incolla il testo qui sotto.',
       none: 'Non ho trovato esercizi. Scrivi un esercizio per riga, tipo "Panca piana 4x8 60kg".'
     };
     const openWorkoutImport = () => { workoutImport.value = { isOpen: true, busy: false, error: '', text: '' }; };
@@ -4061,8 +4077,7 @@ createApp({
     const exportMode = ref(false);
     const exportSelectedDates = ref([]);
     
-    const savedComments = storage.getRaw('still_comments');
-    const commentsMap = ref(savedComments ? JSON.parse(savedComments) : {});
+    const commentsMap = ref(storage.load('still_comments', {}));
 
     // Auto-salvataggio delle note nella memoria del telefono
     watch(commentsMap, (newComments) => {
@@ -4184,8 +4199,7 @@ createApp({
     // ---------------------------------------------------------------
     // PROFILO E REGISTRAZIONE INIZIALE
     // ---------------------------------------------------------------
-    const savedProfile = storage.getRaw('still_profile');
-    const profile = ref(savedProfile ? JSON.parse(savedProfile) : null);
+    const profile = ref(storage.load('still_profile', null));
     watch(profile, (value) => { if (value) storage.save('still_profile', value); }, { deep: true });
 
     const calcAge = (birthDate) => {
@@ -5345,7 +5359,7 @@ createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 15';
+    const APP_VERSION = 'beta 16';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -5416,6 +5430,8 @@ createApp({
     const readBackupFile = (event, onError, onValid) => {
       const file = event.target.files && event.target.files[0];
       if (!file) return;
+      // Un backup vero pesa pochi MB (il browser ne tiene circa 5): oltre è sicuramente sbagliato
+      if (file.size > 15 * 1024 * 1024) { onError('Il file è troppo grande per essere un backup di STILL.'); return; }
       const reader = new FileReader();
       reader.onload = () => {
         let payload;
@@ -5431,8 +5447,15 @@ createApp({
           onError('Il file non contiene dati di STILL.');
           return;
         }
+        if (validKeys.some(k => !hasShape(k, data[k]))) {
+          onError('Il backup è rovinato o è stato modificato: non lo carico per non perdere i tuoi dati.');
+          return;
+        }
+        // Solo le chiavi di STILL: il resto del file viene ignorato
+        const clean = {};
+        validKeys.forEach(k => { clean[k] = data[k]; });
         const when = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString('it-IT') : 'data sconosciuta';
-        onValid(data, when);
+        onValid(clean, when);
       };
       reader.onerror = () => onError('Impossibile leggere il file.');
       reader.readAsText(file);
@@ -5876,7 +5899,7 @@ createApp({
       enabled: false, meals: true, workouts: true, checkins: true, streak: true, workoutLead: 60, streakTime: '21:00',
       mealTimes: { colazione: '08:00', spuntino_mattina: '10:30', pranzo: '13:00', spuntino_pomeriggio: '16:30', post_workout: '', cena: '20:00' }
     };
-    const savedSettings = (() => { try { return JSON.parse(storage.getRaw('still_settings') || '{}'); } catch (e) { return {}; } })();
+    const savedSettings = storage.load('still_settings', {});
     const settings = ref({
       ...savedSettings,
       reminders: {

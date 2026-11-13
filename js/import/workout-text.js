@@ -236,6 +236,7 @@ const workoutFileKind = (file) => {
 };
 const readWorkoutFileText = async (file) => {
   const kind = workoutFileKind(file);
+  if (file.size > IMPORT_MAX_BYTES) return { error: 'big' };
   if (kind === 'txt') return { text: await file.text() };
   if (kind === 'rtf') {
     // RTF semplice: via i comandi, restano le parole

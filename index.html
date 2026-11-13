@@ -2,6 +2,10 @@
 <html lang="it" class="h-full bg-[#F6F5F2]">
 <head>
   <meta charset="UTF-8">
+  <!-- Sicurezza: la pagina può caricare solo i propri file e non può mandare dati ad altri siti.
+       'unsafe-eval' serve a Vue, che costruisce i template nel browser; script scritti nella pagina non sono ammessi -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; media-src 'self' data: blob:; worker-src 'self' blob:; connect-src 'self' data: blob:; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="no-referrer">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>STILL - IERI. OGGI. DOMANI.</title>
   
@@ -26,18 +30,7 @@
   <link rel="stylesheet" href="css/style.css">
 
   <!-- Tema scuro applicato subito (prima che parta l'app), così non c'è il lampo bianco -->
-  <script>
-    (function () {
-      try {
-        var theme = (JSON.parse(localStorage.getItem('still_settings') || '{}') || {}).theme;
-        var dark = theme === 'dark' || (theme === 'system' && window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) {
-          document.documentElement.classList.add('dark');
-          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0E0E11');
-        }
-      } catch (e) {}
-    })();
-  </script>
+  <script src="js/theme.js"></script>
 </head>
 
 <body class="h-full font-sans text-antracite antialiased selection:bg-salvia selection:text-white bg-gray-100 flex justify-center">
