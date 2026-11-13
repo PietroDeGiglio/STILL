@@ -386,7 +386,9 @@
             <!-- HORIZONTAL MEALS SLIDER -->
             <div class="space-y-3">
               <div class="flex justify-between items-center px-1">
-                <h3 class="text-lg font-bold text-antracite">Il tuo menù di oggi</h3>
+                <h3 class="text-lg font-bold text-antracite">{{ todayActiveMeals.length ? 'Il tuo menù di oggi' : 'Cosa hai mangiato oggi' }}</h3>
+                <button v-if="!todayActiveMeals.length" @click="openDiary()" class="text-xs font-bold text-salvia">Diario ›</button>
+                <button v-else @click="openDiaryEditor(todayDateKey, 'extra')" class="text-xs font-bold text-salvia">+ Fuori pasto</button>
               </div>
 
               <!-- Proteine di oggi (stimate dagli alimenti del menù) -->
@@ -405,8 +407,27 @@
                 </p>
               </div>
               
-              <div v-if="todayActiveMeals.length === 0" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft text-center mx-1">
-                <p class="text-sm text-gray-500 font-medium">Riposo o nessun pasto programmato per oggi.</p>
+              <div v-if="todayActiveMeals.length === 0" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft mx-1 space-y-3.5">
+                <div class="flex items-baseline justify-between gap-2">
+                  <div class="flex items-baseline gap-1">
+                    <span class="text-2xl font-extrabold" :class="todayIntake.kcal ? intakeTextClass(todayIntake.kcal, todayIntake.target) : 'text-antracite'">{{ formatNumber(todayIntake.kcal) }}</span>
+                    <span class="text-xs font-bold text-gray-400">/ {{ formatNumber(todayIntake.target) }} kcal</span>
+                  </div>
+                  <span class="text-[11px] font-semibold text-gray-500">🥩 {{ todayIntake.protein }} g</span>
+                </div>
+                <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500" :class="intakeBarClass(todayIntake.kcal, todayIntake.target)" :style="{ width: Math.min(100, Math.round(todayIntake.kcal / Math.max(1, todayIntake.target) * 100)) + '%' }"></div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                  <button v-for="m in DIARY_MEALS" :key="'hd' + m.id" @click="openDiaryEditor(todayDateKey, m.id)"
+                          class="rounded-2xl py-2.5 px-1 flex flex-col items-center gap-0.5 border transition-all active:scale-95"
+                          :class="todayIntake.diary[m.id] ? 'bg-salvia/10 border-salvia/20' : 'bg-gray-50 border-gray-100'">
+                    <span class="text-lg leading-none">{{ m.icon }}</span>
+                    <span class="text-[10px] font-bold text-antracite">{{ m.label }}</span>
+                    <span class="text-[10px] font-extrabold" :class="todayIntake.diary[m.id] ? 'text-salvia' : 'text-gray-300'">{{ todayIntake.diary[m.id] ? (todayIntake.diary[m.id].kcal ?? '?') + ' kcal' : '+' }}</span>
+                  </button>
+                </div>
+                <p class="text-[10px] font-medium text-gray-400 leading-snug text-center">Non segui una dieta? Segna cosa mangi: ti dico se sei nelle tue calorie.</p>
               </div>
 
               <div v-else ref="mealsContainer" id="meals-container" class="flex overflow-x-auto snap-x snap-mandatory hide-scrollbar gap-4 pb-2 pt-1 px-1">
@@ -432,6 +453,7 @@
                         </div>
                       </div>
                       <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
+                      <p v-if="todayMealLogs[meal.id]?.status === 'other'" class="mt-2 text-[11px] font-semibold text-viola bg-viola/10 rounded-xl px-2.5 py-1.5 leading-snug">🍕 Hai mangiato: {{ todayMealLogs[meal.id].text || 'altro' }}<span v-if="todayMealLogs[meal.id].kcal !== null"> · ≈ {{ todayMealLogs[meal.id].kcal }} kcal</span></p>
                     </div>
                   </div>
 
@@ -444,7 +466,7 @@
                     </button>
                     <button @click="promptSkipMeal(todayDateKey, meal)" aria-label="Pasto saltato"
                             class="w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90"
-                            :class="todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
+                            :class="todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : todayMealLogs[meal.id]?.status === 'other' ? 'bg-viola text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
                       <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
                   </div>
@@ -478,7 +500,7 @@
                   </div>
                 </div>
                 <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-                  <div class="bg-salvia h-full rounded-full transition-all" :style="{ width: todayCaloriesPct + '%' }"></div>
+                  <div class="h-full rounded-full transition-all" :class="intakeBarClass(todayConsumedCalories, todayTargetCalories)" :style="{ width: todayCaloriesPct + '%' }"></div>
                 </div>
               </div>
             </div>
@@ -615,6 +637,10 @@
                   <div class="flex items-center gap-1.5">
                     <span class="w-2.5 h-2.5 rounded-full bg-viola"></span>
                     <span class="text-[10px] font-bold text-gray-500">Piccolo sgarro</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-300"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Poco</span>
                   </div>
                   <div class="flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
@@ -1470,17 +1496,145 @@
           <div v-if="activeTab === 'nutrition'" class="space-y-6 animate-fadeIn">
             
             <!-- SWITCH PIANI / CALENDARIO -->
-            <div v-if="nutritionView === 'list' || nutritionView === 'calendar'" class="flex bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
+            <div v-if="nutritionView === 'list' || nutritionView === 'calendar' || nutritionView === 'diary'" class="flex bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
               <button @click="nutritionView = 'list'; exportMode = false" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                       :class="nutritionView === 'list' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 16h14M4 12h16c0-3.314-3.582-6-8-6S4 8.686 4 12zm0 4h16c0 1.657-1.343 3-3 3H7c-1.657 0-3-1.343-3-3z"/></svg>
                 Piani
+              </button>
+              <button @click="openDiary()" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="nutritionView === 'diary' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.25v13m0-13C10.8 5.5 9.2 5 7.5 5S4.2 5.5 3 6.25v13C4.2 18.5 5.8 18 7.5 18s3.3.5 4.5 1.25m0-13C13.2 5.5 14.8 5 16.5 5s3.3.5 4.5 1.25v13C19.8 18.5 18.2 18 16.5 18s-3.3.5-4.5 1.25"/></svg>
+                Diario
               </button>
               <button @click="nutritionView = 'calendar'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
                       :class="nutritionView === 'calendar' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
                 Calendario
               </button>
+            </div>
+
+            <!-- VISTA: DIARIO (chi non segue un piano, o i fuori pasto di chi lo segue) -->
+            <div v-if="nutritionView === 'diary'" class="space-y-5 animate-fadeIn">
+              <div class="flex items-end justify-between gap-3">
+                <div>
+                  <div class="text-[10px] font-bold text-salvia tracking-widest uppercase">ALIMENTAZIONE</div>
+                  <h2 class="text-2xl font-bold text-antracite">Il tuo diario</h2>
+                </div>
+                <div class="flex items-center gap-1 bg-white rounded-xl border border-gray-100 shadow-sm p-1">
+                  <button @click="diaryShift(-1)" class="w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex items-center justify-center" aria-label="Giorno prima">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                  </button>
+                  <span class="text-xs font-bold text-antracite capitalize px-1 min-w-[64px] text-center">{{ diaryDate === todayDateKey ? 'Oggi' : formatDate(diaryDate) }}</span>
+                  <button @click="diaryShift(1)" :disabled="diaryDate >= todayDateKey" class="w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex items-center justify-center disabled:opacity-30" aria-label="Giorno dopo">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Calorie della giornata -->
+              <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-3">
+                <div class="flex items-start justify-between gap-3">
+                  <div>
+                    <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ diaryDay.label }}</div>
+                    <div class="flex items-baseline gap-1 mt-0.5">
+                      <span class="text-3xl font-extrabold" :class="diaryDay.kcal ? intakeTextClass(diaryDay.kcal, diaryDay.target) : 'text-antracite'">{{ formatNumber(diaryDay.kcal) }}</span>
+                      <span class="text-sm font-bold text-gray-400">/ {{ formatNumber(diaryDay.target) }} kcal</span>
+                    </div>
+                  </div>
+                  <span v-if="diaryDay.status !== 'empty' && diaryDay.status !== 'partial'" class="shrink-0 px-2.5 py-1 rounded-full text-[10px] font-bold" :class="dayStatusClasses(diaryDay.status)">{{ dayStatusLabel(diaryDay.status) }}</span>
+                </div>
+                <div class="w-full bg-gray-100 h-3 rounded-full overflow-hidden">
+                  <div class="h-full rounded-full transition-all duration-500" :class="intakeBarClass(diaryDay.kcal, diaryDay.target)" :style="{ width: Math.min(100, Math.round(diaryDay.kcal / Math.max(1, diaryDay.target) * 100)) + '%' }"></div>
+                </div>
+                <div class="flex items-center justify-between gap-3 text-[11px] font-semibold text-gray-500">
+                  <span v-if="diaryDay.kcal <= diaryDay.target">Ti restano <b class="text-antracite">≈ {{ formatNumber(diaryDay.target - diaryDay.kcal) }} kcal</b></span>
+                  <span v-else><b :class="intakeTextClass(diaryDay.kcal, diaryDay.target)">≈ {{ formatNumber(diaryDay.kcal - diaryDay.target) }} kcal</b> oltre l'obiettivo</span>
+                  <span>🥩 {{ diaryDay.protein }} g<span v-if="bodyStats.protein" class="text-gray-400"> / {{ bodyStats.protein.min }} g</span></span>
+                </div>
+                <p v-if="diaryDay.status === 'under'" class="text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 leading-snug">Hai mangiato molto meno del tuo fabbisogno. Ogni tanto capita, ma se succede spesso rallenta i risultati e ti toglie energie.</p>
+                <p v-if="diaryDay.unknown" class="text-[10px] font-medium text-gray-400 leading-snug">⚠️ {{ diaryDay.unknown }} {{ diaryDay.unknown === 1 ? 'pasto ha' : 'pasti hanno' }} alimenti che non conosco: aggiungi le calorie a mano per un totale preciso.</p>
+              </div>
+
+              <!-- Giorno con il piano: i pasti si segnano dal menù -->
+              <div v-if="diaryDay.plan" class="bg-salvia/5 border border-salvia/20 rounded-3xl p-4 space-y-2">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-black uppercase tracking-widest text-salvia">📋 Il tuo piano</div>
+                  <button @click="openDayMenuForDate(new Date(diaryDate + 'T00:00:00'))" class="text-[11px] font-bold text-salvia">Segna i pasti ›</button>
+                </div>
+                <div v-for="meal in diaryDay.meals" :key="'dp' + meal.id" class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-bold text-antracite truncate">{{ meal.icon }} {{ meal.name }}</span>
+                  <span class="shrink-0 font-bold" :class="{ done: 'text-salvia', other: 'text-viola', skipped: 'text-red-500' }[(diaryDay.logs[meal.id] || {}).status] || 'text-gray-300'">
+                    <template v-if="(diaryDay.logs[meal.id] || {}).status === 'done'">✓ {{ meal.calories || 0 }} kcal</template>
+                    <template v-else-if="(diaryDay.logs[meal.id] || {}).status === 'other'">altro · {{ diaryDay.logs[meal.id].kcal ?? '?' }} kcal</template>
+                    <template v-else-if="(diaryDay.logs[meal.id] || {}).status === 'skipped'">✕ saltato</template>
+                    <template v-else>da segnare</template>
+                  </span>
+                </div>
+                <p class="text-[10px] font-medium text-gray-500 leading-snug pt-1">Se mangi qualcosa di diverso tocca ✕ → <b>Ho mangiato altro</b>: se rientra nelle calorie non è uno sgarro. Qui sotto puoi segnare i fuori pasto.</p>
+              </div>
+
+              <!-- Pasti -->
+              <div class="space-y-2.5">
+                <button v-for="slot in (diaryDay.plan ? DIARY_MEALS.filter(m => m.id === 'extra') : DIARY_MEALS)" :key="'ds' + slot.id" @click="openDiaryEditor(diaryDate, slot.id)"
+                        class="w-full bg-white rounded-2xl p-3.5 border shadow-sm flex items-center gap-3 text-left active:scale-[0.99] transition-all"
+                        :class="diaryDay.diary[slot.id] ? 'border-salvia/30' : 'border-gray-100'">
+                  <span class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0" :class="diaryDay.diary[slot.id] ? 'bg-salvia/10' : 'bg-gray-50'">{{ slot.icon }}</span>
+                  <span class="flex-1 min-w-0">
+                    <span class="block text-sm font-extrabold text-antracite">{{ slot.label }}</span>
+                    <span class="block text-[11px] font-medium leading-snug line-clamp-2" :class="diaryDay.diary[slot.id] ? 'text-gray-500' : 'text-gray-400'">{{ diaryDay.diary[slot.id] ? diaryDay.diary[slot.id].text || 'Calorie scritte a mano' : 'Aggiungi cosa hai mangiato' }}</span>
+                  </span>
+                  <span v-if="diaryDay.diary[slot.id]" class="shrink-0 text-xs font-extrabold text-salvia">{{ diaryDay.diary[slot.id].kcal !== null && diaryDay.diary[slot.id].kcal !== undefined ? '≈ ' + diaryDay.diary[slot.id].kcal : '?' }}</span>
+                  <span v-else class="shrink-0 w-8 h-8 rounded-full bg-salvia/10 text-salvia flex items-center justify-center text-lg font-bold">+</span>
+                </button>
+              </div>
+
+              <!-- Obiettivo -->
+              <div v-if="!diaryDay.plan" class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🎯 Il tuo obiettivo</div>
+                  <span class="text-xs font-extrabold text-antracite">{{ formatNumber(diaryTarget.kcal) }} kcal al giorno</span>
+                </div>
+                <div v-if="bodyStats.energy" class="grid grid-cols-3 gap-1.5">
+                  <button v-for="g in [{ id: 'lose', l: 'Dimagrire', k: bodyStats.energy.lose }, { id: 'keep', l: 'Mantenere', k: bodyStats.energy.tdee }, { id: 'gain', l: 'Crescere', k: bodyStats.energy.gain }]" :key="'dg' + g.id"
+                          @click="setDiaryGoal(g.id)" class="rounded-xl py-2 px-1 text-center border transition-all"
+                          :class="!diaryTarget.custom && diaryGoal === g.id ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-100'">
+                    <span class="block text-[11px] font-bold">{{ g.l }}</span>
+                    <span class="block text-[10px] font-semibold opacity-80">{{ formatNumber(g.k) }}</span>
+                  </button>
+                </div>
+                <p v-else class="text-[11px] font-medium text-gray-500 leading-snug">Per ora uso 2000 kcal. Aggiungi età, altezza e peso nel profilo e in Progressi: calcolo il tuo fabbisogno.</p>
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-gray-500">
+                  Oppure scrivi il tuo:
+                  <input type="text" inputmode="numeric" :value="diaryTarget.custom ? diaryTarget.kcal : ''" @change="setDiaryKcal($event.target.value)" placeholder="es. 2200"
+                         class="w-24 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite outline-none focus:border-salvia">
+                  kcal
+                </label>
+              </div>
+
+              <!-- Ultimi 7 giorni -->
+              <div class="bg-white rounded-3xl p-4 border border-gray-100 shadow-sm space-y-3">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Ultimi 7 giorni</div>
+                  <span v-if="diaryWeek.avg" class="text-[11px] font-semibold text-gray-500">media <b class="text-antracite">≈ {{ formatNumber(diaryWeek.avg) }} kcal</b></span>
+                </div>
+                <div class="grid grid-cols-7 gap-1.5 items-end h-24">
+                  <button v-for="d in diaryWeek.days" :key="'dw' + d.key" @click="diaryDate = d.key" class="flex flex-col items-center gap-1 h-full justify-end">
+                    <span class="text-[9px] font-bold text-gray-400">{{ d.tracked ? Math.round(d.kcal / 100) / 10 + 'k' : '' }}</span>
+                    <span class="w-full rounded-lg bg-gray-100 relative overflow-hidden" style="height: 56px;">
+                      <span class="absolute bottom-0 left-0 right-0 rounded-lg transition-all"
+                            :class="({ perfect: 'bg-salvia', small_cheat: 'bg-viola', cheat: 'bg-red-500', under: 'bg-amber-400', partial: 'bg-gray-300' })[d.status] || 'bg-gray-200'"
+                            :style="{ height: d.pct + '%' }"></span>
+                    </span>
+                    <span class="text-[10px] font-extrabold" :class="d.key === diaryDate ? 'text-salvia' : 'text-gray-400'">{{ d.letter }}</span>
+                  </button>
+                </div>
+                <p class="text-[11px] font-medium text-gray-500 leading-snug">
+                  <template v-if="diaryWeek.tracked">{{ diaryWeek.good }} {{ diaryWeek.good === 1 ? 'giorno' : 'giorni' }} su {{ diaryWeek.tracked }} nelle tue calorie. <span class="text-gray-400">Verde: entro l'obiettivo · viola: un po' sopra · rosso: molto sopra · grigio: mancano pranzo o cena.</span></template>
+                  <template v-else>Segna cosa mangi per qualche giorno: qui vedrai come va la settimana.</template>
+                </p>
+              </div>
+              <p class="text-[10px] font-medium text-gray-400 text-center leading-snug px-4">Stime da valori medi: servono a regolarti, non a contare ogni caloria. Per una dieta su misura chiedi a un nutrizionista.</p>
             </div>
 
             <!-- VISTA: LISTA DEI PIANI -->
@@ -1909,6 +2063,10 @@
                     <span class="text-[10px] font-bold text-gray-500">Piccolo sgarro</span>
                   </div>
                   <div class="flex items-center gap-1.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-300"></span>
+                    <span class="text-[10px] font-bold text-gray-500">Poco</span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
                     <span class="w-1.5 h-1.5 rounded-full bg-sky-500"></span>
                     <span class="text-[10px] font-bold text-gray-500">Nota</span>
                   </div>
@@ -2239,8 +2397,20 @@
                 </div>
               </div>
 
-              <div v-if="dayMenuMeals.length === 0" class="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                <p class="text-sm font-medium text-gray-400">Nessun pasto programmato per questo giorno.</p>
+              <div v-if="dayMenuMeals.length === 0 && !dayIntake(dayMenuModal.dateKey).entries" class="text-center py-6 bg-gray-50 rounded-2xl border border-dashed border-gray-200 space-y-2">
+                <p class="text-sm font-medium text-gray-400">Niente di segnato per questo giorno.</p>
+                <button v-if="!isFutureDateKey(dayMenuModal.dateKey)" @click="closeDayMenu(); openDiary(dayMenuModal.dateKey)" class="text-xs font-bold text-salvia">Scrivi cosa hai mangiato ›</button>
+              </div>
+              <!-- Diario del giorno -->
+              <div v-if="dayIntake(dayMenuModal.dateKey).entries" class="bg-salvia/5 border border-salvia/20 rounded-2xl px-3.5 py-3 space-y-1.5">
+                <div class="flex items-center justify-between gap-2">
+                  <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">Diario · ≈ {{ formatNumber(dayIntake(dayMenuModal.dateKey).kcal) }} kcal</div>
+                  <button @click="closeDayMenu(); openDiary(dayMenuModal.dateKey)" class="text-[10px] font-bold text-salvia">Modifica ›</button>
+                </div>
+                <div v-for="m in DIARY_MEALS.filter(x => dayIntake(dayMenuModal.dateKey).diary[x.id])" :key="'dmd' + m.id" class="flex items-start justify-between gap-2 text-[11px]">
+                  <span class="text-antracite font-medium leading-snug"><b>{{ m.icon }} {{ m.label }}:</b> {{ dayIntake(dayMenuModal.dateKey).diary[m.id].text }}</span>
+                  <span class="shrink-0 font-bold text-gray-400">{{ dayIntake(dayMenuModal.dateKey).diary[m.id].kcal ?? '?' }}</span>
+                </div>
               </div>
 
               <div v-for="meal in dayMenuMeals" :key="meal.id" class="bg-gray-50 rounded-2xl border border-gray-100 p-3 flex items-stretch gap-2.5">
@@ -2254,6 +2424,9 @@
                     <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">{{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : '—' }}{{ mealProteinLabel(meal) }}</span>
                   </div>
 
+                  <p v-if="dayMenuLogs[meal.id]?.status === 'other'" class="text-[10px] font-semibold text-viola bg-viola/10 border border-viola/20 rounded-lg px-2.5 py-1.5 leading-snug">
+                    🍕 {{ dayMenuLogs[meal.id].text || 'Altro' }}<span v-if="dayMenuLogs[meal.id].kcal !== null"> · ≈ {{ dayMenuLogs[meal.id].kcal }} kcal</span>
+                  </p>
                   <p v-if="dayMenuLogs[meal.id]?.status === 'skipped' && dayMenuLogs[meal.id]?.comment"
                      class="text-[10px] font-medium text-red-500 bg-red-50 border border-red-100 rounded-lg px-2.5 py-1.5 leading-snug">
                     💬 {{ dayMenuLogs[meal.id].comment }}
@@ -2271,7 +2444,7 @@
                   <button @click="promptSkipMeal(dayMenuModal.dateKey, meal)" aria-label="Pasto saltato"
                           :disabled="isFutureDateKey(dayMenuModal.dateKey)"
                           class="w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100"
-                          :class="dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
+                          :class="dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : dayMenuLogs[meal.id]?.status === 'other' ? 'bg-viola text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                   </button>
                 </div>
@@ -2284,35 +2457,121 @@
           </div>
         </div>
 
-        <!-- MEAL COMMENT MODAL (Pasto saltato) -->
-        <div v-if="mealCommentModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
-          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4">
+        <!-- PASTO NON SEGUITO: saltato oppure "ho mangiato altro" (se rientra nelle calorie non è uno sgarro) -->
+        <div v-if="mealCommentModal.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="mealCommentModal.isOpen = false">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
             <div class="flex justify-between items-start gap-3">
               <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-red-50 border border-red-100 flex items-center justify-center text-red-500 flex-shrink-0">
-                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
-                </div>
+                <button v-if="mealCommentModal.mode !== 'choose'" @click="mealCommentModal.mode = 'choose'" class="w-10 h-10 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center flex-shrink-0" aria-label="Indietro">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+                </button>
                 <div>
-                  <h3 class="text-lg font-bold text-antracite leading-tight">Pasto saltato</h3>
-                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ mealCommentModal.mealName }}</p>
+                  <h3 class="text-lg font-bold text-antracite leading-tight">{{ ({ choose: 'Non hai seguito il pasto?', skipped: 'Pasto saltato', other: 'Hai mangiato altro' })[mealCommentModal.mode] }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ mealCommentModal.mealName }} · <span class="capitalize">{{ mealCommentModal.dateLabel }}</span></p>
                 </div>
               </div>
-              <button @click="mealCommentModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+              <button @click="mealCommentModal.isOpen = false" class="p-1 text-gray-400 hover:text-antracite flex-shrink-0" aria-label="Chiudi"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+
+            <!-- Scelta -->
+            <div v-if="mealCommentModal.mode === 'choose'" class="space-y-2.5">
+              <button @click="mealCommentModal.mode = 'other'" class="w-full rounded-2xl p-4 bg-viola/5 border border-viola/20 flex items-center gap-3 text-left active:scale-[0.98] transition-all">
+                <span class="w-11 h-11 rounded-2xl bg-viola/10 flex items-center justify-center text-xl shrink-0">🍕</span>
+                <span><span class="block text-sm font-extrabold text-antracite">Ho mangiato altro</span><span class="block text-[11px] font-medium text-gray-500 leading-snug">Scrivi cosa: se rientra nelle calorie del pasto non è uno sgarro.</span></span>
               </button>
-            </div>
-
-            <p class="text-xs font-bold text-gray-400 capitalize">{{ mealCommentModal.dateLabel }}</p>
-
-            <div>
-              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Perché l'hai saltato?</label>
-              <textarea v-model="mealCommentModal.text" rows="3" placeholder="Es: ero fuori casa, non avevo fame..."
-                        class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none transition-all"></textarea>
-            </div>
-
-            <div class="space-y-2">
-              <button @click="saveMealSkip" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-red-600 active:scale-95 transition-all">Salva</button>
+              <button @click="mealCommentModal.mode = 'skipped'" class="w-full rounded-2xl p-4 bg-red-50 border border-red-100 flex items-center gap-3 text-left active:scale-[0.98] transition-all">
+                <span class="w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center text-xl shrink-0">🚫</span>
+                <span><span class="block text-sm font-extrabold text-antracite">Non l'ho mangiato</span><span class="block text-[11px] font-medium text-gray-500 leading-snug">Pasto saltato: conta come uno sgarro dal piano.</span></span>
+              </button>
               <button v-if="mealCommentModal.hasExisting" @click="clearMealStatus" class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all">Rimuovi stato</button>
+            </div>
+
+            <!-- Saltato -->
+            <template v-if="mealCommentModal.mode === 'skipped'">
+              <div>
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Perché l'hai saltato? (facoltativo)</label>
+                <textarea v-model="mealCommentModal.text" rows="3" placeholder="Es: ero fuori casa, non avevo fame..."
+                          class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none transition-all"></textarea>
+              </div>
+              <button @click="saveMealSkip" class="w-full bg-red-500 text-white font-bold py-3 rounded-xl shadow-md hover:bg-red-600 active:scale-95 transition-all">Salva</button>
+            </template>
+
+            <!-- Altro -->
+            <template v-if="mealCommentModal.mode === 'other'">
+              <div class="space-y-1.5">
+                <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest pl-1">Cosa hai mangiato?</label>
+                <textarea v-model="mealCommentModal.food" rows="3" placeholder="Es: pizza margherita e una birra"
+                          class="w-full bg-gray-50 border border-gray-200 focus:border-viola focus:ring-2 focus:ring-viola/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none"></textarea>
+              </div>
+              <div v-if="mealOffEstimate.items.length" class="rounded-2xl bg-gray-50 border border-gray-100 p-3 space-y-1">
+                <div v-for="(it, i) in mealOffEstimate.items" :key="'moi' + i" class="flex items-center justify-between gap-2 text-xs">
+                  <span class="font-semibold text-antracite truncate">{{ it.text }}</span>
+                  <span v-if="it.known" class="shrink-0 font-bold text-gray-500">≈ {{ it.kcal }} kcal</span>
+                  <span v-else class="shrink-0 text-[10px] font-bold text-amber-600">non lo conosco</span>
+                </div>
+              </div>
+              <label class="flex items-center justify-between gap-3 text-[11px] font-semibold text-gray-500">
+                <span>Calorie (se le sai)</span>
+                <input type="text" inputmode="numeric" v-model="mealCommentModal.manualKcal" :placeholder="mealOffEstimate.kcal !== null ? String(mealOffEstimate.kcal) : 'kcal'"
+                       class="w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite outline-none focus:border-viola text-right">
+              </label>
+              <p class="text-xs font-semibold rounded-2xl px-3.5 py-3 leading-snug border"
+                 :class="({ ok: 'bg-salvia/10 text-salvia border-salvia/20', over: 'bg-viola/10 text-viola border-viola/20' })[mealOffVerdict.tone] || 'bg-gray-50 text-gray-500 border-gray-100'">{{ mealOffVerdict.text }}</p>
+              <button @click="saveMealOther" class="w-full bg-viola text-white font-bold py-3 rounded-xl shadow-md active:scale-95 transition-all">Salva</button>
+            </template>
+          </div>
+        </div>
+
+        <!-- DIARIO: scrivi un pasto -->
+        <div v-if="diaryEditor.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="diaryEditor.isOpen = false">
+          <div class="bg-white rounded-t-3xl sm:rounded-3xl p-5 w-full max-w-sm shadow-2xl space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex items-center gap-3">
+                <div class="w-11 h-11 rounded-2xl bg-salvia/10 flex items-center justify-center text-xl">{{ diaryMealInfo(diaryEditor.slot).icon }}</div>
+                <div>
+                  <h3 class="text-lg font-bold text-antracite leading-tight">{{ diaryMealInfo(diaryEditor.slot).label }}</h3>
+                  <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ diaryEditor.dateKey === todayDateKey ? 'Oggi' : formatDayLabel(diaryEditor.dateKey) }}</p>
+                </div>
+              </div>
+              <button @click="diaryEditor.isOpen = false" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div class="flex gap-1.5 overflow-x-auto hide-scrollbar -mx-1 px-1">
+              <button v-for="m in DIARY_MEALS" :key="'dem' + m.id" @click="diaryEditor.slot = m.id" class="shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all"
+                      :class="diaryEditor.slot === m.id ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'">{{ m.icon }} {{ m.label }}</button>
+            </div>
+            <div v-if="diaryFrequent.length" class="space-y-1.5">
+              <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">I tuoi soliti</div>
+              <div class="flex flex-wrap gap-1.5">
+                <button v-for="f in diaryFrequent" :key="'df' + f.text" @click="useDiaryFrequent(f)" class="max-w-full text-left px-2.5 py-1.5 rounded-xl bg-salvia/5 border border-salvia/20 text-[11px] font-semibold text-antracite truncate">
+                  {{ f.text }}<span v-if="f.kcal" class="text-salvia font-bold"> · {{ f.kcal }}</span>
+                </button>
+              </div>
+            </div>
+            <div class="space-y-1.5">
+              <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest">Cosa hai mangiato?</label>
+              <textarea v-model="diaryEditor.text" rows="3" placeholder="Es: pasta al pomodoro, insalata e una mela"
+                        class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none"></textarea>
+              <p class="text-[10px] font-medium text-gray-400 leading-snug">Separa con virgole o "e". Se sai le quantità scrivile (80g pasta, 2 uova): la stima è più precisa.</p>
+            </div>
+            <div v-if="diaryEstimate.items.length" class="rounded-2xl bg-gray-50 border border-gray-100 p-3 space-y-1.5">
+              <div v-for="(it, i) in diaryEstimate.items" :key="'dei' + i" class="flex items-center justify-between gap-2 text-xs">
+                <span class="font-semibold text-antracite truncate">{{ it.text }}</span>
+                <span v-if="it.known" class="shrink-0 font-bold text-gray-500">≈ {{ it.kcal }} kcal<span v-if="it.guessed" class="text-[9px] text-gray-400 font-semibold"> porz. media</span></span>
+                <span v-else class="shrink-0 text-[10px] font-bold text-amber-600">non lo conosco</span>
+              </div>
+              <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-gray-200 text-xs">
+                <span class="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Totale</span>
+                <span class="font-extrabold text-salvia">{{ diaryEstimate.kcal !== null ? '≈ ' + diaryEstimate.kcal + ' kcal' : '—' }}<span v-if="diaryEstimate.protein" class="text-gray-400 font-bold"> · {{ diaryEstimate.protein }} g prot</span></span>
+              </div>
+            </div>
+            <label class="flex items-center justify-between gap-3 text-[11px] font-semibold text-gray-500">
+              <span>Calorie (se le sai, sostituiscono la stima)</span>
+              <input type="text" inputmode="numeric" v-model="diaryEditor.manualKcal" :placeholder="diaryEstimate.kcal !== null ? String(diaryEstimate.kcal) : 'kcal'"
+                     class="w-20 bg-gray-50 border border-gray-200 rounded-lg px-2 py-1.5 text-xs font-bold text-antracite outline-none focus:border-salvia text-right">
+            </label>
+            <div class="space-y-2">
+              <button @click="saveDiaryEntry" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all">Salva{{ diaryEditorKcal !== null ? ' · ≈ ' + diaryEditorKcal + ' kcal' : '' }}</button>
+              <button v-if="diaryEditor.existing" @click="deleteDiaryEntry" class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-2xl active:scale-95 transition-all">Elimina</button>
             </div>
           </div>
         </div>

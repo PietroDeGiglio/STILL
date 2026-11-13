@@ -19,7 +19,7 @@ createApp({
     // ---------------------------------------------------------------
     const STORAGE_KEYS = [
       'still_profile', 'still_plans', 'still_meal_logs', 'still_measurements', 'still_workout_logs',
-      'still_workout_sheets', 'still_training_sessions', 'still_comments', 'still_settings'
+      'still_workout_sheets', 'still_training_sessions', 'still_comments', 'still_settings', 'still_food_diary'
     ];
     // Se il telefono non riesce a salvare (memoria piena o bloccata) l'utente deve saperlo subito:
     // avviso a schermo, al massimo una volta al minuto per non bloccare l'app.
@@ -569,6 +569,68 @@ createApp({
       storage.save('still_meal_logs', logs);
     }, { deep: true });
 
+    // DIARIO ALIMENTARE: per chi non segue un piano (o per i fuori pasto di chi lo segue).
+    // { 'YYYY-MM-DD': { colazione: { text, kcal, protein, manual, unknown }, pranzo: {…}, … } }
+    const savedFoodDiary = storage.getRaw('still_food_diary');
+    const foodDiary = ref(savedFoodDiary ? JSON.parse(savedFoodDiary) : {});
+    watch(foodDiary, (d) => storage.save('still_food_diary', d), { deep: true });
+    const DIARY_MEALS = [
+      { id: 'colazione', label: 'Colazione', icon: '🥣', from: 5 },
+      { id: 'spuntino_mattina', label: 'Spuntino', icon: '🍏', from: 10 },
+      { id: 'pranzo', label: 'Pranzo', icon: '🍝', from: 12 },
+      { id: 'spuntino_pomeriggio', label: 'Merenda', icon: '🍌', from: 15.5 },
+      { id: 'cena', label: 'Cena', icon: '🍽️', from: 19 },
+      { id: 'extra', label: 'Fuori pasto', icon: '🍫', from: 99 }
+    ];
+
+    // Obiettivo calorico del diario: dal profilo (mantenere / dimagrire / crescere) o scritto a mano
+    const diaryGoal = computed(() => (settings.value.diary && settings.value.diary.goal) || suggestedEatGoal.value);
+    const diaryTarget = computed(() => {
+      const custom = settings.value.diary && Number(settings.value.diary.kcal);
+      if (custom > 0) return { kcal: Math.round(custom), custom: true };
+      const e = bodyStats.value.energy;
+      if (!e) return { kcal: 2000, fallback: true };
+      const g = diaryGoal.value;
+      return { kcal: g === 'lose' ? e.lose : g === 'gain' ? e.gain : e.tdee };
+    });
+    const setDiaryGoal = (goal) => { settings.value.diary = { ...(settings.value.diary || {}), goal, kcal: null }; };
+    const setDiaryKcal = (value) => {
+      const n = parseOptionalNumber(value);
+      settings.value.diary = { ...(settings.value.diary || {}), kcal: n && n >= 800 && n <= 6000 ? Math.round(n) : null };
+    };
+
+    // Quello che hai mangiato in un giorno: pasti del piano segnati (fatti o "altro") + diario
+    const dayIntake = (dateKey) => {
+      const meals = getMealsForDate(new Date(dateKey + 'T00:00:00'));
+      const logs = mealLogs.value[dateKey] || {};
+      let kcal = 0, protein = 0, logged = 0, unknown = 0;
+      meals.forEach(m => {
+        const l = logs[m.id];
+        if (!l) return;
+        logged++;
+        if (l.status === 'done') { kcal += m.calories || 0; protein += m.protein || 0; }
+        else if (l.status === 'other') { if (l.kcal !== null && l.kcal !== undefined) kcal += l.kcal; else unknown++; protein += l.protein || 0; }
+      });
+      const diary = foodDiary.value[dateKey] || {};
+      const entries = Object.keys(diary).filter(k => diary[k] && (diary[k].text || diary[k].kcal));
+      entries.forEach(k => { const e = diary[k]; if (e.kcal !== null && e.kcal !== undefined) kcal += e.kcal; else unknown++; protein += e.protein || 0; });
+      const planTarget = meals.reduce((s, m) => s + (m.calories || 0), 0);
+      return {
+        plan: meals.length > 0, meals, logs, diary, entries: entries.length, logged, unknown,
+        kcal: Math.round(kcal), protein: Math.round(protein),
+        target: meals.length && planTarget ? planTarget : diaryTarget.value.kcal
+      };
+    };
+    // Colore delle calorie: verde entro l'obiettivo, viola fino al 10% in più, rosso oltre
+    const intakeLevel = (kcal, target) => (!target ? 'ok' : kcal > target * 1.1 ? 'over' : kcal > target ? 'little' : 'ok');
+    const intakeBarClass = (kcal, target) => ({ ok: 'bg-salvia', little: 'bg-viola', over: 'bg-red-500' })[intakeLevel(kcal, target)];
+    const intakeTextClass = (kcal, target) => ({ ok: 'text-salvia', little: 'text-viola', over: 'text-red-500' })[intakeLevel(kcal, target)];
+    // Pasto diverso dal piano: non è uno sgarro se sta nelle calorie del pasto (margine del 5% per le stime)
+    // o se a fine giornata tutto il giorno sta nel totale del piano
+    const kcalWithin = (kcal, planned) => kcal <= planned * 1.05 + 20;
+    const otherMealWithin = (meal, log) => log && log.kcal !== null && log.kcal !== undefined && meal.calories
+      && kcalWithin(log.kcal, meal.calories);
+
     const todayDateKey = computed(() => toISODate(new Date()));
     const todayMealLogs = computed(() => mealLogs.value[todayDateKey.value] || {});
 
@@ -579,7 +641,10 @@ createApp({
       const meals = todayActiveMeals.value.filter(m => m.protein !== null && m.protein !== undefined);
       if (!meals.length) return null;
       const planned = meals.reduce((sum, m) => sum + m.protein, 0);
-      const eaten = meals.filter(m => (todayMealLogs.value[m.id] || {}).status === 'done').reduce((sum, m) => sum + m.protein, 0);
+      const eaten = meals.reduce((sum, m) => {
+        const l = todayMealLogs.value[m.id] || {};
+        return sum + (l.status === 'done' ? m.protein : l.status === 'other' ? (l.protein || 0) : 0);
+      }, 0) + Object.values(foodDiary.value[todayDateKey.value] || {}).reduce((s, e) => s + ((e && e.protein) || 0), 0);
       return { planned, eaten };
     });
 
@@ -632,7 +697,11 @@ createApp({
         mealName: meal.name,
         dateLabel: formatDayLabel(dateKey),
         text: existing?.comment || '',
-        hasExisting: existing?.status === 'skipped'
+        mode: existing?.status === 'other' ? 'other' : existing?.status === 'skipped' ? 'skipped' : 'choose',
+        food: existing?.status === 'other' ? (existing.text || '') : '',
+        manualKcal: existing?.status === 'other' && existing.manual ? String(existing.kcal) : '',
+        planned: meal.calories,
+        hasExisting: existing?.status === 'skipped' || existing?.status === 'other'
       };
     };
 
@@ -644,6 +713,139 @@ createApp({
       mealCommentModal.value.isOpen = false;
     };
 
+    // "Ho mangiato altro": stima dal testo (o calorie scritte a mano) e verdetto
+    const mealOffEstimate = computed(() => (mealCommentModal.value.isOpen && mealCommentModal.value.mode === 'other'
+      ? estimateFoodText(mealCommentModal.value.food) : { items: [], kcal: null, protein: null, unknown: 0 }));
+    const mealOffKcal = computed(() => {
+      const manual = parseOptionalNumber(mealCommentModal.value.manualKcal);
+      return manual !== null && manual >= 0 ? Math.round(manual) : mealOffEstimate.value.kcal;
+    });
+    const mealOffVerdict = computed(() => {
+      const kcal = mealOffKcal.value, planned = mealCommentModal.value.planned;
+      if (kcal === null) return { tone: 'none', text: 'Scrivi cosa hai mangiato (o le calorie) e ti dico se rientra.' };
+      if (!planned) return { tone: 'none', text: 'Il piano non ha le calorie di questo pasto: conterà sul totale della giornata.' };
+      if (kcal <= planned) return { tone: 'ok', text: 'Rientra nelle calorie del pasto (≈ ' + kcal + ' su ' + planned + ' kcal): non è uno sgarro 👍' };
+      if (kcalWithin(kcal, planned)) return { tone: 'ok', text: '≈ ' + kcal + ' kcal contro ' + planned + ': praticamente uguale, non è uno sgarro 👍' };
+      return { tone: 'over', text: '≈ ' + kcal + ' kcal, ' + (kcal - planned) + ' più del previsto. Non conta come sgarro solo se a fine giornata rientri nel totale del piano.' };
+    });
+    const saveMealOther = () => {
+      const modal = mealCommentModal.value;
+      const text = (modal.food || '').trim();
+      const manual = parseOptionalNumber(modal.manualKcal);
+      if (!text && manual === null) { showToastMessage('Scrivi cosa hai mangiato oppure le calorie.'); return; }
+      const dayLogs = mealLogs.value[modal.dateKey] || {};
+      dayLogs[modal.mealId] = {
+        status: 'other', comment: '', text,
+        kcal: mealOffKcal.value, protein: mealOffEstimate.value.protein,
+        manual: manual !== null
+      };
+      mealLogs.value[modal.dateKey] = dayLogs;
+      mealCommentModal.value.isOpen = false;
+    };
+
+    // --- Diario: scrivere un pasto ---
+    const diaryEditor = ref({ isOpen: false, dateKey: '', slot: 'pranzo', text: '', manualKcal: '' });
+    const diaryMealInfo = (slot) => DIARY_MEALS.find(m => m.id === slot) || DIARY_MEALS[0];
+    const openDiaryEditor = (dateKey, slot) => {
+      if (isFutureDateKey(dateKey)) { showToastMessage('Puoi scrivere solo quello che hai già mangiato (oggi o nei giorni passati).'); return; }
+      const e = (foodDiary.value[dateKey] || {})[slot];
+      diaryEditor.value = { isOpen: true, dateKey, slot, text: e ? e.text || '' : '', manualKcal: e && e.manual ? String(e.kcal) : '', existing: !!e };
+    };
+    // Pasto da proporre in base all'ora (in home: "Aggiungi")
+    const diarySlotNow = () => {
+      const h = new Date().getHours() + new Date().getMinutes() / 60;
+      let slot = 'colazione';
+      DIARY_MEALS.forEach(m => { if (m.from <= h) slot = m.id; });
+      return slot;
+    };
+    const diaryEstimate = computed(() => (diaryEditor.value.isOpen ? estimateFoodText(diaryEditor.value.text) : { items: [], kcal: null, protein: null, unknown: 0 }));
+    const diaryEditorKcal = computed(() => {
+      const manual = parseOptionalNumber(diaryEditor.value.manualKcal);
+      return manual !== null && manual >= 0 ? Math.round(manual) : diaryEstimate.value.kcal;
+    });
+    const saveDiaryEntry = () => {
+      const ed = diaryEditor.value;
+      const text = (ed.text || '').trim();
+      const manual = parseOptionalNumber(ed.manualKcal);
+      if (!text && manual === null) { deleteDiaryEntry(); return; }
+      const day = { ...(foodDiary.value[ed.dateKey] || {}) };
+      day[ed.slot] = { text, kcal: diaryEditorKcal.value, protein: diaryEstimate.value.protein, manual: manual !== null, unknown: diaryEstimate.value.unknown };
+      foodDiary.value[ed.dateKey] = day;
+      diaryEditor.value.isOpen = false;
+    };
+    const deleteDiaryEntry = () => {
+      const ed = diaryEditor.value;
+      const day = { ...(foodDiary.value[ed.dateKey] || {}) };
+      delete day[ed.slot];
+      if (Object.keys(day).length) foodDiary.value[ed.dateKey] = day; else delete foodDiary.value[ed.dateKey];
+      diaryEditor.value.isOpen = false;
+    };
+    // Pasti che scrivi spesso: un tocco e sono segnati
+    const diaryFrequent = computed(() => {
+      if (!diaryEditor.value.isOpen) return [];
+      const slot = diaryEditor.value.slot;
+      const count = (onlySlot) => {
+        const map = {};
+        Object.keys(foodDiary.value).sort().forEach(dateKey => {
+          const day = foodDiary.value[dateKey] || {};
+          Object.keys(day).forEach(s => {
+            const e = day[s];
+            if (!e || !e.text || (onlySlot && s !== slot)) return;
+            const key = e.text.trim().toLowerCase();
+            map[key] = { text: e.text.trim(), kcal: e.kcal, n: ((map[key] && map[key].n) || 0) + 1, last: dateKey };
+          });
+        });
+        return Object.values(map).sort((a, b) => b.n - a.n || b.last.localeCompare(a.last));
+      };
+      let list = count(true);
+      if (list.length < 3) list = list.concat(count(false).filter(x => !list.some(y => y.text.toLowerCase() === x.text.toLowerCase())));
+      return list.filter(x => x.text.toLowerCase() !== (diaryEditor.value.text || '').trim().toLowerCase()).slice(0, 6);
+    });
+    const useDiaryFrequent = (item) => { diaryEditor.value.text = item.text; diaryEditor.value.manualKcal = ''; };
+
+    // --- Diario: la giornata e la settimana ---
+    const diaryDate = ref(toISODate(new Date()));
+    const diaryShift = (days) => {
+      const d = new Date(diaryDate.value + 'T00:00:00');
+      d.setDate(d.getDate() + days);
+      const key = toISODate(d);
+      if (key > todayDateKey.value) return;
+      diaryDate.value = key;
+    };
+    const diaryDay = computed(() => {
+      const info = dayIntake(diaryDate.value);
+      return { ...info, status: dayStatusFor(new Date(diaryDate.value + 'T00:00:00')), label: diaryDate.value === todayDateKey.value ? 'Oggi' : formatDayLabel(diaryDate.value) };
+    });
+    const diaryWeek = computed(() => {
+      const days = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+        const key = toISODate(d);
+        const info = dayIntake(key);
+        const tracked = info.entries > 0 || info.logged > 0;
+        days.push({
+          key, tracked, kcal: info.kcal, target: info.target, status: tracked ? dayStatusFor(d) : 'empty',
+          letter: d.toLocaleDateString('it-IT', { weekday: 'narrow' }).toUpperCase(),
+          pct: tracked && info.target ? Math.min(100, Math.round(info.kcal / (info.target * 1.25) * 100)) : 0
+        });
+      }
+      const tracked = days.filter(d => d.tracked);
+      // Media solo sulle giornate complete (con pranzo e cena): quelle a metà la abbasserebbero
+      const complete = tracked.filter(d => d.status !== 'partial');
+      return {
+        days,
+        avg: complete.length ? Math.round(complete.reduce((s, d) => s + d.kcal, 0) / complete.length / 10) * 10 : null,
+        good: tracked.filter(d => d.status === 'perfect').length,
+        tracked: tracked.length
+      };
+    });
+    const openDiary = (dateKey) => {
+      activeTab.value = 'nutrition';
+      nutritionView.value = 'diary';
+      diaryDate.value = dateKey || todayDateKey.value;
+    };
+
+
     const clearMealStatus = () => {
       const modal = mealCommentModal.value;
       if (mealLogs.value[modal.dateKey]) {
@@ -654,20 +856,37 @@ createApp({
     };
 
     const dayStatusFor = (date) => {
-      const mealsForDay = getMealsForDate(date);
-      if (mealsForDay.length === 0) return 'empty';
-
-      const dayLogs = mealLogs.value[toISODate(date)] || {};
-      const statuses = mealsForDay.map(meal => dayLogs[meal.id]?.status).filter(Boolean);
-      if (statuses.length === 0) return 'empty';
-
-      const done = statuses.filter(status => status === 'done').length;
-      const skipped = statuses.filter(status => status === 'skipped').length;
-
-      if (skipped === 0 && done === mealsForDay.length) return 'perfect';
-      if (skipped === 1) return 'small_cheat';
-      if (skipped >= 2) return 'cheat';
-      return 'partial';
+      const dateKey = toISODate(date);
+      const info = dayIntake(dateKey);
+      if (info.plan) {
+        if (!info.logged && !info.entries) return 'empty';
+        const allLogged = info.logged === info.meals.length;
+        // Giornata intera nel totale del piano: i pasti cambiati non contano come sgarro
+        const withinDay = allLogged && info.unknown === 0 && info.kcal <= info.target * 1.05;
+        let cheats = 0;
+        info.meals.forEach(m => {
+          const l = info.logs[m.id];
+          if (!l) return;
+          if (l.status === 'skipped') cheats++;
+          else if (l.status === 'other' && !withinDay && !otherMealWithin(m, l)) cheats++;
+        });
+        // Fuori pasto che fanno sforare il totale del giorno
+        if (info.entries && !withinDay && info.kcal > info.target * 1.1) cheats++;
+        if (cheats === 0 && allLogged) return 'perfect';
+        if (cheats === 1) return 'small_cheat';
+        if (cheats >= 2) return 'cheat';
+        return 'partial';
+      }
+      // Diario: conta il totale delle calorie
+      if (!info.entries) return 'empty';
+      const level = intakeLevel(info.kcal, info.target);
+      if (level === 'over') return 'cheat';
+      if (level === 'little') return 'small_cheat';
+      // Senza pranzo e cena la giornata non è completa: non si giudica (chi non segna tutto non "mangia poco")
+      if (!info.diary.pranzo || !info.diary.cena) return 'partial';
+      // Molto sotto il fabbisogno (solo per i giorni finiti): non è "perfetto"
+      if (dateKey < todayDateKey.value && info.kcal < info.target * 0.6) return 'under';
+      return 'perfect';
     };
 
     const dayStatusLabel = (status) => {
@@ -676,6 +895,7 @@ createApp({
         small_cheat: 'Piccolo sgarro',
         cheat: 'Giornata di sgarro',
         partial: 'Giornata parziale',
+        under: 'Hai mangiato poco',
         empty: 'Non tracciata'
       }[status] || 'Non tracciata';
     };
@@ -686,21 +906,15 @@ createApp({
         small_cheat: 'bg-viola/10 text-viola',
         cheat: 'bg-red-50 text-red-500',
         partial: 'bg-gray-100 text-gray-400',
+        under: 'bg-amber-50 text-amber-600',
         empty: 'bg-gray-100 text-gray-400'
       }[status] || 'bg-gray-100 text-gray-400';
     };
 
-    // Calorie reali: somma dei pasti segnati come eseguiti
-    const todayConsumedCalories = computed(() => {
-      return todayActiveMeals.value.reduce((sum, meal) => {
-        if (meal.calories === null) return sum;
-        return todayMealLogs.value[meal.id]?.status === 'done' ? sum + meal.calories : sum;
-      }, 0);
-    });
-
-    const todayTargetCalories = computed(() => {
-      return todayActiveMeals.value.reduce((sum, meal) => sum + (meal.calories || 0), 0);
-    });
+    // Calorie reali di oggi: pasti del piano fatti (o cambiati) + diario
+    const todayIntake = computed(() => dayIntake(todayDateKey.value));
+    const todayConsumedCalories = computed(() => todayIntake.value.kcal);
+    const todayTargetCalories = computed(() => todayIntake.value.target);
 
     const todayCaloriesPct = computed(() => {
       if (todayTargetCalories.value <= 0) return 0;
@@ -749,6 +963,7 @@ createApp({
       if (status === 'perfect') return 'bg-salvia text-white shadow-sm ' + ring;
       if (status === 'small_cheat') return 'bg-viola text-white shadow-sm ' + ring;
       if (status === 'cheat') return 'bg-red-500 text-white shadow-sm ' + ring;
+      if (status === 'under') return 'bg-amber-100 text-amber-700 ' + ring;
       if (dashIsToday(day)) return 'bg-gray-100 text-salvia font-extrabold ' + (ring || 'ring-2 ring-salvia/20');
       return 'text-gray-600 hover:bg-gray-50 ' + ring;
     };
@@ -764,6 +979,7 @@ createApp({
       if (status === 'perfect') return 'bg-salvia text-white shadow-sm ' + ring;
       if (status === 'small_cheat') return 'bg-viola text-white shadow-sm ' + ring;
       if (status === 'cheat') return 'bg-red-500 text-white shadow-sm ' + ring;
+      if (status === 'under') return 'bg-amber-100 text-amber-700 ' + ring;
       if (isToday(day)) return 'bg-gray-100 text-salvia font-extrabold ' + (ring || 'ring-2 ring-salvia/20');
       if (isSunday(day)) return 'text-salvia bg-salvia/5 hover:bg-salvia/10 ' + ring;
       return 'text-gray-600 hover:bg-gray-50 ' + ring;
@@ -823,9 +1039,8 @@ createApp({
 
     const goToTodayNutrition = () => {
       activeTab.value = 'nutrition';
-      if (!activePlan.value) {
-        nutritionView.value = 'list';
-        showToastMessage("Nessun piano attivo. Crea o attiva un piano alimentare.");
+      if (!activePlan.value || !todayActiveMeals.value.length) {
+        openDiary();
         return;
       }
       selectedPlan.value = activePlan.value;
@@ -5130,7 +5345,7 @@ createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 14';
+    const APP_VERSION = 'beta 15';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -5267,7 +5482,10 @@ createApp({
         }
       });
       Object.entries(mealLogs.value).forEach(([key, logs]) => {
-        if (Object.values(logs || {}).some(l => l && l.status === 'done')) set.add(key);
+        if (Object.values(logs || {}).some(l => l && (l.status === 'done' || l.status === 'other'))) set.add(key);
+      });
+      Object.entries(foodDiary.value).forEach(([key, day]) => {
+        if (Object.values(day || {}).some(e => e && (e.text || e.kcal))) set.add(key);
       });
       return set;
     });
@@ -6612,6 +6830,10 @@ createApp({
       removeSuperset,
       supersetPairCount,
       totalSheetExercises, APP_VERSION, sendFeedback,
+      foodDiary, DIARY_MEALS, diaryGoal, diaryTarget, setDiaryGoal, setDiaryKcal, dayIntake, intakeBarClass, intakeTextClass, todayIntake,
+      mealOffEstimate, mealOffKcal, mealOffVerdict, saveMealOther,
+      diaryEditor, diaryMealInfo, openDiaryEditor, diarySlotNow, diaryEstimate, diaryEditorKcal, saveDiaryEntry, deleteDiaryEntry, diaryFrequent, useDiaryFrequent,
+      diaryDate, diaryShift, diaryDay, diaryWeek, openDiary, openDayMenuForDate,
       activeSheet, isActiveSheet, activeSheetNext, sortedWorkoutSheets, toggleActiveSheet, startActiveSheet,
       saveSheet,
       promptDeleteSheet,

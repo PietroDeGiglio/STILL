@@ -19,9 +19,12 @@ const FOOD_INDEX = (() => {
   return list.sort((a, b) => b.name.length - a.name.length);
 })();
 
-const findFood = (text) => {
+const findFoodEntry = (text) => {
   const t = ' ' + normFood(text) + ' ';
-  const hit = FOOD_INDEX.find(entry => t.includes(entry.name));
+  return FOOD_INDEX.find(entry => t.includes(entry.name)) || null;
+};
+const findFood = (text) => {
+  const hit = findFoodEntry(text);
   return hit ? hit.food : null;
 };
 
@@ -59,7 +62,7 @@ const foodGrams = (text, food) => {
 };
 
 // Calorie e proteine di un alimento scritto a testo: { kcal, protein, grams, food } oppure null se non riconosciuto
-const estimateFoodKcal = (text) => {
+const estimateFoodKcal = (text, guess = false) => {
   // Con le alternative ("pasta oppure riso") si considera la prima
   const first = String(text || '').split(/\s+oppure\s+|\s+in alternativa\s+|\//i)[0];
   if (!normFood(first)) return null;
@@ -69,11 +72,18 @@ const estimateFoodKcal = (text) => {
   // La quantità può stare dopo l'alternativa: "pasta oppure riso 80g"
   let grams = foodGrams(first, food);
   if (grams === null && first !== String(text)) grams = foodGrams(text, food);
+  // Nel diario la quantità spesso non c'è: porzione tipica (un cucchiaio di miele, 70 g di muesli…)
+  let guessed = false;
+  if (grams === null && guess) {
+    grams = food.cu ? food.cu * (food.k >= 500 ? 1 : 2) : food.k >= 500 ? 20 : food.k >= 300 ? 80 : 120;
+    guessed = true;
+  }
   if (grams === null) return null;
   return {
     kcal: Math.round((food.k * grams) / 100),
     protein: Math.round(((food.p || 0) * grams) / 100 * 10) / 10,
     grams: Math.round(grams),
+    guessed,
     food
   };
 };
@@ -90,5 +100,38 @@ const estimateMealKcal = (items) => {
     kcal: found ? Math.round(kcal / 5) * 5 : null,
     protein: found ? Math.round(protein) : null,
     found, total: list.length
+  };
+};
+
+// Diario: una frase libera ("pasta al pomodoro, 2 arancini e una birra") divisa in alimenti.
+// Si divide su virgole e a capo; "e" / "con" dividono solo se non fanno parte del nome di un piatto
+// ("pasta e fagioli", "panino con prosciutto" restano interi, "riso e pollo" diventa riso + pollo).
+// Restituisce { items: [{ text, kcal, protein, known }], kcal, protein, unknown }
+const splitFoodText = (text) => {
+  const out = [];
+  String(text || '').split(/[\n,;+]|\s+-\s+/).map(s => s.trim()).filter(Boolean).forEach(chunk => {
+    const parts = chunk.split(/\s+(?:e|ed|con|piu|più|poi|insieme a)\s+/i).map(s => s.trim()).filter(Boolean);
+    if (parts.length < 2) { out.push(chunk); return; }
+    const whole = findFoodEntry(chunk);
+    if (whole && /\s(e|ed|con)\s/.test(whole.name)) { out.push(chunk); return; }
+    // Le parti che da sole non dicono niente ("e basta") si riattaccano a quella prima
+    parts.forEach(part => {
+      if (!findFoodEntry(part) && out.length && !/\d/.test(part) && part.split(' ').length <= 2) out[out.length - 1] += ' ' + part;
+      else out.push(part);
+    });
+  });
+  return out;
+};
+const estimateFoodText = (text) => {
+  const items = splitFoodText(text).map(part => {
+    const e = estimateFoodKcal(part, true);
+    return { text: part, kcal: e ? e.kcal : null, protein: e ? e.protein : null, known: !!e, guessed: !!(e && e.guessed) };
+  });
+  const known = items.filter(i => i.known);
+  return {
+    items,
+    kcal: known.length ? Math.round(known.reduce((s, i) => s + i.kcal, 0) / 5) * 5 : null,
+    protein: known.length ? Math.round(known.reduce((s, i) => s + i.protein, 0)) : null,
+    unknown: items.length - known.length
   };
 };
