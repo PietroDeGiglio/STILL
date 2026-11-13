@@ -3408,7 +3408,7 @@
               <!-- Settimana o mese (riepilogo) -->
               <div v-if="shareStudio.kind === 'recap'" class="space-y-2">
                 <div class="text-[10px] font-bold text-white/50 uppercase tracking-widest">Riepilogo</div>
-                <div class="grid grid-cols-3 gap-1.5 bg-white/5 p-1 rounded-2xl">
+                <div class="grid gap-1.5 bg-white/5 p-1 rounded-2xl" :class="wrappedSeason || shareStudio.recapType === 'year' ? 'grid-cols-3' : 'grid-cols-2'">
                   <button v-for="t in [{ v: 'week', l: '📅 Settimana' }, { v: 'month', l: '🗓️ Mese' }, { v: 'year', l: '🎁 Anno' }].filter(t => t.v !== 'year' || wrappedSeason || shareStudio.recapType === 'year')" :key="'rt' + t.v" @click="shareStudio.recapType = t.v; shareStudio.recapMonth = 0"
                           class="py-2 rounded-xl text-[11px] font-bold transition-colors"
                           :class="shareStudio.recapType === t.v ? 'bg-white text-antracite' : 'text-white/70'">{{ t.l }}</button>

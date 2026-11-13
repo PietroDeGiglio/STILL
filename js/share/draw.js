@@ -535,6 +535,21 @@ const drawRecapBody = (ctx, data, o) => {
   const at = (start, dur = 0.5) => (live ? easeOut((t - start) / dur) : 1);
   const rev = (k, dy, fn) => { if (k <= 0) return; ctx.save(); ctx.globalAlpha = k; ctx.translate(0, (1 - k) * dy); fn(); ctx.restore(); };
   const top = story ? 330 : 250;
+  // Posizioni del blocco (kicker → numero → calendario → riquadri), poi tutto viene centrato
+  // tra intestazione e piè di pagina: con una settimana corta non resta mezza storia vuota
+  const calRows = data.calendar.length ? Math.ceil(((data.calendar[0].lead || 0) + data.calendar.length) / 7) : 0;
+  const calStep = Math.min((maxW - 240 - 14 * 6) / 7, 118) + 14;
+  const gridY = story ? (calRows ? top + 330 + 26 + calRows * calStep + 70 : 760) : 560;
+  const tiles = data.tiles.slice(0, story ? (gridY > 1150 ? 4 : 6) : 4);
+  const gap = story ? 24 : 20, tileH = story ? 150 : 140;
+  const tw = (maxW - gap) / 2;
+  const tileRows = Math.ceil(tiles.length / 2);
+  const blockTop = top - 40;
+  const blockBottom = Math.max(tileRows ? gridY + tileRows * (tileH + gap) - gap : gridY, data.activeDays ? 0 : gridY + 60, top + (story ? 260 : 200));
+  const areaTop = story ? 230 : 190, areaBottom = (o.foot || H) - (story ? 150 : 110);
+  const shift = Math.max(0, Math.round((areaTop + areaBottom) / 2 - (blockTop + blockBottom) / 2));
+  ctx.save();
+  ctx.translate(0, shift);
   rev(at(0, 0.5), 30, () => {
     setFont(ctx, 900, story ? 34 : 30); ctx.fillStyle = grad(0, 0);
     spacedText(ctx, (data.kicker || '').toUpperCase(), M, top, 6);
@@ -559,12 +574,6 @@ const drawRecapBody = (ctx, data, o) => {
   }
   // Sotto il calendario (1 riga per la settimana, fino a 6 per il mese) vanno i riquadri;
   // se il mese occupa tante righe se ne mostrano 4 invece di 6 per non toccare il piè di pagina
-  const calRows = data.calendar.length ? Math.ceil(((data.calendar[0].lead || 0) + data.calendar.length) / 7) : 0;
-  const calStep = Math.min((maxW - 240 - 14 * 6) / 7, 118) + 14;
-  const gridY = story ? (calRows ? top + 330 + 26 + calRows * calStep + 70 : 760) : 560;
-  const tiles = data.tiles.slice(0, story ? (gridY > 1150 ? 4 : 6) : 4);
-  const gap = story ? 24 : 20, tileH = story ? 150 : 140;
-  const tw = (maxW - gap) / 2;
   tiles.forEach((tile, i) => {
     rev(at(0.45 + i * 0.12, 0.45), 30, () => {
       const tx = M + (i % 2) * (tw + gap);
@@ -586,6 +595,7 @@ const drawRecapBody = (ctx, data, o) => {
       ctx.fillText(data.emptyText || 'Il prossimo mese è tuo.', M, gridY + 40);
     });
   }
+  ctx.restore();
 };
 
 
