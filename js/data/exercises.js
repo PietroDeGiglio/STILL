@@ -133,7 +133,21 @@ const EXERCISE_LIBRARY = [
   { id: 'equilibrio-una-gamba', n: 'Equilibrio su una gamba', m: 'atletici', w: 'home', s: 3, r: '30 s per lato', rec: 30, tip: 'Occhi chiusi per renderlo più difficile: previene le distorsioni.' },
   { id: 'shadow-boxing', n: 'Shadow boxing', m: 'atletici', w: 'home', t: 'cardio', d: 9, i: '3 round da 3 min', tip: 'Combinazioni nell\'aria con guardia sempre alta.' },
   { id: 'polsi-avambracci', n: 'Rafforzamento dei polsi con bottiglia', m: 'atletici', w: 'home', s: 3, r: '15 per lato', rec: 30, tip: 'Avambraccio appoggiato, muovi solo il polso su e giù.' },
-  { id: 'nuoto-dorsali', n: 'Bracciate con elastico', m: 'atletici', w: 'home', s: 3, r: '15', rec: 45, tip: 'Elastico fissato in alto, simula la bracciata spingendo fino alla coscia.' }
+  { id: 'nuoto-dorsali', n: 'Bracciate con elastico', m: 'atletici', w: 'home', s: 3, r: '15', rec: 45, tip: 'Elastico fissato in alto, simula la bracciata spingendo fino alla coscia.' },
+
+  // --- In palestra, pensati per chi fa sport ---
+  { id: 'step-up-manubri', n: 'Step-up sul box con manubri', m: 'gambe', w: 'gym', s: 3, r: '8 per gamba', rec: 75, tip: 'Sali spingendo con la gamba sul box, senza aiutarti con quella a terra.' },
+  { id: 'leg-press-una-gamba', n: 'Leg press a una gamba', m: 'gambe', w: 'gym', s: 3, r: '10 per gamba', rec: 75, tip: 'Metà del peso che usi a due gambe: corregge le differenze tra destra e sinistra.' },
+  { id: 'calf-seduto', n: 'Calf raise seduto', m: 'gambe', w: 'gym', s: 3, r: '15', rec: 45, tip: 'Lavora il polpaccio profondo (soleo): utile a chi corre e salta.' },
+  { id: 'adductor-machine', n: 'Adductor machine', m: 'gambe', w: 'gym', s: 3, r: '15', rec: 45, tip: 'Chiudi le gambe controllando anche il ritorno: interno coscia e inguine più forti.' },
+  { id: 'girata-kettlebell', n: 'Kettlebell swing', m: 'glutei', w: 'gym', s: 4, r: '15', rec: 60, tip: 'Il movimento parte dalle anche, non dalle braccia: spingi il bacino in avanti.' },
+  { id: 'woodchop-cavi', n: 'Taglialegna ai cavi', m: 'addome', w: 'gym', s: 3, r: '12 per lato', rec: 45, tip: 'In diagonale dall\'alto in basso, ruotando busto e anche insieme.' },
+  { id: 'pallof-cavi', n: 'Pallof press ai cavi', m: 'addome', w: 'gym', s: 3, r: '10 per lato', rec: 45, tip: 'Di fianco al cavo, spingi le mani avanti e non farti ruotare.' },
+  { id: 'extrarotazioni-cavi', n: 'Extrarotazioni ai cavi', m: 'spalle', w: 'gym', s: 3, r: '15 per lato', rec: 30, tip: 'Gomito incollato al fianco, ruota l\'avambraccio verso l\'esterno. Peso leggero.' },
+  { id: 'spinta-slitta', n: 'Spinta della slitta', m: 'atletici', w: 'gym', s: 5, r: '15 m', rec: 90, tip: 'Busto inclinato, passi corti e potenti: accelerazione senza impatti.' },
+  { id: 'curl-polsi', n: 'Curl per i polsi con manubrio', m: 'braccia', w: 'gym', s: 3, r: '15', rec: 30, tip: 'Avambraccio sulla panca, muovi solo il polso: previene i fastidi al gomito.' },
+  { id: 'rematore-cavi-una-mano', n: 'Rematore ai cavi a un braccio', m: 'schiena', w: 'gym', s: 3, r: '12 per lato', rec: 60, tip: 'Tira verso il fianco ruotando appena il busto.' },
+  { id: 'panca-presa-stretta', n: 'Panca presa stretta', m: 'braccia', w: 'gym', s: 3, r: '8-10', rec: 90, tip: 'Mani alla larghezza delle spalle, gomiti vicini al corpo: tricipiti e spinta.' }
 ];
 
 // Programmi pronti: diventano una scheda nuova con un tocco
@@ -182,11 +196,20 @@ const WORKOUT_PROGRAMS = [
 ];
 
 // Esercizi mirati per sport: complementari agli allenamenti dello sport, 2 volte a settimana.
-// focus = cosa serve in quello sport · ex = esercizi con il motivo
+// focus = cosa serve in quello sport · gym = versione in palestra · home = versione a casa (esercizi con il motivo)
 const SPORT_PROGRAMS = {
   'Calcio': {
     focus: 'Scatto, cambi di direzione e prevenzione di femorali e inguine.',
-    ex: [
+    gym: [
+      { id: 'squat', why: 'Gambe più forti = scatto e tiro più potenti.' },
+      { id: 'stacco-rumeno', why: 'Femorali forti e meno stiramenti.' },
+      { id: 'box-jump', why: 'Esplosività per i contrasti aerei e i primi metri.' },
+      { id: 'leg-press-una-gamba', why: 'Equilibra la gamba che calcia e quella d\'appoggio.' },
+      { id: 'nordic-curl', why: 'Riduce di molto gli stiramenti ai femorali.' },
+      { id: 'copenhagen', why: 'Protegge l\'inguine (pubalgia).' },
+      { id: 'pallof-cavi', why: 'Core stabile nei contrasti spalla a spalla.' }
+    ],
+    home: [
       { id: 'scatti', why: 'Lo scatto breve decide le partite.' },
       { id: 'navette', why: 'Cambi di direzione più rapidi e sicuri.' },
       { id: 'nordic-curl', why: 'Riduce di molto gli stiramenti ai femorali.' },
@@ -197,9 +220,18 @@ const SPORT_PROGRAMS = {
   },
   'Pallavolo': {
     focus: 'Salto più alto, spalle sane per schiacciare e battere, atterraggi sicuri.',
-    ex: [
-      { id: 'squat-jump', why: 'Più potenza nelle gambe = salto più alto a muro e in attacco.' },
+    gym: [
+      { id: 'squat', why: 'La forza nelle gambe è la base del salto.' },
       { id: 'box-jump', why: 'Allena l\'esplosività senza l\'impatto della discesa.' },
+      { id: 'step-up-manubri', why: 'Spinta su una gamba, come nella rincorsa.' },
+      { id: 'calf-macchina', why: 'Polpacci forti per staccare e atterrare.' },
+      { id: 'extrarotazioni-cavi', why: 'La spalla che schiaccia ha bisogno di equilibrio: previene i dolori.' },
+      { id: 'face-pull', why: 'Spalle e postura per battute e schiacciate.' },
+      { id: 'lanci-palla-medica', why: 'Potenza del braccio che parte da gambe e busto.' }
+    ],
+    home: [
+      { id: 'squat-jump', why: 'Più potenza nelle gambe = salto più alto a muro e in attacco.' },
+      { id: 'skip-alto', why: 'Piedi rapidi per arrivare sotto la palla.' },
       { id: 'calf-gradino', why: 'Polpacci forti per staccare e atterrare.' },
       { id: 'extrarotazioni', why: 'La spalla che schiaccia ha bisogno di equilibrio: previene i dolori.' },
       { id: 'bulgaro', why: 'Forza su una gamba per la rincorsa e gli atterraggi.' },
@@ -208,18 +240,36 @@ const SPORT_PROGRAMS = {
   },
   'Basket': {
     focus: 'Elevazione, primo passo esplosivo e caviglie solide.',
-    ex: [
+    gym: [
+      { id: 'squat', why: 'La forza nelle gambe è la base del salto.' },
       { id: 'box-jump', why: 'Elevazione per rimbalzi e tiri.' },
+      { id: 'step-up-manubri', why: 'Spinta su una gamba per l\'arresto e il terzo tempo.' },
+      { id: 'hip-thrust', why: 'Glutei potenti per il primo passo.' },
+      { id: 'calf-seduto', why: 'Caviglie e polpacci pronti a mille salti.' },
+      { id: 'pallof-cavi', why: 'Core solido per i contatti.' },
+      { id: 'farmer-walk', why: 'Presa e stabilità a tutto il corpo.' }
+    ],
+    home: [
+      { id: 'squat-jump', why: 'Elevazione per rimbalzi e tiri.' },
       { id: 'salti-laterali', why: 'Piedi veloci in difesa.' },
       { id: 'navette', why: 'Il primo passo che ti fa battere l\'avversario.' },
-      { id: 'squat', why: 'La forza nelle gambe è la base del salto.' },
+      { id: 'bulgaro', why: 'Forza su una gamba per l\'arresto e il terzo tempo.' },
       { id: 'equilibrio-una-gamba', why: 'Caviglie più stabili, meno distorsioni.' },
       { id: 'pallof-press', why: 'Core solido per i contatti.' }
     ]
   },
   'Tennis': {
     focus: 'Rotazione del busto, spalle e gomiti protetti, spostamenti laterali.',
-    ex: [
+    gym: [
+      { id: 'woodchop-cavi', why: 'La potenza del dritto e del rovescio nasce dalla rotazione.' },
+      { id: 'extrarotazioni-cavi', why: 'Spalla protetta in servizio.' },
+      { id: 'curl-polsi', why: 'Previene il gomito del tennista.' },
+      { id: 'rematore-cavi-una-mano', why: 'Schiena forte per frenare il braccio dopo il colpo.' },
+      { id: 'affondi-manubri', why: 'Arrivi bassi sulla palla senza perdere equilibrio.' },
+      { id: 'lanci-palla-medica', why: 'Trasferisci la forza dalle gambe alla racchetta.' },
+      { id: 'face-pull', why: 'Spalle in equilibrio dopo tanti servizi.' }
+    ],
+    home: [
       { id: 'rotazioni-elastico', why: 'La potenza del dritto e del rovescio nasce dalla rotazione.' },
       { id: 'extrarotazioni', why: 'Spalla protetta in servizio.' },
       { id: 'polsi-avambracci', why: 'Previene il gomito del tennista.' },
@@ -230,7 +280,16 @@ const SPORT_PROGRAMS = {
   },
   'Padel': {
     focus: 'Rotazione, gambe basse e spalle per bandeja e smash.',
-    ex: [
+    gym: [
+      { id: 'woodchop-cavi', why: 'Più potenza nei colpi con meno sforzo del braccio.' },
+      { id: 'extrarotazioni-cavi', why: 'Spalle protette nei colpi sopra la testa.' },
+      { id: 'curl-polsi', why: 'Previene i fastidi al gomito.' },
+      { id: 'leg-press', why: 'Gambe che reggono la posizione bassa in difesa.' },
+      { id: 'affondi-manubri', why: 'Recuperi bassi e veloci.' },
+      { id: 'pallof-cavi', why: 'Core stabile nei recuperi in parete.' },
+      { id: 'face-pull', why: 'Spalle in equilibrio per bandeja e vibora.' }
+    ],
+    home: [
       { id: 'rotazioni-elastico', why: 'Più potenza nei colpi con meno sforzo del braccio.' },
       { id: 'extrarotazioni', why: 'Spalle protette nei colpi sopra la testa.' },
       { id: 'polsi-avambracci', why: 'Previene i fastidi al gomito.' },
@@ -241,8 +300,17 @@ const SPORT_PROGRAMS = {
   },
   'Nuoto': {
     focus: 'Dorsali e spalle forti ma sane, core per restare in linea in acqua.',
-    ex: [
+    gym: [
       { id: 'lat-machine', why: 'La trazione della bracciata viene dai dorsali.' },
+      { id: 'trazioni', why: 'Forza di trazione con tutto il corpo.' },
+      { id: 'pulley', why: 'Schiena forte per la fase di spinta.' },
+      { id: 'extrarotazioni-cavi', why: 'La spalla del nuotatore va protetta.' },
+      { id: 'face-pull', why: 'Postura e scapole stabili.' },
+      { id: 'box-jump', why: 'Partenze e virate più potenti.' },
+      { id: 'dead-bug', why: 'Corpo in linea = meno resistenza in acqua.' }
+    ],
+    home: [
+      { id: 'trazioni-casa', why: 'La trazione della bracciata viene dai dorsali.' },
       { id: 'nuoto-dorsali', why: 'Simula la bracciata anche fuori dall\'acqua.' },
       { id: 'extrarotazioni', why: 'La spalla del nuotatore va protetta.' },
       { id: 'ytw', why: 'Postura e scapole stabili.' },
@@ -252,7 +320,16 @@ const SPORT_PROGRAMS = {
   },
   'Corsa': {
     focus: 'Gambe resistenti, piedi e caviglie forti, meno infortuni.',
-    ex: [
+    gym: [
+      { id: 'squat', why: 'Gambe forti = passo più economico.' },
+      { id: 'leg-press-una-gamba', why: 'Correre è spingere su una gamba alla volta.' },
+      { id: 'stacco-rumeno', why: 'Femorali e glutei che reggono i chilometri.' },
+      { id: 'step-up-manubri', why: 'Forza per le salite.' },
+      { id: 'calf-seduto', why: 'Polpacci e tendine d\'Achille più resistenti.' },
+      { id: 'hip-thrust', why: 'Glutei attivi = ginocchia protette.' },
+      { id: 'plank-laterale', why: 'Bacino stabile quando la fatica arriva.' }
+    ],
+    home: [
       { id: 'calf-gradino', why: 'Polpacci e tendine d\'Achille più resistenti.' },
       { id: 'bulgaro', why: 'Correre è saltare su una gamba alla volta.' },
       { id: 'ponte-una-gamba', why: 'Glutei attivi = ginocchia protette.' },
@@ -263,51 +340,91 @@ const SPORT_PROGRAMS = {
   },
   'Ciclismo': {
     focus: 'Spinta sui pedali, schiena e core per le ore in sella.',
-    ex: [
+    gym: [
       { id: 'squat', why: 'Più forza in ogni pedalata.' },
+      { id: 'leg-press-una-gamba', why: 'Equilibra le due gambe.' },
+      { id: 'hip-thrust', why: 'I glutei sono il motore della spinta.' },
+      { id: 'stacco-rumeno', why: 'Schiena e femorali per le ore in sella.' },
+      { id: 'face-pull', why: 'Contrasta le spalle chiuse da ciclista.' },
+      { id: 'plank', why: 'Core che tiene la posizione aerodinamica.' }
+    ],
+    home: [
+      { id: 'squat-libero', why: 'Più forza in ogni pedalata.' },
       { id: 'affondi', why: 'Equilibra le due gambe.' },
       { id: 'ponte-glutei', why: 'I glutei sono il motore della spinta.' },
       { id: 'superman', why: 'Schiena forte contro il mal di schiena in sella.' },
       { id: 'plank', why: 'Core che tiene la posizione aerodinamica.' },
-      { id: 'face-pull', why: 'Contrasta le spalle chiuse da ciclista.' }
+      { id: 'ytw', why: 'Contrasta le spalle chiuse da ciclista.' }
     ]
   },
   'Boxe': {
     focus: 'Pugni più potenti, fiato e core per incassare.',
-    ex: [
-      { id: 'shadow-boxing', why: 'Tecnica e fiato insieme.' },
+    gym: [
       { id: 'lanci-palla-medica', why: 'La potenza del pugno parte dalle gambe e passa dal busto.' },
-      { id: 'rotazioni-elastico', why: 'Ganci e montanti più veloci.' },
+      { id: 'woodchop-cavi', why: 'Ganci e montanti più veloci.' },
+      { id: 'panca-presa-stretta', why: 'Spinta e tricipiti per il diretto.' },
+      { id: 'rematore-bilanciere', why: 'Schiena forte per ritirare il pugno e la guardia.' },
+      { id: 'box-jump', why: 'Gambe esplosive, il pugno parte da lì.' },
+      { id: 'hiit-bici', why: 'Fiato da round con ginocchia al sicuro.' }
+    ],
+    home: [
+      { id: 'shadow-boxing', why: 'Tecnica e fiato insieme.' },
       { id: 'corda', why: 'Il classico: piedi leggeri e resistenza.' },
+      { id: 'rotazioni-elastico', why: 'Ganci e montanti più veloci.' },
       { id: 'push-up', why: 'Spinta e resistenza delle braccia.' },
+      { id: 'burpees', why: 'Fiato per l\'ultimo round.' },
       { id: 'plank', why: 'Addome pronto a incassare.' }
     ]
   },
   'Lotta': {
     focus: 'Forza totale, presa, collo e core: vince chi tiene di più.',
-    ex: [
+    gym: [
       { id: 'stacco', why: 'Forza per sollevare e proiettare.' },
       { id: 'farmer-walk', why: 'Presa d\'acciaio.' },
       { id: 'trazioni', why: 'Tirare l\'avversario verso di te.' },
+      { id: 'squat', why: 'Forza nelle gambe per i cambi di livello.' },
+      { id: 'rematore-bilanciere', why: 'Schiena per le prese e i controlli.' },
+      { id: 'pallof-cavi', why: 'Resistere alle torsioni.' }
+    ],
+    home: [
+      { id: 'trazioni-casa', why: 'Tirare l\'avversario verso di te.' },
+      { id: 'rematore-inverso', why: 'Schiena per le prese e i controlli.' },
       { id: 'bulgaro', why: 'Forza nelle gambe per i cambi di livello.' },
       { id: 'pallof-press', why: 'Resistere alle torsioni.' },
+      { id: 'superman', why: 'Schiena che regge i ponti.' },
       { id: 'burpees', why: 'Fiato per gli ultimi secondi del match.' }
     ]
   },
   'Rugby': {
     focus: 'Forza, potenza nei placcaggi e scatto.',
-    ex: [
+    gym: [
       { id: 'squat', why: 'La base della forza nella mischia.' },
       { id: 'stacco', why: 'Forza di tutta la catena posteriore.' },
-      { id: 'scatti', why: 'Accelerazione palla in mano.' },
-      { id: 'farmer-walk', why: 'Presa e core per i contatti.' },
       { id: 'panca-piana', why: 'Spinta per placcaggi e hand-off.' },
+      { id: 'spinta-slitta', why: 'Accelerazione con un peso addosso, come in mischia.' },
+      { id: 'farmer-walk', why: 'Presa e core per i contatti.' },
       { id: 'nordic-curl', why: 'Femorali protetti negli scatti.' }
+    ],
+    home: [
+      { id: 'scatti', why: 'Accelerazione palla in mano.' },
+      { id: 'nordic-curl', why: 'Femorali protetti negli scatti.' },
+      { id: 'push-up', why: 'Spinta per placcaggi e hand-off.' },
+      { id: 'bulgaro', why: 'Gambe forti per spingere in mischia.' },
+      { id: 'burpees', why: 'Rialzarsi da terra, mille volte a partita.' },
+      { id: 'plank', why: 'Core per i contatti.' }
     ]
   },
   'Arti marziali': {
     focus: 'Esplosività, mobilità, equilibrio e core.',
-    ex: [
+    gym: [
+      { id: 'box-jump', why: 'Calci e spostamenti più esplosivi.' },
+      { id: 'woodchop-cavi', why: 'Più potenza nei colpi rotatori.' },
+      { id: 'kickback-cavi', why: 'Glutei forti per calciare alto.' },
+      { id: 'stacco-rumeno', why: 'Anche forti e femorali elastici.' },
+      { id: 'lanci-palla-medica', why: 'Potenza che parte da terra.' },
+      { id: 'hanging-leg-raise', why: 'Addome e flessori per alzare le ginocchia.' }
+    ],
+    home: [
       { id: 'squat-jump', why: 'Calci e spostamenti più esplosivi.' },
       { id: 'equilibrio-una-gamba', why: 'Stabilità quando calci.' },
       { id: 'rotazioni-elastico', why: 'Più potenza nei colpi rotatori.' },

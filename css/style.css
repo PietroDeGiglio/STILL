@@ -136,16 +136,14 @@ html.dark .chart-label { fill: #F2F2F3; }
 html.dark .chart-grid { stroke: #303037; }
 html.dark .chart-dot { fill: #18181C; }
 
-/* Compagno della serie: respira e saltella */
+/* Compagno della serie: sta in piedi sulle gambette, respira, dondola le braccia e ogni tanto saluta */
 .pet-bob svg, .pet-pop svg, [class*="aspect-square"] > svg { width: 100%; height: 100%; display: block; }
 .pet-bob { animation: petBob 2.6s ease-in-out infinite; transform-origin: 50% 90%; }
 .pet-bob.pet-sleep { animation: petBreathe 4s ease-in-out infinite; }
 .pet-pop { animation: petPop .9s cubic-bezier(.2, 1.6, .4, 1) both; }
 @keyframes petBob {
-  0%, 100% { transform: translateY(0) scale(1, 1); }
-  45% { transform: translateY(-4%) scale(.98, 1.02); }
-  55% { transform: translateY(-4%) scale(.98, 1.02); }
-  90% { transform: translateY(0) scale(1.03, .97); }
+  0%, 100% { transform: scale(1, 1); }
+  50% { transform: scale(.985, 1.02); }
 }
 @keyframes petBreathe {
   0%, 100% { transform: scale(1, 1); }
@@ -156,8 +154,26 @@ html.dark .chart-dot { fill: #18181C; }
   60% { transform: scale(1.12) rotate(4deg); opacity: 1; }
   100% { transform: scale(1) rotate(0); }
 }
+/* Braccia e gambe (classi pl-* in js/data/pets.js; il perno è nello style dell'arto) */
+.pl { transform-box: view-box; }
+.pet-bob .pl-al { animation: plSwingL 2.6s ease-in-out infinite; }
+.pet-bob .pl-ar { animation: plWaveR 5.2s ease-in-out infinite; }
+.pet-bob .pl-ll { animation: plStepL 2.6s ease-in-out infinite; }
+.pet-bob .pl-lr { animation: plStepR 2.6s ease-in-out infinite; }
+.pet-bob.pet-sleep .pl { animation: none; }
+@keyframes plSwingL { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(14deg); } }
+@keyframes plWaveR {
+  0%, 55%, 100% { transform: rotate(0); }
+  62% { transform: rotate(-125deg); }
+  68% { transform: rotate(-100deg); }
+  74% { transform: rotate(-130deg); }
+  80% { transform: rotate(-100deg); }
+  88% { transform: rotate(0); }
+}
+@keyframes plStepL { 0%, 40%, 100% { transform: translateY(0); } 20% { transform: translateY(-1.5px); } }
+@keyframes plStepR { 0%, 50%, 90%, 100% { transform: translateY(0); } 70% { transform: translateY(-1.5px); } }
 @media (prefers-reduced-motion: reduce) {
-  .pet-bob, .pet-bob.pet-sleep, .pet-pop { animation: none; }
+  .pet-bob, .pet-bob.pet-sleep, .pet-pop, .pet-bob .pl, .pet-dance .pl { animation: none; }
 }
 
 /* Balletto del compagno (al tocco): una mossa per specie, come nei video da condividere (petDancePose) */
@@ -222,6 +238,16 @@ html.dark .chart-dot { fill: #18181C; }
   87% { transform: translateX(-6%) translateY(-12%) scaleX(1) rotate(-6deg); }
 }
 
+/* Durante il balletto: braccia in alto a tempo e calcetti */
+.pet-dance .pl-al { animation: plPumpL .42s ease-in-out infinite alternate; }
+.pet-dance .pl-ar { animation: plPumpR .42s ease-in-out infinite alternate; }
+.pet-dance .pl-ll { animation: plKickL .42s ease-in-out infinite alternate; }
+.pet-dance .pl-lr { animation: plKickR .42s ease-in-out infinite alternate; }
+@keyframes plPumpL { from { transform: rotate(20deg); } to { transform: rotate(150deg); } }
+@keyframes plPumpR { from { transform: rotate(-150deg); } to { transform: rotate(-20deg); } }
+@keyframes plKickL { from { transform: rotate(0); } to { transform: rotate(18deg); } }
+@keyframes plKickR { from { transform: rotate(-18deg); } to { transform: rotate(0); } }
+
 /* Il tuo anno (wrapped): entrate delle slide */
 @keyframes wrapPop { 0% { transform: scale(.6); opacity: 0; } 60% { transform: scale(1.08); opacity: 1; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes wrapUp { 0% { transform: translateY(18px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
@@ -229,3 +255,39 @@ html.dark .chart-dot { fill: #18181C; }
 .wrap-pop { animation: wrapPop .6s cubic-bezier(.2,.8,.2,1) both; }
 .wrap-up { animation: wrapUp .55s ease-out both; }
 .wrap-float { animation: wrapFloat 9s ease-in-out infinite; }
+
+/* Coriandoli del finale del racconto dell'anno */
+.wrap-confetti { position: absolute; top: -12px; width: 8px; height: 12px; opacity: .9; animation: wrapConfetti 4s linear infinite; }
+@keyframes wrapConfetti {
+  0% { transform: translateY(0) rotate(0); }
+  100% { transform: translateY(105vh) rotate(540deg); }
+}
+@media (prefers-reduced-motion: reduce) { .wrap-confetti { display: none; } }
+
+/* Come si fa: omino animato e mappa dei muscoli (js/data/exercise-art.js) */
+.exercise-pose, .muscle-map { width: 100%; height: 100%; display: block; overflow: visible; }
+.ea-floor { stroke: #E5E5EA; stroke-width: 1.5; }
+.ea-limb { stroke: #2B2233; stroke-width: 5; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.ea-back { stroke: #A39EAB; }
+.ea-torso { stroke: #2B2233; stroke-width: 8; stroke-linecap: round; fill: none; }
+.ea-head { fill: #2B2233; }
+.ea-prop { fill: #C9C9D1; }
+.ea-prop-line { stroke: #C9C9D1; stroke-width: 2; fill: none; stroke-linecap: round; }
+.ea-plate, .ea-db { fill: #F5A623; }
+.ea-hub { fill: #fff; }
+.ea-ball { fill: #7A4DF1; }
+.ea-cable { stroke: #A1A1AA; stroke-width: 1; fill: none; }
+.mm-base { fill: #E7E7EC; }
+.mm-m { fill: #D4D4DA; }
+.mm-on { fill: #F5A623; }
+.mm-sec { fill: #FBD38D; }
+.mm-label { font-size: 5px; font-weight: 700; fill: #A1A1AA; }
+html.dark .ea-floor { stroke: #303037; }
+html.dark .ea-limb, html.dark .ea-torso { stroke: #ECECF1; }
+html.dark .ea-back { stroke: #7C7885; }
+html.dark .ea-head { fill: #ECECF1; }
+html.dark .ea-prop { fill: #4B4B55; }
+html.dark .ea-prop-line { stroke: #4B4B55; }
+html.dark .mm-base { fill: #34343C; }
+html.dark .mm-m { fill: #45454F; }
+html.dark .mm-sec { fill: #8A6420; }

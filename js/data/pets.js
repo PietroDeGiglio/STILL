@@ -98,12 +98,11 @@ const petLeaf = (x, y, len, angle, color, vein = true) =>
   `<g transform="translate(${pn(x)} ${pn(y)}) rotate(${angle})"><path d="M0 0 Q${pn(len * 0.5)} ${pn(-len * 0.42)} ${pn(len)} 0 Q${pn(len * 0.5)} ${pn(len * 0.42)} 0 0Z" fill="${color}"/>${vein ? `<path d="M${pn(len * 0.12)} 0 L${pn(len * 0.82)} 0" stroke="#fff" stroke-opacity=".35" stroke-width="1.2" stroke-linecap="round"/>` : ''}</g>`;
 const petSparkle = (x, y, r, color = '#FBBF24') =>
   `<path d="M${pn(x)} ${pn(y - r)} Q${pn(x + r * 0.18)} ${pn(y - r * 0.18)} ${pn(x + r)} ${pn(y)} Q${pn(x + r * 0.18)} ${pn(y + r * 0.18)} ${pn(x)} ${pn(y + r)} Q${pn(x - r * 0.18)} ${pn(y + r * 0.18)} ${pn(x - r)} ${pn(y)} Q${pn(x - r * 0.18)} ${pn(y - r * 0.18)} ${pn(x)} ${pn(y - r)}Z" fill="${color}"/>`;
-const petShadow = (rx) => `<ellipse cx="60" cy="109" rx="${pn(rx)}" ry="4" fill="#000" opacity=".13"/>`;
+const petShadow = (rx) => `<ellipse data-shadow="1" cx="60" cy="109" rx="${pn(rx)}" ry="4" fill="#000" opacity=".13"/>`;
 const petBlobBody = (uid, cx, cy, r, light, dark, squash = 0.94) =>
   `<defs><radialGradient id="${uid}b" cx="38%" cy="32%" r="75%"><stop offset="0" stop-color="${light}"/><stop offset="1" stop-color="${dark}"/></radialGradient></defs>` +
   `<ellipse cx="${pn(cx)}" cy="${pn(cy)}" rx="${pn(r)}" ry="${pn(r * squash)}" fill="url(#${uid}b)"/>` +
   `<ellipse cx="${pn(cx - r * 0.38)}" cy="${pn(cy - r * 0.48)}" rx="${pn(r * 0.22)}" ry="${pn(r * 0.13)}" fill="#fff" opacity=".35" transform="rotate(-25 ${pn(cx - r * 0.38)} ${pn(cy - r * 0.48)})"/>`;
-const petFeet = (cx, bottom, r, color) => [-1, 1].map(k => `<ellipse cx="${pn(cx + k * r * 0.42)}" cy="${pn(bottom - 1)}" rx="${pn(r * 0.26)}" ry="${pn(r * 0.13)}" fill="${color}"/>`).join('');
 
 // Uovo misterioso (serie a zero): uguale per tutti
 const drawEgg = (uid, mood) => {
@@ -126,7 +125,6 @@ const drawSprout = (uid, stage, mood) => {
   const top = cy - r * 0.94;
   let back = '', topF = '', front = '';
   const g1 = '#22C55E', g2 = '#15803D';
-  if (stage >= 3) front += [-1, 1].map(k => `<ellipse cx="${pn(60 + k * r * 0.98)}" cy="${pn(cy + r * 0.15)}" rx="${pn(r * 0.17)}" ry="${pn(r * 0.27)}" fill="${g2}" transform="rotate(${k * -20} ${pn(60 + k * r * 0.98)} ${pn(cy + r * 0.15)})"/>`).join('');
   if (stage === 1) topF = petLeaf(60, top + 2, 15, -70, '#4ADE80');
   if (stage === 2) topF = petLeaf(59, top + 2, 17, -125, '#4ADE80') + petLeaf(61, top + 2, 17, -55, '#4ADE80');
   if (stage === 3) topF = petLeaf(59, top + 2, 19, -140, '#4ADE80') + petLeaf(61, top + 2, 19, -40, '#4ADE80') + petLeaf(60, top + 1, 17, -90, '#86EFAC');
@@ -151,8 +149,9 @@ const drawSprout = (uid, stage, mood) => {
   }
   return {
     back,
-    body: petShadow(r * 0.85) + petBlobBody(uid, 60, cy, r, '#86EFAC', g1) + petFeet(60, 107, r, g2) + front + petFace(60, cy - r * 0.05, r / 30, mood),
+    body: petShadow(r * 0.85) + petBlobBody(uid, 60, cy, r, '#86EFAC', g1) + front + petFace(60, cy - r * 0.05, r / 30, mood),
     top: topF,
+    limbs: { x: r * 0.95, y: cy + r * 0.2, hip: r * 0.4, bottom: 106, color: g2, s: r / 28 },
     anchors: { top: { x: 60, y: top, w: r * 1.35 }, eyes: { x: 60, y: cy - r * 0.05, d: 9.5 * r / 30, s: r / 30 }, neck: { x: 60, y: cy + r * 0.52, w: r * 1.3 } }
   };
 };
@@ -191,8 +190,9 @@ const drawDragon = (uid, stage, mood) => {
   const faceY = stage === 1 ? cy - r * 0.32 : cy - r * 0.12;
   return {
     back: back + (stage >= 6 ? petSparkle(22, 30, 4) + petSparkle(98, 34, 5, '#F97316') : ''),
-    body: petShadow(r * 0.9) + petBlobBody(uid, 60, cy, r, p1, '#8B5CF6') + (stage > 1 ? petFeet(60, 107, r, p2) : '') + front + petFace(60, faceY, r / 30, mood) + shell,
+    body: petShadow(r * 0.9) + petBlobBody(uid, 60, cy, r, p1, '#8B5CF6') + front + petFace(60, faceY, r / 30, mood) + shell,
     top: topF,
+    limbs: { x: r * 0.95, y: cy + r * 0.2, hip: r * 0.4, bottom: 106, color: p2, s: r / 28, legs: stage > 1 },
     anchors: { top: { x: 60, y: top, w: r * 1.35 }, eyes: { x: 60, y: faceY, d: 9.5 * r / 30, s: r / 30 }, neck: { x: 60, y: cy + r * 0.3, w: r * 1.35 } }
   };
 };
@@ -205,12 +205,12 @@ const drawAvocado = (uid, stage, mood) => {
     const cy = 106 - r * 0.95;
     const top = cy - r * 0.95;
     let topF = '';
-    if (stage === 1) topF = `<path d="M60 107 q-3 4 -6 5 M60 107 q3 4 6 4" stroke="#7C4A26" stroke-width="1.6" fill="none" stroke-linecap="round"/>`;
     if (stage === 2) topF = `<path d="M60 ${pn(top + 2)} Q61 ${pn(top - 6)} 60 ${pn(top - 10)}" stroke="#4D7C0F" stroke-width="2.5" fill="none" stroke-linecap="round"/>` + petLeaf(60, top - 8, 15, -130, '#84CC16') + petLeaf(60, top - 9, 15, -50, '#84CC16');
     return {
       back: '',
       body: petShadow(r * 0.85) + petBlobBody(uid, 60, cy, r, pitL, pit, 0.95) + petFace(60, cy - r * 0.05, r / 30, mood),
       top: topF,
+      limbs: { x: r * 0.95, y: cy + r * 0.2, hip: r * 0.4, bottom: 106, color: '#7C4A26', s: r / 28 },
       anchors: { top: { x: 60, y: top, w: r * 1.35 }, eyes: { x: 60, y: cy - r * 0.05, d: 9.5 * r / 30, s: r / 30 }, neck: { x: 60, y: cy + r * 0.5, w: r * 1.3 } }
     };
   }
@@ -223,28 +223,20 @@ const drawAvocado = (uid, stage, mood) => {
   };
   const gold = stage >= 6;
   const skin = gold ? '#B45309' : '#3F6212';
-  let back = '', front = '', arms = '';
+  let back = '';
   const armC = gold ? '#B45309' : '#3F6212';
-  if (stage === 4) arms = [-1, 1].map(k => `<path d="M${pn(60 + k * wb * 0.95)} ${pn(ty + h * 0.62)} q${pn(k * 8)} 4 ${pn(k * 9)} 12" stroke="${armC}" stroke-width="4" fill="none" stroke-linecap="round"/>`).join('');
-  if (stage >= 5) {
-    // Braccia piegate con bicipiti
-    arms = [-1, 1].map(k => `<path d="M${pn(60 + k * wb * 0.92)} ${pn(ty + h * 0.62)} q${pn(k * 10)} -1 ${pn(k * 12)} -10 q${pn(k * 1)} -5 ${pn(-k * 2)} -9" stroke="${armC}" stroke-width="4.5" fill="none" stroke-linecap="round"/><ellipse cx="${pn(60 + k * (wb * 0.92 + 9))}" cy="${pn(ty + h * 0.53)}" rx="5" ry="4" fill="${armC}"/><circle cx="${pn(60 + k * (wb * 0.92 + 10))}" cy="${pn(ty + h * 0.62 - 20)}" r="3.4" fill="${armC}"/>`).join('');
-  }
-  if (gold) {
-    back += `<circle cx="60" cy="${pn(ty + h * 0.55)}" r="${pn(h * 0.62)}" fill="#FCD34D" opacity=".22"/>` + petSparkle(24, 36, 5) + petSparkle(98, 44, 4) + petSparkle(30, 92, 3, '#F5A623');
-    // Manubrio
-    front += `<g transform="translate(${pn(60 + wb * 0.92 + 10)} ${pn(ty + h * 0.62 - 26)}) rotate(-20)"><rect x="-9" y="-1.5" width="18" height="3" rx="1.5" fill="#6B7280"/><rect x="-12" y="-5" width="4" height="10" rx="1.5" fill="#374151"/><rect x="8" y="-5" width="4" height="10" rx="1.5" fill="#374151"/></g>`;
-  }
+  if (gold) back += `<circle cx="60" cy="${pn(ty + h * 0.55)}" r="${pn(h * 0.62)}" fill="#FCD34D" opacity=".22"/>` + petSparkle(24, 36, 5) + petSparkle(98, 44, 4) + petSparkle(30, 92, 3, '#F5A623');
   const faceY = ty + h * 0.36;
-  const legs = [-1, 1].map(k => `<path d="M${pn(60 + k * wb * 0.4)} ${pn(ty + h - 2)} l${pn(k * 1)} 5" stroke="${armC}" stroke-width="4" stroke-linecap="round"/>`).join('');
   return {
     back,
-    body: petShadow(wb * 0.95) + (stage >= 4 ? legs : '') + arms +
+    body: petShadow(wb * 0.95) +
       `<defs><radialGradient id="${uid}a" cx="40%" cy="30%" r="80%"><stop offset="0" stop-color="${gold ? '#FDE68A' : '#ECFCCB'}"/><stop offset="1" stop-color="${gold ? '#FBBF24' : '#BEF264'}"/></radialGradient></defs>` +
       `<path d="${pear(1)}" fill="${skin}"/><path d="${pear(0.84)}" fill="url(#${uid}a)"/>` +
       `<circle cx="60" cy="${pn(ty + h * 0.7)}" r="${pn(wb * 0.42)}" fill="${pit}"/><circle cx="${pn(60 - wb * 0.13)}" cy="${pn(ty + h * 0.66)}" r="${pn(wb * 0.11)}" fill="${pitL}" opacity=".7"/>` +
-      front + petFace(60, faceY, h / 76, mood),
+      petFace(60, faceY, h / 76, mood),
     top: '',
+    // Da "palestrato" mostra i bicipiti; quello d'oro tiene anche un manubrio
+    limbs: { x: wb * 0.9, y: ty + h * 0.62, hip: wb * 0.42, bottom: 106, color: armC, s: h / 66, pose: stage >= 5 ? 'flex' : 'down', dumbbell: gold },
     anchors: { top: { x: 60, y: ty + 2, w: wt * 2.3 }, eyes: { x: 60, y: faceY, d: 9.5 * h / 76, s: h / 76 }, neck: { x: 60, y: ty + h * 0.5, w: wb * 1.3 } }
   };
 };
@@ -267,6 +259,7 @@ const drawDrop = (uid, stage, mood) => {
         `<ellipse cx="${pn(60 - r * 0.45)}" cy="${pn(by - r * 0.35)}" rx="${pn(r * 0.16)}" ry="${pn(r * 0.3)}" fill="#fff" opacity=".45" transform="rotate(18 ${pn(60 - r * 0.45)} ${pn(by - r * 0.35)})"/>` + bubbles +
         petFace(60, by + r * 0.05, r / 30, mood),
       top: topF,
+      limbs: { x: r * 0.97, y: by + r * 0.25, hip: r * 0.4, bottom: 107, color: '#0284C7', s: r / 26 },
       anchors: { top: { x: 60, y: ty + r * 0.75, w: r * 1.05 }, eyes: { x: 60, y: by + r * 0.05, d: 9.5 * r / 30, s: r / 30 }, neck: { x: 60, y: by + r * 0.55, w: r * 1.3 } }
     };
   }
@@ -288,6 +281,7 @@ const drawDrop = (uid, stage, mood) => {
     back,
     body: petShadow(30 * s) + out + fill + `<ellipse cx="${pn(46 * s + 60 * (1 - s))}" cy="${pn(64)}" rx="5" ry="3" fill="#fff" opacity=".9"/>` + rain + petFace(60, faceY, s, mood),
     top: '',
+    limbs: { x: 34 * s, y: 106 - 22 * s, hip: 14 * s, bottom: 106, color: '#38BDF8', s: s * 1.05 },
     anchors: { top: { x: 60, y: topY + 6, w: 30 * s }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: faceY + 16 * s, w: 34 * s } }
   };
 };
@@ -307,8 +301,6 @@ const drawShroom = (uid, stage, mood) => {
   // Gambo (corpo con la faccia)
   const stem = `<defs><linearGradient id="${uid}s" x1="0" x2="1"><stop offset="0" stop-color="#FFF7ED"/><stop offset="1" stop-color="#F5DEC4"/></linearGradient></defs>` +
     `<rect x="${pn(60 - sw / 2)}" y="${pn(stemTop)}" width="${pn(sw)}" height="${pn(sh)}" rx="${pn(sw * 0.42)}" fill="url(#${uid}s)" stroke="#E7C9A5" stroke-width="1.2"/>`;
-  // Braccini dal gambo
-  if (stage >= 5) front += [-1, 1].map(k => `<path d="M${pn(60 + k * sw * 0.45)} ${pn(stemTop + sh * 0.55)} q${pn(k * 8)} 2 ${pn(k * 10)} -6" stroke="#E7C9A5" stroke-width="4" fill="none" stroke-linecap="round"/>`).join('');
   // Cappello a cupola con i pois
   const cap = `<defs><radialGradient id="${uid}c" cx="40%" cy="25%" r="85%"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></radialGradient></defs>` +
     `<path d="M${pn(60 - cw)} ${pn(base)} C${pn(60 - cw)} ${pn(capTop - ch * 0.1)} ${pn(60 + cw)} ${pn(capTop - ch * 0.1)} ${pn(60 + cw)} ${pn(base)} Q60 ${pn(base + 5)} ${pn(60 - cw)} ${pn(base)}Z" fill="url(#${uid}c)"/>`;
@@ -320,11 +312,11 @@ const drawShroom = (uid, stage, mood) => {
     : `<ellipse cx="${pn(60 + kx * cw)}" cy="${pn(capTop + ky * ch)}" rx="${pn(kr * cw)}" ry="${pn(kr * cw * 0.85)}" fill="#fff" opacity=".92"/>`).join('');
   const faceY = stemTop + 7 + (sh - 7) * 0.42;
   const s = sw / 44;
-  const feet = stage >= 3 ? petFeet(60, 107, sw * 0.8, '#E7C9A5') : '';
   return {
     back,
-    body: petShadow(Math.max(sw * 0.7, cw * 0.7)) + feet + stem + front + petFace(60, faceY, s, mood) + cap + spots,
+    body: petShadow(Math.max(sw * 0.7, cw * 0.7)) + stem + front + petFace(60, faceY, s, mood) + cap + spots,
     top: '',
+    limbs: { x: sw * 0.47, y: stemTop + sh * 0.6, hip: sw * 0.27, bottom: 106, color: '#C9A27A', s: sw / 38 },
     anchors: { top: { x: 60, y: capTop + 3, w: cw * 0.95 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: faceY + 13 * s, w: sw * 1.05 } }
   };
 };
@@ -364,6 +356,7 @@ const drawStar = (uid, stage, mood) => {
     back,
     body: petShadow(R * 0.75) + body + petFace(60, faceY, s, mood),
     top: '',
+    limbs: { x: 0, y: 0, hip: R * 0.42, bottom: cy + R * 0.62, color: '#D97706', s: R / 32, arms: false },
     anchors: { top: { x: 60, y: cy - R * 0.62, w: R * 0.75 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: cy + R * 0.42, w: R * 0.95 } }
   };
 };
@@ -391,12 +384,12 @@ const drawCat = (uid, stage, mood) => {
   const faceY = cy - r * 0.05;
   const whiskers = [-1, 1].map(k => `<path d="M${pn(60 + k * r * 0.62)} ${pn(faceY + r * 0.28)} l${pn(k * r * 0.4)} ${pn(-r * 0.06)} M${pn(60 + k * r * 0.62)} ${pn(faceY + r * 0.36)} l${pn(k * r * 0.4)} ${pn(r * 0.06)}" stroke="${dark}" stroke-width="1.3" stroke-linecap="round" opacity=".55"/>`).join('');
   if (stage >= 3) front += `<ellipse cx="60" cy="${pn(cy + r * 0.5)}" rx="${pn(r * 0.42)}" ry="${pn(r * 0.3)}" fill="${cosmic ? '#EDE9FE' : '#FFEDD5'}"/>`;
-  if (stage >= 4) front += [-1, 1].map(k => `<ellipse cx="${pn(60 + k * r * 0.32)}" cy="${pn(cy + r * 0.78)}" rx="${pn(r * 0.17)}" ry="${pn(r * 0.13)}" fill="${c1}" stroke="${dark}" stroke-width=".8"/>`).join('');
   if (cosmic) front += [[-0.4, -0.35], [0.35, 0.1], [-0.15, 0.55], [0.5, -0.45]].map(([kx, ky]) => `<circle cx="${pn(60 + kx * r)}" cy="${pn(cy + ky * r)}" r="1.4" fill="#fff" opacity=".85"/>`).join('');
   return {
     back,
-    body: petShadow(r * 0.85) + ears + petBlobBody(uid, 60, cy, r, c1, c2) + petFeet(60, 107, r, dark) + stripes + front + whiskers + petFace(60, faceY, s, mood),
+    body: petShadow(r * 0.85) + ears + petBlobBody(uid, 60, cy, r, c1, c2) + stripes + front + whiskers + petFace(60, faceY, s, mood),
     top: '',
+    limbs: { x: r * 0.95, y: cy + r * 0.2, hip: r * 0.4, bottom: 106, color: dark, s: r / 28 },
     anchors: { top: { x: 60, y: top, w: r * 1.35 }, eyes: { x: 60, y: faceY, d: 9.5 * s, s }, neck: { x: 60, y: cy + r * 0.5, w: r * 1.3 } }
   };
 };
@@ -529,6 +522,49 @@ const petDancePose = (id, t) => {
   return P;
 };
 
+// --- Braccine e gambette stilizzate ---
+// Il corpo viene rimpicciolito un po' e alzato (PET_LIFT) per fare spazio alle gambe.
+// Ogni arto è un gruppo con classe (pl-al, pl-ar, pl-ll, pl-lr) e perno sulla spalla/anca:
+// in app lo muove il CSS (saluta, cammina, balla); nelle immagini da condividere resta fermo.
+const PET_LIFT = { s: 0.9, y: 108, base: 118 };
+const petLiftX = (x) => 60 + PET_LIFT.s * (x - 60);
+const petLiftY = (y) => PET_LIFT.y + PET_LIFT.s * (y - PET_LIFT.base);
+const petLimb = (cls, x, y, inner) => `<g class="pl ${cls}" style="transform-origin:${pn(x)}px ${pn(y)}px">${inner}</g>`;
+const petLimbs = (L) => {
+  const c = L.color, s = Math.max(0.7, Math.min(1.25, L.s || 1));
+  const w = pn(4.2 * s);
+  let legs = '', arms = '';
+  if (L.legs !== false) {
+    const top = petLiftY(L.bottom) - 2;
+    legs = [-1, 1].map(k => {
+      const x = 60 + k * L.hip * PET_LIFT.s;
+      const inner = `<path d="M${pn(x)} ${pn(top)} L${pn(x + k * 0.6)} 104.5" stroke="${c}" stroke-width="${w}" stroke-linecap="round"/>` +
+        `<ellipse cx="${pn(x + k * 2.2 * s)}" cy="106" rx="${pn(4.4 * s)}" ry="${pn(2.6 * s)}" fill="${c}"/>`;
+      return petLimb(k < 0 ? 'pl-ll' : 'pl-lr', x, top, inner);
+    }).join('');
+  }
+  if (L.arms !== false) {
+    const y = petLiftY(L.y);
+    arms = [-1, 1].map(k => {
+      const x = petLiftX(60 + k * L.x * 0.94);
+      let inner;
+      if (L.pose === 'flex') {
+        // Braccio piegato con il bicipite in vista
+        const ex = x + k * 10 * s, ey = y - 1, hx = x + k * 9 * s, hy = y - 13 * s;
+        inner = `<path d="M${pn(x)} ${pn(y)} Q${pn(ex)} ${pn(ey + 1)} ${pn(ex)} ${pn(ey - 3)} Q${pn(ex + k * 1)} ${pn(hy + 3)} ${pn(hx)} ${pn(hy)}" stroke="${c}" stroke-width="${pn(4.6 * s)}" fill="none" stroke-linecap="round"/>` +
+          `<ellipse cx="${pn(x + k * 6.5 * s)}" cy="${pn(y - 3.5 * s)}" rx="${pn(4.2 * s)}" ry="${pn(3.4 * s)}" fill="${c}"/><circle cx="${pn(hx)}" cy="${pn(hy)}" r="${pn(3.2 * s)}" fill="${c}"/>`;
+        if (L.dumbbell && k > 0) inner += `<g transform="translate(${pn(hx)} ${pn(hy - 1)}) rotate(-20)"><rect x="-8" y="-1.4" width="16" height="2.8" rx="1.4" fill="#6B7280"/><rect x="-11" y="-4.5" width="3.6" height="9" rx="1.4" fill="#374151"/><rect x="7.4" y="-4.5" width="3.6" height="9" rx="1.4" fill="#374151"/></g>`;
+      } else {
+        const hx = x + k * 7.5 * s, hy = y + 10 * s;
+        inner = `<path d="M${pn(x)} ${pn(y)} Q${pn(x + k * 6 * s)} ${pn(y + 2 * s)} ${pn(hx)} ${pn(hy)}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round"/>` +
+          `<circle cx="${pn(hx)}" cy="${pn(hy)}" r="${pn(2.9 * s)}" fill="${c}"/>`;
+      }
+      return petLimb(k < 0 ? 'pl-al' : 'pl-ar', x, y, inner);
+    }).join('');
+  }
+  return { legs, arms };
+};
+
 // SVG completo. opts: { species, stage, mood, outfit: { hat, eyes, neck }, legendary, uid, size }
 let petUidCounter = 0;
 const petSvg = (opts = {}) => {
@@ -547,7 +583,13 @@ const petSvg = (opts = {}) => {
   const hat = a && o.hat ? petHat(o.hat, a.top, a.eyes) : '';
   const size = opts.size ? ` width="${opts.size}" height="${opts.size}"` : '';
   const silhouette = opts.silhouette ? ` style="filter: brightness(0); opacity: .18"` : '';
-  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${art.back}${backItem.back}${art.body}${wear}${hat}${art.top}</svg>`;
+  const inner = `${art.back}${backItem.back}${art.body}${wear}${hat}${art.top}`;
+  if (!art.limbs) return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${inner}</svg>`;
+  // Con gli arti: l'ombra resta a terra, il corpo sale sulle gambe
+  const shadow = (inner.match(/<ellipse data-shadow="1"[^>]*\/>/) || [''])[0];
+  const limbs = petLimbs(art.limbs);
+  const lifted = `<g transform="translate(60 ${PET_LIFT.y}) scale(${PET_LIFT.s}) translate(-60 -${PET_LIFT.base})">${inner.replace(shadow, '')}</g>`;
+  return `<svg viewBox="0 0 120 120"${size} xmlns="http://www.w3.org/2000/svg"${silhouette}>${aura}${shadow}${limbs.legs}${lifted}${limbs.arms}</svg>`;
 };
 
 // Immagine (per le card da condividere su canvas)

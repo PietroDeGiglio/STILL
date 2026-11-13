@@ -1698,7 +1698,8 @@ createApp({
       const g = guide.value;
       if (g.tab === 'sport') {
         const program = SPORT_PROGRAMS[g.sport];
-        return program ? program.ex.map(item => ({ ...EXERCISE_BY_ID[item.id], why: item.why })).filter(item => item.id) : [];
+        const list = program ? (program[g.place] || program.home) : [];
+        return list.map(item => ({ ...EXERCISE_BY_ID[item.id], why: item.why })).filter(item => item.id);
       }
       if (g.tab !== 'muscle') return [];
       const own = EXERCISE_LIBRARY.filter(item => item.m === g.muscle && item.w === g.place);
@@ -1818,6 +1819,30 @@ createApp({
     const libraryTip = (name) => {
       const item = EXERCISE_BY_NAME[(name || '').trim().toLowerCase()];
       return item ? item.tip : '';
+    };
+    const libraryItem = (name) => EXERCISE_BY_NAME[(name || '').trim().toLowerCase()] || null;
+
+    // Come si fa (js/data/exercise-art.js): omino animato + muscoli allenati evidenziati
+    const exerciseThumbCache = {};
+    const exerciseThumb = (item) => {
+      if (!item) return '';
+      if (!exerciseThumbCache[item.id]) {
+        const art = exerciseArt(item);
+        exerciseThumbCache[item.id] = art ? exercisePoseSvg(art.pattern, false) : '';
+      }
+      return exerciseThumbCache[item.id];
+    };
+    const exerciseInfo = ref({ isOpen: false, item: null, pose: '', map: '', primary: [], secondary: [] });
+    const openExerciseInfo = (item) => {
+      const art = exerciseArt(item);
+      if (!art) return;
+      exerciseInfo.value = {
+        isOpen: true, item,
+        pose: exercisePoseSvg(art.pattern, true),
+        map: muscleMapSvg(art.primary, art.secondary),
+        primary: art.primary.map(id => MUSCLE_NAMES[id]),
+        secondary: art.secondary.map(id => MUSCLE_NAMES[id])
+      };
     };
 
     const currentSheetDay = computed(() => {
@@ -4081,11 +4106,95 @@ createApp({
 
     const MEAL_ORDER = ['colazione', 'spuntino_mattina', 'pranzo', 'spuntino_pomeriggio', 'post_workout', 'cena'];
     const eatGoal = computed(() => NUTRITION_GOALS.find(g => g.id === eatGuide.value.goal) || NUTRITION_GOALS[0]);
-    const eatGoalDays = computed(() => eatGoal.value.days.map(day => {
+
+    // --- Porzioni su misura: le giornate tipo si adattano al fabbisogno calcolato dal profilo ---
+    const eatTarget = computed(() => {
+      const e = bodyStats.value.energy;
+      if (!e) return null;
+      const g = eatGuide.value.goal;
+      return g === 'lose' ? e.lose : g === 'gain' ? e.gain : e.tdee;
+    });
+    const eatBaseKcal = (goal) => {
+      const days = goal.days.map(day => Object.values(day.meals).reduce((sum, items) => sum + (estimateMealKcal(items).kcal || 0), 0));
+      return days.reduce((a, b) => a + b, 0) / days.length;
+    };
+    // Si scala al massimo del 25% in meno o del 40% in più: oltre serve un piano fatto da un professionista
+    const eatFactor = computed(() => (eatTarget.value ? Math.max(0.75, Math.min(1.4, eatTarget.value / eatBaseKcal(eatGoal.value))) : 1));
+    const roundGrams = (g) => (g < 50 ? Math.max(5, Math.round(g / 5) * 5) : Math.round(g / 10) * 10);
+    const scaleFoodText = (text, f) => {
+      const t = String(text).trim();
+      if (Math.abs(f - 1) < 0.04) return t;
+      let m = /^(\d+(?:[.,]\d+)?)\s*(g|ml)\b/i.exec(t);
+      if (m) return roundGrams(parseFloat(m[1].replace(',', '.')) * f) + m[2] + t.slice(m[0].length);
+      m = /^(\d+)\s+(?!cucchia)/i.exec(t);
+      if (m) return Math.max(1, Math.round(parseInt(m[1], 10) * f)) + ' ' + t.slice(m[0].length);
+      return t;
+    };
+
+    // --- I tuoi gusti: esclusioni, alimenti che non piacciono, sostituzioni scelte (salvati nelle impostazioni) ---
+    const eatPrefs = computed(() => settings.value.eatPrefs || { exclude: [], dislikes: [], swaps: {} });
+    const eatBlockedTags = computed(() => {
+      const tags = new Set();
+      EAT_EXCLUDES.forEach(x => { if (eatPrefs.value.exclude.includes(x.id)) x.tags.forEach(t => tags.add(t)); });
+      return tags;
+    });
+    const SWAP_INDEX = FOOD_SWAPS.flatMap(g => g.items.map(it => ({ g, it, key: ' ' + normFood(it.t) + ' ', food: findFood(it.t) })))
+      .sort((a, b) => b.key.length - a.key.length);
+    const swapEntryFor = (text, mealType) => {
+      const t = ' ' + normFood(text) + ' ';
+      const fits = (e) => !e.g.meals || e.g.meals.includes(mealType);
+      let hit = SWAP_INDEX.find(e => fits(e) && t.includes(e.key));
+      if (!hit) {
+        const food = findFood(text);
+        if (food) hit = SWAP_INDEX.find(e => fits(e) && e.food === food);
+      }
+      return hit || null;
+    };
+    const swapBlocked = (it) => it.tags.some(t => eatBlockedTags.value.has(t)) || eatPrefs.value.dislikes.includes(it.t);
+    // Testo dell'alternativa con la porzione equivalente (stesse proteine o stesse calorie dell'originale)
+    const swapText = (group, it, orig) => {
+      const food = findFood(it.t);
+      if (!food || group.by === 'none' || !orig || !orig.kcal) return it.t;
+      let grams = group.by === 'protein' && orig.protein > 0 && food.p > 0 ? (orig.protein * 100) / food.p : (orig.kcal * 100) / food.k;
+      if (group.max) grams = Math.min(grams, group.max);
+      if (it.c && food.pz) {
+        const n = Math.max(1, Math.round(grams / food.pz));
+        return n + ' ' + (n === 1 ? (it.one || it.t) : (it.many || it.t));
+      }
+      return roundGrams(grams) + 'g ' + it.t;
+    };
+    const swapOptions = (group, current, orig) => group.items
+      .filter(it => it.t !== current && !swapBlocked(it))
+      .map(it => {
+        const text = swapText(group, it, orig);
+        const e = estimateFoodKcal(text);
+        return { t: it.t, text, kcal: e ? e.kcal : null, protein: e ? Math.round(e.protein) : null };
+      });
+
+    // Un alimento della giornata tipo, già adattato: porzione scalata, poi sostituito se escluso o se hai scelto un'alternativa
+    const personalizeFood = (text, meal, key, seed) => {
+      const scaled = scaleFoodText(text, eatFactor.value);
+      const entry = swapEntryFor(scaled, meal);
+      if (!entry) return { text: scaled, key, swappable: false };
+      const orig = estimateFoodKcal(scaled);
+      const chosenName = eatPrefs.value.swaps[key];
+      let target = chosenName ? entry.g.items.find(it => it.t === chosenName && !swapBlocked(it)) : null;
+      let auto = false;
+      if (!target && swapBlocked(entry.it)) {
+        const allowed = entry.g.items.filter(it => !swapBlocked(it));
+        if (allowed.length) { target = allowed[seed % allowed.length]; auto = true; }
+      }
+      const base = { key, meal, swappable: true, group: entry.g.id, original: entry.it.t, scaled };
+      if (!target || target.t === entry.it.t) return { ...base, text: scaled, current: entry.it.t, blocked: swapBlocked(entry.it) };
+      return { ...base, text: swapText(entry.g, target, orig), current: target.t, swapped: true, auto };
+    };
+
+    const eatGoalDays = computed(() => eatGoal.value.days.map((day, dayIdx) => {
       const meals = MEAL_ORDER.filter(type => day.meals[type]).map(type => {
         const info = mealTypes.find(t => t.id === type) || mealTypes[0];
-        const est = estimateMealKcal(day.meals[type]);
-        return { type, label: info.label, icon: info.icon, items: day.meals[type], kcal: est.kcal, protein: est.protein };
+        const foods = day.meals[type].map((text, i) => personalizeFood(text, type, eatGoal.value.id + '|' + dayIdx + '|' + type + '|' + i, dayIdx * 3 + i));
+        const est = estimateMealKcal(foods.map(f => f.text));
+        return { type, label: info.label, icon: info.icon, foods, items: foods.map(f => f.text), kcal: est.kcal, protein: est.protein };
       });
       return {
         name: day.name, meals,
@@ -4093,16 +4202,55 @@ createApp({
         protein: meals.reduce((sum, m) => sum + (m.protein || 0), 0)
       };
     }));
+    const eatSwapCount = computed(() => eatGoalDays.value.reduce((n, d) => n + d.meals.reduce((k, m) => k + m.foods.filter(f => f.swapped).length, 0), 0));
 
-    // Prova per una settimana: le 3 giornate si alternano dal lunedì alla domenica
+    const toggleEatExclude = (id) => {
+      const prefs = { exclude: [], dislikes: [], swaps: {}, ...(settings.value.eatPrefs || {}) };
+      prefs.exclude = prefs.exclude.includes(id) ? prefs.exclude.filter(x => x !== id) : [...prefs.exclude, id];
+      settings.value.eatPrefs = prefs;
+    };
+    const removeEatDislike = (name) => {
+      const prefs = settings.value.eatPrefs;
+      if (prefs) prefs.dislikes = prefs.dislikes.filter(x => x !== name);
+    };
+
+    // Finestra "cambia alimento"
+    const eatSwap = ref({ isOpen: false, food: null, options: [] });
+    const openEatSwap = (food) => {
+      if (!food.swappable) return;
+      const group = FOOD_SWAPS.find(g => g.id === food.group);
+      eatSwap.value = { isOpen: true, food, options: swapOptions(group, food.current, estimateFoodKcal(food.scaled)) };
+    };
+    const ensureEatPrefs = () => {
+      if (!settings.value.eatPrefs) settings.value.eatPrefs = { exclude: [], dislikes: [], swaps: {} };
+      return settings.value.eatPrefs;
+    };
+    const chooseEatSwap = (name) => {
+      const prefs = ensureEatPrefs();
+      const food = eatSwap.value.food;
+      if (name === food.original) delete prefs.swaps[food.key]; else prefs.swaps[food.key] = name;
+      eatSwap.value.isOpen = false;
+    };
+    const resetEatSwap = () => { delete ensureEatPrefs().swaps[eatSwap.value.food.key]; eatSwap.value.isOpen = false; };
+    const dislikeEatFood = () => {
+      const prefs = ensureEatPrefs();
+      const name = eatSwap.value.food.current;
+      if (!prefs.dislikes.includes(name)) prefs.dislikes.push(name);
+      Object.keys(prefs.swaps).forEach(k => { if (prefs.swaps[k] === name) delete prefs.swaps[k]; });
+      eatSwap.value.isOpen = false;
+      showToastMessage('Ok, niente più ' + name + ': l\'abbiamo sostituito in tutte le giornate tipo. Lo ritrovi in "I tuoi gusti" se cambi idea. 👍');
+    };
+
+    // Prova per una settimana: le 3 giornate (già adattate a te) si alternano dal lunedì alla domenica
     const createTrialPlan = () => {
       const goal = eatGoal.value;
+      const personal = eatGoalDays.value;
       const build = () => {
-        const toMeals = (day) => MEAL_ORDER.filter(type => day.meals[type]).map(type => ({ type, items: [...day.meals[type]], calories: '' }));
+        const toMeals = (day) => day.meals.map(m => ({ type: m.type, items: [...m.items], calories: '' }));
         const days = {};
-        weekDays.forEach((name, i) => { days[name] = toMeals(goal.days[i % goal.days.length]); });
+        weekDays.forEach((name, i) => { days[name] = toMeals(personal[i % personal.length]); });
         const grocery = [];
-        goal.days.forEach(day => Object.values(day.meals).forEach(items => items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
+        personal.forEach(day => day.meals.forEach(m => m.items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
         plans.value.forEach(p => { if (p.status === 'active') { p.status = 'inactive'; p.results = 'Terminato'; } });
         const end = new Date(); end.setDate(end.getDate() + 6);
         const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
@@ -5215,6 +5363,14 @@ createApp({
         add({ id: 'food', emoji: '🥗', kicker: 'Alimentazione', big: fmt(mealsDone), caption: 'pasti del piano fatti', sub: protein ? '≈ ' + formatNumber(Math.round(protein / 100) / 10) + ' kg di proteine' : '',
           fun: protein ? 'Circa ' + fmt(protein) + ' g di proteine: come ' + fmt(chicken) + ' petti di pollo. I tuoi muscoli ringraziano.' : 'Un pasto alla volta si costruisce tutto.', scene: true });
       }
+      // Collezione dei compagni della serie (forma più alta raggiunta da ognuno)
+      const pets = PET_SPECIES.map((sp, i) => ({ sp, i, max: (settings.value.pet.album || {})[sp.id] || 0 })).filter(p => p.max)
+        .map(p => ({ id: p.sp.id, name: p.sp.stages[p.max - 1], svg: petSvg({ species: p.i, stage: p.max, mood: 'happy', uid: 'wp' + p.sp.id }) }));
+      if (pets.length) {
+        const missing = PET_SPECIES.length - pets.length;
+        add({ id: 'pets', emoji: '🥚', kicker: 'La tua collezione', big: pets.length + ' su ' + PET_SPECIES.length, caption: pets.length === 1 ? 'compagno trovato' : 'compagni trovati', pets,
+          fun: missing ? 'Ne mancano ' + missing + ': ogni nuova serie fa schiudere un uovo. Chi sarà il prossimo?' : 'Li hai trovati tutti. Collezionista leggendario. 👑', scene: true });
+      }
       const trophies = unlockedTrophies.value.length;
       if (trophies) {
         add({ id: 'trophies', emoji: '🏅', kicker: 'Trofei', big: String(trophies), caption: trophies === 1 ? 'trofeo sbloccato' : 'trofei sbloccati', sub: 'livello ' + playerLevel.value.level + ' · ' + playerLevel.value.title,
@@ -5225,15 +5381,25 @@ createApp({
       }
 
       const tiles = [];
-      if (workouts) tiles.push({ label: 'Allenamenti', value: fmt(workouts) });
-      if (hours >= 1) tiles.push({ label: 'Ore', value: fmt(hours) });
-      if (bestRun >= 2) tiles.push({ label: 'Serie migliore', value: bestRun + ' gg' });
-      if (mealsDone) tiles.push({ label: 'Pasti fatti', value: fmt(mealsDone) });
-      if (kcal >= 800) tiles.push({ label: 'Pizze bruciate', value: fmt(kcal / 800) });
-      if (trophies) tiles.push({ label: 'Trofei', value: String(trophies) });
+      if (workouts) tiles.push({ label: 'Allenamenti', value: fmt(workouts), emoji: '💪', color: '#F5A623' });
+      if (hours >= 1) tiles.push({ label: 'Ore', value: fmt(hours), emoji: '⏱️', color: '#7A4DF1' });
+      if (bestRun >= 2) tiles.push({ label: 'Serie migliore', value: bestRun + ' gg', emoji: '🔥', color: '#EF4444' });
+      if (mealsDone) tiles.push({ label: 'Pasti fatti', value: fmt(mealsDone), emoji: '🥗', color: '#20C997' });
+      if (kcal >= 800) tiles.push({ label: 'Pizze bruciate', value: fmt(kcal / 800), emoji: '🍕', color: '#EC4899' });
+      if (trophies) tiles.push({ label: 'Trofei', value: String(trophies), emoji: '🏅', color: '#0EA5E9' });
 
-      return { year, start, end, activeDays, totalDays, workouts, hours, bestRun, type, slides, tiles };
+      const name = profile.value && profile.value.firstName ? profile.value.firstName.trim() : '';
+      return { year, start, end, activeDays, totalDays, workouts, hours, bestRun, type, slides, tiles, pets, name };
     };
+
+    // Coriandoli del finale: posizioni fisse (niente calcoli a ogni render)
+    const wrappedConfetti = Array.from({ length: 28 }, (_, i) => ({
+      left: (i * 37) % 100,
+      delay: ((i * 0.53) % 4).toFixed(2),
+      duration: (3.5 + (i % 5) * 0.6).toFixed(1),
+      color: ['#F5A623', '#20C997', '#7A4DF1', '#EC4899', '#0EA5E9', '#FDE68A'][i % 6],
+      round: i % 3 === 0
+    }));
 
     // Racconto a schermo intero: si avanza toccando a destra, si torna indietro a sinistra
     const WRAPPED_SLIDE_MS = 6000;
@@ -6033,7 +6199,7 @@ createApp({
       streakInfo,
       recapBanner,
       weekBanner,
-      openRecap, wrapped, openWrapped, closeWrapped, wrappedGo, wrappedTap, wrappedProgress, shareWrapped, wrappedBanner,
+      openRecap, wrapped, openWrapped, closeWrapped, wrappedGo, wrappedTap, wrappedProgress, shareWrapped, wrappedBanner, wrappedConfetti,
       recapMonthName,
       recapPeriodName,
       trophyGroups,
@@ -6202,8 +6368,8 @@ createApp({
       selectedNutritionDay,
       selectedPlanDayMeals,
       selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
-      NUTRITION_TIPS, NUTRITION_GOALS, eatGuide, openEatGuide, eatTipStat, menuCheck, eatGoalDays, createTrialPlan, suggestedEatGoal,
-      EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip,
+      NUTRITION_TIPS, NUTRITION_GOALS, eatGuide, openEatGuide, eatTipStat, menuCheck, eatGoalDays, createTrialPlan, suggestedEatGoal, EAT_EXCLUDES, eatPrefs, eatTarget, eatFactor, eatSwapCount, toggleEatExclude, removeEatDislike, eatSwap, openEatSwap, chooseEatSwap, resetEatSwap, dislikeEatFood,
+      EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip, libraryItem, exerciseThumb, exerciseInfo, openExerciseInfo,
       EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,
       formatDate,

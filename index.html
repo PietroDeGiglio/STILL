@@ -638,12 +638,12 @@
 
               <!-- GUIDA: allenamenti consigliati -->
               <button @click="openGuide(userSports.length ? 'sport' : 'muscle')" class="w-full text-left bg-antracite rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all">
-                <div class="absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none">📚</div>
-                <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-arancione">Senza personal trainer?</div>
+                <div class="absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none">🏋️</div>
+                <div class="relative z-10 text-[10px] font-black uppercase tracking-[0.2em] text-arancione">Non sai cosa fare?</div>
                 <div class="relative z-10 text-lg font-extrabold text-white mt-1 leading-tight">Allenamenti consigliati</div>
                 <p class="relative z-10 text-[11px] font-medium text-white/60 mt-1 leading-snug pr-10">
-                  <template v-if="userSports.length">Fai {{ userSports[0] }}? Ci sono esercizi mirati per migliorare. E poi esercizi per muscolo e programmi pronti, in palestra o a casa.</template>
-                  <template v-else>Esercizi per muscolo, programmi pronti ed esercizi per il tuo sport. In palestra o a casa, da aggiungere alla tua scheda.</template>
+                  <template v-if="userSports.length">Esercizi scelti per chi gioca a {{ userSports[0].toLowerCase() }}, schede pronte e oltre 100 esercizi con il disegno di come si fanno.</template>
+                  <template v-else>Schede pronte e oltre 100 esercizi con il disegno di come si fanno e i muscoli che lavorano.</template>
                 </p>
               </button>
 
@@ -988,7 +988,7 @@
                             <template v-else>{{ ex.sets ? ex.sets + '×' + (ex.reps || '—') + ' • ' : '' }}rec. {{ ex.rest ? ex.rest + 's' : '—' }}</template>
                           </p>
                           <p v-if="ex.type === 'strength' && ex.pyramid" class="text-[10px] text-amber-700 font-medium mt-1 leading-snug break-words">{{ pyramidSummary(ex) }}</p>
-                          <p v-if="libraryTip(ex.name)" class="text-[10px] text-gray-500 font-medium mt-1 leading-snug">💡 {{ libraryTip(ex.name) }}</p>
+                          <p v-if="libraryTip(ex.name)" class="text-[10px] text-gray-500 font-medium mt-1 leading-snug">💡 {{ libraryTip(ex.name) }} <button @click.stop="openExerciseInfo(libraryItem(ex.name))" class="font-bold text-arancione whitespace-nowrap">Come si fa →</button></p>
                         </div>
                         <button @click="openExerciseHistory(ex)" class="p-1.5 text-gray-400 hover:text-arancione flex-shrink-0" aria-label="Storico esercizio">
                           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -1423,6 +1423,20 @@
           <!-- ==================== NUTRIZIONE ==================== -->
           <div v-if="activeTab === 'nutrition'" class="space-y-6 animate-fadeIn">
             
+            <!-- SWITCH PIANI / CALENDARIO -->
+            <div v-if="nutritionView === 'list' || nutritionView === 'calendar'" class="flex bg-white rounded-2xl p-1 border border-gray-100 shadow-sm">
+              <button @click="nutritionView = 'list'; exportMode = false" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="nutritionView === 'list' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 16h14M4 12h16c0-3.314-3.582-6-8-6S4 8.686 4 12zm0 4h16c0 1.657-1.343 3-3 3H7c-1.657 0-3-1.343-3-3z"/></svg>
+                Piani
+              </button>
+              <button @click="nutritionView = 'calendar'" class="flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5"
+                      :class="nutritionView === 'calendar' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3M4 11h16M5 5h14a1 1 0 011 1v14a1 1 0 01-1 1H5a1 1 0 01-1-1V6a1 1 0 011-1z"/></svg>
+                Calendario
+              </button>
+            </div>
+
             <!-- VISTA: LISTA DEI PIANI -->
             <div v-if="nutritionView === 'list'" class="space-y-5 animate-fadeIn">
               <div class="flex justify-between items-end gap-3">
@@ -1783,10 +1797,11 @@
             <div v-if="nutritionView === 'calendar'" class="space-y-5 animate-fadeIn">
               
               <div class="flex justify-between items-center">
-                <button @click="nutritionView = 'detail'" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors">
+                <button v-if="selectedPlan" @click="nutritionView = 'detail'; exportMode = false" class="flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
-                  Indietro
+                  {{ selectedPlan.name }}
                 </button>
+                <div v-else class="text-[10px] font-bold text-salvia tracking-widest uppercase">I tuoi giorni</div>
                 <div class="flex items-center gap-2">
                   <span class="text-xs font-bold text-antracite uppercase tracking-widest">Esporta Menù</span>
                   <!-- Toggle Export Mode -->
@@ -3342,7 +3357,7 @@
 
         <!-- IL TUO ANNO: racconto a schermo intero -->
         <div v-if="wrapped.isOpen && wrapped.data" class="fixed inset-0 z-[80] text-white select-none overflow-hidden"
-             :style="{ background: wrapped.idx < wrapped.data.slides.length ? wrapped.data.slides[wrapped.idx].bg : 'linear-gradient(160deg, #0E0E11, #2a1650 60%, #0E0E11)' }"
+             :style="{ background: wrapped.idx < wrapped.data.slides.length ? wrapped.data.slides[wrapped.idx].bg : 'linear-gradient(160deg, #7A4DF1 0%, #EC4899 55%, #F5A623 100%)' }"
              style="transition: background 0.6s ease;">
           <div class="absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl wrap-float"></div>
           <div class="absolute -bottom-24 -right-16 w-80 h-80 rounded-full bg-black/20 blur-3xl wrap-float" style="animation-delay: -3s;"></div>
@@ -3371,33 +3386,92 @@
                    :class="String(wrapped.data.slides[wrapped.idx].big).length > 10 ? 'text-5xl' : 'text-7xl'">{{ wrapped.data.slides[wrapped.idx].big }}</div>
               <div class="text-2xl font-extrabold leading-tight wrap-up" style="animation-delay: .5s;">{{ wrapped.data.slides[wrapped.idx].caption }}</div>
               <div v-if="wrapped.data.slides[wrapped.idx].sub" class="text-sm font-bold text-white/75 wrap-up" style="animation-delay: .6s;">{{ wrapped.data.slides[wrapped.idx].sub }}</div>
+              <!-- Collezione dei compagni -->
+              <div v-if="wrapped.data.slides[wrapped.idx].pets" class="grid grid-cols-4 gap-2 pt-2">
+                <div v-for="(p, i) in wrapped.data.slides[wrapped.idx].pets" :key="'wpet' + p.id" class="text-center wrap-pop" :style="{ animationDelay: (0.7 + i * 0.12) + 's' }">
+                  <div class="aspect-square rounded-2xl bg-white/15 p-1"><div class="w-full h-full pet-bob" v-html="p.svg"></div></div>
+                  <div class="text-[9px] font-bold text-white/80 mt-1 leading-tight">{{ p.name }}</div>
+                </div>
+              </div>
               <p v-if="wrapped.data.slides[wrapped.idx].fun" class="text-base font-semibold text-white/90 leading-snug pt-2 wrap-up" style="animation-delay: 1s;">{{ wrapped.data.slides[wrapped.idx].fun }}</p>
             </div>
             <div class="absolute bottom-8 inset-x-0 text-center text-[10px] font-bold uppercase tracking-[0.25em] text-white/50" style="padding-bottom: env(safe-area-inset-bottom);">Tocca per continuare</div>
           </div>
 
-          <!-- Finale -->
-          <div v-else class="absolute inset-0 z-10 overflow-y-auto px-6 pt-24 pb-10 flex flex-col">
-            <div class="space-y-1 wrap-up">
-              <div class="text-xs font-black uppercase tracking-[0.25em] text-white/60">Il tuo {{ wrapped.data.year }} su STILL</div>
-              <div class="text-4xl font-black leading-tight">{{ wrapped.data.activeDays }} <span class="text-lg font-bold text-white/60">giorni attivi su {{ wrapped.data.totalDays }}</span></div>
+          <!-- Finale: festa, compagno che saluta, numeri colorati -->
+          <div v-else class="absolute inset-0 z-10 overflow-y-auto px-6 pt-20 pb-10 flex flex-col">
+            <div class="pointer-events-none fixed inset-0 overflow-hidden">
+              <span v-for="(c, i) in wrappedConfetti" :key="'cf' + i" class="wrap-confetti"
+                    :style="{ left: c.left + '%', background: c.color, animationDelay: c.delay + 's', animationDuration: c.duration + 's', borderRadius: c.round ? '50%' : '2px' }"></span>
             </div>
-            <div v-if="wrapped.data.activeDays" class="mt-5 rounded-3xl p-5 bg-white/10 border border-white/15 wrap-pop" style="animation-delay: .2s;">
-              <div class="text-[10px] font-black uppercase tracking-[0.2em] text-white/60">Che atleta sei</div>
-              <div class="text-2xl font-black mt-1">{{ wrapped.data.type.emoji }} {{ wrapped.data.type.name }}</div>
-              <p class="text-sm font-medium text-white/75 mt-1 leading-snug">{{ wrapped.data.type.text }}</p>
-            </div>
-            <div v-if="wrapped.data.tiles.length" class="grid grid-cols-2 gap-3 mt-4">
-              <div v-for="(t, i) in wrapped.data.tiles" :key="'wt' + i" class="rounded-2xl p-4 bg-white/10 wrap-up" :style="{ animationDelay: (0.3 + i * 0.08) + 's' }">
-                <div class="text-[9px] font-black uppercase tracking-widest text-white/50">{{ t.label }}</div>
-                <div class="text-2xl font-black">{{ t.value }}</div>
+            <div class="relative flex items-end gap-3 wrap-up">
+              <div v-if="petState.stage" class="w-24 h-24 shrink-0 pet-bob" v-html="petMainSvg"></div>
+              <div v-else class="text-6xl shrink-0 wrap-pop">🎉</div>
+              <div class="relative bg-white text-antracite rounded-2xl rounded-bl-sm px-3.5 py-2.5 mb-6 shadow-lg wrap-pop" style="animation-delay: .3s;">
+                <div class="text-sm font-black leading-tight">Che anno{{ wrapped.data.name ? ', ' + wrapped.data.name : '' }}! 🎉</div>
+                <div class="text-[11px] font-semibold text-gray-500 leading-snug">{{ wrapped.data.activeDays ? 'Grazie per averlo passato con me.' : 'Il prossimo lo riempiamo insieme.' }}</div>
               </div>
             </div>
-            <p v-if="!wrapped.data.activeDays" class="mt-6 text-sm text-white/70 font-medium">Segna allenamenti e pasti: il prossimo racconto sarà pieno di numeri da condividere.</p>
-            <div class="mt-auto pt-8 space-y-2">
-              <button v-if="wrapped.data.activeDays" @click="shareWrapped" class="w-full cangiante-btn text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">🎬 Condividi nelle storie</button>
-              <button @click="wrappedGo(-wrapped.data.slides.length)" class="w-full bg-white/10 text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all">Rivedi da capo</button>
-              <p class="text-[10px] font-medium text-white/40 text-center pt-2">Salti, km e calorie sono stime per divertirsi, non misure.</p>
+            <div class="relative mt-4 wrap-up" style="animation-delay: .15s;">
+              <div class="text-xs font-black uppercase tracking-[0.25em] text-white/70">Il tuo {{ wrapped.data.year }} su STILL</div>
+              <div class="text-5xl font-black leading-none mt-1">{{ wrapped.data.activeDays }} <span class="text-lg font-bold text-white/80">giorni in movimento</span></div>
+            </div>
+            <div v-if="wrapped.data.activeDays" class="relative mt-5 rounded-3xl p-5 bg-white text-antracite shadow-xl wrap-pop" style="animation-delay: .25s;">
+              <div class="text-[10px] font-black uppercase tracking-[0.2em] text-viola">Che atleta sei</div>
+              <div class="text-2xl font-black mt-1">{{ wrapped.data.type.emoji }} {{ wrapped.data.type.name }}</div>
+              <p class="text-sm font-medium text-gray-500 mt-1 leading-snug">{{ wrapped.data.type.text }}</p>
+            </div>
+            <div v-if="wrapped.data.tiles.length" class="relative grid grid-cols-2 gap-3 mt-4">
+              <div v-for="(t, i) in wrapped.data.tiles" :key="'wt' + i" class="rounded-2xl p-4 shadow-lg wrap-pop" :style="{ background: t.color, animationDelay: (0.35 + i * 0.09) + 's' }">
+                <div class="flex items-center justify-between">
+                  <div class="text-[9px] font-black uppercase tracking-widest text-white/80">{{ t.label }}</div>
+                  <span class="text-lg leading-none">{{ t.emoji }}</span>
+                </div>
+                <div class="text-3xl font-black mt-1">{{ t.value }}</div>
+              </div>
+            </div>
+            <div v-if="wrapped.data.pets.length" class="relative mt-4 rounded-3xl p-4 bg-white/15 border border-white/20 wrap-up" style="animation-delay: .8s;">
+              <div class="flex items-center justify-between">
+                <div class="text-[10px] font-black uppercase tracking-[0.2em] text-white/80">La tua collezione</div>
+                <div class="text-[11px] font-black">{{ wrapped.data.pets.length }} / {{ PET_SPECIES.length }}</div>
+              </div>
+              <div class="flex gap-2 mt-2 overflow-x-auto hide-scrollbar">
+                <div v-for="p in wrapped.data.pets" :key="'wfp' + p.id" class="w-14 h-14 shrink-0 rounded-xl bg-white/15 p-0.5 pet-bob" v-html="p.svg"></div>
+              </div>
+            </div>
+            <p v-if="!wrapped.data.activeDays" class="relative mt-6 text-sm text-white/80 font-medium">Segna allenamenti e pasti: il prossimo racconto sarà pieno di numeri da condividere.</p>
+            <div class="relative mt-auto pt-8 space-y-2">
+              <button v-if="wrapped.data.activeDays" @click="shareWrapped" class="w-full bg-white text-antracite font-black py-4 rounded-2xl shadow-xl active:scale-95 transition-all">🎬 Condividi nelle storie</button>
+              <button @click="wrappedGo(-wrapped.data.slides.length)" class="w-full bg-white/15 text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all">🔁 Rivedi da capo</button>
+              <p class="text-[10px] font-medium text-white/60 text-center pt-2">Salti, km e calorie sono stime per divertirsi, non misure.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CAMBIA ALIMENTO (giornate tipo) -->
+        <div v-if="eatSwap.isOpen && eatSwap.food" class="fixed inset-0 z-[60] bg-antracite/50 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn" @click.self="eatSwap.isOpen = false">
+          <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[85vh] flex flex-col">
+            <div class="flex items-start justify-between gap-3 shrink-0">
+              <div class="min-w-0">
+                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">Cambia alimento</div>
+                <h3 class="text-lg font-extrabold text-antracite leading-tight">{{ eatSwap.food.text }}</h3>
+                <p class="text-[11px] font-medium text-gray-500">Scegli con cosa sostituirlo: la porzione è già ricalcolata {{ ['secondo', 'affettato', 'colazione', 'proteine'].includes(eatSwap.food.group) ? 'per darti le stesse proteine' : 'per le stesse calorie' }}.</p>
+              </div>
+              <button @click="eatSwap.isOpen = false" class="p-1 text-gray-400" aria-label="Chiudi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="overflow-y-auto space-y-1.5 -mx-1 px-1">
+              <button v-for="o in eatSwap.options" :key="'so' + o.t" @click="chooseEatSwap(o.t)"
+                      class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl border border-gray-200 text-left active:scale-[0.98] transition-all hover:border-salvia">
+                <span class="text-sm font-bold text-antracite">{{ o.text }}</span>
+                <span v-if="o.kcal !== null" class="text-[10px] font-bold text-gray-400 whitespace-nowrap">≈ {{ o.kcal }} kcal<span v-if="o.protein"> · {{ o.protein }} g prot</span></span>
+              </button>
+              <p v-if="!eatSwap.options.length" class="text-sm text-gray-500 font-medium text-center py-4">Con i gusti che hai scelto non ci sono alternative per questo alimento.</p>
+            </div>
+            <div class="grid grid-cols-2 gap-2 shrink-0">
+              <button v-if="eatSwap.food.swapped && !eatSwap.food.auto" @click="resetEatSwap" class="bg-gray-100 text-gray-600 font-bold py-3 rounded-xl text-sm">↺ Originale</button>
+              <button @click="dislikeEatFood" class="bg-red-50 text-red-500 font-bold py-3 rounded-xl text-sm" :class="eatSwap.food.swapped && !eatSwap.food.auto ? '' : 'col-span-2'">👎 Non mi piace {{ eatSwap.food.current }}</button>
             </div>
           </div>
         </div>
@@ -3447,9 +3521,29 @@
                         :class="eatGuide.goal === g.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ g.icon }} {{ g.name }}<span v-if="suggestedEatGoal === g.id"> ⭐</span></button>
               </div>
               <div class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4">
-                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ NUTRITION_GOALS.find(g => g.id === eatGuide.goal).range }} · 3 giornate da alternare</div>
+                <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ eatTarget ? 'Su misura per te · ≈ ' + eatTarget + ' kcal al giorno' : NUTRITION_GOALS.find(g => g.id === eatGuide.goal).range }} · 3 giornate da alternare</div>
                 <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ NUTRITION_GOALS.find(g => g.id === eatGuide.goal).desc }}</p>
-                <p v-if="bodyStats.energy" class="text-[11px] font-medium text-gray-500 mt-1">Il tuo fabbisogno stimato è ≈ {{ bodyStats.energy.tdee }} kcal (per dimagrire ≈ {{ bodyStats.energy.lose }}, per crescere ≈ {{ bodyStats.energy.gain }}). ⭐ = l'obiettivo che ti suggeriamo.</p>
+                <p v-if="bodyStats.energy" class="text-[11px] font-medium text-gray-500 mt-1">Porzioni calcolate dal tuo fabbisogno (≈ {{ bodyStats.energy.tdee }} kcal per mantenerti, ≈ {{ bodyStats.energy.lose }} per dimagrire, ≈ {{ bodyStats.energy.gain }} per crescere). ⭐ = l'obiettivo che ti suggeriamo.</p>
+                <p v-else class="text-[11px] font-bold text-arancione mt-1">Porzioni medie: completa il profilo (altezza, data di nascita, sesso) e pesati in Progressi, così le giornate si adattano a te.</p>
+                <p v-if="eatTarget && (eatFactor >= 1.4 || eatFactor <= 0.75)" class="text-[11px] font-medium text-gray-500 mt-1">Il tuo fabbisogno è lontano dalla media: abbiamo adattato le porzioni fin dove ha senso, per numeri precisi chiedi a un nutrizionista.</p>
+              </div>
+
+              <!-- I tuoi gusti -->
+              <div class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+                <div>
+                  <div class="text-sm font-extrabold text-antracite">😋 I tuoi gusti</div>
+                  <p class="text-[11px] font-medium text-gray-500 leading-snug">Tocca un alimento ⇄ per cambiarlo con un altro dello stesso tipo: la porzione si ricalcola. Quello che escludi qui viene sostituito da solo.</p>
+                </div>
+                <div class="flex flex-wrap gap-1.5">
+                  <button v-for="x in EAT_EXCLUDES" :key="'ex' + x.id" @click="toggleEatExclude(x.id)"
+                          class="px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all"
+                          :class="eatPrefs.exclude.includes(x.id) ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'">{{ x.icon }} {{ x.label }}</button>
+                </div>
+                <div v-if="eatPrefs.dislikes.length" class="flex flex-wrap items-center gap-1.5">
+                  <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Non ti piace:</span>
+                  <button v-for="d in eatPrefs.dislikes" :key="'dl' + d" @click="removeEatDislike(d)" class="px-2 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-500 border border-red-100">{{ d }} ✕</button>
+                </div>
+                <p v-if="eatSwapCount" class="text-[10px] font-bold text-salvia">{{ eatSwapCount }} {{ eatSwapCount === 1 ? 'alimento cambiato' : 'alimenti cambiati' }} secondo i tuoi gusti</p>
               </div>
               <div v-for="day in eatGoalDays" :key="'ed' + day.name" class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
                 <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100">
@@ -3464,7 +3558,11 @@
                         <span class="text-xs font-bold text-antracite">{{ m.label }}</span>
                         <span class="text-[10px] font-bold text-gray-400 whitespace-nowrap">≈ {{ m.kcal }} kcal</span>
                       </div>
-                      <p class="text-[11px] font-medium text-gray-500 leading-snug">{{ m.items.join(', ') }}</p>
+                      <div class="flex flex-wrap gap-1 mt-1">
+                        <button v-for="f in m.foods" :key="f.key" @click="openEatSwap(f)" :disabled="!f.swappable"
+                                class="text-[11px] font-semibold leading-tight px-2 py-1 rounded-lg border text-left transition-all"
+                                :class="f.swapped ? 'bg-salvia/10 border-salvia/40 text-antracite' : f.swappable ? 'bg-gray-50 border-gray-200 text-gray-600 active:scale-95' : 'border-transparent text-gray-500 px-0.5'">{{ f.text }}<span v-if="f.swappable" class="text-salvia font-black"> ⇄</span></button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -3472,6 +3570,32 @@
               <button @click="createTrialPlan" class="w-full bg-salvia text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Prova per una settimana</button>
               <p class="text-[10px] font-medium text-gray-400 leading-relaxed text-center px-2">Esempi generici, non una dieta personalizzata. Se hai patologie, allergie, sei in gravidanza o segui terapie, chiedi prima al medico. Per un piano su misura vai da un nutrizionista.</p>
             </template>
+          </div>
+        </div>
+
+        <!-- COME SI FA: omino animato + muscoli allenati (js/data/exercise-art.js) -->
+        <div v-if="exerciseInfo.isOpen && exerciseInfo.item" class="fixed inset-0 z-[60] bg-antracite/50 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn" @click.self="exerciseInfo.isOpen = false">
+          <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-start justify-between gap-3">
+              <div class="min-w-0">
+                <div class="text-[10px] font-bold text-arancione uppercase tracking-widest">Come si fa</div>
+                <h3 class="text-lg font-extrabold text-antracite leading-tight">{{ exerciseInfo.item.n }}</h3>
+                <div class="text-[11px] font-bold mt-0.5" :class="exerciseInfo.item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'">{{ guidePrescription(exerciseInfo.item) }} · {{ exerciseInfo.item.w === 'gym' ? 'in palestra' : 'a casa' }}</div>
+              </div>
+              <button @click="exerciseInfo.isOpen = false" class="p-1 text-gray-400" aria-label="Chiudi">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+              <div class="rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square" v-html="exerciseInfo.pose"></div>
+              <div class="rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square flex items-center" v-html="exerciseInfo.map"></div>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <span v-for="m in exerciseInfo.primary" :key="'mp' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione text-white">{{ m }}</span>
+              <span v-for="m in exerciseInfo.secondary" :key="'ms' + m" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-arancione/15 text-arancione">{{ m }}</span>
+            </div>
+            <p class="text-sm font-medium text-antracite leading-snug">💡 {{ exerciseInfo.item.tip }}</p>
+            <p class="text-[10px] font-medium text-gray-400 leading-snug">Disegno indicativo del movimento. Arancione pieno: muscoli principali; chiaro: quelli che aiutano.</p>
           </div>
         </div>
 
@@ -3507,11 +3631,17 @@
                 <button @click="guide.place = 'home'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
               </div>
             </template>
-            <div v-if="guide.tab === 'sport'" class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
-              <button v-for="sp in guideSports" :key="'gs' + sp" @click="guide.sport = sp; guide.selected = []"
-                      class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
-                      :class="guide.sport === sp ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
-            </div>
+            <template v-if="guide.tab === 'sport'">
+              <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
+                <button v-for="sp in guideSports" :key="'gs' + sp" @click="guide.sport = sp; guide.selected = []"
+                        class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                        :class="guide.sport === sp ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
+              </div>
+              <div class="grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100">
+                <button @click="guide.place = 'gym'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
+                <button @click="guide.place = 'home'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
+              </div>
+            </template>
           </div>
 
           <div class="flex-1 overflow-y-auto px-5 py-4 space-y-3" :class="guide.selected.length ? 'pb-28' : 'pb-8'">
@@ -3519,7 +3649,7 @@
             <div v-if="guide.tab === 'sport' && SPORT_PROGRAMS[guide.sport]" class="bg-arancione/10 border border-arancione/30 rounded-2xl p-4">
               <div class="text-[10px] font-bold text-arancione uppercase tracking-widest">Per migliorare a {{ guide.sport }}</div>
               <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ SPORT_PROGRAMS[guide.sport].focus }}</p>
-              <p class="text-[11px] font-medium text-gray-500 mt-1">2 volte a settimana, nei giorni senza partita o allenamento intenso.</p>
+              <p class="text-[11px] font-medium text-gray-500 mt-1">{{ guide.place === 'gym' ? 'In palestra, con pesi e macchine' : 'A casa, senza attrezzi o quasi' }} · 2 volte a settimana, lontano dalla partita.</p>
             </div>
 
             <!-- Elenco esercizi (muscolo / sport) -->
@@ -3538,13 +3668,16 @@
                 <div class="min-w-0 flex-1">
                   <div class="flex items-center gap-1.5 flex-wrap">
                     <span class="text-sm font-extrabold text-antracite">{{ item.n }}</span>
-                    <span v-if="item.w === 'home' && guide.tab === 'sport'" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">a casa</span>
-                    <span v-if="item.w === 'gym' && guide.tab === 'sport'" class="text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md bg-gray-100 text-gray-500">palestra</span>
                   </div>
                   <div class="text-[11px] font-bold mt-0.5" :class="item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'">{{ guidePrescription(item) }}</div>
                   <p v-if="item.why" class="text-[11px] font-bold text-antracite/80 mt-1 leading-snug">🎯 {{ item.why }}</p>
                   <p class="text-[11px] font-medium text-gray-500 mt-1 leading-snug">{{ item.tip }}</p>
                 </div>
+                <span v-if="exerciseThumb(item)" @click.stop="openExerciseInfo(item)" role="button" aria-label="Come si fa"
+                      class="w-16 shrink-0 rounded-xl bg-gray-50 border border-gray-100 p-1 flex flex-col items-center active:scale-95 transition-transform">
+                  <span class="block w-full aspect-square" v-html="exerciseThumb(item)"></span>
+                  <span class="text-[8px] font-black uppercase tracking-wider text-arancione mt-0.5">Come si fa</span>
+                </span>
               </button>
             </template>
 
@@ -4188,6 +4321,7 @@
   <script src="js/data/quotes.js"></script>
   <script src="js/data/trophies.js"></script>
   <script src="js/data/exercises.js"></script>
+  <script src="js/data/exercise-art.js"></script>
   <script src="js/data/nutrition.js"></script>
   <script src="js/data/wrapped.js"></script>
   <script src="js/data/pets.js"></script>
