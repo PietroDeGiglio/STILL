@@ -3757,12 +3757,19 @@ createApp({
       const rec = muscleRecovery.value;
       const place = trainPlace.value;
       const fresh = (g) => 1 - (rec.groups[g] || 0);
+      // Sport in programma domani: i muscoli che usa restano riposati (es. pallavolo domani → oggi niente gambe e spalle)
+      const tomorrowKey = toISODate(new Date(now + 86400000));
+      const tomorrowSports = trainingSessionsOnDateKey(tomorrowKey).filter(s => s.kind === 'sport' && sportStatus(s, tomorrowKey) !== 'skipped');
+      const spare = new Set();
+      tomorrowSports.forEach(s => (SPORT_MUSCLES[s.sport] || []).forEach(m => { if (MUSCLE_GROUP_OF[m]) spare.add(MUSCLE_GROUP_OF[m]); }));
+      const pickFresh = (g) => fresh(g) * (spare.has(g) ? 0.5 : 1);
       const trainedDays = new Set(muscleEvents(toISODate(new Date(now - 14 * 86400000)), now).map(ev => ev.date)).size;
+      const beginner = trainedDays < 3 && !spare.size;
       const scored = TODAY_SPLITS.filter(s => s.id !== 'recovery').map(s => ({
-        split: s, score: Math.min(...s.groups.map(fresh)), last: Math.max(0, ...s.groups.map(g => rec.last[g] || 0))
+        split: s, score: Math.min(...s.groups.map(pickFresh)), last: Math.max(0, ...s.groups.map(g => rec.last[g] || 0))
       }));
       // Chi si allena poco fa tutto il corpo; chi si allena spesso alterna spinta, tirata e gambe
-      let pick = trainedDays < 3 ? scored.find(x => x.split.id === 'full')
+      let pick = beginner ? scored.find(x => x.split.id === 'full')
         : scored.filter(x => x.split.id !== 'full').sort((a, b) => (b.score - a.score) || (a.last - b.last))[0];
       const recovery = !pick || pick.score < 0.6;
       const split = recovery ? TODAY_SPLITS.find(s => s.id === 'recovery') : pick.split;
@@ -3788,9 +3795,24 @@ createApp({
         minutes: Math.max(10, Math.round(seconds / 60 / 5) * 5),
         groups: split.groups.map(g => ({ id: g, name: groupName(g), fresh: Math.round(fresh(g) * 100) })),
         tired: Object.entries(rec.groups).filter(([, f]) => f >= 0.45).map(([g]) => groupName(g)),
-        beginner: trainedDays < 3
+        beginner,
+        spareFor: tomorrowSports.length ? tomorrowSports[0].sport : '',
+        spared: [...spare].filter(g => !split.groups.includes(g)).map(groupName)
       };
     });
+    // Oggi c'è già un allenamento (in programma o fatto): nessun consiglio in più
+    const todayBusy = computed(() => {
+      const w = todayWorkout.value;
+      if (w.state === 'free') return '';
+      return ([...w.planned, ...w.done].map(x => x.title)[0]) || 'un allenamento';
+    });
+    // Il consiglio resta chiuso finché non lo apri
+    const suggestOpen = ref(false);
+    const openSuggestion = () => {
+      activeTab.value = 'allenamento';
+      workoutView.value = 'list';
+      suggestOpen.value = true;
+    };
     const startTodaySuggestion = () => {
       const plan = todaySuggestion.value;
       if (!plan || !plan.items.length) return;
@@ -7037,6 +7059,7 @@ createApp({
 
     return {
       activeTab,
+      todayBusy, suggestOpen, openSuggestion,
       timeIsAhead,
       realExpenditure, realExpNeedText, toggleDiaryAdaptive, diaryCopySource, copyDiaryFromPrev,
       recordModal, shareRecordFromModal,
