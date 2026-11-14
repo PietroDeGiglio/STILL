@@ -10,6 +10,11 @@
 //  - cardio: "Tapis 20 min", "corsa 30'" (con le parole del cardio e i minuti)
 //  - superserie: "Panca + croci" sulla stessa riga, oppure righe che iniziano con "+" o "SS"
 //  - numeri da soli sulla riga dopo il nome ("Panca piana" a capo "4x8") vanno all'esercizio sopra
+//  - schede dettagliate: "1. Leg press" con sotto "Serie e ripetizioni 3 x 10-12", "Recupero 90''", "Peso 20 kg"
+// Cosa NON prende: una riga diventa esercizio solo se lo dimostra (serie x ripetizioni, nome della libreria,
+// titolo numerato seguito dalle serie). Frasi, regole, calendario, spiegazioni dell'esecuzione e righe andate a capo
+// si scartano; le sezioni come riscaldamento, regole, progressione, piscina e note si saltano fino al giorno dopo
+// e vengono elencate in "skipped", così l'app può dire cosa ha lasciato fuori.
 // Funzioni pure (niente accesso ai dati dell'app); i file si leggono con le funzioni di js/import/diet-pdf.js.
 // ---------------------------------------------------------------
 
@@ -18,7 +23,7 @@ const wNorm = (t) => String(t || '').toLowerCase().normalize('NFD').replace(/[̀
 
 const W_WEEKDAYS = ['lunedi', 'martedi', 'mercoledi', 'giovedi', 'venerdi', 'sabato', 'domenica'];
 const W_WEEKDAY_NAMES = ['Lunedì', 'Martedì', 'Mercoledì', 'Giovedì', 'Venerdì', 'Sabato', 'Domenica'];
-const W_DAY_WORDS = /^(giorno|giornata|day|allenamento|workout|seduta|sessione|scheda|wod)\s*(n\.?|nr\.?|numero)?\s*([a-z]|\d{1,2})\b/;
+const W_DAY_WORDS = /^(giorno|giornata|day|allenamento|workout|seduta|sessione|scheda|wod|palestra|gym|circuito|routine)\s*(n\.?|nr\.?|numero)?\s*([a-z]|\d{1,2})\b/;
 // Titoli fatti solo di nomi di split o muscoli ("Push", "Petto e tricipiti", "Gambe + glutei", "Upper body")
 const W_SPLIT_TOKENS = new Set(['push', 'pull', 'leg', 'legs', 'gambe', 'gamba', 'upper', 'lower', 'body', 'full', 'fullbody', 'total', 'parte', 'alta', 'bassa',
   'petto', 'schiena', 'spalle', 'spalla', 'braccia', 'dorso', 'dorsali', 'glutei', 'addome', 'addominali', 'core', 'cardio', 'tirata', 'spinta',
@@ -66,7 +71,7 @@ const wShareNumbers = (list) => {
 // Serie e ripetizioni
 const wReps = (r) => String(r).replace(/\s*([-–/])\s*/g, '$1').replace(/\s+/g, ' ').trim();
 const wTakeSetsReps = (t) => {
-  const R = "(max|\\d+(?:\\s*[-–/]\\s*\\d+)*(?:\\s*(?:s|sec|secondi|''|\"|min|per (?:lato|gamba|braccio)))?)";
+  const R = "(max|\\d+(?:\\s*[-–/]\\s*\\d+)*(?:\\s*(?:s|sec|secondi|''|\"|min|m|metri|passi|per (?:lato|gamba|braccio)))?)";
   let m = new RegExp('\\b(\\d{1,2})\\s*(?:serie|set|sets)?\\s*[x*]\\s*' + R).exec(t);
   if (m) return { sets: m[1], reps: wReps(m[2]), text: t.replace(m[0], ' ') };
   m = new RegExp('\\b(\\d{1,2})\\s*(?:serie|set|sets)\\s*(?:da|di|x|per)?\\s*' + R + '\\s*(?:rip(?:etizioni|\\.)?|reps?)?').exec(t);
@@ -102,6 +107,8 @@ const wDayName = (line) => {
   const raw = String(line).trim().replace(/^[#*\s•\-–—=_]+|[#*\s=_]+$/g, '');
   const t = wNorm(raw).replace(/[:.]+$/, '');
   if (!t || t.length > 40) return null;
+  // "4. Dorso", "1) Panca": un elenco numerato è di esercizi, non di giorni
+  if (/^\d{1,2}\s*[.)]\s/.test(raw)) return null;
   const hasNumbers = /\d+\s*[x*]\s*\d|\d+\s*(kg|serie|rip)/.test(t);
   if (hasNumbers) return null;
   const wd = W_WEEKDAYS.findIndex(d => t === d || t.startsWith(d + ' ') || t.startsWith(d + ':') || t.startsWith(d.slice(0, 3) + ' ') && t.length < 30);
@@ -140,7 +147,7 @@ const wParseLine = (line) => {
     if (isCardio) { const mm = wTakeMinutes(t); duration = mm.duration; t = mm.text; }
     // Il nome si prende dal testo originale (maiuscole e accenti) togliendo i pezzi numerici riconosciuti
     const name = wCleanName(wNameFrom(original, t));
-    return { name: wCap(name), sets: sr.sets, reps: sr.reps, weight: w.weight, rest: r.rest, duration, cardio: isCardio, superset };
+    return { name: wCap(name), sets: sr.sets, reps: sr.reps, weight: w.weight, rest: r.rest, duration, cardio: isCardio, superset, restText: t };
   }));
 };
 
@@ -154,7 +161,8 @@ const wNameFrom = (original, cleaned) => {
     if (stop) return;
     const n = wNorm(wd).replace(/[^a-z0-9']+/g, '');
     if (!n) { out.push(wd); return; }
-    if (keep.has(n) && !/^\d/.test(n)) { out.push(wd); return; }
+    const parts = wNorm(wd).split(/[^a-z0-9']+/).filter(Boolean);
+    if (parts.every(x => keep.has(x)) && !/^\d/.test(n)) { out.push(wd); return; }
     // Al primo numero riconosciuto (serie, peso…) il nome finisce, se ha già almeno una parola
     if (/\d/.test(n) && out.join('').trim()) stop = true;
   });
@@ -164,51 +172,123 @@ const wNameFrom = (original, cleaned) => {
 // Righe con soli numeri ("4x8 60kg rec 90"): vanno all'esercizio sopra
 const wOnlyNumbers = (ex) => !ex.name || /^(x|rip|reps?|serie|kg)?$/i.test(ex.name);
 
-const parseWorkoutText = (text, fileName = '') => {
+// --- Cosa NON è un esercizio ---
+// Sezioni da saltare per intero (fino al prossimo giorno): regole, riscaldamento, piscina, note…
+const W_SECTION_SKIP = /^(riscaldamento|attivazione|warm ?up|defaticamento|cool ?down|stretching|allungamento finale|regole|indicazioni|istruzioni|avvertenz[ae]|attenzione|progressione|periodizzazione|note?|nota|nb|n\.b\.|legenda|calendario|programma settimanale|settimana tipo|alimentazione|dieta|integrazione|idratazione|piscina|nuoto|in acqua|obiettiv[oi]|premessa|introduzione|valutazione|test iniziali)\b/;
+// Etichette dentro la scheda di un esercizio: le righe dopo sono spiegazioni, non esercizi
+const W_DETAIL_LABEL = /^(posizione( di partenza| iniziale)?|partenza|esecuzione( passo passo)?|come si fa|respirazione( e ritmo)?|ritmo|errori( da evitare| comuni)?|per te( in particolare)?|consigli?|attenzione|note?|immagini( e video)?|video|link|muscoli( coinvolti| allenati)?|varianti?|alternativ[ae]|obiettivo|perche|sensazioni)\b/;
+// Etichette con i numeri dell'esercizio sopra ("Serie e ripetizioni | 3 x 10-12", "Recupero: 90''")
+const W_SETS_LABEL = /^(serie\s*(?:e|x|\/|-)\s*rip(?:etizioni|\.)?|serie|ripetizioni|rip\.?|reps?|sets?|volume|durata|tempo)\s*:?\s*/;
+const W_REST_LABEL = /^(recupero|rec\.?|riposo|pausa|rest)\s*:?\s*/;
+const W_WEIGHT_LABEL = /^(peso|carico|kg)\s*:?\s*/;
+const W_STRIP_LEAD = (s) => String(s).trim().replace(/^[\s•●▪◦·*\-–—>»✓✔☐□■○+]+/, '');
+const W_NUMBERED = /^\d{1,2}\s*[.)]\s+\S/;
+// Una frase (spiegazione, regola, nota) e non il nome di un esercizio
+const wIsProse = (raw, leftover) => {
+  const s = W_STRIP_LEAD(raw).replace(/^\d{1,2}\s*[.)]\s*/, '');
+  const words = wNorm(leftover).split(/[^a-z0-9à-ú']+/).filter(w => w && !/^\d+$/.test(w));
+  if (words.length > 7) return true;
+  if (/[.!?;]$/.test(s) && !/\b(rip|rec|sec|min|max|kg)\.$/i.test(s)) return true;
+  if (/,\s*\S/.test(leftover)) return true;
+  if (/:\s*\S/.test(s) && words.length > 4) return true;
+  return false;
+};
+// Riga che continua quella sopra (testo andato a capo): inizia con la minuscola
+const wIsContinuation = (raw) => /^[a-zà-ú(]/.test(W_STRIP_LEAD(raw));
+// Titolo corto (giorno, sezione) e non una riga di esercizio
+const wIsHeading = (raw) => {
+  const t = wNorm(W_STRIP_LEAD(raw)).replace(/\([^)]*\)/g, ' ');
+  return !/\d\s*[x*]\s*\d/.test(t) && t.split(/\s+/).filter(Boolean).length <= 8 && !/[.;]$/.test(raw.trim());
+};
+const W_WATER = /\b(acqua|vasca|piscina|bordo vasca|tavoletta|stile libero|dorso|rana|delfino)\b/;
+
+const parseWorkoutText = (text, fileName = '', library = (typeof EXERCISE_LIBRARY !== 'undefined' ? EXERCISE_LIBRARY : null)) => {
   const lines = String(text || '').replace(/\r/g, '').split('\n').map(l => l.replace(/\t+/g, ' ').trim());
   const days = [];
+  const skipped = [];
   let day = null;
   let ssCount = 0, ssOpen = null;
   let title = '';
+  let skipping = false;   // dentro una sezione da saltare (regole, riscaldamento, piscina…)
+  let details = false;    // dentro le spiegazioni di un esercizio
+  const libMatch = (name) => (library && typeof matchExerciseName === 'function' ? matchExerciseName(name, library) : null);
   // Titolo in prima riga ("Scheda Palestra Ottobre", "Il mio programma"): senza numeri,
   // e la riga piena dopo è un giorno oppure inizia con scheda/programma/allenamento
   const filled = lines.map((l, i) => [l, i]).filter(([l]) => l && !/^[-=_*~.\s]+$/.test(l));
-  let titleIdx = -1;
+  const titleIdx = new Set();
   if (filled.length > 1) {
     const [first, i0] = filled[0];
     const f = wNorm(first);
-    const looksTitle = !/\d+\s*[x×*]\s*\d|\d+\s*(kg|min|serie|rip)/.test(f) && first.length <= 50;
-    if (looksTitle && !wDayName(first) && (/^(scheda|programma|allenamento|workout|piano|il mio|la mia)/.test(f) || wDayName(filled[1][0]))) {
+    const looksTitle = !/\d+\s*[x×*]\s*\d|\d+\s*(kg|min|serie|rip)/.test(f) && first.length <= 60;
+    if (looksTitle && !wDayName(first) && (/^(scheda|programma|allenamento|workout|piano|il mio|la mia)/.test(f) || wDayName(filled[1][0]))) {
       title = first.replace(/[:.]+$/, '').trim();
-      titleIdx = i0;
+      titleIdx.add(i0);
+      // Titolo andato a capo: "Scheda di allenamento: palestra e" + "piscina"
+      const [second, i1] = filled[1];
+      if (wIsContinuation(second) && second.length <= 30 && !/\d/.test(second)) { title += ' ' + second.trim(); titleIdx.add(i1); }
     }
   }
   const ensureDay = () => {
     if (!day) { day = { name: 'Giorno ' + String.fromCharCode(65 + days.length), exercises: [] }; days.push(day); }
     return day;
   };
+  const lastEx = () => (day && day.exercises.length ? day.exercises[day.exercises.length - 1] : null);
+  // Prossima riga piena (per capire se un titolo numerato è seguito da "Serie e ripetizioni")
+  const nextFilled = (idx) => { for (let j = idx + 1; j < lines.length; j++) if (lines[j] && !/^[-=_*~.\s]+$/.test(lines[j])) return lines[j]; return ''; };
+  // "Serie e ripetizioni 3 x 10-12", "Recupero 90''", "Peso 20 kg" → all'esercizio sopra
+  const takeLabel = (n) => {
+    const ex = lastEx();
+    let m = W_SETS_LABEL.exec(n);
+    if (m && /\d|max/.test(n.slice(m[0].length))) {
+      const rest = n.slice(m[0].length);
+      if (!ex) return true;
+      const p = wParseLine('x ' + rest)[0] || {};
+      if (!ex.sets && p.sets) { ex.sets = p.sets; ex.reps = p.reps; }
+      else if (!ex.sets && !ex.reps) {
+        const mm = /(\d+(?:\s*[-–/]\s*\d+)*)\s*(minuti|min|'|secondi|sec|s\b|ripetizioni|rip|passi|m\b|metri)?(.*)$/.exec(rest);
+        if (mm && /^(minuti|min|')$/.test(mm[2] || '')) ex.duration = ex.duration || mm[1];
+        else if (mm) ex.reps = wReps(mm[1] + (mm[2] && !/^rip/.test(mm[2]) ? ' ' + mm[2] : '') + (/per (lato|gamba|braccio)/.test(mm[3]) ? ' per ' + /per (lato|gamba|braccio)/.exec(mm[3])[1] : ''));
+      }
+      if (!ex.rest && p.rest) ex.rest = p.rest;
+      if (!ex.weight && p.weight) ex.weight = p.weight;
+      return true;
+    }
+    m = W_REST_LABEL.exec(n);
+    if (m && /\d/.test(n.slice(m[0].length))) { if (ex && !ex.rest) ex.rest = wTakeRest('rec ' + n.slice(m[0].length)).rest; return true; }
+    m = W_WEIGHT_LABEL.exec(n);
+    if (m && /\d/.test(n.slice(m[0].length))) { if (ex && !ex.weight) ex.weight = wTakeWeight(n.slice(m[0].length) + ' kg').weight; return true; }
+    return false;
+  };
+
   lines.forEach((line, idx) => {
-    if (idx === titleIdx) return;
+    if (titleIdx.has(idx)) return;
     if (!line || /^[-=_*~.\s]+$/.test(line)) { ssOpen = null; return; }
-    const n = wNorm(line);
-    if (W_SKIP.test(n) && !/\d+\s*x\s*\d/.test(n)) {
-      if (!title && idx < 3 && /^scheda/.test(n)) title = line.replace(/[:.]+$/, '').trim();
-      return;
-    }
-    if (line.length > 90 && !/\d+\s*[x×*]\s*\d/.test(line)) return;   // note lunghe
-    const dayName = wDayName(line);
-    if (dayName) {
-      // Il primo titolo senza esercizi prima e senza parole da giorno può essere il nome della scheda
-      day = { name: dayName.slice(0, 30), exercises: [] };
+    const n = wNorm(W_STRIP_LEAD(line));
+    // Giorno: chiude sezioni saltate e spiegazioni
+    const dayName = wIsHeading(line) && !wIsContinuation(line) ? wDayName(line) : null;
+    const sectionSkip = W_SECTION_SKIP.test(n) && wIsHeading(line);
+    if (dayName && !sectionSkip) {
+      day = { name: dayName.length > 40 ? dayName.slice(0, 40).replace(/\s+\S*$/, '') : dayName, exercises: [] };
       days.push(day);
-      ssOpen = null;
+      skipping = false; details = false; ssOpen = null;
       return;
     }
+    if (sectionSkip) {
+      skipping = true; details = false;
+      const label = wCap(W_STRIP_LEAD(line).replace(/[:.]+$/, '').replace(/\s*\(.*$/, '').trim()).slice(0, 30);
+      if (label && !skipped.includes(label)) skipped.push(label);
+      return;
+    }
+    if (W_SKIP.test(n) && !/\d+\s*x\s*\d/.test(n)) return;
+    // Numeri dell'esercizio sopra scritti come etichetta
+    if (!skipping && takeLabel(n)) return;
+    if (W_DETAIL_LABEL.test(n)) { details = true; return; }
+    if (line.length > 120 && !/\d+\s*[x×*]\s*\d/.test(line)) return;   // note lunghe
+
     const parsed = wParseLine(line);
     if (!parsed.length) return;
-    const d = ensureDay();
-    const prev = d.exercises[d.exercises.length - 1];
-    if (parsed.length === 1 && wOnlyNumbers(parsed[0]) && prev) {
+    const prev = lastEx();
+    if (parsed.length === 1 && wOnlyNumbers(parsed[0]) && prev && !skipping && !details) {
       const p = parsed[0];
       if (!prev.sets && p.sets) { prev.sets = p.sets; prev.reps = p.reps; }
       if (!prev.weight && p.weight) prev.weight = p.weight;
@@ -216,8 +296,32 @@ const parseWorkoutText = (text, fileName = '') => {
       if (!prev.duration && p.duration) prev.duration = p.duration;
       return;
     }
-    const valid = parsed.filter(p => p.name && /[a-zà-ú]/i.test(p.name) && p.name.length <= 60);
+    // Ogni pezzo deve dimostrare di essere un esercizio
+    const numbered = W_NUMBERED.test(W_STRIP_LEAD(line)) || W_NUMBERED.test(line);
+    const valid = parsed.filter(p => {
+      if (!p.name || !/[a-zà-ú]/i.test(p.name) || p.name.length > 60) return false;
+      const words = p.name.split(/\s+/).length;
+      const restWords = wNorm(p.restText).split(/[^a-z0-9']+/).filter(w => w && !/^\d+$/.test(w)).length;
+      const prose = wIsProse(line, p.restText);
+      const strong = !!p.sets || (p.cardio && !!p.duration);
+      if (strong) {
+        if (words > 7 || restWords > 8 || (prose && restWords > 4)) return false;
+        // Dopo il riscaldamento si riprende solo con un esercizio vero (serie x ripetizioni, nome conosciuto)
+        if (skipping) return !!p.sets && !!libMatch(p.name) && !W_WATER.test(wNorm(line));
+        return true;
+      }
+      if (skipping || prose || words > 6) return false;
+      // Titolo numerato con i numeri subito sotto ("3. Squat al box" + "Serie e ripetizioni 3 x 10")
+      if (W_SETS_LABEL.test(wNorm(W_STRIP_LEAD(nextFilled(idx)))) && /\d/.test(nextFilled(idx))) return true;
+      if (details) return false;
+      // Nome riconosciuto nella libreria, su una riga corta che non continua una frase
+      if (!wIsContinuation(line) && words <= 5 && libMatch(p.name)) return true;
+      return numbered && words <= 5 && !!libMatch(p.name);
+    });
     if (!valid.length) return;
+    if (skipping) skipping = false;   // un esercizio vero dopo il riscaldamento: si riprende
+    details = false;
+    const d = ensureDay();
     let label = '';
     if (valid.length > 1 || valid[0].superset) {
       if (/^\+/.test(line) && ssOpen) label = ssOpen;
@@ -230,7 +334,7 @@ const parseWorkoutText = (text, fileName = '') => {
   const kept = days.filter(dd => dd.exercises.length);
   const exercises = kept.reduce((s, dd) => s + dd.exercises.length, 0);
   const name = title || String(fileName).replace(/\.(pdf|docx?|txt|md|rtf)$/i, '').replace(/[_-]+/g, ' ').trim().slice(0, 40);
-  return { name, days: kept, exercises, withNumbers: kept.reduce((s, dd) => s + dd.exercises.filter(e => e.sets || e.duration).length, 0) };
+  return { name, days: kept, exercises, skipped, withNumbers: kept.reduce((s, dd) => s + dd.exercises.filter(e => e.sets || e.duration).length, 0) };
 };
 
 // ---------------------------------------------------------------
@@ -293,32 +397,35 @@ const wRowText = (cells) => {
 const workoutLinesToText = (lines) => {
   const out = [];
   let cols = null;
-  lines.forEach(line => {
-    const segs = line.segs || [];
-    const header = segs.length >= 2 ? wHeader(line) : null;
-    if (header) { cols = header; return; }
-    if (!cols || segs.length < 2) {
-      // Nome che va a capo nella cella: riga di sole lettere minuscole, attaccata all'esercizio sopra
-      const prev = out[out.length - 1];
-      if (cols && prev && prev.row && segs.length === 1 && /^[a-zà-ú(]/.test(segs[0].text) && !/\d/.test(segs[0].text)) {
-        prev.text = prev.text.replace(/^(\S.*?)(\s+\d|\s*$)/, (m, a, b) => a + ' ' + segs[0].text + b);
-        return;
-      }
-      out.push({ text: line.text });
-      return;
-    }
+  const cellsOf = (segs) => {
     const cells = {};
     segs.forEach(s => {
       const c = wColumnOf(s, cols);
       const kind = c && c.kind ? c.kind : (c === cols[0] ? 'name' : 'skip');
       cells[kind] = cells[kind] ? cells[kind] + ' ' + s.text : s.text;
     });
+    return cells;
+  };
+  const NUM_COLS = ['sets', 'reps', 'sr', 'weight', 'rest'];
+  lines.forEach(line => {
+    const segs = line.segs || [];
+    const header = segs.length >= 2 ? wHeader(line) : null;
+    if (header) { cols = header; return; }
+    if (!cols) { out.push({ text: line.text }); return; }
+    const cells = cellsOf(segs);
+    const hasNumbers = NUM_COLS.some(k => cells[k] && /\d|max/i.test(cells[k]));
+    const prev = out[out.length - 1];
+    // Cella andata a capo ("Rematore petto" + "appoggiato", "3 x 10 per" + "lato", "...escursione" + "parziale."):
+    // pezzi senza numeri che iniziano con la minuscola si attaccano, ognuno alla sua colonna, alla riga sopra
+    if (prev && prev.cells && !hasNumbers && segs.every(s => /^[a-zà-ú(]/.test(s.text))) {
+      Object.keys(cells).forEach(k => { prev.cells[k] = prev.cells[k] ? prev.cells[k] + ' ' + cells[k] : cells[k]; });
+      return;
+    }
     // Nessun numero nelle colonne: è un titolo o una nota scritta di traverso, si tiene com'è
-    if (!['sets', 'reps', 'sr', 'weight', 'rest'].some(k => cells[k] && /\d|max/i.test(cells[k]))) { out.push({ text: line.text }); return; }
-    if (!cells.name) { out.push({ text: wRowText(cells) }); return; }
-    out.push({ text: wRowText(cells), row: true });
+    if (segs.length < 2 || !hasNumbers) { out.push({ text: line.text }); return; }
+    out.push({ cells });
   });
-  return out.map(o => o.text).join('\n');
+  return out.map(o => (o.cells ? wRowText(o.cells) : o.text)).join('\n');
 };
 
 // ---------------------------------------------------------------
@@ -339,9 +446,10 @@ const XM_STOP = new Set(['con', 'al', 'ai', 'alla', 'alle', 'allo', 'agli', 'di'
 const XM_MOD = new Set(['singola', 'singolo', 'singole', 'singoli', 'unilaterale', 'unilaterali', 'mono', 'single', 'one', 'una', 'un', 'uno',
   'alternato', 'alternata', 'alternati', 'alternate', 'alternando', 'alternated', 'unilateral', 'bilaterale', 'leggero', 'pesante', 'controllato',
   'fermo', 'pausa', 'isometria', 'isometrico', 'parziale', 'parziali', 'completo', 'presa', 'neutra', 'normale', 'classico', 'classica', 'variante',
-  'sx', 'dx', 'destra', 'sinistra', 'lato', 'side']);
+  'sx', 'dx', 'destra', 'sinistra', 'lato', 'side', 'bicipiti', 'tricipiti', 'leggero', 'leggera']);
 // Sinonimi → una parola sola (dopo minuscole e senza accenti)
 const XM_SYN = {
+  abduzione: 'abductor', adduzione: 'adductor', farmer: 'camminata contadino', carry: 'camminata', appoggiato: 'panca inclinata',
   monopodalico: 'una gamba', monopodalica: 'una gamba', monopodalici: 'una gamba',
   estensione: 'extension', estensioni: 'extension', extensions: 'extension', ext: 'extension',
   pressa: 'leg press', 'leg-press': 'leg press', legpress: 'leg press',

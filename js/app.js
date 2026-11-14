@@ -2209,8 +2209,13 @@ createApp({
       workoutImport.value.isOpen = false;
       workoutView.value = 'builder';
       const n = days.reduce((sum, d) => sum + d.exercises.length, 0);
+      // Parti lasciate fuori (regole, riscaldamento, piscina…): meglio dirlo che farle sparire in silenzio
+      const skipped = parsed.skipped || [];
+      const skippedText = skipped.length
+        ? ' Ho lasciato fuori: ' + skipped.slice(0, 3).join(', ') + (skipped.length > 3 ? ' e altre ' + (skipped.length - 3) + ' parti' : '') + '.'
+        : '';
       showToastMessage('Ho letto ' + n + (n === 1 ? ' esercizio' : ' esercizi') + ' in ' + days.length + (days.length === 1 ? ' giorno' : ' giorni') +
-        '. Controlla che sia tutto giusto, poi salva la scheda.');
+        '.' + skippedText + ' Controlla che sia tutto giusto, poi salva la scheda.');
     };
     const importWorkoutFile = async (event) => {
       const file = event.target.files && event.target.files[0];
@@ -2221,7 +2226,7 @@ createApp({
       try {
         const res = await readWorkoutFileText(file);
         if (res.error) { workoutImport.value.error = WORKOUT_IMPORT_ERRORS[res.error] || WORKOUT_IMPORT_ERRORS.empty; return; }
-        applyWorkoutImport(parseWorkoutText(res.text, file.name));
+        applyWorkoutImport(parseWorkoutText(res.text, file.name, EXERCISE_LIBRARY));
       } catch (e) {
         console.error(e);
         workoutImport.value.error = 'Non riesco a leggere questo file. Prova a copiare e incollare il testo qui sotto.';
@@ -2233,7 +2238,7 @@ createApp({
       const text = workoutImport.value.text || '';
       if (!text.trim()) { workoutImport.value.error = WORKOUT_IMPORT_ERRORS.none; return; }
       workoutImport.value.error = '';
-      applyWorkoutImport(parseWorkoutText(text));
+      applyWorkoutImport(parseWorkoutText(text, '', EXERCISE_LIBRARY));
     };
 
     // Come si fa (js/data/exercise-art.js): omino animato + muscoli allenati evidenziati
