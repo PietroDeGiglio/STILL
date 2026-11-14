@@ -675,6 +675,56 @@ const drawSharePet = (ctx, img, id, cx, bottom, size, live, k = 1) => {
   leg(R.armR, R.pivots.armR, -P.aR * arm);
   ctx.restore();
 };
+// Evoluzione (storia "il mio compagno si è evoluto"): la forma di prima trema e si illumina sempre di più,
+// poi un lampo con le scintille e appare la forma nuova (che saluta e balla)
+const PET_EVOLVE_AT = 2.8;   // secondo del lampo
+const drawPetBeforeEvolving = (ctx, img, bottom, size, time) => {
+  const i = clamp01((time - 1) / (PET_EVOLVE_AT - 1));   // quanto è vicino alla trasformazione
+  ctx.save();
+  ctx.translate(0, bottom);
+  const hop = i > 0 ? -Math.abs(Math.sin(time * (6 + 10 * i))) * size * 0.03 * i : 0;
+  ctx.translate(0, hop);
+  ctx.rotate(Math.sin(time * (14 + 34 * i)) * 0.13 * i);
+  const pulse = 1 + 0.04 * i * Math.sin(time * 30);
+  ctx.scale(pulse, 2 - pulse);
+  if (i > 0 && 'filter' in ctx) ctx.filter = 'brightness(' + (1 + 2.2 * i * i).toFixed(2) + ')';
+  ctx.drawImage(img, -size / 2, -size * (108 / 120), size, size);
+  ctx.restore();
+};
+const drawEvolveFlash = (ctx, cx, cy, R, time) => {
+  const d = time - PET_EVOLVE_AT;
+  if (d < -0.3 || d > 1.4) return;
+  ctx.save();
+  // Lampo di luce bianca
+  const a = d < 0 ? (d + 0.3) / 0.3 : Math.max(0, 1 - d / 0.7);
+  if (a > 0) {
+    const r = R * (1.1 + 0.5 * clamp01(d + 0.3));
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0, 'rgba(255,255,255,' + a.toFixed(3) + ')');
+    g.addColorStop(0.45, 'rgba(255,250,220,' + (a * 0.8).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+  }
+  // Scintille che volano via
+  if (d > 0) {
+    const n = 12;
+    for (let j = 0; j < n; j++) {
+      const ang = (j / n) * Math.PI * 2 + (j % 2) * 0.25;
+      const dist = R * (0.35 + easeOut(d / 1.4) * (j % 2 ? 1.05 : 1.35));
+      const sz = R * (j % 2 ? 0.05 : 0.08) * (1 - d / 1.4);
+      const x = cx + Math.cos(ang) * dist, y = cy + Math.sin(ang) * dist;
+      ctx.fillStyle = j % 3 === 0 ? '#FDE68A' : '#FFFFFF';
+      ctx.globalAlpha = Math.max(0, 1 - d / 1.4);
+      ctx.beginPath();
+      for (let p = 0; p < 8; p++) {
+        const rr = p % 2 ? sz * 0.35 : sz, aa = (p / 8) * Math.PI * 2 + d * 3;
+        ctx[p ? 'lineTo' : 'moveTo'](x + Math.cos(aa) * rr, y + Math.sin(aa) * rr);
+      }
+      ctx.closePath(); ctx.fill();
+    }
+  }
+  ctx.restore();
+};
 const drawCornerPet = (ctx, data, cx, bottom, size, live, k) => {
   if (data.pet) drawSharePet(ctx, data.pet.img, data.pet.id, cx, bottom, size, live, k);
 };
@@ -735,7 +785,16 @@ const drawAchievementBody = (ctx, data, o) => {
     ctx.fillStyle = '#FFFFFF';
     // Compagno della serie al posto dell'emoji: più grande della medaglia, nel video balla
     if (data.petImg && data.petImg.complete && data.petImg.naturalWidth) {
-      drawSharePet(ctx, data.petImg, data.petDance, 0, R * 0.86, R * 2.25, live && k >= 1);
+      const prev = live && data.petPrevImg && data.petPrevImg.naturalWidth ? data.petPrevImg : null;
+      if (prev && time < PET_EVOLVE_AT) drawPetBeforeEvolving(ctx, prev, R * 0.86, R * 2.25, time);
+      else if (prev && time < PET_EVOLVE_AT + 0.6) {
+        // Appena trasformato: esce con un "pop" dalla luce
+        const q = (time - PET_EVOLVE_AT) / 0.6, sp = easeOut(q) * (1 + 0.25 * Math.sin(q * Math.PI));
+        ctx.save(); ctx.translate(0, R * 0.86); ctx.scale(sp, sp); ctx.translate(0, -R * 0.86);
+        drawSharePet(ctx, data.petImg, data.petDance, 0, R * 0.86, R * 2.25, true, 1);
+        ctx.restore();
+      } else drawSharePet(ctx, data.petImg, data.petDance, 0, R * 0.86, R * 2.25, live && k >= 1);
+      if (prev) drawEvolveFlash(ctx, 0, R * 0.86 - R * 0.95, R, time);
     } else ctx.fillText(data.icon || '🏆', 0, R * 0.06);
     ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
     ctx.restore();

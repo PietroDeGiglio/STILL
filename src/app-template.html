@@ -197,6 +197,19 @@
         </div>
       </div>
 
+      <!-- Foto del mese (js/utils/photos.js): ogni 4 settimane -->
+      <div v-if="photoDue && !backupDue" class="bg-white border border-viola/30 rounded-2xl p-4 shadow-soft flex items-start gap-3">
+        <div class="w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-lg flex-shrink-0">📸</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-extrabold text-antracite">È il momento della foto del mese</div>
+          <p class="text-[11px] font-medium text-gray-500 leading-snug mt-0.5">L'ultima è di {{ photoDue }} giorni fa. Stessa posa e stessa luce: poi ti preparo la storia "Prima e dopo".</p>
+          <div class="flex gap-2 mt-3">
+            <button @click="triggerPhotoInput" class="flex-1 cangiante-btn text-white font-bold py-2 rounded-xl text-xs active:scale-95 transition-all">Scatta la foto</button>
+            <button @click="snoozePhoto" class="flex-1 bg-gray-100 text-gray-600 font-bold py-2 rounded-xl text-xs active:scale-95 transition-all">Più tardi</button>
+          </div>
+        </div>
+      </div>
+
       <!-- User Greeting -->
       <div class="space-y-1">
         <h1 class="text-3xl font-bold tracking-tight text-antracite">Ciao {{ profile ? profile.firstName : '' }},</h1>
@@ -1119,6 +1132,9 @@
           <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
           Avvia sessione{{ currentSheetDay ? ' · ' + currentSheetDay.name : '' }}
         </button>
+        <button v-if="homeDayPlan && selectedSheet && selectedSheet.auto !== 'today'" @click="openHomeSwap" class="w-full -mt-1 text-xs font-bold text-gray-500 py-2 flex items-center justify-center gap-1.5 active:scale-95 transition-all">
+          🏠 Oggi niente palestra? <span class="text-arancione">Fallo a casa</span>
+        </button>
 
         <!-- Esercizi del giorno -->
         <div class="space-y-3">
@@ -1177,6 +1193,11 @@
                     <template v-for="sg in [exerciseSuggestion(ex)]" :key="'sg' + ex.id">
                       <p v-if="sg" class="text-[10px] font-bold mt-1" :class="sg.kind === 'up' ? 'text-salvia' : (sg.kind === 'down' ? 'text-sky-600' : 'text-gray-500')">
                         {{ sg.kind === 'up' ? '⬆️' : (sg.kind === 'down' ? '⬇️' : '🎯') }} Prossima volta: {{ formatNumber(sg.value) }} kg<span v-if="sg.delta" class="font-semibold"> ({{ sg.delta > 0 ? '+' : '' }}{{ formatNumber(sg.delta) }})</span>
+                      </p>
+                    </template>
+                    <template v-for="stl in [exerciseStall(ex)]" :key="'stl' + ex.id">
+                      <p v-if="stl" class="text-[10px] font-semibold text-viola mt-1 leading-snug">
+                        🔄 {{ stl.hard ? 'Duro due volte di fila' : 'Fermo da ' + stl.sessions + ' sessioni' }}: cambia stimolo con <span class="font-extrabold">{{ (stl.gym || stl.home).n }}</span><template v-if="stl.gym && stl.home"> o, a casa, <span class="font-extrabold">{{ stl.home.n }}</span></template>.
                       </p>
                     </template>
                   </div>
@@ -3038,6 +3059,31 @@
     </div>
   </div>
 
+  <!-- Storia "Prima e dopo" pronta dopo una foto nuova -->
+  <div v-if="photoStory.isOpen && photoStoryPair" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/50 backdrop-blur-sm animate-fadeIn" @click.self="photoStory.isOpen = false">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center">
+      <div>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Foto salvata</p>
+        <h3 class="text-xl font-extrabold text-antracite leading-tight mt-1">La tua storia è pronta ✨</h3>
+        <p class="text-xs text-gray-500 font-medium mt-1">{{ photoStoryPair.days }} giorni dalla prima foto<template v-if="photoStoryPair.diffText"> · {{ photoStoryPair.diffText }}</template></p>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <div v-for="side in [{ p: photoStoryPair.before, label: 'PRIMA' }, { p: photoStoryPair.after, label: 'DOPO' }]" :key="'pst' + side.label" class="relative aspect-[3/4] rounded-2xl overflow-hidden bg-gray-100">
+          <img :src="side.p.thumbUrl" alt="" class="w-full h-full object-cover object-[50%_30%]">
+          <span class="absolute top-2 left-2 text-[9px] font-black tracking-widest text-white rounded-full px-2 py-0.5" :class="side.label === 'DOPO' ? 'cangiante-btn' : 'bg-black/50'">{{ side.label }}</span>
+          <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent text-white text-[10px] font-bold px-2 pb-1.5 pt-4 text-left">{{ photoDateLabel(side.p.date) }}</span>
+        </div>
+      </div>
+      <button @click="sharePhotoStory" :disabled="photoCompare.busy" class="w-full cangiante-btn text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-60">
+        {{ photoCompare.busy ? 'Preparo…' : 'Condividi nelle storie' }}
+      </button>
+      <div class="grid grid-cols-2 gap-2">
+        <button @click="viewPhotoStory" class="py-3 rounded-xl text-sm font-bold text-antracite bg-gray-100 active:scale-95 transition-all">Guarda il confronto</button>
+        <button @click="photoStory.isOpen = false" class="py-3 rounded-xl text-sm font-bold text-gray-500 bg-gray-50 active:scale-95 transition-all">Più tardi</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Foto grande -->
   <div v-if="photoViewer.isOpen && viewerPhoto" class="fixed inset-0 z-[60] bg-black flex flex-col animate-fadeIn sm:max-w-[420px] sm:mx-auto">
     <div class="flex items-center justify-between px-4 pt-4 pb-2 text-white">
@@ -3131,6 +3177,37 @@
       <button @click="shareCompare" :disabled="photoCompare.busy" class="py-3 rounded-xl text-sm font-bold text-white cangiante-btn active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5">
         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
         {{ photoCompare.busy ? 'Preparo…' : 'Condividi storia' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- OGGI NIENTE PALESTRA: lo stesso giorno della scheda, a casa -->
+  <div v-if="homeSwap.isOpen && homeDayPlan" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn" @click.self="homeSwap.isOpen = false">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 max-h-[88vh] flex flex-col">
+      <div class="flex justify-between items-start gap-3">
+        <div>
+          <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Oggi niente palestra</p>
+          <h3 class="text-lg font-bold text-antracite leading-tight">{{ homeDayPlan.name }} · a casa</h3>
+          <p class="text-xs text-gray-500 font-medium mt-1">Stessi muscoli, esercizi da fare a casa o a corpo libero.</p>
+        </div>
+        <button @click="homeSwap.isOpen = false" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex-1 overflow-y-auto space-y-2 hide-scrollbar">
+        <div v-for="(row, i) in homeDayPlan.rows" :key="'hs' + i" class="rounded-2xl border px-3.5 py-2.5" :class="row.alt ? 'border-gray-100 bg-gray-50' : 'border-dashed border-gray-200'">
+          <p class="text-[10px] font-bold text-gray-400 truncate" :class="row.same ? '' : 'line-through'">{{ row.ex.name }}</p>
+          <p v-if="row.same" class="text-sm font-bold text-antracite">Va bene anche a casa ✓</p>
+          <template v-else-if="row.alt">
+            <p class="text-sm font-bold text-antracite">→ {{ row.alt.n }}</p>
+            <p class="text-[10px] font-semibold text-gray-500">{{ row.alt.t === 'cardio' ? (row.alt.d || 15) + ' min' : (row.alt.s || 3) + ' × ' + row.alt.r }}</p>
+          </template>
+          <p v-else class="text-xs font-semibold text-gray-400">Nessuna alternativa a casa: oggi lo salti.</p>
+        </div>
+      </div>
+      <button @click="startHomeDay" :disabled="!homeDayPlan.count" class="w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+        Avvia la versione a casa
       </button>
     </div>
   </div>
@@ -4527,7 +4604,7 @@
       <div class="relative px-6 pt-6 pb-5 text-center" :style="{ background: 'linear-gradient(160deg, ' + petState.color + '33, transparent 75%)' }">
         <button @click="petModal.isOpen = false" class="absolute top-4 right-4 w-8 h-8 rounded-full bg-white/70 text-gray-500 flex items-center justify-center text-lg font-bold">×</button>
         <button @click="petDance" class="block w-36 h-36 mx-auto" aria-label="Fai ballare il compagno">
-          <div class="w-full h-full" :class="petDanceClass || ('pet-bob' + (petState.mood === 'sleepy' ? ' pet-sleep' : ''))" v-html="petMainSvg"></div>
+          <div ref="petMainBox" class="w-full h-full" :class="petDanceClass || ('pet-bob' + (petState.mood === 'sleepy' ? ' pet-sleep' : ''))" v-html="petMainSvg"></div>
         </button>
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">{{ petState.speciesName }}<span v-if="petState.legendary"> · leggendario ✨</span></p>
         <h3 class="text-2xl font-extrabold text-antracite leading-tight">{{ petState.name }}</h3>
@@ -4622,7 +4699,7 @@
         <p class="text-sm text-gray-500 font-medium mt-2">{{ streakInfo.current }} {{ streakInfo.current === 1 ? 'giorno' : 'giorni' }} di fila<span v-if="petState.nextIn">. Prossima forma tra {{ petState.nextIn }} {{ petState.nextIn === 1 ? 'giorno' : 'giorni' }}</span>.</p>
       </div>
       <div class="p-6 pt-2 space-y-2">
-        <button @click="sharePet" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm">Condividi nelle storie</button>
+        <button @click="sharePetEvolution" class="w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm">Condividi l'evoluzione</button>
         <button @click="petEvolveModal.isOpen = false" class="w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl active:scale-95 transition-all text-sm">Evvai!</button>
       </div>
     </div>

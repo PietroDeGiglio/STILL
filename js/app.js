@@ -2420,6 +2420,85 @@ createApp({
       return make(w, 'same', `Consolida ${fw} (${streak} di 3 sessioni prima di salire). Dimmi com'è andata per consigli più precisi.`);
     };
 
+    // ---------------------------------------------------------------
+    // ALTERNATIVE DEL COACH: esercizi della libreria per gli stessi muscoli, in palestra o a casa.
+    //  - esercizio fermo da un po' → cambia stimolo con una variante
+    //  - "Oggi niente palestra?" → lo stesso giorno della scheda, fatto a casa
+    // ---------------------------------------------------------------
+    const libraryAlternatives = (item, place, avoid = new Set()) => {
+      if (!item) return [];
+      const isCardio = item.t === 'cardio' || item.m === 'cardio';
+      const prim = (exerciseArt(item) || {}).primary || [];
+      return EXERCISE_LIBRARY
+        .filter(x => x.id !== item.id && x.w === place && !avoid.has(x.id) && x.m !== 'mobilita'
+          && ((x.t === 'cardio' || x.m === 'cardio') === isCardio))
+        .map(x => {
+          const p = (exerciseArt(x) || {}).primary || [];
+          const shared = prim.filter(m => p.includes(m)).length;
+          // Più punti a chi lavora gli stessi muscoli (e meno a chi ne aggiunge tanti altri)
+          return { x, score: shared * 3 + (x.m === item.m ? 2 : 0) + (prim[0] && p[0] === prim[0] ? 2 : 0) - 0.5 * Math.max(0, p.length - shared) + (familiarLibraryIds.value.has(x.id) ? 0.5 : 0) };
+        })
+        .filter(o => o.score >= 2)
+        .sort((a, b) => b.score - a.score)
+        .map(o => o.x);
+    };
+    // Fermo: 4 sessioni o più allo stesso peso in almeno 10 giorni, oppure "duro" due volte di fila
+    const exerciseStall = (exercise) => {
+      if (!exercise || exercise.type === 'cardio') return null;
+      const logs = exerciseLogsFor(exercise).filter(log => parseOptionalNumber(log.weight) !== null);
+      if (logs.length < 2) return null;
+      const last = logs[logs.length - 1], prev = logs[logs.length - 2];
+      const w = parseOptionalNumber(last.weight);
+      let n = 0;
+      for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w; i--) n++;
+      const longFlat = n >= 4 && coachDayDiff(logs[logs.length - n].date, last.date) >= 10 && last.feel !== 'easy';
+      const hardTwice = last.feel === 'hard' && prev.feel === 'hard';
+      if (!longFlat && !hardTwice) return null;
+      const item = libraryForName(exercise.name);
+      if (!item) return null;
+      const gym = libraryAlternatives(item, 'gym')[0] || null;
+      const home = libraryAlternatives(item, 'home')[0] || null;
+      if (!gym && !home) return null;
+      return { sessions: n, hard: hardTwice && !longFlat, gym, home };
+    };
+    const homeSwap = ref({ isOpen: false });
+    const homeDayPlan = computed(() => {
+      const day = currentSheetDay.value;
+      if (!day || !Array.isArray(day.exercises) || !day.exercises.length) return null;
+      const used = new Set();
+      let gym = 0;
+      // Prima quelli già fattibili a casa, così le alternative non li ripetono
+      const items = day.exercises.map(ex => libraryForName(ex.name));
+      items.forEach(item => { if (item && item.w === 'home') used.add(item.id); });
+      const rows = day.exercises.map((ex, i) => {
+        const item = items[i];
+        if (item && item.w === 'home') return { ex, alt: item, same: true };
+        if (item) gym++;
+        const alt = item ? (libraryAlternatives(item, 'home', used)[0] || null) : null;
+        if (alt) used.add(alt.id);
+        return { ex, alt, same: false };
+      });
+      if (!gym) return null;
+      return { name: day.name || 'Allenamento', rows, count: rows.filter(r => r.alt).length };
+    });
+    const openHomeSwap = () => { homeSwap.value = { isOpen: true }; };
+    const startHomeDay = () => {
+      const plan = homeDayPlan.value;
+      if (!plan || !plan.count) return;
+      const exercises = plan.rows.filter(r => r.alt).map(r => ({ ...libraryToExercise(r.alt), id: 'auto-' + r.alt.id }));
+      let sheet = workoutSheets.value.find(s => s.auto === 'today');
+      if (!sheet) {
+        const nextId = Math.max(Date.now(), ...workoutSheets.value.map(item => (Number(item.id) || 0) + 1));
+        workoutSheets.value.push({ id: nextId, createdAt: toISODate(), name: 'Allenamento del giorno', auto: 'today', days: [] });
+        sheet = workoutSheets.value[workoutSheets.value.length - 1];
+      }
+      sheet.days = [{ name: plan.name + ' · a casa', exercises }];
+      homeSwap.value.isOpen = false;
+      activeTab.value = 'allenamento';
+      openSheet(sheet);
+      openSessionPreview();
+    };
+
     // Salva "com'è andata" sulla registrazione di oggi dell'esercizio
     const setExerciseFeel = (exercise, feel) => {
       if (!exercise) return;
@@ -5421,6 +5500,7 @@ createApp({
     // Compagno della serie in ogni storia (si può nascondere): immagine + specie per il balletto nel video
     const petCornerImg = shallowRef(null);
     const petShareImg = shallowRef(null);   // compagno protagonista (card del compagno e "salva la serie")
+    const petPrevShareImg = shallowRef(null);   // forma di prima, per la storia dell'evoluzione
     const loadPetCornerImage = async () => {
       const st = petState.value;
       if (!st.stage) { petCornerImg.value = null; return; }
@@ -5538,7 +5618,7 @@ createApp({
     };
     watch(() => {
       const st = shareStudio.value;
-      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.showPet, petCornerImg.value, petShareImg.value, muscleShareImg.value, st.weightMode, st.loadMode, st.hasPhoto];
+      return [st.isOpen, st.kind, st.sessionId, st.period, st.recapMonth, st.recapType, st.achievement, st.focus, st.hero, st.theme, st.format, st.output, st.showName, st.showPet, petCornerImg.value, petShareImg.value, petPrevShareImg.value, muscleShareImg.value, st.weightMode, st.loadMode, st.hasPhoto];
     }, () => { if (shareStudio.value.isOpen) refreshSharePreview(); else stopShareAnimation(); });
 
     const openShareStudio = (kind, sessionId = null) => {
@@ -5710,6 +5790,8 @@ createApp({
           if (!photoThumbUrls.has(p.id) && thumb) photoThumbUrls.set(p.id, URL.createObjectURL(thumb));
           return { ...p, thumbUrl: photoThumbUrls.get(p.id) || '' };
         });
+        // Per il promemoria in Dashboard (senza dover aprire le foto all'avvio)
+        settings.value.photoLast = photos.value.length ? photos.value[0].date : '';
       } catch (e) {
         photoUnavailable.value = true;
       }
@@ -5756,6 +5838,48 @@ createApp({
     // Ultime foto per la card in Progressi, e da quanto non ne fai una
     const recentPhotos = computed(() => photos.value.slice(0, 4));
     const daysSinceLastPhoto = computed(() => (photos.value.length ? daysBetween(photos.value[0].date, toISODate()) : null));
+    // FOTO DEL MESE: ogni 4 settimane un promemoria in Dashboard (solo per chi ha già iniziato)
+    const photoDue = computed(() => {
+      const s = settings.value;
+      if (!s.photoLast) return 0;
+      const today = toISODate();
+      if (s.photoSnoozeUntil && s.photoSnoozeUntil > today) return 0;
+      const days = daysBetween(s.photoLast, today);
+      return days >= 28 ? days : 0;
+    });
+    const snoozePhoto = () => { settings.value.photoSnoozeUntil = toISODate(new Date(Date.now() + 4 * DAY_MS)); };
+    // Dopo una foto nuova: se c'è una foto di almeno 2 settimane prima nella stessa posa,
+    // la storia "Prima e dopo" (con la prima foto in assoluto) è già pronta da condividere
+    const photoStory = ref({ isOpen: false, beforeId: null, afterId: null });
+    const photoStoryPair = computed(() => {
+      const st = photoStory.value;
+      const b = photos.value.find(p => p.id === st.beforeId), a = photos.value.find(p => p.id === st.afterId);
+      if (!b || !a) return null;
+      const wb = photoWeight(b.date), wa = photoWeight(a.date);
+      const diff = wb !== null && wa !== null ? Math.round((wa - wb) * 10) / 10 : null;
+      return { before: b, after: a, days: daysBetween(b.date, a.date), diffText: diff ? (diff > 0 ? '+' : '−') + formatNumber(Math.abs(diff)) + ' kg' : '' };
+    });
+    const offerPhotoStory = (addedIds) => {
+      const added = photos.value.filter(p => addedIds.includes(p.id));
+      if (!added.length) return false;
+      const after = added[0];   // la più recente tra quelle aggiunte
+      const same = photos.value.filter(p => p.pose === after.pose && !addedIds.includes(p.id));
+      const first = same[same.length - 1];
+      if (!first || daysBetween(first.date, after.date) < 14) return false;
+      photoStory.value = { isOpen: true, beforeId: first.id, afterId: after.id };
+      return true;
+    };
+    const sharePhotoStory = async () => {
+      const st = photoStory.value;
+      photoCompare.value = { ...photoCompare.value, isOpen: false, beforeId: st.beforeId, afterId: st.afterId, busy: false };
+      await shareCompare();
+      photoStory.value.isOpen = false;
+    };
+    const viewPhotoStory = () => {
+      const st = photoStory.value;
+      photoStory.value.isOpen = false;
+      openCompare(st.beforeId, st.afterId);
+    };
     const openGallery = async (pose = 'tutte') => {
       gallery.value = { isOpen: true, pose, selecting: false, selected: [] };
       if (!photosReady.value) await loadPhotos();
@@ -5794,12 +5918,15 @@ createApp({
       st.busy = true; st.done = 0; st.error = '';
       const today = toISODate();
       let saved = 0, failed = 0;
+      const addedIds = [];
       for (const file of st.files) {
         try {
           const { blob, thumb, w, h } = await compressPhoto(file);
           const date = st.files.length === 1 ? (st.date || today) : (photoDateFromFile(file) || today);
           const pose = st.files.length === 1 ? st.pose : (photoPoseFromFile(file) || st.pose);
-          await photoStore.put({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), date: date > today ? today : date, pose, note: '', createdAt: Date.now(), w, h, blob, thumb });
+          const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+          await photoStore.put({ id, date: date > today ? today : date, pose, note: '', createdAt: Date.now(), w, h, blob, thumb });
+          addedIds.push(id);
           saved++;
         } catch (e) {
           console.error(e);
@@ -5818,6 +5945,8 @@ createApp({
       closePhotoAdd();
       // Si vedono subito nella galleria: il messaggio serve solo se qualcuna non è entrata
       if (failed) showToastMessage(saved + ' foto salvate, ' + failed + ' non leggibili (forse HEIC: sceglile dalla Galleria/Foto).');
+      settings.value.photoSnoozeUntil = '';
+      if (offerPhotoStory(addedIds)) return;
       if (!gallery.value.isOpen && photos.value.length >= 2) openGallery();
     };
 
@@ -6783,9 +6912,9 @@ createApp({
       const pet = settings.value.pet;
       const run = streakInfo.value.startKey;
       if (pet.lastStage !== undefined && pet.lastRun === run && st.stage > pet.lastStage) {
-        petEvolveModal.value = { isOpen: true, hatched: pet.lastStage === 0 || st.stage === 1 };
+        petEvolveModal.value = { isOpen: true, hatched: pet.lastStage === 0 || st.stage === 1, prevStage: pet.lastStage };
       } else if (pet.lastStage !== undefined && pet.lastRun !== run && st.stage >= 1 && pet.lastStage === 0) {
-        petEvolveModal.value = { isOpen: true, hatched: true };
+        petEvolveModal.value = { isOpen: true, hatched: true, prevStage: 0 };
       }
       pet.lastStage = st.stage;
       pet.lastRun = run;
@@ -6801,15 +6930,20 @@ createApp({
       outfit[item.slot] = outfit[item.slot] === item.id ? '' : item.id;
     };
     const petItemPreview = (item) => petMarkup({ uid: 'pi' + item.id, stage: Math.max(petState.value.stage, 3), mood: 'happy', outfit: { hat: '', eyes: '', neck: '', back: '', [item.slot]: item.id } });
-    // Tocco sul compagno: fa il suo balletto (mossa diversa per ogni specie, vedi css/style.css)
+    // Tocco sul compagno: fa il suo balletto, con le stesse mosse dei video (petPlayDance in js/data/pets.js)
     const petDancing = ref(false);
-    let petDanceTimer = null;
+    const petMainBox = ref(null);
+    let petDanceStop = null;
     const petDance = () => {
-      if (!petState.value.stage) { petDancing.value = 'egg'; } else petDancing.value = PET_SPECIES[petState.value.species].id;
-      clearTimeout(petDanceTimer);
-      petDanceTimer = setTimeout(() => { petDancing.value = false; }, 2600);
+      if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      if (petDanceStop) petDanceStop();
+      const id = petState.value.stage ? PET_SPECIES[petState.value.species].id : 'egg';
+      petDancing.value = true;
+      nextTick(() => {
+        petDanceStop = petPlayDance(petMainBox.value, id, 3.2, () => { petDancing.value = false; petDanceStop = null; });
+      });
     };
-    const petDanceClass = computed(() => (petDancing.value ? 'pet-dance pet-dance-' + petDancing.value : ''));
+    const petDanceClass = computed(() => (petDancing.value ? 'pet-dance-js' : ''));
     const petEvolutionPath = computed(() => {
       const st = petState.value;
       return PET_THRESHOLDS.map((days, stage) => ({
@@ -6840,6 +6974,17 @@ createApp({
       petEvolveModal.value.isOpen = false;
       await loadPetShareImage();
       openAchievementShare({ type: 'pet' });
+    };
+    // Storia dell'evoluzione: nel video la forma di prima trema, brilla e si trasforma in quella nuova
+    const sharePetEvolution = async () => {
+      const prevStage = petEvolveModal.value.prevStage || 0;
+      petEvolveModal.value.isOpen = false;
+      const st = petState.value;
+      await loadPetShareImage();
+      try {
+        petPrevShareImg.value = await petImage({ species: st.species, stage: prevStage, mood: 'happy', outfit: settings.value.pet.outfit, uid: 'petPrev' });
+      } catch (e) { petPrevShareImg.value = null; }
+      openAchievementShare({ type: 'petEvolve', prevStage });
     };
     // Storia "salva la serie": mostra il compagno della serie persa, nella forma che aveva raggiunto
     const shareStreakSave = async () => {
@@ -7086,12 +7231,29 @@ createApp({
           tiles: [{ label: 'Trofei', value: lv.trophies + ' su ' + lv.trophyTotal }, { label: 'Serie migliore', value: streakInfo.value.best + (streakInfo.value.best === 1 ? ' giorno' : ' giorni') }]
         };
       }
-      if (spec && (spec.type === 'pet' || spec.type === 'streakSave')) {
+      if (spec && (spec.type === 'pet' || spec.type === 'petEvolve' || spec.type === 'streakSave')) {
         const ps = petState.value;
         const sk = streakInfo.value;
         const activeDays = activeDaySet.value.size;
         const since = (profile.value && profile.value.createdAt) || [...activeDaySet.value].sort()[0] || toISODate();
         const petBase = { ...base, dateLabel: formatDateLong(toISODate()), icon: '🔥', color: ps.color, petImg: petShareImg.value, petSpecies: spec.species != null ? spec.species : ps.species };
+        if (spec.type === 'petEvolve') {
+          const prevName = petStageName(petBase.petSpecies, spec.prevStage || 0);
+          const hatched = !spec.prevStage;
+          return {
+            ...petBase,
+            petPrevImg: petPrevShareImg.value,
+            kicker: hatched ? (name ? 'È nato il compagno di ' + name : 'È nato il mio compagno') : (name ? 'Il compagno di ' + name + ' si è evoluto' : 'Il mio compagno si è evoluto'),
+            badge: hatched ? 'Si è schiuso!' : 'Evoluzione!',
+            big: String(sk.current),
+            caption: (sk.current === 1 ? 'giorno' : 'giorni') + ' di fila su STILL',
+            sub: prevName + ' → ' + ps.name,
+            tiles: [
+              { label: 'Forma', value: ps.stage + ' di 6' },
+              ps.nextIn ? { label: 'Prossima forma', value: 'tra ' + ps.nextIn + (ps.nextIn === 1 ? ' giorno' : ' giorni') } : { label: 'Evoluzione', value: 'Completa' }
+            ]
+          };
+        }
         if (spec.type === 'pet') {
           // Numero grande senza "giorni" (la g scendeva sulla riga sotto); riquadri con informazioni diverse dal numero
           const items = petItems.value.filter(i => i.unlocked).length;
@@ -7483,12 +7645,12 @@ createApp({
       petItemPreview,
       petEvolutionPath,
       petAlbum,
-      petEvolveModal,
+      petEvolveModal, sharePetEvolution,
       petUnlockModal,
       toggleSharePet,
       petUnlockSvg,
       petAlbumFound,
-      petDance,
+      petDance, petMainBox,
       petDanceClass,
       PET_SPECIES,
       sharePet,
@@ -7556,7 +7718,7 @@ createApp({
       selectedPlanDayCalories, selectedPlanDayProtein, todayProtein, mealProteinLabel, proteinGoal,
       NUTRITION_TIPS, NUTRITION_GOALS, eatGuide, openEatGuide, eatTipStat, menuCheck, eatGoalDays, createTrialPlan, suggestedEatGoal, EAT_EXCLUDES, eatPrefs, eatTarget, eatFactor, eatSwapCount, toggleEatExclude, removeEatDislike, eatSwap, openEatSwap, chooseEatSwap, resetEatSwap, dislikeEatFood,
       EXERCISE_LIBRARY, MUSCLE_GROUPS, WORKOUT_PROGRAMS, SPORT_PROGRAMS, guide, userSports, guideSports, openGuide, closeGuide, setGuideTab, guideExercises, guidePrescription, toggleGuideSelect, selectAllGuide, openGuidePicker, guidePickerSheet, confirmGuideAdd, createProgramSheet, programExerciseNames, fillFromLibrary, libraryTip, libraryItem, exerciseThumb, exercisePhoto, exerciseInfo, openExerciseInfo, workoutImport, openWorkoutImport, closeWorkoutImport, importWorkoutFile, importWorkoutText,
-      EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
+      EXERCISE_FEELS, exerciseHistorySuggestion, exerciseSuggestion, exerciseStall, homeSwap, homeDayPlan, openHomeSwap, startHomeDay, setExerciseFeel, todayExerciseFeel, playerFeelExercise, playerSuggestion,
       openPlan,
       formatDate,
       sharePendingGrocery,
@@ -7772,7 +7934,8 @@ createApp({
       photoAdd, triggerPhotoInput, onPhotoFiles, closePhotoAdd, savePhotoAdd,
       photoViewer, viewerPhoto, viewerIndex, openPhoto, stepPhoto, closePhotoViewer, savePhotoEdit, deletePhoto,
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
-      compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos
+      compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
+      photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory
     };
   },
   // Interfaccia già compilata (src/app-template.html → js/app-render.js, npm run build:template)

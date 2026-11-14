@@ -643,6 +643,56 @@ const petMotion = (id, t, k = 1) => {
   return P;
 };
 
+// Balletto nell'app (al tocco): le stesse mosse dei video, applicate ai pezzi dell'SVG di petSvg.
+// box = elemento che contiene l'SVG. Ritorna la funzione per fermarlo; onEnd quando finisce.
+const PET_POSE_KEYS = ['dx', 'dy', 'rot', 'legs', 'lean', 'usx', 'usy', 'aL', 'aR', 'lL', 'lR'];
+const petPlayDance = (box, id, seconds, onEnd) => {
+  const svg = box && box.querySelector('svg');
+  if (!svg) { if (onEnd) onEnd(); return () => {}; }
+  const q = (sel) => svg.querySelector(sel);
+  const all = q('.pet-all');
+  const parts = all ? { all, legs: q('.pet-legs'), up: q('.pet-up'), sh: q('.pet-sh'), aL: q('.pl-al'), aR: q('.pl-ar'), lL: q('.pl-ll'), lR: q('.pl-lr') } : null;
+  const leg = parseFloat(svg.style.getPropertyValue('--leg')) || 0;
+  const arm = q('.pl-flex') ? 0.25 : 1;   // braccia piegate (avocado palestrato): si muovono poco
+  const set = (el, tr) => { if (el) el.style.transform = tr; };
+  const start = performance.now();
+  let raf = 0, done = false;
+  const stop = () => {
+    if (done) return;
+    done = true;
+    cancelAnimationFrame(raf);
+    [svg, ...svg.querySelectorAll('.pet-all, .pet-legs, .pet-up, .pet-sh, .pl')].forEach(el => { el.style.transform = ''; el.style.opacity = ''; });
+    if (onEnd) onEnd();
+  };
+  const frame = (now) => {
+    const t = (now - start) / 1000;
+    if (t >= seconds) { stop(); return; }
+    const P = petMotion(id, PET_HELLO + t);
+    // Ultimi istanti: torna a riposo senza scatti
+    const out = Math.min(1, (seconds - t) / 0.4);
+    if (out < 1) { const rest = petPose(); PET_POSE_KEYS.forEach(key => { P[key] = rest[key] + (P[key] - rest[key]) * out; }); }
+    if (!parts) {
+      // Uovo: tutto insieme (viewBox 120 → percentuali)
+      svg.style.transformOrigin = '50% 90%';
+      set(svg, `translate(${P.dx / 1.2}%, ${P.dy / 1.2}%) rotate(${P.rot}rad)`);
+    } else {
+      const air = Math.max(0, Math.min(1, -P.dy / 40));
+      set(parts.sh, `translateX(${P.dx}px) scale(${1 - air * 0.45})`);
+      if (parts.sh) parts.sh.style.opacity = String(1 - air * 0.55);
+      set(parts.all, `translate(${P.dx}px, ${P.dy}px) rotate(${P.rot}rad) scaleX(${P.flip ? -1 : 1})`);
+      set(parts.legs, `scaleY(${P.legs})`);
+      set(parts.up, `translateY(${leg * (1 - P.legs)}px) rotate(${P.lean}deg) scale(${P.usx}, ${P.usy})`);
+      set(parts.aL, `rotate(${P.aL * arm}deg)`);
+      set(parts.aR, `rotate(${-P.aR * arm}deg)`);
+      set(parts.lL, `rotate(${P.lL}deg)`);
+      set(parts.lR, `rotate(${-P.lR}deg)`);
+    }
+    raf = requestAnimationFrame(frame);
+  };
+  raf = requestAnimationFrame(frame);
+  return stop;
+};
+
 // --- Braccine e gambette stilizzate ---
 // Il corpo viene rimpicciolito un po' e alzato (PET_LIFT) per fare spazio alle gambe.
 // Ogni arto è un gruppo con classe (pl-al, pl-ar, pl-ll, pl-lr) e perno sulla spalla/anca:
