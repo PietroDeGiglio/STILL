@@ -1582,11 +1582,55 @@ createApp({
         weekdays: [weekday],
         recurring: true,
         sheetId: firstSheet ? firstSheet.id : null,
-        dayName: '',
+        dayName: firstSheet ? suggestSheetDay(firstSheet, date) : '',
         note: '',
         error: ''
       };
     };
+
+    // Giorni della scheda (A, B, Gambe...) per il calendario: nome mostrato, anche se il giorno non ce l'ha
+    const sheetDayLabel = (day, i) => ((day && day.name) || '').trim() || ('Giorno ' + (i + 1));
+    const sheetDayByLabel = (sheet, label) => {
+      const days = (sheet && sheet.days) || [];
+      const i = days.findIndex((d, k) => sheetDayLabel(d, k) === label);
+      return i > -1 ? days[i] : (days.length === 1 ? days[0] : null);
+    };
+    // Quale giorno della scheda è stato fatto in una data (dal calendario o dagli esercizi registrati)
+    const sheetDayDoneOn = (sheet, dateKey) => {
+      const s = trainingSessions.value.find(x => x.kind === 'gym' && String(x.sheetId) === String(sheet.id) && x.date === dateKey && x.dayName);
+      if (s) return s.dayName;
+      const ids = new Set(workoutLogs.value.filter(l => l.date === dateKey).map(l => String(l.exerciseId)));
+      const days = sheet.days || [];
+      const i = days.findIndex(day => (day.exercises || []).some(e => ids.has(String(e.id))));
+      return i > -1 ? sheetDayLabel(days[i], i) : '';
+    };
+    // Proposta: il giorno dopo l'ultimo fatto prima di quella data (A → B → C → A...)
+    const suggestSheetDay = (sheet, dateKey) => {
+      const days = (sheet && sheet.days) || [];
+      if (!days.length) return '';
+      if (days.length === 1) return sheetDayLabel(days[0], 0);
+      const dates = new Set();
+      workoutLogs.value.forEach(l => { if (l.date && l.date < dateKey) dates.add(l.date); });
+      trainingSessions.value.forEach(x => { if (x.kind === 'gym' && String(x.sheetId) === String(sheet.id) && x.date < dateKey) dates.add(x.date); });
+      for (const d of [...dates].sort().reverse().slice(0, 15)) {
+        const name = sheetDayDoneOn(sheet, d);
+        const i = days.findIndex((day, k) => sheetDayLabel(day, k) === name);
+        if (i > -1) return sheetDayLabel(days[(i + 1) % days.length], (i + 1) % days.length);
+      }
+      return sheetDayLabel(days[0], 0);
+    };
+    const trainingFormSheetDays = computed(() => {
+      const sheet = workoutSheets.value.find(item => String(item.id) === String(trainingFormModal.value.sheetId));
+      return ((sheet && sheet.days) || []).map((d, i) => sheetDayLabel(d, i));
+    });
+    // Cambiando scheda nel modulo: proponi il giorno giusto di quella scheda
+    watch(() => trainingFormModal.value.isOpen && trainingFormModal.value.sheetId, () => {
+      const form = trainingFormModal.value;
+      if (!form.isOpen || form.kind !== 'gym') return;
+      if (trainingFormSheetDays.value.includes(form.dayName)) return;
+      const sheet = workoutSheets.value.find(item => String(item.id) === String(form.sheetId));
+      form.dayName = sheet ? suggestSheetDay(sheet, form.date || toISODate()) : '';
+    });
 
     const editTrainingSession = (session, fromDate = '') => {
       if (!session) return;
@@ -3794,6 +3838,22 @@ createApp({
         const item = libraryForName(log.exerciseName || log.exercise);
         const art = item && item.t !== 'cardio' ? exerciseArt(item) : null;
         if (art) events.push({ time: logTime(log.date, now), date: log.date, primary: art.primary, secondary: art.secondary, item, log });
+      });
+      // Palestra segnata "fatto" dal calendario senza carichi registrati: contano gli esercizi del giorno della scheda
+      trainingSessions.value.forEach(s => {
+        if (s.kind !== 'gym' || !s.statusByDate) return;
+        Object.entries(s.statusByDate).forEach(([key, status]) => {
+          if (status !== 'done' || key < fromKey) return;
+          if (workoutLogs.value.some(l => l.date === key)) return;   // già contati dai carichi registrati
+          const sheet = workoutSheets.value.find(x => String(x.id) === String(s.sheetId));
+          const day = sheet && sheetDayByLabel(sheet, s.dayName);
+          if (!day) return;
+          (day.exercises || []).forEach(ex => {
+            const item = libraryForName(ex.name);
+            const art = item && item.t !== 'cardio' && ex.type !== 'cardio' ? exerciseArt(item) : null;
+            if (art) events.push({ time: logTime(key, now), date: key, primary: art.primary, secondary: art.secondary, item, log: { date: key, exerciseId: ex.id, exerciseName: ex.name, sheetId: sheet.id } });
+          });
+        });
       });
       trainingSessions.value.forEach(s => {
         const muscles = s.kind === 'sport' && SPORT_MUSCLES[s.sport];
@@ -7896,7 +7956,7 @@ createApp({
       openTrainingDay,
       closeTrainingDay,
       trainingDaySessions,
-      trainingFormModal,
+      trainingFormModal, trainingFormSheetDays,
       openTrainingForm,
       sportStatus,
       sportCanCheck,

@@ -5065,6 +5065,14 @@
               Nessuna scheda disponibile. Creane una nella sezione Schede per registrare la palestra.
             </div>
           </div>
+          <div v-if="trainingFormSheetDays.length > 1">
+            <label class="block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1">Giorno della scheda</label>
+            <div class="flex flex-wrap gap-1.5">
+              <button v-for="d in trainingFormSheetDays" :key="'tfd-' + d" type="button" @click="trainingFormModal.dayName = d"
+                      class="px-3 py-2 rounded-xl text-xs font-bold border transition-colors"
+                      :class="trainingFormModal.dayName === d ? 'bg-arancione text-white border-arancione' : 'bg-gray-50 text-gray-500 border-gray-200'">{{ d }}</button>
+            </div>
+          </div>
           <p class="text-[10px] font-medium text-gray-400 leading-relaxed">La palestra è variabile: aggiungi la singola sessione ogni volta, senza giorni fissi.</p>
         </template>
 
