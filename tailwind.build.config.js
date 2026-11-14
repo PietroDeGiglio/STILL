@@ -1,7 +1,7 @@
 // Tailwind: genera css/tailwind.css con solo le classi usate dall'app (npm run build:css).
-// Va rigenerato ogni volta che si usano classi nuove in index.html o nei file js.
+// Va rigenerato ogni volta che si usano classi nuove in src/app-template.html, index.html o nei file js.
 module.exports = {
-  content: ['./index.html', './js/**/*.js', '!./js/vendor/**'],
+  content: ['./index.html', './src/**/*.html', './js/**/*.js', '!./js/vendor/**', '!./js/app-render.js'],
   theme: {
     extend: {
       colors: {

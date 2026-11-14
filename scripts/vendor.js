@@ -13,7 +13,8 @@ const copy = (from, to) => {
 };
 
 console.log('Librerie copiate:');
-copy('vue/dist/vue.global.prod.js', 'js/vendor/vue.global.prod.js');
+// Vue senza compilatore: l'interfaccia arriva già compilata da scripts/build-template.js
+copy('vue/dist/vue.runtime.global.prod.js', 'js/vendor/vue.runtime.global.prod.js');
 copy('pdfjs-dist/build/pdf.min.js', 'js/vendor/pdfjs/pdf.min.js');
 copy('pdfjs-dist/build/pdf.worker.min.js', 'js/vendor/pdfjs/pdf.worker.min.js');
 ['latin', 'latin-ext'].forEach(set => ['normal', 'italic'].forEach(style =>

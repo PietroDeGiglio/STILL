@@ -1,4 +1,4 @@
-// STILL: logica dell'app (Vue 3). Il markup è in index.html.
+// STILL: logica dell'app (Vue 3). L'interfaccia è in src/app-template.html (compilata in js/app-render.js).
 // Vue Application Setup
 const { createApp, ref, shallowRef, onMounted, watch, nextTick, computed } = Vue;
 
@@ -7476,7 +7476,9 @@ createApp({
       allGroceryChecked,
       shareGroceryReady
     };
-  }
+  },
+  // Interfaccia già compilata (src/app-template.html → js/app-render.js, npm run build:template)
+  render: STILL_RENDER
 }).mount('#app');
 
 // App installabile e uso offline: il service worker funziona solo da un indirizzo web (non da file e non nell'APK)

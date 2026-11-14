@@ -6,7 +6,8 @@
     "build:css": "tailwindcss -c tailwind.build.config.js -i css/tailwind.src.css -o css/tailwind.css --minify",
     "watch:css": "tailwindcss -c tailwind.build.config.js -i css/tailwind.src.css -o css/tailwind.css --watch",
     "vendor": "node scripts/vendor.js",
-    "build": "npm run vendor && npm run build:css",
+    "build:template": "node scripts/build-template.js",
+    "build": "npm run vendor && npm run build:template && npm run build:css",
     "test:import": "node scripts/test-workout-import.js"
   },
   "devDependencies": {
