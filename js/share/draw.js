@@ -999,3 +999,88 @@ const drawShareCard = (canvas, data, opts, time = Infinity) => {
   ctx.shadowColor = 'transparent';
 };
 
+
+// ---------------------------------------------------------------
+// PRIMA E DOPO: due foto dei progressi affiancate, per le storie (1080x1920)
+// data: { before: { img, date, weight }, after: { img, date, weight }, days, change, pose }
+// img = immagine già caricata (HTMLImageElement o ImageBitmap); date già in parole ("14 mar 2026")
+// ---------------------------------------------------------------
+const drawPhotoCompare = (canvas, data) => {
+  const W = 1080, H = 1920, M = 72;
+  canvas.width = W; canvas.height = H;
+  const ctx = canvas.getContext('2d');
+  const th = SHARE_THEMES.night;
+  drawShareBackground(ctx, W, H, 'night', Infinity);
+  ctx.textBaseline = 'alphabetic';
+
+  // Intestazione: logo e nome
+  setFont(ctx, 900, 44);
+  const nameW = [...'STILL'].reduce((w, ch) => w + ctx.measureText(ch).width, 0) + 14 * 4;
+  const headFill = brandGradient(ctx, M - 6, 0, M + 104 + nameW, 0, 0);
+  drawLogo(ctx, M - 6, 80, 92, headFill);
+  ctx.fillStyle = headFill;
+  spacedText(ctx, 'STILL', M + 104, 142, 14);
+
+  // Titolo
+  setFont(ctx, 800, 30); ctx.fillStyle = th.sub;
+  spacedText(ctx, 'IL MIO PERCORSO', M, 290, 6);
+  setFont(ctx, 900, 96); ctx.fillStyle = th.text;
+  ctx.fillText('Prima', M, 400);
+  const pw = ctx.measureText('Prima ').width;
+  ctx.fillStyle = brandGradient(ctx, M + pw, 0, M + pw + 360, 0, 0);
+  ctx.fillText('e dopo', M + pw, 400);
+
+  // Le due foto, ritagliate per riempire il riquadro (centrate un po' in alto: di solito c'è la testa)
+  const gap = 28, top = 470, boxW = (W - 2 * M - gap) / 2, boxH = 980;
+  const drawSide = (side, x, label, highlight) => {
+    ctx.save();
+    roundRect(ctx, x, top, boxW, boxH, 36);
+    ctx.clip();
+    ctx.fillStyle = '#1b1b1f'; ctx.fillRect(x, top, boxW, boxH);
+    if (side.img) {
+      const iw = side.img.naturalWidth || side.img.width, ih = side.img.naturalHeight || side.img.height;
+      const scale = Math.max(boxW / iw, boxH / ih);
+      const dw = iw * scale, dh = ih * scale;
+      ctx.drawImage(side.img, x + (boxW - dw) / 2, top + (boxH - dh) * 0.3, dw, dh);
+    }
+    const shade = ctx.createLinearGradient(0, top + boxH * 0.62, 0, top + boxH);
+    shade.addColorStop(0, 'rgba(0,0,0,0)'); shade.addColorStop(1, 'rgba(0,0,0,0.78)');
+    ctx.fillStyle = shade; ctx.fillRect(x, top, boxW, boxH);
+    ctx.restore();
+    if (highlight) {
+      ctx.save(); ctx.lineWidth = 6; ctx.strokeStyle = brandGradient(ctx, x, top, x + boxW, top + boxH, 0);
+      roundRect(ctx, x + 3, top + 3, boxW - 6, boxH - 6, 34); ctx.stroke(); ctx.restore();
+    }
+    // Etichetta in alto
+    setFont(ctx, 900, 26);
+    const lw = [...label].reduce((w, ch) => w + ctx.measureText(ch).width, 0) + 4 * (label.length - 1) + 40;
+    ctx.fillStyle = highlight ? brandGradient(ctx, x + 24, 0, x + 24 + lw, 0, 0) : 'rgba(0,0,0,0.55)';
+    roundRect(ctx, x + 24, top + 24, lw, 52, 26); ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    spacedText(ctx, label, x + 44, top + 60, 4);
+    // Data e peso in basso
+    setFont(ctx, 800, 34); ctx.fillStyle = '#FFFFFF';
+    ctx.fillText(ellipsize(ctx, side.date || '', boxW - 48), x + 24, top + boxH - (side.weight ? 74 : 32));
+    if (side.weight) {
+      setFont(ctx, 700, 28); ctx.fillStyle = 'rgba(255,255,255,0.75)';
+      ctx.fillText(side.weight, x + 24, top + boxH - 32);
+    }
+  };
+  drawSide(data.before, M, 'PRIMA', false);
+  drawSide(data.after, M + boxW + gap, 'DOPO', true);
+
+  // Quanto tempo e quanto è cambiato
+  const statY = top + boxH + 130;
+  setFont(ctx, 900, 84);
+  ctx.textAlign = 'center';
+  const main = data.change || (data.days ? data.days + (data.days === 1 ? ' giorno' : ' giorni') : '');
+  ctx.fillStyle = brandGradient(ctx, W * 0.2, 0, W * 0.8, 0, 0);
+  ctx.fillText(main, W / 2, statY);
+  if (data.change && data.days) {
+    setFont(ctx, 700, 34); ctx.fillStyle = th.sub;
+    ctx.fillText('in ' + data.days + (data.days === 1 ? ' giorno' : ' giorni'), W / 2, statY + 58);
+  }
+  ctx.textAlign = 'left';
+
+  drawShareFooter(ctx, W, M, 1840, true, th, 0);
+};

@@ -5031,7 +5031,8 @@ createApp({
         'Profilo, schede, piani, pasti, misurazioni e allenamenti verranno cancellati da questo dispositivo. Se vuoi conservarli, esporta prima un backup.',
         () => {
           [...STORAGE_KEYS, ACTIVE_WORKOUT_KEY].forEach(key => storage.remove(key));
-          window.location.reload();
+          // Anche le foto dei progressi (IndexedDB)
+          photoStore.clear().catch(() => {}).finally(() => window.location.reload());
         }
       );
     };
@@ -5692,9 +5693,300 @@ createApp({
     };
 
     // ---------------------------------------------------------------
+    // FOTO DEI PROGRESSI (js/utils/photos.js): galleria, confronto prima/dopo, storia da condividere.
+    // Le foto restano solo su questo telefono (IndexedDB). Qui si tengono solo i dati leggeri e le miniature.
+    // ---------------------------------------------------------------
+    const photos = shallowRef([]);            // { id, date, pose, note, createdAt, w, h, thumbUrl }
+    const photosReady = ref(false);
+    const photoUnavailable = ref(false);      // browser senza IndexedDB (es. alcune finestre private)
+    const photoInput = ref(null);
+    const photoThumbUrls = new Map();
+    const loadPhotos = async () => {
+      try {
+        const list = await photoStore.list();
+        const alive = new Set(list.map(p => p.id));
+        photoThumbUrls.forEach((url, id) => { if (!alive.has(id)) { URL.revokeObjectURL(url); photoThumbUrls.delete(id); } });
+        photos.value = list.map(({ thumb, ...p }) => {
+          if (!photoThumbUrls.has(p.id) && thumb) photoThumbUrls.set(p.id, URL.createObjectURL(thumb));
+          return { ...p, thumbUrl: photoThumbUrls.get(p.id) || '' };
+        });
+      } catch (e) {
+        photoUnavailable.value = true;
+      }
+      photosReady.value = true;
+    };
+    // Peso del giorno della foto (o la misurazione più vicina entro 4 giorni)
+    const photoWeight = (date) => {
+      let best = null, bestGap = 5;
+      weightEntries.value.forEach(m => {
+        const gap = Math.abs(Math.round((new Date(m.date + 'T00:00:00') - new Date(date + 'T00:00:00')) / 86400000));
+        if (gap < bestGap) { best = m; bestGap = gap; }
+      });
+      return best ? Number(best.weight) : null;
+    };
+    const MONTHS_LONG = ['gennaio', 'febbraio', 'marzo', 'aprile', 'maggio', 'giugno', 'luglio', 'agosto', 'settembre', 'ottobre', 'novembre', 'dicembre'];
+    const MONTHS_SHORT = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+    const photoDateLabel = (date) => {
+      const d = new Date(date + 'T00:00:00');
+      return isNaN(d) ? '' : d.getDate() + ' ' + MONTHS_SHORT[d.getMonth()] + ' ' + d.getFullYear();
+    };
+    const poseLabel = (pose) => (PHOTO_POSES.find(p => p.id === pose) || {}).label || '';
+
+    // Galleria: filtro per posa e foto raggruppate per mese
+    const gallery = ref({ isOpen: false, pose: 'tutte', selecting: false, selected: [] });
+    const galleryPhotos = computed(() => (gallery.value.pose === 'tutte' ? photos.value : photos.value.filter(p => p.pose === gallery.value.pose)));
+    const galleryMonths = computed(() => {
+      const groups = [];
+      galleryPhotos.value.forEach(p => {
+        const key = (p.date || '').slice(0, 7);
+        let g = groups[groups.length - 1];
+        if (!g || g.key !== key) {
+          const [y, m] = key.split('-');
+          g = { key, label: (MONTHS_LONG[Number(m) - 1] || '') + ' ' + y, items: [] };
+          groups.push(g);
+        }
+        g.items.push(p);
+      });
+      return groups;
+    });
+    const galleryPoses = computed(() => {
+      const used = new Set(photos.value.map(p => p.pose));
+      return PHOTO_POSES.filter(p => used.has(p.id));
+    });
+    // Ultime foto per la card in Progressi, e da quanto non ne fai una
+    const recentPhotos = computed(() => photos.value.slice(0, 4));
+    const daysSinceLastPhoto = computed(() => (photos.value.length ? daysBetween(photos.value[0].date, toISODate()) : null));
+    const openGallery = async (pose = 'tutte') => {
+      gallery.value = { isOpen: true, pose, selecting: false, selected: [] };
+      if (!photosReady.value) await loadPhotos();
+    };
+    const closeGallery = () => { gallery.value.isOpen = false; };
+
+    // Aggiunta: si scelgono una o più foto (o si scatta), poi si conferma posa e data
+    const photoAdd = ref({ isOpen: false, files: [], previews: [], pose: 'fronte', date: '', busy: false, done: 0, error: '' });
+    const triggerPhotoInput = () => {
+      if (photoUnavailable.value) { showToastMessage('Questo browser non permette di salvare foto (forse sei in una finestra privata). Apri STILL normalmente o dall\'app installata.'); return; }
+      if (photoInput.value) { photoInput.value.value = ''; photoInput.value.click(); }
+    };
+    const onPhotoFiles = (event) => {
+      const files = [...(event.target.files || [])].filter(f => /^image\//.test(f.type) || /\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
+      event.target.value = '';
+      if (!files.length) return;
+      if (files.length > 40) { showToastMessage('Puoi aggiungere fino a 40 foto alla volta.'); return; }
+      const one = files.length === 1;
+      photoAdd.value.previews.forEach(u => URL.revokeObjectURL(u));
+      photoAdd.value = {
+        isOpen: true, files, previews: files.slice(0, 6).map(f => URL.createObjectURL(f)),
+        pose: (one && photoPoseFromFile(files[0])) || 'fronte',
+        // Una foto: data modificabile (di solito oggi). Più foto: ognuna con la sua data (dal nome o dal file)
+        date: one ? (photoDateFromFile(files[0]) || toISODate()) : '',
+        busy: false, done: 0, error: ''
+      };
+    };
+    const closePhotoAdd = () => {
+      if (photoAdd.value.busy) return;
+      photoAdd.value.previews.forEach(u => URL.revokeObjectURL(u));
+      photoAdd.value = { isOpen: false, files: [], previews: [], pose: 'fronte', date: '', busy: false, done: 0, error: '' };
+    };
+    const savePhotoAdd = async () => {
+      const st = photoAdd.value;
+      if (st.busy) return;
+      st.busy = true; st.done = 0; st.error = '';
+      const today = toISODate();
+      let saved = 0, failed = 0;
+      for (const file of st.files) {
+        try {
+          const { blob, thumb, w, h } = await compressPhoto(file);
+          const date = st.files.length === 1 ? (st.date || today) : (photoDateFromFile(file) || today);
+          const pose = st.files.length === 1 ? st.pose : (photoPoseFromFile(file) || st.pose);
+          await photoStore.put({ id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7), date: date > today ? today : date, pose, note: '', createdAt: Date.now(), w, h, blob, thumb });
+          saved++;
+        } catch (e) {
+          console.error(e);
+          failed++;
+          if (e && e.name === 'QuotaExceededError') break;
+        }
+        st.done++;
+      }
+      st.busy = false;
+      await loadPhotos();
+      if (!saved) {
+        st.error = 'Non sono riuscito a salvare le foto. Se sono in formato HEIC, sceglile dalla Galleria/Foto (il telefono le converte) oppure fai uno screenshot.';
+        return;
+      }
+      requestPersistentStorage();
+      closePhotoAdd();
+      // Si vedono subito nella galleria: il messaggio serve solo se qualcuna non è entrata
+      if (failed) showToastMessage(saved + ' foto salvate, ' + failed + ' non leggibili (forse HEIC: sceglile dalla Galleria/Foto).');
+      if (!gallery.value.isOpen && photos.value.length >= 2) openGallery();
+    };
+
+    // Visualizzatore: foto grande, scorre avanti e indietro nell'elenco filtrato
+    const photoViewer = ref({ isOpen: false, id: null, url: '', editing: false, date: '', pose: '' });
+    const viewerPhoto = computed(() => photos.value.find(p => p.id === photoViewer.value.id) || null);
+    const viewerIndex = computed(() => galleryPhotos.value.findIndex(p => p.id === photoViewer.value.id));
+    const fullUrlCache = new Map();
+    const photoFullUrl = async (id) => {
+      if (fullUrlCache.has(id)) return fullUrlCache.get(id);
+      const rec = await photoStore.get(id);
+      if (!rec || !rec.blob) return '';
+      // Tiene in memoria solo le ultime foto grandi aperte
+      if (fullUrlCache.size >= 6) { const [k, u] = fullUrlCache.entries().next().value; URL.revokeObjectURL(u); fullUrlCache.delete(k); }
+      const url = URL.createObjectURL(rec.blob);
+      fullUrlCache.set(id, url);
+      return url;
+    };
+    const openPhoto = async (photo) => {
+      if (gallery.value.selecting) { togglePhotoSelect(photo); return; }
+      photoViewer.value = { isOpen: true, id: photo.id, url: photo.thumbUrl, editing: false, date: photo.date, pose: photo.pose };
+      const url = await photoFullUrl(photo.id);
+      if (photoViewer.value.id === photo.id && url) photoViewer.value.url = url;
+    };
+    const stepPhoto = (dir) => {
+      const list = galleryPhotos.value;
+      const next = list[viewerIndex.value + dir];
+      if (next) openPhoto(next);
+    };
+    const closePhotoViewer = () => { photoViewer.value.isOpen = false; };
+    const savePhotoEdit = async () => {
+      const v = photoViewer.value;
+      if (!v.date) return;
+      await photoStore.update(v.id, { date: v.date > toISODate() ? toISODate() : v.date, pose: v.pose });
+      v.editing = false;
+      await loadPhotos();
+    };
+    const deletePhoto = (photo) => {
+      showConfirm('Eliminare la foto?', 'La foto verrà cancellata da questo telefono. Non si può annullare.', async () => {
+        await photoStore.remove(photo.id);
+        if (fullUrlCache.has(photo.id)) { URL.revokeObjectURL(fullUrlCache.get(photo.id)); fullUrlCache.delete(photo.id); }
+        photoViewer.value.isOpen = false;
+        await loadPhotos();
+      });
+    };
+
+    // Confronto: due foto scelte (o la prima e l'ultima della stessa posa), con cursore da trascinare
+    const photoCompare = ref({ isOpen: false, beforeId: null, afterId: null, beforeUrl: '', afterUrl: '', split: 50, mode: 'slider', busy: false });
+    const togglePhotoSelect = (photo) => {
+      const sel = gallery.value.selected;
+      const i = sel.indexOf(photo.id);
+      if (i > -1) sel.splice(i, 1);
+      else { if (sel.length >= 2) sel.shift(); sel.push(photo.id); }
+    };
+    const startCompareSelect = () => { gallery.value.selecting = true; gallery.value.selected = []; };
+    const cancelCompareSelect = () => { gallery.value.selecting = false; gallery.value.selected = []; };
+    const openCompare = async (idA, idB) => {
+      const a = photos.value.find(p => p.id === idA), b = photos.value.find(p => p.id === idB);
+      if (!a || !b) return;
+      // La più vecchia è sempre "prima"
+      const [before, after] = (a.date < b.date || (a.date === b.date && a.createdAt < b.createdAt)) ? [a, b] : [b, a];
+      photoCompare.value = { isOpen: true, beforeId: before.id, afterId: after.id, beforeUrl: before.thumbUrl, afterUrl: after.thumbUrl, split: 50, mode: 'slider', busy: false };
+      gallery.value.selecting = false; gallery.value.selected = [];
+      const [bu, au] = await Promise.all([photoFullUrl(before.id), photoFullUrl(after.id)]);
+      if (photoCompare.value.beforeId === before.id) { photoCompare.value.beforeUrl = bu || before.thumbUrl; photoCompare.value.afterUrl = au || after.thumbUrl; }
+    };
+    const confirmCompareSelect = () => {
+      const [a, b] = gallery.value.selected;
+      if (a && b) openCompare(a, b);
+    };
+    // Confronto veloce: la prima e l'ultima foto della posa più fotografata
+    const quickCompare = computed(() => {
+      const byPose = {};
+      photos.value.forEach(p => { (byPose[p.pose] = byPose[p.pose] || []).push(p); });
+      const best = Object.values(byPose).filter(l => l.length >= 2).sort((x, y) => y.length - x.length)[0];
+      if (!best) return photos.value.length >= 2 ? { before: photos.value[photos.value.length - 1], after: photos.value[0] } : null;
+      return { before: best[best.length - 1], after: best[0] };
+    });
+    const openQuickCompare = () => { const q = quickCompare.value; if (q) openCompare(q.before.id, q.after.id); };
+    const compareBefore = computed(() => photos.value.find(p => p.id === photoCompare.value.beforeId) || null);
+    const compareAfter = computed(() => photos.value.find(p => p.id === photoCompare.value.afterId) || null);
+    const compareStats = computed(() => {
+      const b = compareBefore.value, a = compareAfter.value;
+      if (!b || !a) return null;
+      const days = daysBetween(b.date, a.date);
+      const wb = photoWeight(b.date), wa = photoWeight(a.date);
+      const diff = wb !== null && wa !== null ? Math.round((wa - wb) * 10) / 10 : null;
+      return {
+        days, wb, wa, diff,
+        diffText: diff === null ? '' : (diff > 0 ? '+' : diff < 0 ? '−' : '') + formatNumber(Math.abs(diff)) + ' kg'
+      };
+    });
+    // Il cursore si trascina con il dito su tutta la foto
+    const dragCompare = (event) => {
+      const el = event.currentTarget;
+      const rect = el.getBoundingClientRect();
+      const x = (event.touches ? event.touches[0].clientX : event.clientX) - rect.left;
+      photoCompare.value.split = Math.max(0, Math.min(100, (x / rect.width) * 100));
+    };
+    const closeCompare = () => { photoCompare.value.isOpen = false; };
+
+    // Storia "Prima e dopo" (js/share/draw.js → drawPhotoCompare)
+    const loadForCanvas = (url) => new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => resolve(img);
+      img.onerror = reject;
+      img.src = url;
+    });
+    const shareCompare = async () => {
+      const st = photoCompare.value;
+      const b = compareBefore.value, a = compareAfter.value, stats = compareStats.value;
+      if (st.busy || !b || !a) return;
+      st.busy = true;
+      let file = null;
+      try { if (navigator.clipboard) navigator.clipboard.writeText(APP_URL).catch(() => {}); } catch (e) { /* ignora */ }
+      try {
+        const [ib, ia] = await Promise.all([loadForCanvas(await photoFullUrl(b.id)), loadForCanvas(await photoFullUrl(a.id))]);
+        if (document.fonts && document.fonts.ready) await document.fonts.ready;
+        const canvas = document.createElement('canvas');
+        drawPhotoCompare(canvas, {
+          before: { img: ib, date: photoDateLabel(b.date), weight: stats && stats.wb !== null ? formatNumber(stats.wb) + ' kg' : '' },
+          after: { img: ia, date: photoDateLabel(a.date), weight: stats && stats.wa !== null ? formatNumber(stats.wa) + ' kg' : '' },
+          days: stats ? stats.days : 0,
+          change: stats && stats.diff ? stats.diffText : ''
+        });
+        const blobFile = await new Promise((res, rej) => canvas.toBlob(x => (x ? res(x) : rej(new Error('blob'))), 'image/jpeg', 0.92));
+        file = new File([blobFile], 'still-prima-e-dopo-' + toISODate() + '.jpg', { type: 'image/jpeg' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          await navigator.share({ files: [file], text: 'Il mio percorso su STILL 💪 #STILL #primaedopo ' + APP_URL });
+        } else {
+          downloadBlob(file, file.name);
+          showToastMessage('Immagine salvata: caricala nella tua storia.');
+        }
+        countShare();
+      } catch (e) {
+        if (e && e.name === 'AbortError') { /* annullato */ }
+        else if (file) downloadBlob(file, file.name);
+        else showToastMessage("Non sono riuscito a creare l'immagine.");
+      }
+      st.busy = false;
+    };
+
+    // Salva tutte le foto (per tenerle al sicuro o passarle a un altro telefono): il nome ha data e posa
+    const exportPhotos = async () => {
+      if (!photos.value.length) return;
+      const files = [];
+      const seen = {};
+      for (const p of [...photos.value].reverse()) {
+        const rec = await photoStore.get(p.id);
+        if (!rec || !rec.blob) continue;
+        const base = photoFileName(p);
+        seen[base] = (seen[base] || 0) + 1;
+        files.push(new File([rec.blob], photoFileName(p, seen[base] - 1), { type: 'image/jpeg' }));
+      }
+      try {
+        if (navigator.canShare && navigator.canShare({ files })) { await navigator.share({ files, title: 'Foto dei progressi STILL' }); return; }
+      } catch (e) { if (e && e.name === 'AbortError') return; }
+      files.forEach((f, i) => setTimeout(() => downloadBlob(f, f.name), i * 350));
+      showToastMessage('Sto salvando ' + files.length + ' foto nei download. Per rimetterle in STILL basta aggiungerle di nuovo: data e posa si leggono dal nome.');
+    };
+    // Le foto si leggono solo quando servono (scheda Progressi), così l'avvio resta veloce
+    watch(activeTab, (tab) => { if (tab === 'progress' && !photosReady.value) loadPhotos(); }, { immediate: true });
+
+    // ---------------------------------------------------------------
     // BACKUP: esporta / importa tutti i dati in un file JSON
     // ---------------------------------------------------------------
     const backupModal = ref({ isOpen: false, error: '', sizeKB: 0 });
+    // Nel backup serve sapere se ci sono foto da salvare a parte
+    watch(() => backupModal.value.isOpen, (open) => { if (open && !photosReady.value) loadPhotos(); });
     const backupFileInput = ref(null);
     const openBackupModal = () => {
       let sizeKB = 0;
@@ -7474,7 +7766,13 @@ createApp({
       openGroceryModal,
       checklistItems,
       allGroceryChecked,
-      shareGroceryReady
+      shareGroceryReady,
+      photos, photosReady, photoUnavailable, photoInput, PHOTO_POSES, poseLabel, photoDateLabel, photoWeight,
+      gallery, galleryPhotos, galleryMonths, galleryPoses, recentPhotos, daysSinceLastPhoto, openGallery, closeGallery,
+      photoAdd, triggerPhotoInput, onPhotoFiles, closePhotoAdd, savePhotoAdd,
+      photoViewer, viewerPhoto, viewerIndex, openPhoto, stepPhoto, closePhotoViewer, savePhotoEdit, deletePhoto,
+      photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
+      compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos
     };
   },
   // Interfaccia già compilata (src/app-template.html → js/app-render.js, npm run build:template)

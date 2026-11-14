@@ -1228,6 +1228,42 @@
         </div>
       </div>
 
+      <!-- FOTO DEI PROGRESSI (js/utils/photos.js): restano solo sul telefono -->
+      <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft space-y-4">
+        <div class="flex justify-between items-start gap-3">
+          <div>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">FOTO DEI PROGRESSI</span>
+            <p v-if="photos.length" class="text-sm font-bold text-antracite mt-1">{{ photos.length }} foto · dal {{ photoDateLabel(photos[photos.length - 1].date) }}</p>
+            <p v-else class="text-sm font-bold text-antracite mt-1">Guarda il tuo corpo cambiare</p>
+          </div>
+          <button v-if="photos.length" @click="openGallery()" class="text-[10px] font-bold text-salvia flex items-center gap-0.5 flex-shrink-0 pt-0.5">
+            Galleria
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+          </button>
+        </div>
+
+        <div v-if="photos.length" class="grid grid-cols-4 gap-2">
+          <button v-for="p in recentPhotos" :key="'rp-' + p.id" @click="openGallery(); openPhoto(p)" class="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 active:scale-95 transition-all">
+            <img :src="p.thumbUrl" alt="" class="w-full h-full object-cover" loading="lazy">
+            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent text-white text-[9px] font-bold px-1.5 pb-1 pt-3 text-left">{{ photoDateLabel(p.date).replace(/ \d{4}$/, '') }}</span>
+          </button>
+        </div>
+        <p v-else class="text-xs text-gray-500 font-medium leading-relaxed">Una foto ogni 2-4 settimane, stessa luce e stessa posa: tra qualche mese vedrai la differenza meglio di qualsiasi bilancia. Le foto restano solo su questo telefono 🔒</p>
+
+        <p v-if="daysSinceLastPhoto !== null && daysSinceLastPhoto >= 21" class="text-[11px] font-bold text-arancione">Ultima foto {{ daysSinceLastPhoto }} giorni fa: è il momento di scattarne una nuova 📸</p>
+
+        <div class="grid gap-2" :class="quickCompare ? 'grid-cols-2' : 'grid-cols-1'">
+          <button @click="triggerPhotoInput" class="bg-salvia text-white font-bold text-xs py-3 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.66-.9l.82-1.2A2 2 0 0110.07 4h3.86a2 2 0 011.66.9l.82 1.2a2 2 0 001.66.9H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            Aggiungi foto
+          </button>
+          <button v-if="quickCompare" @click="openQuickCompare" class="cangiante-btn text-white font-bold text-xs py-3 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16M5 7h4v10H5zM15 7h4v10h-4z"/></svg>
+            Prima e dopo
+          </button>
+        </div>
+      </div>
+
       <!-- EMPTY STATE -->
       <div v-if="measurements.length === 0 && workoutGroups.length === 0 && trainingTimeSummary.total === 0" class="bg-white rounded-3xl p-8 border border-gray-100 shadow-soft text-center flex flex-col items-center space-y-5">
         <div class="w-16 h-16 rounded-full bg-salvia/10 border border-salvia/20 flex items-center justify-center text-salvia">
@@ -2454,6 +2490,7 @@
               <span>Memoria protetta</span>
               <span class="font-bold" :class="storagePersisted ? 'text-salvia' : 'text-arancione'">{{ storagePersisted ? 'Sì' : 'No' }}</span>
             </div>
+            <div v-if="photos.length" class="flex justify-between gap-2"><span>Foto dei progressi</span><span class="font-bold text-antracite">{{ photos.length }}</span></div>
             <p v-if="storagePersisted === false" class="text-[10px] text-gray-400 leading-snug pt-1">Il browser potrebbe cancellare i dati se non apri STILL per un po'. Installa l'app sulla schermata Home e fai backup spesso.</p>
           </div>
           <button @click="exportBackup" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2">
@@ -2464,6 +2501,13 @@
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M17 9l-5-5m0 0L7 9m5-5v12"/></svg>
             Importa backup
           </button>
+          <template v-if="photos.length">
+            <button @click="exportPhotos" class="w-full bg-gray-100 text-antracite font-bold py-3.5 rounded-2xl hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.6-4.6a2 2 0 012.8 0L16 16m-2-2l1.6-1.6a2 2 0 012.8 0L20 14M14 8h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+              Salva le foto
+            </button>
+            <p class="text-[10px] text-gray-400 leading-snug px-1">Le foto non sono nel file di backup (sarebbe enorme): salvale a parte nella galleria del telefono.</p>
+          </template>
           <input ref="backupFileInput" type="file" accept="application/json,.json" class="hidden" @change="handleBackupFile">
           <p v-if="backupModal.error" class="text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{{ backupModal.error }}</p>
         </div>
@@ -2896,6 +2940,198 @@
           Condividi cosa manca
         </button>
       </div>
+    </div>
+  </div>
+
+  <!-- ==================== FOTO DEI PROGRESSI ==================== -->
+  <!-- Scelta delle foto: sul telefono propone anche la fotocamera -->
+  <input ref="photoInput" type="file" accept="image/*" multiple class="hidden" @change="onPhotoFiles">
+
+  <!-- Galleria -->
+  <div v-if="gallery.isOpen" class="fixed inset-0 z-50 bg-bianco flex flex-col animate-fadeIn sm:max-w-[420px] sm:mx-auto">
+    <div class="px-5 pt-5 pb-3 flex items-center justify-between gap-3 border-b border-gray-200 bg-bianco">
+      <button @click="closeGallery" class="p-1 -ml-1 text-gray-500 hover:text-antracite" aria-label="Chiudi">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <div class="flex-1 min-w-0">
+        <h3 class="text-lg font-bold text-antracite leading-tight">Le tue foto</h3>
+        <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Solo su questo telefono 🔒</p>
+      </div>
+      <button v-if="photos.length >= 2 && !gallery.selecting" @click="startCompareSelect" class="text-xs font-bold text-viola bg-viola/10 px-3 py-2 rounded-xl active:scale-95 transition-all">Confronta</button>
+      <button v-if="gallery.selecting" @click="cancelCompareSelect" class="text-xs font-bold text-gray-500 px-2 py-2">Annulla</button>
+    </div>
+
+    <div v-if="galleryPoses.length > 1" class="px-5 py-3 flex gap-2 overflow-x-auto hide-scrollbar">
+      <button @click="gallery.pose = 'tutte'" class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex-shrink-0"
+              :class="gallery.pose === 'tutte' ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">Tutte</button>
+      <button v-for="pose in galleryPoses" :key="'gp-' + pose.id" @click="gallery.pose = pose.id" class="px-3 py-1.5 rounded-full text-xs font-bold border transition-all flex-shrink-0"
+              :class="gallery.pose === pose.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ pose.label }}</button>
+    </div>
+
+    <div v-if="gallery.selecting" class="mx-5 mb-2 bg-viola/10 border border-viola/20 rounded-2xl px-4 py-2.5 text-xs font-bold text-viola">
+      Scegli due foto da confrontare ({{ gallery.selected.length }}/2)
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-5 pb-28 space-y-5 hide-scrollbar">
+      <div v-if="!photosReady" class="py-16 flex justify-center"><div class="w-7 h-7 border-4 border-salvia border-t-transparent rounded-full animate-spin"></div></div>
+      <div v-else-if="!galleryPhotos.length" class="py-16 text-center text-sm font-medium text-gray-500">Nessuna foto qui. Aggiungine una!</div>
+      <div v-for="month in galleryMonths" :key="'gm-' + month.key" class="space-y-2">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest pt-1">{{ month.label }}</div>
+        <div class="grid grid-cols-3 gap-2">
+          <button v-for="p in month.items" :key="'gi-' + p.id" @click="openPhoto(p)"
+                  class="relative aspect-[3/4] rounded-xl overflow-hidden bg-gray-100 active:scale-95 transition-all"
+                  :class="gallery.selected.includes(p.id) ? 'ring-4 ring-viola' : ''">
+            <img :src="p.thumbUrl" alt="" class="w-full h-full object-cover" loading="lazy">
+            <span class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent text-white px-2 pb-1.5 pt-5 text-left leading-tight">
+              <span class="block text-[10px] font-extrabold">{{ photoDateLabel(p.date).replace(/ \d{4}$/, '') }}</span>
+              <span class="block text-[9px] font-bold text-white/75">{{ poseLabel(p.pose) }}<template v-if="photoWeight(p.date) !== null"> · {{ formatNumber(photoWeight(p.date)) }} kg</template></span>
+            </span>
+            <span v-if="gallery.selecting" class="absolute top-1.5 right-1.5 w-6 h-6 rounded-full border-2 border-white flex items-center justify-center text-[11px] font-black text-white"
+                  :class="gallery.selected.includes(p.id) ? 'bg-viola' : 'bg-black/30'">{{ gallery.selected.includes(p.id) ? (gallery.selected.indexOf(p.id) + 1) : '' }}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="absolute bottom-0 inset-x-0 p-5 bg-gradient-to-t from-bianco via-bianco to-transparent">
+      <button v-if="gallery.selecting" @click="confirmCompareSelect" :disabled="gallery.selected.length < 2"
+              class="w-full cangiante-btn text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-40">Confronta le due foto</button>
+      <button v-else @click="triggerPhotoInput" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+        Aggiungi foto
+      </button>
+    </div>
+  </div>
+
+  <!-- Aggiunta: posa e data -->
+  <div v-if="photoAdd.isOpen" class="fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5">
+      <div class="flex justify-between items-center">
+        <h3 class="text-lg font-bold text-antracite">{{ photoAdd.files.length === 1 ? 'Nuova foto' : photoAdd.files.length + ' nuove foto' }}</h3>
+        <button @click="closePhotoAdd" :disabled="photoAdd.busy" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="flex gap-2 overflow-x-auto hide-scrollbar">
+        <img v-for="(u, i) in photoAdd.previews" :key="'pa-' + i" :src="u" alt="" class="h-28 aspect-[3/4] object-cover rounded-xl bg-gray-100 flex-shrink-0">
+        <div v-if="photoAdd.files.length > photoAdd.previews.length" class="h-28 aspect-[3/4] rounded-xl bg-gray-100 flex items-center justify-center text-sm font-bold text-gray-500 flex-shrink-0">+{{ photoAdd.files.length - photoAdd.previews.length }}</div>
+      </div>
+      <div>
+        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Posa</label>
+        <div class="grid grid-cols-4 gap-1.5">
+          <button v-for="pose in PHOTO_POSES" :key="'pap-' + pose.id" type="button" @click="photoAdd.pose = pose.id"
+                  class="py-2.5 rounded-xl text-xs font-bold border transition-all"
+                  :class="photoAdd.pose === pose.id ? 'bg-salvia/10 border-salvia text-salvia' : 'bg-white border-gray-200 text-gray-500'">{{ pose.label }}</button>
+        </div>
+        <p class="text-[10px] text-gray-400 font-medium mt-1.5 pl-1">Confronti più belli se usi sempre la stessa posa, la stessa luce e lo stesso posto.</p>
+      </div>
+      <div v-if="photoAdd.files.length === 1">
+        <label class="block text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-1.5 pl-1">Data</label>
+        <input type="date" v-model="photoAdd.date" :max="todayDateKey"
+               class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm font-semibold text-antracite outline-none transition-all">
+      </div>
+      <p v-else class="text-[11px] text-gray-500 font-medium">Ogni foto prende la data in cui è stata scattata. Potrai cambiarla aprendo la foto.</p>
+      <p v-if="photoAdd.error" class="text-[11px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2">{{ photoAdd.error }}</p>
+      <button @click="savePhotoAdd" :disabled="photoAdd.busy" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-60">
+        {{ photoAdd.busy ? 'Salvo… ' + photoAdd.done + '/' + photoAdd.files.length : 'Salva' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Foto grande -->
+  <div v-if="photoViewer.isOpen && viewerPhoto" class="fixed inset-0 z-[60] bg-black flex flex-col animate-fadeIn sm:max-w-[420px] sm:mx-auto">
+    <div class="flex items-center justify-between px-4 pt-4 pb-2 text-white">
+      <button @click="closePhotoViewer" class="p-2 -ml-2" aria-label="Chiudi">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="text-center">
+        <div class="text-sm font-extrabold">{{ photoDateLabel(viewerPhoto.date) }}</div>
+        <div class="text-[11px] font-bold text-white/60">{{ poseLabel(viewerPhoto.pose) }}<template v-if="photoWeight(viewerPhoto.date) !== null"> · {{ formatNumber(photoWeight(viewerPhoto.date)) }} kg</template></div>
+      </div>
+      <button @click="deletePhoto(viewerPhoto)" class="p-2 -mr-2 text-white/70 hover:text-red-400" aria-label="Elimina">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.87 12.14A2 2 0 0116.14 21H7.86a2 2 0 01-1.99-1.86L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+      </button>
+    </div>
+    <div class="flex-1 relative flex items-center justify-center min-h-0">
+      <img :src="photoViewer.url" alt="" class="max-w-full max-h-full object-contain">
+      <button v-if="viewerIndex > 0" @click="stepPhoto(-1)" class="absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center" aria-label="Più recente">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+      </button>
+      <button v-if="viewerIndex > -1 && viewerIndex < galleryPhotos.length - 1" @click="stepPhoto(1)" class="absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center" aria-label="Più vecchia">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+      </button>
+    </div>
+    <div class="p-4 space-y-3">
+      <div v-if="photoViewer.editing" class="bg-white/10 rounded-2xl p-3 space-y-3">
+        <input type="date" v-model="photoViewer.date" :max="todayDateKey" class="w-full bg-white/10 border border-white/20 rounded-xl p-2.5 text-sm font-bold text-white outline-none [color-scheme:dark]">
+        <div class="grid grid-cols-4 gap-1.5">
+          <button v-for="pose in PHOTO_POSES" :key="'pvp-' + pose.id" @click="photoViewer.pose = pose.id" class="py-2 rounded-xl text-xs font-bold border transition-all"
+                  :class="photoViewer.pose === pose.id ? 'bg-white text-antracite border-white' : 'border-white/20 text-white/70'">{{ pose.label }}</button>
+        </div>
+        <div class="flex gap-2">
+          <button @click="photoViewer.editing = false" class="flex-1 py-2.5 rounded-xl text-sm font-bold text-white/70 border border-white/20">Annulla</button>
+          <button @click="savePhotoEdit" class="flex-1 py-2.5 rounded-xl text-sm font-bold bg-salvia text-white">Salva</button>
+        </div>
+      </div>
+      <div v-else class="grid grid-cols-2 gap-2">
+        <button @click="photoViewer.editing = true; photoViewer.date = viewerPhoto.date; photoViewer.pose = viewerPhoto.pose" class="py-3 rounded-xl text-sm font-bold text-white border border-white/20 active:scale-95 transition-all">Data e posa</button>
+        <button v-if="photos.length >= 2" @click="startCompareSelect(); togglePhotoSelect(viewerPhoto); closePhotoViewer()" class="py-3 rounded-xl text-sm font-bold text-white cangiante-btn active:scale-95 transition-all">Confronta</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confronto prima / dopo -->
+  <div v-if="photoCompare.isOpen && compareBefore && compareAfter" class="fixed inset-0 z-[60] bg-black flex flex-col animate-fadeIn sm:max-w-[420px] sm:mx-auto text-white">
+    <div class="flex items-center justify-between px-4 pt-4 pb-2">
+      <button @click="closeCompare" class="p-2 -ml-2" aria-label="Chiudi">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+      </button>
+      <div class="text-center">
+        <div class="text-sm font-extrabold">Prima e dopo</div>
+        <div v-if="compareStats" class="text-[11px] font-bold text-white/60">{{ compareStats.days }} {{ compareStats.days === 1 ? 'giorno' : 'giorni' }}<template v-if="compareStats.diffText"> · {{ compareStats.diffText }}</template></div>
+      </div>
+      <div class="flex bg-white/10 rounded-xl p-0.5">
+        <button @click="photoCompare.mode = 'slider'" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold" :class="photoCompare.mode === 'slider' ? 'bg-white text-antracite' : 'text-white/70'">Cursore</button>
+        <button @click="photoCompare.mode = 'side'" class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold" :class="photoCompare.mode === 'side' ? 'bg-white text-antracite' : 'text-white/70'">Affiancate</button>
+      </div>
+    </div>
+
+    <div class="flex-1 min-h-0 flex items-center justify-center px-4">
+      <!-- Cursore: la foto "prima" sopra, tagliata dove c'è il dito -->
+      <div v-if="photoCompare.mode === 'slider'" class="relative w-full max-h-full aspect-[3/4] rounded-2xl overflow-hidden bg-white/5 touch-none select-none"
+           @pointerdown="dragCompare" @pointermove="($event.buttons || $event.pointerType === 'touch') && dragCompare($event)">
+        <img :src="photoCompare.afterUrl" alt="" class="absolute inset-0 w-full h-full object-cover object-[50%_30%] pointer-events-none" draggable="false">
+        <img :src="photoCompare.beforeUrl" alt="" class="absolute inset-0 w-full h-full object-cover object-[50%_30%] pointer-events-none" draggable="false"
+             :style="{ clipPath: 'inset(0 ' + (100 - photoCompare.split) + '% 0 0)' }">
+        <div class="absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.6)] pointer-events-none" :style="{ left: photoCompare.split + '%' }">
+          <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 left-1/2 w-9 h-9 rounded-full bg-white text-antracite flex items-center justify-center shadow-lg">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 9l-3 3 3 3M16 9l3 3-3 3"/></svg>
+          </div>
+        </div>
+        <span class="absolute top-3 left-3 text-[10px] font-black tracking-widest bg-black/50 rounded-full px-2.5 py-1">PRIMA · {{ photoDateLabel(compareBefore.date) }}</span>
+        <span class="absolute top-3 right-3 text-[10px] font-black tracking-widest cangiante-btn rounded-full px-2.5 py-1">DOPO · {{ photoDateLabel(compareAfter.date) }}</span>
+      </div>
+      <!-- Affiancate -->
+      <div v-else class="grid grid-cols-2 gap-2 w-full">
+        <div v-for="side in [{ p: compareBefore, url: photoCompare.beforeUrl, label: 'PRIMA' }, { p: compareAfter, url: photoCompare.afterUrl, label: 'DOPO' }]" :key="'cs-' + side.label" class="space-y-1.5">
+          <div class="relative aspect-[3/4] rounded-2xl overflow-hidden bg-white/5">
+            <img :src="side.url" alt="" class="w-full h-full object-cover object-[50%_30%]">
+            <span class="absolute top-2 left-2 text-[9px] font-black tracking-widest rounded-full px-2 py-0.5" :class="side.label === 'DOPO' ? 'cangiante-btn' : 'bg-black/50'">{{ side.label }}</span>
+          </div>
+          <div class="text-center">
+            <div class="text-xs font-extrabold">{{ photoDateLabel(side.p.date) }}</div>
+            <div v-if="photoWeight(side.p.date) !== null" class="text-[11px] font-bold text-white/60">{{ formatNumber(photoWeight(side.p.date)) }} kg</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="p-4 grid grid-cols-2 gap-2">
+      <button @click="closeCompare(); openGallery(); startCompareSelect()" class="py-3 rounded-xl text-sm font-bold text-white border border-white/20 active:scale-95 transition-all">Cambia foto</button>
+      <button @click="shareCompare" :disabled="photoCompare.busy" class="py-3 rounded-xl text-sm font-bold text-white cangiante-btn active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+        {{ photoCompare.busy ? 'Preparo…' : 'Condividi storia' }}
+      </button>
     </div>
   </div>
 
