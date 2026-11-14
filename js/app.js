@@ -2129,9 +2129,24 @@ createApp({
     };
     const programExerciseNames = (day) => day.ex.map(id => (EXERCISE_BY_ID[id] || {}).n).filter(Boolean).join(' · ');
 
+    // Nome scritto → esercizio della libreria, anche se scritto diverso (js/import/workout-text.js):
+    // "Leg extension a gamba singola" → Leg extension (variante), "Pressa 45°" → Leg press (stesso esercizio)
+    const libMatchCache = new Map();
+    const libraryMatch = (name) => {
+      const key = String(name || '').trim().toLowerCase();
+      if (!key) return null;
+      if (!libMatchCache.has(key)) {
+        if (libMatchCache.size > 500) libMatchCache.clear();
+        libMatchCache.set(key, EXERCISE_BY_NAME[key] ? { item: EXERCISE_BY_NAME[key], kind: 'same' } : matchExerciseName(name, EXERCISE_LIBRARY));
+      }
+      return libMatchCache.get(key);
+    };
+    const libraryItem = (name) => { const m = libraryMatch(name); return m ? m.item : null; };
+    const matchLibraryName = libraryItem;
+
     // Mentre scrivi una scheda: se il nome è nella libreria, completa serie, ripetizioni e recupero vuoti
     const fillFromLibrary = (ex) => {
-      const item = EXERCISE_BY_NAME[(ex.name || '').trim().toLowerCase()];
+      const item = libraryItem(ex.name);
       if (!item) return;
       if (item.t === 'cardio') {
         if (ex.type !== 'cardio') return;
@@ -2145,10 +2160,9 @@ createApp({
       }
     };
     const libraryTip = (name) => {
-      const item = EXERCISE_BY_NAME[(name || '').trim().toLowerCase()];
+      const item = libraryItem(name);
       return item ? item.tip : '';
     };
-    const libraryItem = (name) => EXERCISE_BY_NAME[(name || '').trim().toLowerCase()] || null;
 
     // Importa scheda (js/import/workout-text.js): da PDF, Word, testo o incollata dalle Note
     const workoutImport = ref({ isOpen: false, busy: false, error: '', text: '' });
@@ -2162,21 +2176,14 @@ createApp({
     };
     const openWorkoutImport = () => { workoutImport.value = { isOpen: true, busy: false, error: '', text: '' }; };
     const closeWorkoutImport = () => { workoutImport.value.isOpen = false; };
-    // "Panca piana" → "Panca piana con bilanciere" se nella libreria c'è un solo esercizio che lo contiene
-    const IMPORT_STOP = new Set(['con', 'al', 'ai', 'alla', 'alle', 'allo', 'di', 'da', 'e', 'il', 'la', 'le', 'lo', 'a', 'in', 'su', 'the', 'with']);
-    const importTokens = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').split(/[^a-z0-9]+/).filter(t => t && !IMPORT_STOP.has(t));
-    const matchLibraryName = (name) => {
-      const exact = libraryItem(name);
-      if (exact) return exact;
-      const want = importTokens(name);
-      if (!want.length) return null;
-      const hits = EXERCISE_LIBRARY.filter(item => { const have = importTokens(item.n); return want.every(t => have.includes(t)); });
-      return hits.length === 1 ? hits[0] : null;
-    };
+    // Stesso esercizio scritto diverso ("LEG EXTENSIONS", "Pressa 45°") → nome della libreria;
+    // una variante ("Leg extension a gamba singola") tiene il nome della scheda, ma consigli, muscoli e
+    // valori di partenza vengono comunque dall'esercizio della libreria
     const importedToExercise = (row, ssPrefix) => {
       const ex = createEmptyExercise();
-      const lib = matchLibraryName(row.name);
-      ex.name = lib ? lib.n : row.name;
+      const match = libraryMatch(row.name);
+      const lib = match ? match.item : null;
+      ex.name = match && match.kind === 'same' ? lib.n : row.name;
       if (row.cardio || (lib && lib.t === 'cardio' && !row.sets)) {
         ex.type = 'cardio';
         ex.duration = String(row.duration || (lib && lib.d) || '');

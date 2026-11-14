@@ -60,6 +60,7 @@ const EXERCISE_LIBRARY = [
 
   // --- Braccia ---
   { id: 'curl-bilanciere', n: 'Curl con bilanciere', m: 'braccia', w: 'gym', s: 3, r: '10', rec: 60, tip: 'Gomiti fermi lungo i fianchi, niente slanci con la schiena.' },
+  { id: 'curl-manubri', n: 'Curl con manubri', m: 'braccia', w: 'gym', s: 3, r: '10-12', rec: 60, tip: 'Gomiti fermi ai fianchi, ruota il palmo verso l\'alto mentre sali.' },
   { id: 'curl-martello', n: 'Curl a martello', m: 'braccia', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Palmi uno di fronte all\'altro: bicipiti e avambracci.' },
   { id: 'curl-cavi', n: 'Curl ai cavi', m: 'braccia', w: 'gym', s: 3, r: '12-15', rec: 45, tip: 'Tensione costante: scendi lento.' },
   { id: 'pushdown', n: 'Pushdown ai cavi', m: 'braccia', w: 'gym', s: 3, r: '12', rec: 60, tip: 'Gomiti attaccati ai fianchi, distendi completamente le braccia.' },

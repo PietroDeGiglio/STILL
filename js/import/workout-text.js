@@ -128,6 +128,13 @@ const wParseLine = (line) => {
     const sr = wTakeSetsReps(t); t = sr.text;
     const w = wTakeWeight(t); t = w.text;
     const r = wTakeRest(t); t = r.text;
+    // Numeri senza la "x" in fondo alla riga, come nelle tabelle copiate: "Leg extension 3 12" → 3 serie da 12
+    if (!sr.sets) {
+      const m = /(?:^|\s)(\d{1,2})\s+(\d{1,2}(?:\s*[-/]\s*\d{1,2})*)\s*$/.exec(t);
+      if (m && Number(m[1]) >= 1 && Number(m[1]) <= 10 && /[a-z]/.test(t.slice(0, m.index))) {
+        sr.sets = m[1]; sr.reps = wReps(m[2]); t = t.slice(0, m.index) + ' ' + m[1] + ' ';
+      }
+    }
     let duration = '';
     const isCardio = !sr.sets && W_CARDIO_WORDS.test(t);
     if (isCardio) { const mm = wTakeMinutes(t); duration = mm.duration; t = mm.text; }
@@ -226,6 +233,200 @@ const parseWorkoutText = (text, fileName = '') => {
   return { name, days: kept, exercises, withNumbers: kept.reduce((s, dd) => s + dd.exercises.filter(e => e.sets || e.duration).length, 0) };
 };
 
+// ---------------------------------------------------------------
+// TABELLE (PDF e Word): "Esercizio | Serie | Ripetizioni | Recupero | Peso"
+// Nelle tabelle i numeri stanno in colonne separate ("Leg extension   4   12   90''   40"): senza
+// l'intestazione non si sa cosa sia cosa. Si trova la riga d'intestazione, si ricorda dove sta ogni
+// colonna e ogni riga sotto diventa testo che il lettore capisce: "Leg extension 4x12 40kg rec 90''".
+// ---------------------------------------------------------------
+const W_COLUMNS = [
+  ['sr', /^(serie|set|sets)\s*(x|\/|e|-|×|\*)\s*(rip|ripetizioni|ripet|reps?)\.?$/],
+  ['name', /^(esercizi[oi]?|exercises?|nome|movimento)\b/],
+  ['sets', /^(n\.?\s*)?(serie|set|sets|n\.? serie)\.?$/],
+  ['reps', /^(rip|ripetizioni|ripet|reps?|ripetiz|n\.? rip|ripetizioni\/tempo|tempo\/rip)\.?$/],
+  ['rest', /^(rec|recupero|recuperi|riposo|pausa|rest|buffer rec)\.?(\s*\(.*\))?$/],
+  ['weight', /^(peso|pesi|kg|carico|carichi|load|weight)\.?(\s*\(.*\))?$/],
+  ['skip', /^(note?|tecnica|tut|tempo|rpe|rir|buffer|intensita|esecuzione|video|link|mod|modalita)\.?$/]
+];
+const wColumnKind = (text) => {
+  const t = wNorm(text).replace(/[:]+$/, '').trim();
+  const hit = W_COLUMNS.find(([, re]) => re.test(t));
+  return hit ? hit[0] : '';
+};
+// Riga d'intestazione: almeno due colonne riconosciute, di cui una con i numeri (serie, ripetizioni…)
+const wHeader = (line) => {
+  const cols = line.segs.map(s => ({ kind: wColumnKind(s.text), x: s.x, x2: s.x2, cx: s.cx }));
+  const known = cols.filter(c => c.kind);
+  if (known.length < 2 || known.length < cols.length - 1) return null;
+  if (!known.some(c => ['sets', 'reps', 'sr'].includes(c.kind))) return null;
+  return cols;
+};
+// Colonna di un pezzo di riga: quella con l'intestazione che si sovrappone di più, altrimenti la più vicina
+const wColumnOf = (seg, cols) => {
+  let best = null, bestScore = -Infinity;
+  cols.forEach(c => {
+    const overlap = Math.min(seg.x2, c.x2) - Math.max(seg.x, c.x);
+    const score = overlap > 0 ? 1000 + overlap : -Math.abs(seg.cx - c.cx);
+    if (score > bestScore) { bestScore = score; best = c; }
+  });
+  return best;
+};
+const W_EMPTY_CELL = /^[-–—\/.x*]*$|^(libero|corpo libero|cl|bw|n\.?d\.?|max)$/;
+const wRowText = (cells) => {
+  const v = (k) => (cells[k] || '').trim();
+  let out = v('name');
+  const sr = v('sr'), sets = v('sets').replace(/\s*serie$/i, ''), reps = v('reps').replace(/\s*(rip(etizioni)?|reps?)$/i, '');
+  if (sr) out += ' ' + (/^\d{1,2}\s*$/.test(sr) ? sr + ' serie' : sr);
+  else if (/^\d{1,2}$/.test(sets) && reps && !W_EMPTY_CELL.test(wNorm(reps)) || /^\d{1,2}$/.test(sets) && /^max$/i.test(reps)) out += ' ' + sets + 'x' + reps;
+  else if (/^\d{1,2}$/.test(sets)) out += ' ' + sets + ' serie';
+  else if (reps && /^\d/.test(reps)) out += ' 1x' + reps;
+  const weight = v('weight');
+  if (weight && !W_EMPTY_CELL.test(wNorm(weight))) {
+    const n = /(\d+(?:[.,]\d+)?)/.exec(weight);
+    if (n) out += ' ' + n[1] + 'kg';
+  }
+  const rest = v('rest');
+  if (rest && /\d/.test(rest)) out += ' rec ' + (/^\d+$/.test(rest) ? rest + (Number(rest) <= 5 ? ' min' : "''") : rest);
+  return out.replace(/\s+/g, ' ').trim();
+};
+// Righe del lettore PDF/Word (con i pezzi e le loro posizioni) → testo, una riga per esercizio
+const workoutLinesToText = (lines) => {
+  const out = [];
+  let cols = null;
+  lines.forEach(line => {
+    const segs = line.segs || [];
+    const header = segs.length >= 2 ? wHeader(line) : null;
+    if (header) { cols = header; return; }
+    if (!cols || segs.length < 2) {
+      // Nome che va a capo nella cella: riga di sole lettere minuscole, attaccata all'esercizio sopra
+      const prev = out[out.length - 1];
+      if (cols && prev && prev.row && segs.length === 1 && /^[a-zà-ú(]/.test(segs[0].text) && !/\d/.test(segs[0].text)) {
+        prev.text = prev.text.replace(/^(\S.*?)(\s+\d|\s*$)/, (m, a, b) => a + ' ' + segs[0].text + b);
+        return;
+      }
+      out.push({ text: line.text });
+      return;
+    }
+    const cells = {};
+    segs.forEach(s => {
+      const c = wColumnOf(s, cols);
+      const kind = c && c.kind ? c.kind : (c === cols[0] ? 'name' : 'skip');
+      cells[kind] = cells[kind] ? cells[kind] + ' ' + s.text : s.text;
+    });
+    // Nessun numero nelle colonne: è un titolo o una nota scritta di traverso, si tiene com'è
+    if (!['sets', 'reps', 'sr', 'weight', 'rest'].some(k => cells[k] && /\d|max/i.test(cells[k]))) { out.push({ text: line.text }); return; }
+    if (!cells.name) { out.push({ text: wRowText(cells) }); return; }
+    out.push({ text: wRowText(cells), row: true });
+  });
+  return out.map(o => o.text).join('\n');
+};
+
+// ---------------------------------------------------------------
+// ABBINAMENTO CON LA LIBRERIA (js/data/exercises.js)
+// Il nome scritto dal personal trainer quasi mai è identico a quello della libreria:
+// "Leg extension a gamba singola", "LEG EXTENSIONS", "Pressa 45°", "Lat pulldown presa larga".
+// Si confrontano le parole importanti (senza articoli, singolare/plurale, italiano/inglese):
+//  1) la libreria è contenuta nel nome scritto ("Leg extension" in "Leg extension a gamba singola") → la più specifica
+//  2) il nome scritto è contenuto nella libreria ("Panca piana" → "Panca piana con bilanciere") → solo se è una sola
+//  3) altrimenti quella con più parole in comune (almeno due)
+// Risultato: { item, kind } con kind 'same' (stesso esercizio, si può usare il nome della libreria)
+// o 'variant' (è una variante: si tiene il nome scritto, ma consigli e muscoli vengono dalla libreria).
+// ---------------------------------------------------------------
+const XM_STOP = new Set(['con', 'al', 'ai', 'alla', 'alle', 'allo', 'agli', 'di', 'da', 'e', 'ed', 'il', 'la', 'le', 'lo', 'gli', 'i', 'a', 'ad', 'in', 'su',
+  'sul', 'sulla', 'sulle', 'sui', 'sugli', 'del', 'della', 'delle', 'dei', 'degli', 'dal', 'dalla', 'per', 'tra', 'fra', 'o', 'the', 'with', 'of', 'on', 'at', 'to', 'and', 'or',
+  'esercizio', 'macchinario', 'attrezzo']);
+// Parole che dicono "come" (una gamba, alternato, seduto…): non cambiano l'esercizio, contano poco
+const XM_MOD = new Set(['singola', 'singolo', 'singole', 'singoli', 'unilaterale', 'unilaterali', 'monopodalico', 'monopodalica', 'mono', 'single', 'one', 'una', 'un', 'uno',
+  'alternato', 'alternata', 'alternati', 'alternate', 'alternando', 'alternated', 'unilateral', 'bilaterale', 'leggero', 'pesante', 'controllato',
+  'fermo', 'pausa', 'isometria', 'isometrico', 'parziale', 'parziali', 'completo', 'presa', 'neutra', 'normale', 'classico', 'classica', 'variante',
+  'sx', 'dx', 'destra', 'sinistra', 'lato', 'side']);
+// Sinonimi → una parola sola (dopo minuscole e senza accenti)
+const XM_SYN = {
+  estensione: 'extension', estensioni: 'extension', extensions: 'extension', ext: 'extension',
+  pressa: 'leg press', 'leg-press': 'leg press', legpress: 'leg press',
+  manubrio: 'manubri', dumbbell: 'manubri', dumbbells: 'manubri', db: 'manubri', manubi: 'manubri',
+  barbell: 'bilanciere', bb: 'bilanciere', bilancere: 'bilanciere', ez: 'ez', sbarra: 'sbarra',
+  cavo: 'cavi', cable: 'cavi', cables: 'cavi', ercolina: 'cavi', croce: 'croci', crossover: 'croci', cross: 'croci', fly: 'croci', flyes: 'croci', flies: 'croci',
+  machine: 'macchina', macchine: 'macchina', smith: 'multipower',
+  bench: 'panca', chest: 'chest', deadlift: 'stacco', stacchi: 'stacco', romanian: 'rumeno', rdl: 'stacco rumeno', sldl: 'stacco gambe tese',
+  row: 'rematore', rowing: 'rematore', rematori: 'rematore', pulldown: 'pulldown', lat: 'lat',
+  pullup: 'trazioni', pullups: 'trazioni', trazione: 'trazioni', chinup: 'chin', chinups: 'chin', lunge: 'affondi', lunges: 'affondi', affondo: 'affondi',
+  raise: 'alzate', raises: 'alzate', alzata: 'alzate', lateral: 'laterali', laterale: 'laterali', front: 'frontali', frontale: 'frontali', rear: 'posteriori',
+  posteriore: 'posteriori', hammer: 'martello', triceps: 'tricipiti', tricep: 'tricipiti', tricipite: 'tricipiti', biceps: 'bicipiti', bicep: 'bicipiti',
+  glute: 'glutei', glutes: 'glutei', gluteo: 'glutei', bridge: 'ponte', calves: 'calf', polpacci: 'calf', polpaccio: 'calf',
+  pushup: 'piegamenti', pushups: 'piegamenti', piegamento: 'piegamenti', flessioni: 'piegamenti', flessione: 'piegamenti',
+  dips: 'dip', crunches: 'crunch', squats: 'squat', curls: 'curl', presses: 'press',
+  gambe: 'gamba', legs: 'leg', abductor: 'abductor', abduttori: 'abductor', abduzioni: 'abductor', adductor: 'adductor', adduttori: 'adductor', adduzioni: 'adductor',
+  seated: 'seduto', standing: 'piedi', inclinata: 'inclinata', incline: 'inclinata', decline: 'declinata', flat: 'piana',
+  shrug: 'scrollate', shrugs: 'scrollate', scrollata: 'scrollate', hyperextension: 'iperestensioni', hyperextensions: 'iperestensioni', iperestensione: 'iperestensioni',
+  kickbacks: 'kickback', pushdowns: 'pushdown', facepull: 'face pull', overhead: 'sopra testa', ohp: 'military press', military: 'military',
+  goblet: 'goblet', hack: 'hack', thrust: 'thrust', hipthrust: 'hip thrust', peck: 'pectoral', deck: 'pectoral', butterfly: 'pectoral',
+  walking: 'camminati', camminato: 'camminati', reverse: 'inverso', inversi: 'inverso', inversa: 'inverso',
+  treadmill: 'tapis', tapis: 'tapis', bike: 'cyclette', elliptical: 'ellittica', rower: 'vogatore'
+};
+// Singolare e plurale insieme: "affondi"/"affondo" → "affond", "manubri" → "manubr"
+const xmStem = (w) => (w.length > 4 ? w.replace(/[aeiou]+$/, '') : w).replace(/(?<=.{3})s$/, '');
+const xmWords = (s) => String(s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+  .replace(/\b(pull|chin|push)\s*-\s*ups?\b/g, '$1up').replace(/\b45\s*°/g, ' ')
+  .replace(/\b(push|pull)\s+down\b/g, '$1down').replace(/\blat\s+pulldown\b/g, 'lat machine')
+  .split(/[^a-z0-9]+/).filter(w => w && !/^\d+$/.test(w))
+  .flatMap(w => (XM_SYN[w] || w).split(' '))
+  .filter(w => !XM_STOP.has(w));
+const xmTokens = (s) => {
+  const core = new Set(), mod = new Set();
+  xmWords(s).forEach(w => (XM_MOD.has(w) ? mod : core).add(xmStem(w)));
+  return { core, mod };
+};
+// Attrezzi e dettagli che la libreria aggiunge al nome ("Hip thrust" → "Hip thrust con bilanciere"): non cambiano l'esercizio
+const XM_EQUIP = new Set(['bilanciere', 'manubri', 'cavi', 'macchina', 'multipower', 'elastico', 'sbarra', 'parallele', 'corda', 'kettlebell', 'ez', 'terra', 'piedi', 'seduto']
+  .map(w => xmStem(w)));
+let xmIndexCache = null;
+const xmIndex = (library) => {
+  if (xmIndexCache && xmIndexCache.library === library) return xmIndexCache;
+  const items = library.map((item, i) => ({ item, i, ...xmTokens(item.n) })).filter(x => x.core.size);
+  // Peso delle parole: rare (bulgaro, polsi, martello) contano più di quelle comuni (squat, manubri)
+  const df = {};
+  items.forEach(x => x.core.forEach(t => { df[t] = (df[t] || 0) + 1; }));
+  const idf = (t) => Math.log(1 + items.length / (df[t] || 0.5));
+  xmIndexCache = { library, items, idf };
+  return xmIndexCache;
+};
+const matchExerciseName = (name, library) => {
+  if (!name || !Array.isArray(library) || !library.length) return null;
+  const key = String(name).trim().toLowerCase();
+  const exact = library.find(item => item.n.trim().toLowerCase() === key);
+  if (exact) return { item: exact, kind: 'same' };
+  const want = xmTokens(name);
+  if (!want.core.size) return null;
+  const wantAll = new Set([...want.core, ...want.mod]);
+  const { items: index, idf } = xmIndex(library);
+  const covers = (big, small) => [...small].every(t => big.has(t));
+  const weight = (list) => [...list].reduce((s, t) => s + idf(t), 0);
+  // Stesse parole importanti → stesso esercizio scritto in un altro modo
+  const same = index.filter(x => x.core.size === want.core.size && covers(x.core, want.core));
+  if (same.length) return { item: same[0].item, kind: covers(new Set([...same[0].core, ...same[0].mod]), want.mod) ? 'same' : 'variant' };
+  // 1) La libreria è dentro il nome scritto: la più specifica, poi la prima della libreria
+  const inside = index.filter(x => covers(want.core, x.core) && (x.core.size >= 2 || want.core.size <= 2 || idf([...x.core][0]) > 2.5))
+    .map(x => ({ x, score: weight(x.core) + [...x.mod].filter(t => wantAll.has(t)).length * 0.5 - [...x.mod].filter(t => !wantAll.has(t)).length * 0.5 }))
+    .sort((a, b) => b.score - a.score || a.x.i - b.x.i);
+  if (inside.length) return { item: inside[0].x.item, kind: 'variant' };
+  // 2) Il nome scritto è dentro la libreria, che aggiunge solo l'attrezzo ("Panca piana" → "… con bilanciere")
+  const outside = index.filter(x => covers(x.core, want.core) && [...x.core].every(t => want.core.has(t) || XM_EQUIP.has(t)));
+  if (outside.length === 1) return { item: outside[0].item, kind: 'same' };
+  if (outside.length > 1) return { item: outside[0].item, kind: 'variant' };
+  // 3) Il più simile per parole in comune, pesate per quanto sono rare
+  const wantW = weight(want.core);
+  const scored = index.map(x => {
+    const common = [...want.core].filter(t => x.core.has(t));
+    return { x, score: common.length ? weight(common) / Math.sqrt(wantW * weight(x.core)) : 0 };
+  }).filter(s => s.score >= 0.5).sort((a, b) => b.score - a.score || a.x.i - b.x.i);
+  if (!scored.length) return null;
+  const [best, second] = scored;
+  // Pari merito tra esercizi di muscoli diversi: meglio non indovinare
+  if (second && second.score > best.score - 0.02 && second.x.item.m !== best.x.item.m) return null;
+  return { item: best.x.item, kind: 'variant' };
+};
+
 // File → testo (riga per riga). PDF e Word usano i lettori dell'import della dieta.
 const workoutFileKind = (file) => {
   const name = String(file.name || '').toLowerCase();
@@ -246,11 +447,12 @@ const readWorkoutFileText = async (file) => {
   if (kind === 'doc') return { error: 'doc' };
   if (kind !== 'pdf' && kind !== 'docx') return { error: 'type' };
   const pages = kind === 'pdf' ? await readPdfPages(file) : await readDocxPages(file);
-  const text = pages.map(p => pdfLines(p.items).map(l => l.text).join('\n')).join('\n');
+  // Ogni pagina a sé: le colonne di una tabella valgono fino alla pagina dopo
+  const text = pages.map(p => workoutLinesToText(pdfLines(p.items))).join('\n');
   if (text.replace(/\s/g, '').length < 10) return { error: kind === 'pdf' ? 'scan' : 'empty' };
   return { text };
 };
 
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { parseWorkoutText, wParseLine, wDayName };
+  module.exports = { parseWorkoutText, wParseLine, wDayName, workoutLinesToText, matchExerciseName };
 }
