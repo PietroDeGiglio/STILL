@@ -104,21 +104,23 @@ const muscleFatigue = (events, now) => {
 const muscleReadyIn = (fatigue, muscle) => Math.max(0, Math.ceil((fatigue - 0.2) * recoveryHoursFor(muscle)));
 
 // ---------------------------------------------------------------
-// MAPPA DEL CORPO COLORATA (usa MUSCLE_SHAPES e bodySilhouette di exercise-art.js)
+// MAPPA DEL CORPO COLORATA (disegno di bodyMapSvg in exercise-art.js)
 // colors: { muscolo: '#colore' }. Con inline: true è un'immagine a sé (per le storie): niente classi CSS.
+// opts.sex 'F' = figura femminile
 // ---------------------------------------------------------------
 const muscleColorSvg = (colors, opts = {}) => {
-  const inline = !!opts.inline;
-  const groups = Object.keys(MUSCLE_SHAPES).map(id => {
-    const fill = colors[id] || (inline ? opts.empty : null);
-    return `<g ${fill ? `fill="${fill}"` : 'class="mm-m"'}>${MUSCLE_SHAPES[id].map(muscleShape).join('')}</g>`;
-  }).join('');
-  const base = inline ? `<g fill="${opts.base}">` : '<g class="mm-base">';
-  const labels = opts.labels === false ? '' : inline
-    ? `<text x="30" y="104" text-anchor="middle" font-size="5" font-weight="700" font-family="sans-serif" fill="${opts.label}">davanti</text><text x="90" y="104" text-anchor="middle" font-size="5" font-weight="700" font-family="sans-serif" fill="${opts.label}">dietro</text>`
-    : '<text x="30" y="104" text-anchor="middle" class="mm-label">davanti</text><text x="90" y="104" text-anchor="middle" class="mm-label">dietro</text>';
-  const size = opts.size ? ` width="${opts.size}" height="${Math.round(opts.size * 104 / 120)}"` : '';
-  return `<svg viewBox="0 0 120 104"${size} xmlns="http://www.w3.org/2000/svg" class="muscle-map">${base}${bodySilhouette(30)}${bodySilhouette(90)}</g>${groups}${labels}</svg>`;
+  const labels = opts.labels === false ? null : BODY_LABELS;
+  if (!opts.inline) {
+    return bodyMapSvg({ ...BODY_CSS, sex: opts.sex, labels, cls: 'muscle-map',
+      paint: (m) => (colors[m] ? `fill="${colors[m]}"` : 'class="mm-m"') });
+  }
+  return bodyMapSvg({
+    sex: opts.sex, size: opts.size, labels,
+    base: `fill="${opts.base}"`, hair: `fill="${opts.hair || opts.base}"`,
+    line: `stroke="${opts.line || opts.label}" stroke-width="3" stroke-opacity=".45"`,
+    labelAttr: `font-size="64" font-weight="700" font-family="sans-serif" fill="${opts.label}"`,
+    paint: (m) => `fill="${colors[m] || opts.empty}"`
+  });
 };
 // Pronto (verde) → in recupero (giallo) → stanco (rosso)
 const fatigueColor = (f) => (f < 0.2 ? '#20C997' : f < 0.55 ? '#F5C042' : '#EF6B5B');

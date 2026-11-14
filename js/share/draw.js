@@ -916,6 +916,9 @@ const drawMusclesBody = (ctx, data, o) => {
   const img = data.mapImg;
   const mapH = Y.mapW * 104 / 120;
   if (img && img.complete && img.naturalWidth) {
+    // Entra nel riquadro senza deformarsi
+    const ar = img.naturalHeight / img.naturalWidth;
+    const dh = Math.min(mapH, Y.mapW * ar), dw = dh / ar;
     const k = live ? clamp01((time - 0.3) / 0.8) : 1;
     if (k > 0) {
       const s = 0.9 + 0.1 * easeOut(k);
@@ -924,7 +927,7 @@ const drawMusclesBody = (ctx, data, o) => {
       ctx.globalAlpha *= Math.min(1, k * 1.4);
       ctx.translate(cx, Y.mapTop + mapH / 2);
       ctx.scale(s, s);
-      ctx.drawImage(img, -Y.mapW / 2, -mapH / 2, Y.mapW, mapH);
+      ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh);
       ctx.restore();
     }
   }

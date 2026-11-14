@@ -2304,7 +2304,7 @@ createApp({
       exerciseInfo.value = {
         isOpen: true, item, photos,
         pose: photos ? '' : exercisePoseSvg(art.pattern, true),
-        map: muscleMapSvg(art.primary, art.secondary),
+        map: muscleMapSvg(art.primary, art.secondary, { sex: bodySex.value }),
         primary: art.primary.map(id => MUSCLE_NAMES[id]),
         secondary: art.secondary.map(id => MUSCLE_NAMES[id])
       };
@@ -3878,7 +3878,9 @@ createApp({
       Object.keys(fatigue).forEach(m => { colors[m] = fatigueColor(fatigue[m]); });
       return { fatigue, groups, last, colors };
     });
-    const muscleRecoverySvg = computed(() => muscleColorSvg(muscleRecovery.value.colors));
+    // Figura maschile o femminile secondo il profilo
+    const bodySex = computed(() => (profile.value && profile.value.sex) || '');
+    const muscleRecoverySvg = computed(() => muscleColorSvg(muscleRecovery.value.colors, { sex: bodySex.value }));
 
     const TODAY_SPLITS = [
       { id: 'push', title: 'Spinta: petto, spalle e tricipiti', groups: ['petto', 'spalle', 'braccia'], slots: [['petto', 2], ['spalle', 1, 'spalle'], ['braccia', 1, 'tricipiti'], ['addome', 1]] },
@@ -4002,14 +4004,14 @@ createApp({
         .map(([id, v]) => ({ id, name: MUSCLE_NAMES[id] || id, sets: Math.round(v), k: max ? v / max : 0 }));
       return { sets, days: days.size, sports, top, colors, empty: !sets };
     });
-    const weekMusclesSvg = computed(() => muscleColorSvg(weekMuscles.value.colors));
+    const weekMusclesSvg = computed(() => muscleColorSvg(weekMuscles.value.colors, { sex: bodySex.value }));
     const muscleShareImg = shallowRef(null);
     const loadMuscleShareImage = () => {
       const img = new Image();
       img.onload = () => { muscleShareImg.value = img; };
       img.onerror = () => { muscleShareImg.value = null; };
       img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(muscleColorSvg(weekMuscles.value.colors, {
-        inline: true, size: 960, base: 'rgba(150,150,160,0.28)', empty: 'rgba(150,150,160,0.5)', label: 'rgba(150,150,160,0.95)'
+        inline: true, size: 960, sex: bodySex.value, base: 'rgba(150,150,160,0.28)', empty: 'rgba(150,150,160,0.5)', label: 'rgba(150,150,160,0.95)'
       }));
     };
     const openMuscleShare = () => {

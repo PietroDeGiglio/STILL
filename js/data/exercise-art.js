@@ -1,65 +1,67 @@
 // Immagini dimostrative degli esercizi: omino animato che fa il movimento + mappa del corpo
 // con i muscoli allenati evidenziati (principali pieni, secondari più chiari).
-// Tutto in SVG generato qui, niente immagini esterne. Usato da app.js (GUIDA ESERCIZI).
+// Omino in SVG generato qui; la mappa del corpo usa i disegni di js/data/body-map.js. Usato da app.js (GUIDA ESERCIZI).
 
-// --- Muscoli (mappa fronte / retro, viewBox 0 0 120 104) ---
+// --- Muscoli: mappa fronte / retro (disegni anatomici in js/data/body-map.js → BODY_ART) ---
 const MUSCLE_NAMES = {
   petto: 'Petto', spalle: 'Spalle', 'spalle-post': 'Spalle (dietro)', bicipiti: 'Bicipiti', tricipiti: 'Tricipiti',
   avambracci: 'Avambracci', addome: 'Addome', obliqui: 'Obliqui', trapezio: 'Trapezio', dorsali: 'Dorsali',
   lombari: 'Lombari', glutei: 'Glutei', quadricipiti: 'Quadricipiti', femorali: 'Femorali', adduttori: 'Adduttori', polpacci: 'Polpacci'
 };
-
-// Ogni muscolo: forme (ellissi [cx, cy, rx, ry, rotazione] o path 'd') sulle due figure
-const MUSCLE_SHAPES = {
-  // Fronte (figura centrata in x = 30)
-  spalle: [[17.5, 23, 4.6, 4, -20], [42.5, 23, 4.6, 4, 20], [77.5, 23, 3.6, 3.6, 0], [102.5, 23, 3.6, 3.6, 0]],
-  petto: [[25.2, 28, 5.6, 4.4, 8], [34.8, 28, 5.6, 4.4, -8]],
-  bicipiti: [[15, 33, 2.8, 6, 12], [45, 33, 2.8, 6, -12]],
-  avambracci: [[12, 47, 2.4, 7, 10], [48, 47, 2.4, 7, -10], [72, 47, 2.4, 7, 10], [108, 47, 2.4, 7, -10]],
-  addome: ['M26.5 33.5 h7 a1.5 1.5 0 0 1 1.5 1.5 v14 a3 3 0 0 1 -3 3 h-4 a3 3 0 0 1 -3 -3 v-14 a1.5 1.5 0 0 1 1.5 -1.5z'],
-  obliqui: [[22.6, 42, 2.1, 6.5, 6], [37.4, 42, 2.1, 6.5, -6]],
-  quadricipiti: [[25, 67, 4.7, 12.5, 4], [35, 67, 4.7, 12.5, -4]],
-  adduttori: [[28.6, 62, 1.5, 6.5, 0], [31.4, 62, 1.5, 6.5, 0]],
-  polpacci: [[24.6, 89, 2.6, 7.5, 0], [35.4, 89, 2.6, 7.5, 0], [84.6, 88, 3.4, 8, 0], [95.4, 88, 3.4, 8, 0]],
-  // Retro (figura centrata in x = 90)
-  trapezio: ['M84 18.5 L96 18.5 L93.5 27 L90 31 L86.5 27Z'],
-  'spalle-post': [[77.5, 23, 4.6, 4, -20], [102.5, 23, 4.6, 4, 20]],
-  dorsali: [[83.2, 36, 4.8, 9, 14], [96.8, 36, 4.8, 9, -14]],
-  tricipiti: [[75, 33, 2.8, 6, 12], [105, 33, 2.8, 6, -12]],
-  lombari: [[90, 47, 5, 3.8, 0]],
-  glutei: [[85.3, 57, 5.4, 5, 0], [94.7, 57, 5.4, 5, 0]],
-  femorali: [[85, 71, 4.5, 10, 3], [95, 71, 4.5, 10, -3]]
+// Nostri muscoli → parti del disegno, sulla figura davanti e dietro
+const BODY_SLUGS = {
+  petto: { front: ['chest'] },
+  spalle: { front: ['deltoids'] },
+  'spalle-post': { back: ['deltoids'] },
+  bicipiti: { front: ['biceps'] },
+  tricipiti: { front: ['triceps'], back: ['triceps'] },
+  avambracci: { front: ['forearm'], back: ['forearm'] },
+  addome: { front: ['abs'] },
+  obliqui: { front: ['obliques'] },
+  trapezio: { front: ['trapezius'], back: ['trapezius'] },
+  dorsali: { back: ['upper-back'] },
+  lombari: { back: ['lower-back'] },
+  glutei: { back: ['gluteal'] },
+  quadricipiti: { front: ['quadriceps'] },
+  femorali: { back: ['hamstring'] },
+  adduttori: { front: ['adductors'], back: ['adductors'] },
+  polpacci: { front: ['calves'], back: ['calves'] }
 };
+const BODY_OWNER = { front: {}, back: {} };
+Object.entries(BODY_SLUGS).forEach(([m, sides]) => Object.entries(sides).forEach(([side, slugs]) => slugs.forEach(s => { BODY_OWNER[side][s] = m; })));
 
-// Sagoma di base (una per lato), disegnata sotto i muscoli
-const bodySilhouette = (cx) => {
-  const x = (v) => cx + v;
-  return `<circle cx="${cx}" cy="10" r="6"/>` +
-    `<rect x="${x(-2.2)}" y="15" width="4.4" height="5" rx="1.5"/>` +
-    `<path d="M${x(-13.5)} 20 Q${cx} 17.5 ${x(13.5)} 20 L${x(11)} 36 L${x(8)} 53 L${x(-8)} 53 L${x(-11)} 36Z"/>` +
-    `<ellipse cx="${x(-15)}" cy="33" rx="3.6" ry="9" transform="rotate(12 ${x(-15)} 33)"/><ellipse cx="${x(15)}" cy="33" rx="3.6" ry="9" transform="rotate(-12 ${x(15)} 33)"/>` +
-    `<ellipse cx="${x(-18)}" cy="48" rx="3" ry="8.5" transform="rotate(10 ${x(-18)} 48)"/><ellipse cx="${x(18)}" cy="48" rx="3" ry="8.5" transform="rotate(-10 ${x(18)} 48)"/>` +
-    `<circle cx="${x(-19.5)}" cy="58" r="2.4"/><circle cx="${x(19.5)}" cy="58" r="2.4"/>` +
-    `<path d="M${x(-8.5)} 51 L${x(8.5)} 51 L${x(9.5)} 60 L${x(-9.5)} 60Z"/>` +
-    `<ellipse cx="${x(-5)}" cy="68" rx="5.2" ry="14"/><ellipse cx="${x(5)}" cy="68" rx="5.2" ry="14"/>` +
-    `<ellipse cx="${x(-5.4)}" cy="89" rx="3.6" ry="10"/><ellipse cx="${x(5.4)}" cy="89" rx="3.6" ry="10"/>` +
-    `<ellipse cx="${x(-6)}" cy="100" rx="3.6" ry="1.8"/><ellipse cx="${x(6)}" cy="100" rx="3.6" ry="1.8"/>`;
+// Disegno completo (due figure affiancate). paint(muscolo) → attributi del muscolo;
+// base / hair / line = attributi di corpo, capelli e contorno. sex 'F' = figura femminile.
+const BODY_W = 1448, BODY_H = 1448;
+const bodyMapSvg = ({ paint, base, hair, line, sex, labels, labelAttr, size, cls }) => {
+  const art = typeof BODY_ART !== 'undefined' ? BODY_ART[sex === 'F' ? 'female' : 'male'] : null;
+  if (!art) return '';
+  const figure = (side, x) => {
+    const fig = art[side];
+    const paths = Object.entries(fig.parts).map(([slug, d]) => {
+      const m = BODY_OWNER[side][slug];
+      const attr = m ? paint(m) : (slug === 'hair' ? hair : base);
+      return `<path d="${d}" ${attr}/>`;
+    }).join('');
+    const outline = fig.outline ? `<path d="${fig.outline}" fill="none" ${line}/>` : '';
+    return `<svg x="${x}" y="0" width="${BODY_W / 2}" height="${BODY_H}" viewBox="${fig.vb}">${paths}${outline}</svg>`;
+  };
+  const textH = labels ? 110 : 0;
+  const text = labels
+    ? `<text x="${BODY_W / 4}" y="${BODY_H + 85}" text-anchor="middle" ${labelAttr}>${labels[0]}</text><text x="${BODY_W * 3 / 4}" y="${BODY_H + 85}" text-anchor="middle" ${labelAttr}>${labels[1]}</text>`
+    : '';
+  const h = BODY_H + textH;
+  const dims = size ? ` width="${size}" height="${Math.round(size * h / BODY_W)}"` : '';
+  return `<svg viewBox="0 0 ${BODY_W} ${h}"${dims} xmlns="http://www.w3.org/2000/svg"${cls ? ` class="${cls}"` : ''}>${figure('front', 0)}${figure('back', BODY_W / 2)}${text}</svg>`;
 };
+const BODY_LABELS = ['davanti', 'dietro'];
+const BODY_CSS = { base: 'class="mm-base"', hair: 'class="mm-hair"', line: 'class="mm-line" vector-effect="non-scaling-stroke"', labelAttr: 'class="mm-label" font-size="64" font-weight="700"' };
 
-const muscleShape = (sh) => (typeof sh === 'string'
-  ? `<path d="${sh}"/>`
-  : `<ellipse cx="${sh[0]}" cy="${sh[1]}" rx="${sh[2]}" ry="${sh[3]}"${sh[4] ? ` transform="rotate(${sh[4]} ${sh[0]} ${sh[1]})"` : ''}/>`);
-
-// Mappa dei muscoli: primary e secondary sono liste di id di MUSCLE_SHAPES
-const muscleMapSvg = (primary = [], secondary = []) => {
-  const groups = Object.keys(MUSCLE_SHAPES).map(id => {
-    const cls = primary.includes(id) ? 'mm-on' : secondary.includes(id) ? 'mm-sec' : 'mm-m';
-    return `<g class="${cls}">${MUSCLE_SHAPES[id].map(muscleShape).join('')}</g>`;
-  }).join('');
-  return `<svg viewBox="0 0 120 104" xmlns="http://www.w3.org/2000/svg" class="muscle-map">` +
-    `<g class="mm-base">${bodySilhouette(30)}${bodySilhouette(90)}</g>${groups}` +
-    `<text x="30" y="104" text-anchor="middle" class="mm-label">davanti</text><text x="90" y="104" text-anchor="middle" class="mm-label">dietro</text></svg>`;
-};
+// Mappa dei muscoli di un esercizio: primary e secondary sono liste di id di MUSCLE_NAMES
+const muscleMapSvg = (primary = [], secondary = [], opts = {}) => bodyMapSvg({
+  ...BODY_CSS, sex: opts.sex, labels: BODY_LABELS, cls: 'muscle-map',
+  paint: (m) => `class="${primary.includes(m) ? 'mm-on' : secondary.includes(m) ? 'mm-sec' : 'mm-m'}"`
+});
 
 // --- Omino animato (viewBox 0 0 100 100, pavimento a y = 98) ---
 // Giunti: h testa · n spalle · p bacino · k1/f1 ginocchio/piede avanti · k2/f2 dietro · e1/w1 gomito/polso avanti · e2/w2 dietro

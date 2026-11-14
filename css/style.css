@@ -277,7 +277,9 @@ html.dark .chart-dot { fill: #18181C; }
 .mm-m { fill: #D4D4DA; }
 .mm-on { fill: #F5A623; }
 .mm-sec { fill: #FBD38D; }
-.mm-label { font-size: 5px; font-weight: 700; fill: #A1A1AA; }
+.mm-label { fill: #A1A1AA; }
+.mm-hair { fill: #CFCFD6; }
+.mm-line { stroke: #C7C7CF; stroke-width: 1; }
 html.dark .ea-floor { stroke: #303037; }
 html.dark .ea-limb, html.dark .ea-torso { stroke: #ECECF1; }
 html.dark .ea-back { stroke: #7C7885; }
@@ -286,6 +288,8 @@ html.dark .ea-prop { fill: #4B4B55; }
 html.dark .ea-prop-line { stroke: #4B4B55; }
 html.dark .mm-base { fill: #34343C; }
 html.dark .mm-m { fill: #45454F; }
+html.dark .mm-hair { fill: #2A2A31; }
+html.dark .mm-line { stroke: #55555F; }
 html.dark .mm-sec { fill: #8A6420; }
 
 /* Come si fa: seconda foto (fine del movimento) che compare e scompare */
