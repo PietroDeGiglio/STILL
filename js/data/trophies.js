@@ -15,7 +15,7 @@ const TROPHY_GROUPS = [
     hint: 'Palestra e sport segnati come fatti' },
   { id: 'hours', icon: '⏱️', name: 'Ore di allenamento', unit: 'ore', one: 'ora', steps: [1, 10, 25, 50, 100, 250, 500],
     hint: 'Il tempo passato ad allenarti' },
-  { id: 'streak', icon: '🔥', name: 'Serie', unit: 'giorni di fila', one: 'giorno di fila', steps: [3, 7, 14, 30, 60, 100, 365],
+  { id: 'streak', icon: '🔥', name: 'Giorni di fila', unit: 'giorni di fila', one: 'giorno di fila', steps: [3, 7, 14, 30, 60, 100, 365],
     hint: 'La tua serie migliore di giorni attivi' },
   { id: 'active', icon: '📅', name: 'Giorni attivi', unit: 'giorni attivi', one: 'giorno attivo', steps: [7, 30, 60, 100, 200, 365, 730],
     hint: 'Giorni con almeno un pasto o un allenamento' },

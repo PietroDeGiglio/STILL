@@ -2,7 +2,7 @@
 // i conti sono in app.js, sezione IL TUO ANNO. Le stime per gli sport (salti, km, colpi…) sono medie
 // indicative per un'ora di allenamento o partita amatoriale: servono a divertirsi, non a misurare.
 
-const wfmt = (n) => Math.round(n).toLocaleString('it-IT');
+const wfmt = (n) => Math.round(n).toLocaleString(i18nIntl());
 const wtimes = (x) => (x >= 1.5 ? wfmt(x) + ' volte' : '');
 
 // Distanze per i paragoni (dalla più lunga): "come Milano–Roma 3 volte"

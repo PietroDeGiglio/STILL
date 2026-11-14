@@ -73,7 +73,7 @@ const countUp = (text, k) => {
   if (!isFinite(target)) return text;
   const decimals = (m[2].split(',')[1] || '').length;
   const v = target * easeOut(k);
-  return m[1] + v.toLocaleString('it-IT', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + m[3];
+  return m[1] + v.toLocaleString(i18nIntl(), { minimumFractionDigits: decimals, maximumFractionDigits: decimals }) + m[3];
 };
 const drawLogo = (ctx, x, y, size, fill) => {
   // Trasforma il path (non il contesto) così un gradiente in coordinate canvas resta allineato

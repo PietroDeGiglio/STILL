@@ -8,7 +8,8 @@
     "vendor": "node scripts/vendor.js",
     "build:template": "node scripts/build-template.js",
     "build": "npm run vendor && npm run build:template && npm run build:css",
-    "test:import": "node scripts/test-workout-import.js"
+    "test:import": "node scripts/test-workout-import.js",
+    "i18n:check": "node scripts/i18n-check.js"
   },
   "devDependencies": {
     "@fontsource-variable/plus-jakarta-sans": "5.2.8",

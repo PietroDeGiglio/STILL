@@ -1529,7 +1529,7 @@
                 <div class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-lg flex-shrink-0">{{ row.icon }}</div>
                 <div class="min-w-0">
                   <span class="text-sm font-bold text-antracite block truncate">{{ row.label }}</span>
-                  <span class="text-[10px] font-medium text-gray-400">{{ row.count }} misur{{ row.count === 1 ? 'azione' : 'azioni' }}</span>
+                  <span class="text-[10px] font-medium text-gray-400">{{ row.count }} {{ row.count === 1 ? 'misurazione' : 'misurazioni' }}</span>
                 </div>
               </div>
               <div class="flex items-center gap-2 flex-shrink-0">
@@ -1591,7 +1591,7 @@
             <div class="flex justify-between items-start gap-3">
               <div>
                 <h5 class="text-sm font-extrabold text-antracite">{{ group.label }}</h5>
-                <p class="text-[10px] text-gray-400 font-medium mt-0.5">{{ group.sessions }} session{{ group.sessions === 1 ? 'e' : 'i' }} • ultima {{ formatDate(group.lastDate) }}</p>
+                <p class="text-[10px] text-gray-400 font-medium mt-0.5">{{ group.sessions }} {{ group.sessions === 1 ? 'sessione' : 'sessioni' }} • ultima {{ formatDate(group.lastDate) }}</p>
               </div>
               <span class="text-[10px] font-bold px-2 py-1 rounded-lg whitespace-nowrap" :class="group.classes">{{ group.deltaText }}</span>
             </div>
@@ -1674,7 +1674,7 @@
               <span v-else class="text-[9px] font-bold text-gray-400">🔒 Da sbloccare</span>
             </div>
             <div class="text-xs font-extrabold text-antracite mt-2 truncate">{{ g.name }}</div>
-            <div class="text-[10px] font-semibold text-gray-400 truncate">{{ g.next ? formatNumber(g.value) + ' / ' + formatNumber(g.next.target) + ' ' + g.unit : 'Tutti sbloccati! 👑' }}</div>
+            <div class="text-[10px] font-semibold text-gray-400 truncate">{{ g.next ? formatNumber(g.value) + ' / ' + formatNumber(g.next.target) + ' ' + $tv(g.unit) : 'Tutti sbloccati! 👑' }}</div>
             <div class="h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
               <div class="h-full rounded-full transition-all" :style="{ width: Math.round(g.progress * 100) + '%', background: g.next ? g.next.tier.color : '#20C997' }"></div>
             </div>
@@ -2403,6 +2403,18 @@
             </button>
           </div>
           <p v-if="settings.theme === 'system'" class="text-[10px] font-medium text-gray-400 -mt-1">Segue il tema del telefono: scuro di sera se l'hai impostato così.</p>
+        </div>
+
+        <!-- Lingua -->
+        <div class="space-y-3">
+          <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Lingua</div>
+          <div class="grid grid-cols-3 gap-1.5 bg-gray-50 border border-gray-100 rounded-2xl p-1.5">
+            <button v-for="lang in LOCALES" :key="'lang-' + lang.id" @click="setLocale(lang.id)"
+                    class="py-2.5 rounded-xl text-xs font-bold transition-all flex flex-col items-center gap-1"
+                    :class="i18nLocale === lang.id ? 'bg-white text-antracite shadow-sm border border-gray-200' : 'text-gray-400 hover:text-antracite border border-transparent'">
+              <span class="text-base leading-none">{{ lang.flag }}</span>{{ lang.name }}
+            </button>
+          </div>
         </div>
 
         <!-- Da tracciare (facoltativo) -->
@@ -3305,7 +3317,7 @@
           <div class="w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-xl border border-salvia/20">{{ historyIcon }}</div>
           <div>
             <h3 class="text-lg font-bold text-antracite leading-tight">Storico {{ historyLabel }}</h3>
-            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ historyRows.length }} misurazion{{ historyRows.length === 1 ? 'e' : 'i' }}</p>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ historyRows.length }} {{ historyRows.length === 1 ? 'misurazione' : 'misurazioni' }}</p>
           </div>
         </div>
         <button @click="closeHistory" class="p-1 text-gray-400 hover:text-antracite">
@@ -3484,7 +3496,7 @@
         </button>
       </div>
 
-      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">{{ sheetHistorySessions.length }} session{{ sheetHistorySessions.length === 1 ? 'e' : 'i' }} registrate</p>
+      <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0">{{ sheetHistorySessions.length }} {{ sheetHistorySessions.length === 1 ? 'sessione registrata' : 'sessioni registrate' }}</p>
 
       <div v-if="sheetHistorySessions.length === 0" class="py-8 text-center text-sm text-gray-400 font-medium">
         Ancora nessuna sessione. Registra i carichi dalla scheda per iniziare a costruire lo storico.
@@ -4695,7 +4707,7 @@
       <div class="px-6 pt-8 pb-5 pet-glow" :style="{ background: 'radial-gradient(circle at 50% 45%, ' + petState.color + '55, transparent 70%)' }">
         <div class="pet-pop w-40 h-40 mx-auto" v-html="petMainSvg"></div>
         <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2">{{ petEvolveModal.hatched ? 'L\'uovo si è schiuso!' : 'Evoluzione!' }}</p>
-        <h3 class="text-2xl font-extrabold text-antracite leading-tight mt-1">{{ petEvolveModal.hatched ? 'È nato ' + petState.name : 'È diventato ' + petState.name }}</h3>
+        <h3 class="text-2xl font-extrabold text-antracite leading-tight mt-1">{{ petEvolveModal.hatched ? $t('È nato {0}', [petState.name]) : $t('È diventato {0}', [petState.name]) }}</h3>
         <p class="text-sm text-gray-500 font-medium mt-2">{{ streakInfo.current }} {{ streakInfo.current === 1 ? 'giorno' : 'giorni' }} di fila<span v-if="petState.nextIn">. Prossima forma tra {{ petState.nextIn }} {{ petState.nextIn === 1 ? 'giorno' : 'giorni' }}</span>.</p>
       </div>
       <div class="p-6 pt-2 space-y-2">

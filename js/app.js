@@ -2,7 +2,7 @@
 // Vue Application Setup
 const { createApp, ref, shallowRef, onMounted, watch, nextTick, computed } = Vue;
 
-createApp({
+const stillApp = createApp({
   setup() {
     // App State
     const activeTab = ref('dashboard');
@@ -709,7 +709,7 @@ createApp({
 
     const formatDayLabel = (dateKey) => {
       const [year, month, day] = dateKey.split('-').map(Number);
-      return new Date(year, month - 1, day).toLocaleDateString('it-IT', {
+      return new Date(year, month - 1, day).toLocaleDateString(i18nIntl(), {
         weekday: 'long', day: 'numeric', month: 'long'
       });
     };
@@ -874,7 +874,7 @@ createApp({
         const tracked = info.entries > 0 || info.logged > 0;
         days.push({
           key, tracked, kcal: info.kcal, target: info.target, status: tracked ? dayStatusFor(d) : 'empty',
-          letter: d.toLocaleDateString('it-IT', { weekday: 'narrow' }).toUpperCase(),
+          letter: d.toLocaleDateString(i18nIntl(), { weekday: 'narrow' }).toUpperCase(),
           pct: tracked && info.target ? Math.min(100, Math.round(info.kcal / (info.target * 1.25) * 100)) : 0
         });
       }
@@ -976,7 +976,7 @@ createApp({
     const dashMonth = ref(dashToday.getMonth());
 
     const dashMonthName = computed(() => {
-      return new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(dashYear.value, dashMonth.value, 1));
+      return new Intl.DateTimeFormat(i18nIntl(), { month: 'long' }).format(new Date(dashYear.value, dashMonth.value, 1));
     });
 
     const dashDaysInMonth = computed(() => new Date(dashYear.value, dashMonth.value + 1, 0).getDate());
@@ -1362,7 +1362,7 @@ createApp({
     const trainingYear = ref(trainingToday.getFullYear());
     const trainingMonth = ref(trainingToday.getMonth());
 
-    const trainingMonthName = computed(() => new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(trainingYear.value, trainingMonth.value, 1)));
+    const trainingMonthName = computed(() => new Intl.DateTimeFormat(i18nIntl(), { month: 'long' }).format(new Date(trainingYear.value, trainingMonth.value, 1)));
     const trainingDaysInMonth = computed(() => new Date(trainingYear.value, trainingMonth.value + 1, 0).getDate());
     const trainingFirstDayOfMonth = computed(() => {
       const firstDay = new Date(trainingYear.value, trainingMonth.value, 1).getDay();
@@ -1505,7 +1505,7 @@ createApp({
     const formatDateLong = (dateStr) => {
       const d = new Date(String(dateStr) + 'T00:00:00');
       if (Number.isNaN(d.getTime())) return String(dateStr);
-      const label = new Intl.DateTimeFormat('it-IT', { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
+      const label = new Intl.DateTimeFormat(i18nIntl(), { weekday: 'long', day: 'numeric', month: 'long' }).format(d);
       return label.charAt(0).toUpperCase() + label.slice(1);
     };
 
@@ -4138,7 +4138,7 @@ createApp({
 
     const formatNumber = (value) => {
       if (value === null || value === undefined || Number.isNaN(Number(value))) return '-';
-      return Number(value).toLocaleString('it-IT', { maximumFractionDigits: 1 });
+      return Number(value).toLocaleString(i18nIntl(), { maximumFractionDigits: 1 });
     };
 
     const daysBetween = (fromDate, toDate) => {
@@ -4478,7 +4478,7 @@ createApp({
     const currentMonth = ref(todayDate.getMonth());
     
     const currentMonthName = computed(() => {
-      return new Intl.DateTimeFormat('it-IT', { month: 'long' }).format(new Date(currentYear.value, currentMonth.value, 1));
+      return new Intl.DateTimeFormat(i18nIntl(), { month: 'long' }).format(new Date(currentYear.value, currentMonth.value, 1));
     });
     
     const daysInMonth = computed(() => {
@@ -5474,7 +5474,7 @@ createApp({
       const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
       const today = toISODate();
       const end = toISODate(last) > today ? today : toISODate(last);
-      const month = first.toLocaleDateString('it-IT', { month: 'long' });
+      const month = first.toLocaleDateString(i18nIntl(), { month: 'long' });
       return { start: toISODate(first), end, first, month: month.charAt(0).toUpperCase() + month.slice(1), year: first.getFullYear() };
     };
     const recapMonthName = (offset) => recapRange(offset).month;
@@ -5485,8 +5485,8 @@ createApp({
       const last = new Date(first); last.setDate(last.getDate() + 6);
       const today = toISODate();
       const end = toISODate(last) > today ? today : toISODate(last);
-      const m1 = first.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
-      const m2 = last.toLocaleDateString('it-IT', { month: 'short' }).replace('.', '');
+      const m1 = first.toLocaleDateString(i18nIntl(), { month: 'short' }).replace('.', '');
+      const m2 = last.toLocaleDateString(i18nIntl(), { month: 'short' }).replace('.', '');
       const label = first.getDate() + (m1 !== m2 ? ' ' + m1 : '') + '–' + last.getDate() + ' ' + m2;
       return { start: toISODate(first), end, first, month: label, year: last.getFullYear() };
     };
@@ -5594,7 +5594,7 @@ createApp({
           kind: 'quote', empty: false, available: [], focusAvailable: [],
           kicker: name ? 'La frase del giorno di ' + name : 'La frase del giorno',
           dateLabel: formatDateLong(toISODate()),
-          pre: q.pre, hi: q.hi, attribution: q.by || '',
+          pre: i18nTv(q.pre), hi: i18nTv(q.hi), attribution: i18nTv(q.by || ''),
           stats: progress.stats,
           statsLabel: (name ? 'I risultati di ' + name : 'I miei risultati') + ' · ' + periodLabel(st.period).toLowerCase()
         };
@@ -6314,7 +6314,7 @@ createApp({
         // Solo le chiavi di STILL: il resto del file viene ignorato
         const clean = {};
         validKeys.forEach(k => { clean[k] = data[k]; });
-        const when = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString('it-IT') : 'data sconosciuta';
+        const when = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString(i18nIntl()) : 'data sconosciuta';
         onValid(clean, when);
       };
       reader.onerror = () => onError('Impossibile leggere il file.');
@@ -6504,7 +6504,7 @@ createApp({
       const today = toISODate();
       const end = yearEnd < today ? yearEnd : today;
       const inRange = (d) => !!d && d >= start && d <= end;
-      const fmt = (n) => Math.round(n).toLocaleString('it-IT');
+      const fmt = (n) => Math.round(n).toLocaleString(i18nIntl());
 
       // Giorni attivi, mese e giorno preferiti, serie migliore
       const set = activeDaySet.value;
@@ -6904,7 +6904,7 @@ createApp({
       const total = Math.floor(h * 60);
       return Math.floor(total / 60) + ' h ' + String(total % 60).padStart(2, '0') + ' min';
     };
-    const clockLabel = (ms) => new Date(ms).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    const clockLabel = (ms) => new Date(ms).toLocaleTimeString(i18nIntl(), { hour: '2-digit', minute: '2-digit' });
     const startFast = (goal) => {
       settings.value.fasting = { ...(settings.value.fasting || {}), start: Date.now(), goal };
       fastNow.value = Date.now();
@@ -7997,12 +7997,17 @@ createApp({
       photoViewer, viewerPhoto, viewerIndex, openPhoto, stepPhoto, closePhotoViewer, savePhotoEdit, deletePhoto,
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
-      photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory
+      photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
+      LOCALES, i18nLocale, setLocale
     };
   },
   // Interfaccia già compilata (src/app-template.html → js/app-render.js, npm run build:template)
   render: STILL_RENDER
-}).mount('#app');
+});
+// Lingue (js/i18n/i18n.js): $t('frase') e $tv(valore) usati dall'interfaccia
+stillApp.config.globalProperties.$t = i18nT;
+stillApp.config.globalProperties.$tv = i18nTv;
+stillApp.mount('#app');
 
 // App installabile e uso offline: il service worker funziona solo da un indirizzo web (non da file e non nell'APK)
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !window.Capacitor) {

@@ -46,6 +46,8 @@ const bodyMapSvg = ({ paint, base, hair, line, sex, labels, labelAttr, size, cls
     const outline = fig.outline ? `<path d="${fig.outline}" fill="none" ${line}/>` : '';
     return `<svg x="${x}" y="0" width="${BODY_W / 2}" height="${BODY_H}" viewBox="${fig.vb}">${paths}${outline}</svg>`;
   };
+  // Etichette nella lingua scelta (js/i18n/i18n.js)
+  if (labels && typeof i18nTv === 'function') labels = labels.map(i18nTv);
   const textH = labels ? 110 : 0;
   const text = labels
     ? `<text x="${BODY_W / 4}" y="${BODY_H + 85}" text-anchor="middle" ${labelAttr}>${labels[0]}</text><text x="${BODY_W * 3 / 4}" y="${BODY_H + 85}" text-anchor="middle" ${labelAttr}>${labels[1]}</text>`
