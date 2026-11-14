@@ -600,24 +600,79 @@ const drawRecapBody = (ctx, data, o) => {
 
 
 // ---------------------------------------------------------------
-// COMPAGNO DELLA SERIE nelle storie: appoggiato coi piedi su "bottom", fa il suo balletto nel video
-// (mosse in js/data/pets.js → petDancePose). k = ingresso (0..1).
+// COMPAGNO DELLA SERIE nelle storie: appoggiato coi piedi su "bottom".
+// Nel video cade in scena, saluta e poi fa il suo balletto (mosse in js/data/pets.js → petMotion),
+// muovendo ombra, gambe, corpo e braccia separatamente (img.rig). k = ingresso (0..1).
 // ---------------------------------------------------------------
+const petShareClock = new WeakMap();   // per ogni compagno: quando è atterrato
 const drawSharePet = (ctx, img, id, cx, bottom, size, live, k = 1) => {
   if (!img || !img.complete || !img.naturalWidth || k <= 0) return;
-  const pose = live && typeof petDancePose === 'function'
-    ? petDancePose(id, performance.now() / 1000)
-    : { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1, flip: false };
-  const u = size / 240;   // le mosse sono pensate per un compagno di 240 px
-  const pop = k < 1 ? easeOut(k) * (1 + 0.2 * Math.sin(k * Math.PI)) : 1;
+  if (!live || typeof petMotion !== 'function') {
+    ctx.drawImage(img, cx - size / 2, bottom - size * (108 / 120), size, size);
+    return;
+  }
+  const now = performance.now() / 1000;
+  let clock = petShareClock.get(img);
+  if (!clock) { clock = { start: null, last: 0 }; petShareClock.set(img, clock); }
+  // Ricomincia (caduta + saluto) quando rientra in scena
+  if (k < 1 || now - clock.last > 0.4) clock.start = null;
+  if (k >= 1 && clock.start === null) clock.start = now;
+  clock.last = now;
+  const P = petMotion(id, clock.start === null ? 0 : now - clock.start, k);
+  const u = size / 120;
   ctx.save();
   ctx.shadowColor = 'transparent';
-  ctx.globalAlpha *= Math.min(1, k * 1.5);
-  ctx.translate(cx + pose.dx * u, bottom + pose.dy * u);
-  ctx.rotate(pose.rot);
-  ctx.scale(pose.sx * pop * (pose.flip ? -1 : 1), pose.sy * pop);
-  // Nel disegno (120×120) i piedi toccano terra a y≈108
-  ctx.drawImage(img, -size / 2, -size * (108 / 120), size, size);
+  ctx.globalAlpha *= P.alpha;
+  // Da qui in poi si lavora nelle coordinate del disegno (120×120), piedi a terra a y≈108
+  ctx.translate(cx, bottom);
+  ctx.scale(u, u);
+  ctx.translate(-60, -108);
+  const around = (x, y, rot, sx = 1, sy = 1) => {
+    ctx.translate(x, y);
+    if (rot) ctx.rotate(rot);
+    if (sx !== 1 || sy !== 1) ctx.scale(sx, sy);
+    ctx.translate(-x, -y);
+  };
+  const part = (im) => { if (im) ctx.drawImage(im, 0, 0, 120, 120); };
+  const R = img.rig;
+  if (!R) {
+    // Senza pezzi separati (uovo): si muove tutto insieme
+    ctx.translate(P.dx, P.dy);
+    around(60, 107, P.rot + P.lean * Math.PI / 180, (P.flip ? -1 : 1) * P.usx, P.usy);
+    part(img);
+    ctx.restore();
+    return;
+  }
+  const deg = Math.PI / 180;
+  // Ombra: resta a terra, più piccola e chiara quando salta
+  const air = Math.max(0, Math.min(1, -P.dy / 40));
+  ctx.save();
+  ctx.globalAlpha *= 1 - air * 0.55;
+  around(60 + P.dx, 109, 0, 1 - air * 0.45, 1 - air * 0.45);
+  ctx.translate(P.dx, 0);
+  part(R.shadow);
+  ctx.restore();
+  // Tutto il corpo: spostamento, rotazione dai piedi, specchio
+  ctx.translate(P.dx, P.dy);
+  around(60, 107, P.rot, P.flip ? -1 : 1, 1);
+  // Gambe: si accorciano piegandosi (piedi fermi a terra) e si aprono
+  ctx.save();
+  around(60, 106, 0, 1, P.legs);
+  const leg = (im, pv, ang) => {
+    if (!im || !pv) return;
+    ctx.save(); around(pv[0], pv[1], ang * deg); part(im); ctx.restore();
+  };
+  leg(R.legL, R.pivots.legL, P.lL);
+  leg(R.legR, R.pivots.legR, -P.lR);
+  ctx.restore();
+  // Busto e braccia: scende quando le gambe si piegano, si inclina e si schiaccia
+  ctx.translate(0, R.leg * (1 - P.legs));
+  around(60, 100, P.lean * deg, P.usx, P.usy);
+  part(R.body);
+  // Braccia piegate (avocado palestrato): già in posa, si muovono poco
+  const arm = R.flex ? 0.25 : 1;
+  leg(R.armL, R.pivots.armL, P.aL * arm);
+  leg(R.armR, R.pivots.armR, -P.aR * arm);
   ctx.restore();
 };
 const drawCornerPet = (ctx, data, cx, bottom, size, live, k) => {

@@ -241,7 +241,7 @@ html.dark .chart-dot { fill: #18181C; }
   .pet-dance, .pet-dance .pet-all, .pet-dance .pet-sh, .pet-dance .pl { animation: none !important; }
 }
 
-/* Balletto del compagno (al tocco): una mossa per specie, come nei video da condividere (petDancePose).
+/* Balletto del compagno (al tocco): una mossa per specie, come nei video da condividere (petMotion in js/data/pets.js).
    Si muove il corpo, l'ombra resta a terra; braccia e gambe hanno passi diversi per ogni specie. */
 .pet-dance { transform-origin: 50% 90%; }
 .pet-dance-egg { animation: dEgg .5s ease-in-out 5; }

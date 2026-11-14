@@ -483,41 +483,162 @@ const petBack = (id, a) => {
   return { back: '', front: '' };
 };
 
-// --- Balletti: mossa diversa per ogni specie (usata nell'app via CSS e nei video da condividere) ---
-// Ritorna spostamento, rotazione (attorno ai piedi), schiacciamento e specchio al tempo t (secondi)
-const petDancePose = (id, t) => {
-  const P = { dx: 0, dy: 0, rot: 0, sx: 1, sy: 1, flip: false };
-  const hop = (period, height) => { const p = (t % period) / period; return -Math.sin(p * Math.PI) * height; };
+// --- Movimenti nei video da condividere (canvas, js/share/draw.js → drawSharePet) ---
+// Il compagno è diviso in pezzi (petImage → img.rig): ombra, gambe, corpo e braccia si muovono
+// ognuno per conto suo, come nell'app. Unità = viewBox 120 (dy negativo = verso l'alto), gradi.
+// Posa: dx, dy (tutto il corpo), rot (tutto, dai piedi), flip, legs (altezza gambe, 1 = dritte),
+// lean (busto), usx/usy (schiacciamento del busto), aL/aR (braccia alzate: 0 giù, 150 in alto),
+// lL/lR (gambe aperte), pop (scala d'ingresso), alpha.
+const petPose = () => ({ dx: 0, dy: 0, rot: 0, flip: false, legs: 1, lean: 0, usx: 1, usy: 1, aL: 0, aR: 0, lL: 0, lR: 0, pop: 1, alpha: 1 });
+
+// Valore al punto p (0..1) passando per le tappe [[p, v], ...], con curve morbide tra una tappa e l'altra
+const petKey = (p, keys) => {
+  if (p <= keys[0][0]) return keys[0][1];
+  for (let i = 1; i < keys.length; i++) {
+    if (p <= keys[i][0]) {
+      const [p0, v0] = keys[i - 1], [p1, v1] = keys[i];
+      const u = (p - p0) / ((p1 - p0) || 1);
+      return v0 + (v1 - v0) * u * u * (3 - 2 * u);
+    }
+  }
+  return keys[keys.length - 1][1];
+};
+
+// Salto vero: si piega (preparazione), spinge, vola, atterra schiacciandosi e torna su.
+// p = 0..1 dentro il salto, h = altezza. Le braccia salgono con la spinta.
+const petHop = (P, p, h, arms = 140) => {
+  const air = p > 0.24 && p < 0.76 ? (p - 0.24) / 0.52 : -1;
+  P.dy += air >= 0 ? -h * 4 * air * (1 - air) : 0;
+  P.legs = petKey(p, [[0, 1], [0.18, 0.66], [0.26, 1.1], [0.4, 1], [0.72, 0.98], [0.8, 0.68], [0.92, 1.03], [1, 1]]);
+  P.usx = petKey(p, [[0, 1], [0.18, 1.08], [0.27, 0.93], [0.45, 1], [0.78, 1], [0.82, 1.1], [0.93, 0.97], [1, 1]]);
+  P.usy = 2 - P.usx;
+  const a = petKey(p, [[0, 0], [0.18, -20], [0.32, arms], [0.62, arms * 0.85], [0.82, 20], [1, 0]]);
+  P.aL = a; P.aR = a;
+  const tuck = air >= 0 ? Math.sin(air * Math.PI) * 12 : 0;
+  P.lL = tuck; P.lR = tuck;
+  return P;
+};
+
+const PET_HELLO = 1.5;   // secondi di saluto prima del balletto
+
+// t = secondi da quando è atterrato; k = ingresso (0..1, già "addolcito" come gli altri elementi)
+const petMotion = (id, t, k = 1) => {
+  const P = petPose();
+  // Ingresso: cade dall'alto con le braccia su, atterra schiacciandosi
+  if (k < 1) {
+    const raw = 1 - Math.cbrt(1 - Math.max(0, k));   // tempo lineare
+    if (raw < 0.6) {
+      const q = raw / 0.6;
+      P.dy = -70 * (1 - q * q); P.alpha = Math.min(1, q * 3);
+      P.aL = P.aR = 150; P.lL = P.lR = 8; P.usx = 0.94; P.usy = 1.06; P.legs = 1.08;
+    } else {
+      const q = (raw - 0.6) / 0.4;
+      P.legs = petKey(q, [[0, 0.62], [0.5, 1.06], [1, 1]]);
+      P.usx = petKey(q, [[0, 1.16], [0.5, 0.95], [1, 1]]); P.usy = 2 - P.usx;
+      P.aL = P.aR = petKey(q, [[0, 70], [0.5, 30], [1, 0]]);
+    }
+    return P;
+  }
+  // Saluto: si gira un po' e fa ciao con la mano
+  if (t < PET_HELLO) {
+    const w = petKey(t / PET_HELLO, [[0, 0], [0.15, 1], [0.85, 1], [1, 0]]);
+    P.lean = -5 * w;
+    P.aR = w * (100 + 22 * Math.sin(t * 15));
+    P.aL = w * 12;
+    P.usy = 1 + 0.02 * Math.sin(t * 7); P.usx = 2 - P.usy;
+    return P;
+  }
+  const d = t - PET_HELLO;
+  const loop = (period) => (d % period) / period;
+  const S = Math.sin, PI2 = Math.PI * 2;
   switch (id) {
-    case 'sprout':      // ondeggia come al vento, con un saltino
-      P.rot = Math.sin(t * 3) * 0.16; P.dy = -Math.abs(Math.sin(t * 3)) * 8; break;
-    case 'dragon': {    // salti, e ogni tre salti una giravolta in aria
-      const n = Math.floor(t / 0.9), p = (t % 0.9) / 0.9;
-      P.dy = hop(0.9, 70);
-      if (n % 3 === 2) P.rot = p * Math.PI * 2;
-      else { const q = Math.max(0, 1 - Math.abs(p - 0.98) * 10); P.sy = 1 - q * 0.12; P.sx = 1 + q * 0.1; }
+    case 'sprout': {     // ondeggia al vento a braccia alzate, battendo i piedi a tempo
+      const p = loop(1.4), s = S(p * PI2);
+      P.lean = s * 11; P.dx = s * 3;
+      P.aL = 125 + 25 * s; P.aR = 125 - 25 * s;
+      const b = Math.abs(S(p * PI2 * 2));
+      P.legs = 1 - 0.1 * b; P.usy = 1 + 0.03 * (1 - b); P.usx = 2 - P.usy;
+      P.lL = Math.max(0, s) * 12; P.lR = Math.max(0, -s) * 12;
       break;
     }
-    case 'avocado': {   // squat da palestra + passetti laterali
-      const q = Math.max(0, Math.sin(t * 5));
-      P.sy = 1 - q * 0.16; P.sx = 1 + q * 0.1; P.dx = Math.sin(t * 1.25) * 30; break;
+    case 'dragon': {     // due saltelli, poi un salto grande sbattendo le ali (braccia) e un ruggito
+      const p = loop(3);
+      if (p < 0.2) petHop(P, p / 0.2, 8, 60);
+      else if (p < 0.4) petHop(P, (p - 0.2) / 0.2, 8, 60);
+      else if (p < 0.75) {
+        const q = (p - 0.4) / 0.35;
+        petHop(P, q, 26, 120);
+        if (q > 0.25 && q < 0.75) { const f = S(q * 40) * 30; P.aL = 110 + f; P.aR = 110 + f; P.lean = S(q * Math.PI) * 6; }
+      } else {
+        const q = (p - 0.75) / 0.25, r = petKey(q, [[0, 0], [0.25, 1], [0.8, 1], [1, 0]]);
+        P.lean = -8 * r; P.usx = 1 + 0.08 * r; P.usy = 1 + 0.05 * r;
+        P.aL = P.aR = 85 * r + S(q * 30) * 6 * r; P.lL = P.lR = 10 * r;
+      }
+      break;
     }
-    case 'drop':        // gelatina che fluttua
-      P.sx = 1 + Math.sin(t * 6) * 0.1; P.sy = 1 - Math.sin(t * 6) * 0.1; P.dy = Math.sin(t * 2) * 14 - 10; break;
-    case 'shroom': {    // molla: salta e atterra schiacciandosi
-      const p = (t % 0.7) / 0.7;
-      P.dy = hop(0.7, 50);
-      const land = p > 0.85 || p < 0.08 ? 1 : 0;
-      P.sy = 1 - land * 0.18; P.sx = 1 + land * 0.14; break;
+    case 'avocado': {    // squat da palestra a braccia tese, poi mostra i muscoli
+      const p = loop(3.2);
+      if (p < 0.6) {
+        const q = (p % 0.3) / 0.3, dn = petKey(q, [[0, 0], [0.4, 1], [0.6, 1], [1, 0]]);
+        P.legs = 1 - 0.36 * dn; P.usx = 1 + 0.05 * dn; P.usy = 1 - 0.03 * dn;
+        P.aL = P.aR = 90 * petKey(q, [[0, 0], [0.3, 1], [0.7, 1], [1, 0]]);
+        P.lL = P.lR = 9 * dn; P.lean = 3 * dn;
+      } else {
+        const q = (p - 0.6) / 0.4, r = petKey(q, [[0, 0], [0.15, 1], [0.85, 1], [1, 0]]);
+        const pump = (S(q * 26) + 1) / 2;
+        P.aL = P.aR = r * (115 + 25 * pump);
+        P.usx = 1 + 0.06 * r * pump; P.usy = 1 + 0.03 * r;
+        P.dx = S(q * PI2) * 4 * r; P.lean = S(q * PI2 * 2) * 4 * r;
+      }
+      break;
     }
-    case 'star':        // gira su se stessa e brilla
-      P.rot = Math.sin(t * 2.4) * 0.5; P.sx = P.sy = 1 + Math.sin(t * 8) * 0.06; P.dy = Math.sin(t * 2.4) * -16 - 8; break;
-    case 'cat': {       // passo a destra e a sinistra, si gira a ogni passo
-      const n = Math.floor(t / 0.6);
-      P.flip = n % 2 === 1; P.dy = hop(0.6, 34); P.dx = (n % 2 ? -1 : 1) * 24 * Math.sin(((t % 0.6) / 0.6) * Math.PI); P.rot = (n % 2 ? -1 : 1) * 0.12; break;
+    case 'drop': {       // gelatina che galleggia, braccia a onda
+      const p = loop(1.6), s = S(p * PI2);
+      P.dy = -6 - 6 * s;
+      P.usx = 1 + 0.09 * S(p * PI2 * 2); P.usy = 2 - P.usx;
+      P.aL = 70 + 55 * S(p * PI2 * 2); P.aR = 70 + 55 * S(p * PI2 * 2 + Math.PI);
+      P.lL = 6 + 6 * S(p * PI2 * 2); P.lR = 6 - 6 * S(p * PI2 * 2);
+      P.lean = s * 5;
+      break;
     }
-    default:            // uovo: dondola
-      P.rot = Math.sin(t * 4) * 0.12;
+    case 'shroom': {     // molla: salti continui, schiacciandosi bene a terra
+      const p = loop(0.8);
+      petHop(P, p, 18, 150);
+      const n = Math.floor(d / 0.8);
+      P.lean = (n % 2 ? 1 : -1) * 7 * S(p * Math.PI);
+      break;
+    }
+    case 'star': {       // ondeggia e brilla, saltellando a destra e a sinistra
+      const p = loop(1.6), s = S(p * PI2);
+      const hop = Math.abs(S(p * PI2));
+      P.dy = -10 * hop; P.dx = s * 6;
+      P.lean = s * 16;
+      P.usx = P.usy = 1 + 0.05 * S(p * PI2 * 4);
+      P.legs = 1 - 0.18 * (1 - hop) * (1 - hop);
+      P.lL = Math.max(0, s) * 16; P.lR = Math.max(0, -s) * 16;
+      break;
+    }
+    case 'cat': {        // passo laterale: due passi a destra, si gira, due a sinistra; braccia a tempo
+      const p = loop(2.4), side = p < 0.5 ? 1 : -1, q = (p % 0.5) / 0.5;
+      const step = (q * 2) % 1, phase = q < 0.5 ? 0 : 1;
+      P.flip = side < 0;
+      P.dx = side * (-8 + 16 * ((phase + petKey(step, [[0, 0], [0.8, 1], [1, 1]])) / 2));
+      P.dy = -7 * S(Math.min(1, step / 0.8) * Math.PI);
+      P.legs = petKey(step, [[0, 0.82], [0.2, 1.04], [0.8, 1], [1, 0.82]]);
+      const sw = S(step * Math.PI) * (phase ? -1 : 1);
+      P.aL = 30 + 35 * sw; P.aR = 30 - 35 * sw;
+      P.lL = Math.max(0, sw) * 14; P.lR = Math.max(0, -sw) * 14;
+      P.lean = 5;
+      break;
+    }
+    default:             // uovo: dondola
+      P.rot = S(d * 4) * 0.12;
+  }
+  // Primo mezzo secondo: entra nel balletto senza scatti
+  const ease = Math.min(1, d / 0.5);
+  if (ease < 1) {
+    const base = petPose();
+    for (const key of ['dx', 'dy', 'rot', 'legs', 'lean', 'usx', 'usy', 'aL', 'aR', 'lL', 'lR']) P[key] = base[key] + (P[key] - base[key]) * ease;
   }
   return P;
 };
@@ -560,7 +681,7 @@ const petLimbs = (L) => {
         inner = `<path d="M${pn(x)} ${pn(y)} Q${pn(x + k * 6 * s)} ${pn(y + 2 * s)} ${pn(hx)} ${pn(hy)}" stroke="${c}" stroke-width="${w}" fill="none" stroke-linecap="round"/>` +
           `<circle cx="${pn(hx)}" cy="${pn(hy)}" r="${pn(2.9 * s)}" fill="${c}"/>`;
       }
-      return petLimb(k < 0 ? 'pl-al' : 'pl-ar', x, y, inner);
+      return petLimb((k < 0 ? 'pl-al' : 'pl-ar') + (L.pose === 'flex' ? ' pl-flex' : ''), x, y, inner);
     }).join('');
   }
   return { legs, arms, legLen };
@@ -601,10 +722,44 @@ const petSvg = (opts = {}) => {
     `<g class="pet-up" style="transform-origin:60px 100px">${lifted}${limbs.arms}</g></g></svg>`;
 };
 
-// Immagine (per le card da condividere su canvas)
-const petImage = (opts) => new Promise((resolve) => {
+// Immagine (per le card da condividere su canvas). Se il compagno ha braccia e gambe,
+// img.rig contiene anche i pezzi separati (stesso disegno, un pezzo per immagine) con i perni,
+// così nei video ogni parte si muove per conto suo.
+const PET_RIG_PARTS = {
+  shadow: '.pet-sh, .pet-sh *',
+  legL: '.pl-ll, .pl-ll *',
+  legR: '.pl-lr, .pl-lr *',
+  body: 'svg > circle, .pet-up > g:not(.pl), .pet-up > g:not(.pl) *',
+  armL: '.pl-al, .pl-al *',
+  armR: '.pl-ar, .pl-ar *'
+};
+const petSvgImage = (svg) => new Promise((resolve) => {
   const img = new Image();
   img.onload = () => resolve(img);
   img.onerror = () => resolve(null);
-  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(petSvg({ ...opts, size: 480 }));
+  img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
 });
+const petRig = async (svg) => {
+  const pivots = {};
+  svg.replace(/class="pl (pl-\w\w)[^"]*" style="transform-origin:([\d.-]+)px ([\d.-]+)px"/g, (m, cls, x, y) => { pivots[cls] = [+x, +y]; return m; });
+  const leg = +((svg.match(/--leg:([\d.-]+)px/) || [])[1] || 0);
+  const names = Object.keys(PET_RIG_PARTS);
+  const imgs = await Promise.all(names.map(name => {
+    if ((name === 'armL' || name === 'armR') && !pivots[name === 'armL' ? 'pl-al' : 'pl-ar']) return null;
+    if ((name === 'legL' || name === 'legR') && !pivots[name === 'legL' ? 'pl-ll' : 'pl-lr']) return null;
+    const style = `<style>*{visibility:hidden}${PET_RIG_PARTS[name]}{visibility:visible}</style>`;
+    return petSvgImage(svg.replace(/^<svg[^>]*>/, (open) => open + style));
+  }));
+  if (!imgs[names.indexOf('body')]) return null;
+  const rig = { leg, flex: svg.includes('pl-flex'), pivots: { armL: pivots['pl-al'], armR: pivots['pl-ar'], legL: pivots['pl-ll'], legR: pivots['pl-lr'] } };
+  names.forEach((name, i) => { rig[name] = imgs[i]; });
+  return rig;
+};
+const petImage = async (opts) => {
+  const svg = petSvg({ ...opts, size: 480 });
+  const img = await petSvgImage(svg);
+  if (img && svg.includes('class="pet-up"')) {
+    try { img.rig = await petRig(svg); } catch (e) { img.rig = null; }
+  }
+  return img;
+};
