@@ -336,12 +336,13 @@ const XM_STOP = new Set(['con', 'al', 'ai', 'alla', 'alle', 'allo', 'agli', 'di'
   'sul', 'sulla', 'sulle', 'sui', 'sugli', 'del', 'della', 'delle', 'dei', 'degli', 'dal', 'dalla', 'per', 'tra', 'fra', 'o', 'the', 'with', 'of', 'on', 'at', 'to', 'and', 'or',
   'esercizio', 'macchinario', 'attrezzo']);
 // Parole che dicono "come" (una gamba, alternato, seduto…): non cambiano l'esercizio, contano poco
-const XM_MOD = new Set(['singola', 'singolo', 'singole', 'singoli', 'unilaterale', 'unilaterali', 'monopodalico', 'monopodalica', 'mono', 'single', 'one', 'una', 'un', 'uno',
+const XM_MOD = new Set(['singola', 'singolo', 'singole', 'singoli', 'unilaterale', 'unilaterali', 'mono', 'single', 'one', 'una', 'un', 'uno',
   'alternato', 'alternata', 'alternati', 'alternate', 'alternando', 'alternated', 'unilateral', 'bilaterale', 'leggero', 'pesante', 'controllato',
   'fermo', 'pausa', 'isometria', 'isometrico', 'parziale', 'parziali', 'completo', 'presa', 'neutra', 'normale', 'classico', 'classica', 'variante',
   'sx', 'dx', 'destra', 'sinistra', 'lato', 'side']);
 // Sinonimi → una parola sola (dopo minuscole e senza accenti)
 const XM_SYN = {
+  monopodalico: 'una gamba', monopodalica: 'una gamba', monopodalici: 'una gamba',
   estensione: 'extension', estensioni: 'extension', extensions: 'extension', ext: 'extension',
   pressa: 'leg press', 'leg-press': 'leg press', legpress: 'leg press',
   manubrio: 'manubri', dumbbell: 'manubri', dumbbells: 'manubri', db: 'manubri', manubi: 'manubri',
@@ -388,7 +389,7 @@ const xmIndex = (library) => {
   const df = {};
   items.forEach(x => x.core.forEach(t => { df[t] = (df[t] || 0) + 1; }));
   const idf = (t) => Math.log(1 + items.length / (df[t] || 0.5));
-  xmIndexCache = { library, items, idf };
+  xmIndexCache = { library, items, idf, df };
   return xmIndexCache;
 };
 const matchExerciseName = (name, library) => {
@@ -399,7 +400,7 @@ const matchExerciseName = (name, library) => {
   const want = xmTokens(name);
   if (!want.core.size) return null;
   const wantAll = new Set([...want.core, ...want.mod]);
-  const { items: index, idf } = xmIndex(library);
+  const { items: index, idf, df } = xmIndex(library);
   const covers = (big, small) => [...small].every(t => big.has(t));
   const weight = (list) => [...list].reduce((s, t) => s + idf(t), 0);
   // Stesse parole importanti → stesso esercizio scritto in un altro modo
@@ -409,7 +410,16 @@ const matchExerciseName = (name, library) => {
   const inside = index.filter(x => covers(want.core, x.core) && (x.core.size >= 2 || want.core.size <= 2 || idf([...x.core][0]) > 2.5))
     .map(x => ({ x, score: weight(x.core) + [...x.mod].filter(t => wantAll.has(t)).length * 0.5 - [...x.mod].filter(t => !wantAll.has(t)).length * 0.5 }))
     .sort((a, b) => b.score - a.score || a.x.i - b.x.i);
-  if (inside.length) return { item: inside[0].x.item, kind: 'variant' };
+  // ...ma se resta fuori una parola rara, si preferisce l'esercizio che ha anche quella, purché sia lo stesso movimento:
+  // "Squat bulgaro con manubri" → Squat bulgaro (non Squat con manubri); "Croci ai cavi alti" resta Croci ai cavi
+  if (inside.length) {
+    const top = inside[0].x;
+    const key = [...top.core].filter(t => !XM_EQUIP.has(t));
+    const rare = [...want.core].filter(t => !top.core.has(t) && df[t] > 0 && df[t] <= 2);
+    const better = rare.length ? index.filter(x => x !== top && rare.some(t => x.core.has(t)) && key.every(t => x.core.has(t)))
+      .map(x => ({ x, w: weight([...want.core].filter(t => x.core.has(t))) })).sort((m, n) => n.w - m.w || m.x.i - n.x.i) : [];
+    return { item: (better.length ? better[0].x : top).item, kind: 'variant' };
+  }
   // 2) Il nome scritto è dentro la libreria, che aggiunge solo l'attrezzo ("Panca piana" → "… con bilanciere")
   const outside = index.filter(x => covers(x.core, want.core) && [...x.core].every(t => want.core.has(t) || XM_EQUIP.has(t)));
   if (outside.length === 1) return { item: outside[0].item, kind: 'same' };
