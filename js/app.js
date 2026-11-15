@@ -5635,7 +5635,7 @@ const stillApp = createApp({
           .find(type => MediaRecorder.isTypeSupported(type)) || '';
       } catch (e) { return ''; }
     })();
-    const shareVideoSupported = !!videoMime;
+    const shareVideoSupported = !!videoMime || mp4Supported();
     const shareWantsVideo = computed(() => shareVideoSupported && shareStudio.value.output === 'video' && shareStudio.value.theme !== 'sticker');
 
     // --- Anteprima: statica o animata in loop ---
@@ -5747,10 +5747,34 @@ const stillApp = createApp({
       drawShareCard(canvas, shareData.value, shareStudio.value, Infinity);
       canvas.toBlob(b => (b ? resolve(new File([b], shareBaseName() + '.png', { type: 'image/png' })) : reject(new Error('blob'))), 'image/png');
     });
+    // Crea il video fotogramma per fotogramma (js/share/mp4.js): durata sempre esatta, anche sui telefoni lenti.
+    // Se il dispositivo non sa codificare H.264 si torna alla registrazione dell'anteprima.
+    const buildShareVideo = async () => {
+      const st = shareStudio.value;
+      const data = shareData.value;
+      const total = data.kind === 'recap' ? recapDuration(data) : VIDEO_TOTAL;
+      if (mp4Supported()) {
+        st.recording = true; st.recordProgress = 0;
+        try {
+          const W = 1080, H = st.format === 'story' ? 1920 : 1350;
+          const blob = await encodeCanvasMp4({
+            width: W, height: H, fps: 30, duration: total,
+            draw: (canvas, t) => drawShareCard(canvas, data, st, t),
+            onProgress: (p) => { st.recordProgress = p; }
+          });
+          if (blob) return new File([blob], shareBaseName() + '.mp4', { type: 'video/mp4' });
+        } catch (e) {
+          if (!videoMime) throw e;
+        } finally {
+          st.recording = false;
+        }
+      }
+      return recordShareVideo();
+    };
     // Registra il video (animazione 6 s + risultati in vista fino a 15 s) direttamente dall'anteprima
-    const buildShareVideo = () => new Promise((resolve, reject) => {
+    const recordShareVideo = () => new Promise((resolve, reject) => {
       const canvas = sharePreviewCanvas.value;
-      if (!canvas) return reject(new Error('canvas'));
+      if (!canvas || !videoMime) return reject(new Error('canvas'));
       const st = shareStudio.value;
       stopShareAnimation();
       st.recording = true; st.recordProgress = 0;
@@ -5777,7 +5801,7 @@ const stillApp = createApp({
       const total = data.kind === 'recap' ? recapDuration(data) : VIDEO_TOTAL;
       const start = performance.now();
       drawShareCard(canvas, data, st, 0);
-      recorder.start(250);
+      recorder.start();   // un solo blocco a fine registrazione: niente MP4 a frammenti con durata sbagliata
       const frame = (now) => {
         const t = (now - start) / 1000;
         // Dopo l'animazione i risultati restano fermi, lo sfondo continua a muoversi piano
