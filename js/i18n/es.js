@@ -1529,5 +1529,6 @@ I18N_DICTS.es = {
   "Sette giorni con carichi più leggeri fanno recuperare muscoli e articolazioni: poi si riparte più forti.": "Siete días con cargas más ligeras permiten recuperar músculos y articulaciones: después se vuelve con más fuerza.",
   "Termina ora": "Terminar ahora",
   "Ti alleni da {0} settimane di fila: è ora di una settimana di scarico": "Llevas {0} semanas seguidas entrenando: toca una semana de descarga",
-  "Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.": "Se añade a tus rutinas. Los pesos no están incluidos: los pones tú en el primer entrenamiento."
+  "Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.": "Se añade a tus rutinas. Los pesos no están incluidos: los pones tú en el primer entrenamiento.",
+  "Le prossime sessioni, se va come previsto": "Tus próximas sesiones, si todo va según lo previsto"
 };

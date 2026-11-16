@@ -1217,7 +1217,7 @@
                     <p class="text-[9px] font-medium text-gray-400 mt-0.5">{{ lastExerciseLog(ex) ? 'Ultima: ' + formatDate(lastExerciseLog(ex).date) : 'Nessun dato registrato' }}</p>
                     <template v-for="sg in [exerciseSuggestion(ex)]" :key="'sg' + ex.id">
                       <p v-if="sg" class="text-[10px] font-bold mt-1" :class="sg.kind === 'up' ? 'text-salvia' : (sg.kind === 'down' ? 'text-sky-600' : 'text-gray-500')">
-                        {{ sg.kind === 'up' ? '⬆️' : (sg.kind === 'down' ? '⬇️' : '🎯') }} Prossima volta: {{ formatNumber(sg.value) }} kg<span v-if="sg.delta" class="font-semibold"> ({{ sg.delta > 0 ? '+' : '' }}{{ formatNumber(sg.delta) }})</span>
+                        {{ sg.kind === 'up' ? '⬆️' : (sg.kind === 'down' ? '⬇️' : '🎯') }} Prossima volta: {{ formatNumber(sg.value) }} kg<span v-if="sg.reps"> × {{ sg.reps }}</span><span v-if="sg.delta" class="font-semibold"> ({{ sg.delta > 0 ? '+' : '' }}{{ formatNumber(sg.delta) }})</span>
                       </p>
                     </template>
                     <template v-for="stl in [exerciseStall(ex)]" :key="'stl' + ex.id">
@@ -3443,10 +3443,19 @@
              :class="exerciseHistorySuggestion.kind === 'up' ? 'bg-salvia/10 border-salvia/30' : (exerciseHistorySuggestion.kind === 'down' ? 'bg-sky-500/10 border-sky-500/30' : 'bg-gray-50 border-gray-100')">
           <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Prossima volta{{ exerciseHistorySuggestion.top }}</div>
           <div class="text-2xl font-extrabold text-antracite leading-tight">
-            {{ formatNumber(exerciseHistorySuggestion.value) }} <span class="text-xs font-bold text-gray-400">kg</span>
+            {{ formatNumber(exerciseHistorySuggestion.value) }} <span class="text-xs font-bold text-gray-400">kg</span><span v-if="exerciseHistorySuggestion.reps"> × {{ exerciseHistorySuggestion.reps }}</span>
             <span v-if="exerciseHistorySuggestion.delta" class="text-sm font-bold ml-1" :class="exerciseHistorySuggestion.delta > 0 ? 'text-salvia' : 'text-sky-600'">{{ exerciseHistorySuggestion.delta > 0 ? '+' : '' }}{{ formatNumber(exerciseHistorySuggestion.delta) }}</span>
           </div>
           <p class="text-[11px] font-medium text-gray-500 leading-snug mt-1">{{ exerciseHistorySuggestion.reason }}</p>
+          <div v-if="exerciseHistoryPlan" class="mt-3 pt-3 border-t border-gray-200">
+            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-1.5">Le prossime sessioni, se va come previsto</div>
+            <div class="grid grid-cols-4 gap-1.5">
+              <div v-for="(st, i) in exerciseHistoryPlan" :key="'pl' + i" class="rounded-xl bg-white border border-gray-100 py-1.5 text-center">
+                <div class="text-xs font-extrabold text-antracite">{{ formatNumber(st.kg) }} kg</div>
+                <div class="text-[9px] font-bold text-gray-400">{{ st.reps ? '× ' + st.reps : '#' + (i + 1) }}</div>
+              </div>
+            </div>
+          </div>
         </div>
 
         <!-- Massimale stimato -->

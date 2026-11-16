@@ -2639,9 +2639,20 @@ const stillApp = createApp({
     ];
     const loadStep = (weight) => (weight < 20 ? 1 : 2.5);
     const roundLoad = (value, step) => Math.max(0, Math.round(value / step) * step);
-    const exerciseSuggestion = (exercise) => {
+    // Intervallo di ripetizioni della scheda ("8-10", "8/10", "8–10"): null se è un numero solo o un testo
+    const repRange = (reps) => {
+      const m = /^\s*(\d{1,2})\s*[-–\/]\s*(\d{1,2})\s*$/.exec(String(reps === null || reps === undefined ? '' : reps));
+      if (!m) return null;
+      const lo = Number(m[1]), hi = Number(m[2]);
+      return lo >= 1 && hi > lo ? { lo, hi } : null;
+    };
+    // Con un intervallo ("8-10") la progressione è doppia: prima si sale di ripetizioni fino al massimo
+    // dell'intervallo, poi si sale di peso e si riparte dal minimo. Le ripetizioni della scheda sono quelle
+    // fatte davvero, quindi l'app tiene il conto di dove sei arrivato nell'intervallo.
+    // "before": considera solo le sessioni prima di quel giorno (serve mentre si registra quella di oggi)
+    const exerciseSuggestion = (exercise, before) => {
       if (!exercise || exercise.type === 'cardio') return null;
-      const logs = exerciseLogsFor(exercise).filter(log => !log.deload && parseOptionalNumber(log.weight) !== null);
+      const logs = exerciseLogsFor(exercise).filter(log => !log.deload && parseOptionalNumber(log.weight) !== null && (!before || log.date < before));
       if (!logs.length) return null;
       const last = logs[logs.length - 1];
       const prev = logs.length > 1 ? logs[logs.length - 2] : null;
@@ -2654,7 +2665,30 @@ const stillApp = createApp({
       const top = exercise.pyramid ? ' (serie più pesante)' : '';
       const fw = formatNumber(w) + ' kg';
       const make = (value, kind, reason) => ({ value, kind, reason, unit: 'kg', delta: Math.round((value - w) * 10) / 10, top });
-      if (deloadActive()) return make(roundLoad(w * 0.6, loadStep(w * 0.6)), 'down', `Settimana di scarico: circa il 60% del tuo solito (${fw}), stesse ripetizioni e senza arrivare al limite.`);
+      const range = exercise.pyramid ? null : repRange(exercise.reps);
+      // Ripetizioni dell'ultima volta dentro l'intervallo (le sessioni vecchie valgono come il minimo)
+      const lastReps = parseOptionalNumber(last.reps);
+      const r = range ? (lastReps !== null && lastReps >= range.lo && lastReps <= range.hi ? Math.round(lastReps) : range.lo) : null;
+      const withReps = (suggestion, reps) => ({ ...suggestion, reps, range });
+      if (deloadActive()) {
+        const s = make(roundLoad(w * 0.6, loadStep(w * 0.6)), 'down', `Settimana di scarico: circa il 60% del tuo solito (${fw}), stesse ripetizioni e senza arrivare al limite.`);
+        return range ? withReps(s, r) : s;
+      }
+      if (range) {
+        const fr = `${fw} × ${r}`;
+        if (last.feel === 'hard') {
+          if (samePrev && prev.feel === 'hard' && down > 0) return withReps(make(down, 'down', `${fr} è stato duro due volte di fila: scendi un po' e riparti da ${range.lo} ripetizioni.`), range.lo);
+          return withReps(make(w, 'same', `${fr} è stato duro: ripeti così finché non diventa giusto.`), r);
+        }
+        // Sessioni di fila con lo stesso peso e le stesse ripetizioni
+        let same = 0;
+        for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w && parseOptionalNumber(logs[i].reps) === lastReps; i--) same++;
+        const solid = last.feel === 'easy' || last.feel === 'ok' || same >= 2;
+        if (!solid) return withReps(make(w, 'same', `Ripeti ${fr}: se va bene, la prossima volta aggiungi una ripetizione. Dimmi com'è andata per consigli più precisi.`), r);
+        if (r >= range.hi) return withReps(make(up, 'up', `Hai chiuso ${fr}, il massimo della scheda (${range.lo}-${range.hi}): sali di peso e riparti da ${range.lo} ripetizioni.`), range.lo);
+        const next = last.feel === 'easy' ? range.hi : r + 1;
+        return withReps(make(w, 'up', `${fr} ${last.feel === 'easy' ? 'era facile' : 'è andato bene'}: stesso peso, punta a ${next} ripetizioni. A ${range.hi} si sale di peso.`), next);
+      }
       if (last.feel === 'easy') return make(up, 'up', `L'ultima volta ${fw} era facile: è ora di salire.`);
       if (last.feel === 'hard') {
         if (samePrev && prev.feel === 'hard' && down > 0) return make(down, 'down', `${fw} è stato duro due volte di fila: scendi un po' e cura la tecnica.`);
@@ -2669,6 +2703,22 @@ const stillApp = createApp({
       for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w; i--) streak++;
       if (streak >= 3) return make(up, 'up', `Sei a ${fw} da ${streak} sessioni: prova a salire.`);
       return make(w, 'same', `Consolida ${fw} (${streak} di 3 sessioni prima di salire). Dimmi com'è andata per consigli più precisi.`);
+    };
+
+    // Ripetizioni da scrivere nella sessione di oggi: con un intervallo sono quelle a cui eri arrivato
+    // (o quelle consigliate, se oggi usi il peso consigliato); salendo o scendendo di peso si riparte dal minimo
+    const repsForLog = (exercise, weight) => {
+      const range = exercise && !exercise.pyramid ? repRange(exercise.reps) : null;
+      if (!range) return parseOptionalNumber(exercise && exercise.reps);
+      const sg = exerciseSuggestion(exercise, toISODate());
+      if (!sg || weight === null || weight === undefined) return range.lo;
+      const lastWeight = Math.round((sg.value - sg.delta) * 10) / 10;
+      if (weight === sg.value) return sg.reps;
+      if (weight !== lastWeight) return range.lo;
+      // Stesso peso dell'ultima volta anche se il consiglio era di cambiarlo: restano le ripetizioni di allora
+      const prevLogs = exerciseLogsFor(exercise).filter(log => !log.deload && log.date < toISODate() && parseOptionalNumber(log.weight) === lastWeight);
+      const prevReps = prevLogs.length ? parseOptionalNumber(prevLogs[prevLogs.length - 1].reps) : null;
+      return prevReps !== null && prevReps >= range.lo && prevReps <= range.hi ? Math.round(prevReps) : range.lo;
     };
 
     // ---------------------------------------------------------------
@@ -2731,8 +2781,10 @@ const stillApp = createApp({
       if (logs.length < 2) return null;
       const last = logs[logs.length - 1], prev = logs[logs.length - 2];
       const w = parseOptionalNumber(last.weight);
+      // Fermo vuol dire stesso peso e stesse ripetizioni: salire di ripetizioni è già un progresso
+      const lastReps = parseOptionalNumber(last.reps);
       let n = 0;
-      for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w; i--) n++;
+      for (let i = logs.length - 1; i >= 0 && parseOptionalNumber(logs[i].weight) === w && parseOptionalNumber(logs[i].reps) === lastReps; i--) n++;
       const longFlat = n >= 4 && coachDayDiff(logs[logs.length - n].date, last.date) >= 10 && last.feel !== 'easy';
       const hardTwice = last.feel === 'hard' && prev.feel === 'hard';
       if (!longFlat && !hardTwice) return null;
@@ -2845,7 +2897,7 @@ const stillApp = createApp({
         showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' min registrati per oggi.');
       } else {
         const record = newRecordFor(exercise, rounded);
-        upsertTodayExerciseLog(exercise, { weight: rounded, reps: parseOptionalNumber(exercise.reps) });
+        upsertTodayExerciseLog(exercise, { weight: rounded, reps: repsForLog(exercise, rounded) });
         if (record) celebrateRecord(record);
         else showToastMessage(exercise.name + ': ' + formatNumber(rounded) + ' kg registrati per oggi.');
       }
@@ -3144,6 +3196,28 @@ const stillApp = createApp({
       return exerciseSuggestion(info ? info.exercise : { ...target, type: 'strength' });
     });
 
+    // Le prossime 4 sessioni se tutto va come previsto ("giusto" ogni volta): fa vedere dove porta la progressione.
+    //  - con un intervallo di ripetizioni: +1 ripetizione a sessione, poi più peso e si riparte dal minimo
+    //  - con ripetizioni fisse: due sessioni solide allo stesso peso, poi si sale
+    const exerciseHistoryPlan = computed(() => {
+      const sg = exerciseHistorySuggestion.value;
+      if (!sg || deloadActive()) return null;
+      const range = sg.range || null;
+      let w = sg.value, r = sg.reps || null;
+      let upNext = !range && sg.kind === 'same';
+      const steps = [{ kg: w, reps: r }];
+      for (let i = 0; i < 3; i++) {
+        const step = loadStep(w);
+        if (range) {
+          if (r < range.hi) r++;
+          else { w = roundLoad(w + step, step); r = range.lo; }
+        } else if (upNext) { w = roundLoad(w + step, step); upNext = false; }
+        else upNext = true;
+        steps.push({ kg: w, reps: r });
+      }
+      return steps;
+    });
+
     // Massimale stimato (1RM) con la formula di Epley: peso × (1 + ripetizioni / 30).
     // Si usa la serie migliore tra quelle registrate con 1-12 ripetizioni (oltre, la stima è poco affidabile).
     const exerciseOneRm = computed(() => {
@@ -3158,7 +3232,8 @@ const stillApp = createApp({
         const sets = Array.isArray(log.setsDetail) && log.setsDetail.length ? log.setsDetail : [{ weight: log.weight, reps: log.reps }];
         sets.forEach(set => {
           const weight = parseOptionalNumber(set && set.weight);
-          const reps = repsOf(set && set.reps) || repsOf(log.reps) || repsOf(planned);
+          // "8-10" scritto nella serie non dice quante ne hai fatte: lì valgono le ripetizioni della sessione
+          const reps = (repRange(set && set.reps) ? null : repsOf(set && set.reps)) || repsOf(log.reps) || repsOf(planned);
           if (weight === null || weight <= 0 || !reps) return;
           const value = reps === 1 ? weight : weight * (1 + reps / 30);
           if (!best || value > best.raw) best = { raw: value, weight, reps, date: log.date };
@@ -3518,10 +3593,10 @@ const stillApp = createApp({
         if (!valid.length) return;
         const top = Math.max(...valid.map(set => set.weight));
         const topSet = valid.find(set => set.weight === top);
-        upsertTodayExerciseLog(exercise, { weight: top, reps: parseOptionalNumber(topSet.reps), setsDetail: sets });
+        upsertTodayExerciseLog(exercise, { weight: top, reps: exercise.pyramid ? parseOptionalNumber(topSet.reps) : repsForLog(exercise, top), setsDetail: sets });
       } else {
         if (value === null || value === undefined) return;
-        upsertTodayExerciseLog(exercise, { weight: value, reps: parseOptionalNumber(exercise.reps) });
+        upsertTodayExerciseLog(exercise, { weight: value, reps: repsForLog(exercise, value) });
       }
     };
 
@@ -8295,7 +8370,7 @@ const stillApp = createApp({
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
 selectedPlanDayMacros, diaryFavorites, diaryIsFav, toggleDiaryFav,
-      deload, startDeload, snoozeDeload, endDeload, exerciseOneRm,
+      deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale
     };
