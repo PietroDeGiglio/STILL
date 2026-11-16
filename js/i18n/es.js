@@ -1532,5 +1532,18 @@ I18N_DICTS.es = {
   "Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.": "Se añade a tus rutinas. Los pesos no están incluidos: los pones tú en el primer entrenamiento.",
   "Le prossime sessioni, se va come previsto": "Tus próximas sesiones, si todo va según lo previsto",
   "Carboidrati": "Carbohidratos",
-  "Grassi": "Grasas"
+  "Grassi": "Grasas",
+  "· {0} g di alimento": "· {0} g de alimento",
+  "{0}% delle kcal": "{0}% de las kcal",
+  "🔥 Calorie": "🔥 Calorías",
+  "🔥 Calorie di oggi": "🔥 Calorías de hoy",
+  "Alimento per alimento": "Alimento por alimento",
+  "Gli alimenti che non conosco non sono contati.": "Los alimentos que no conozco no se cuentan.",
+  "Le calorie sono quelle scritte nel piano. Dagli alimenti ne stimo ≈ {0}.": "Las calorías son las escritas en el plan. A partir de los alimentos estimo ≈ {0}.",
+  "Non riesco a calcolare proteine, carboidrati e grassi: scrivi gli alimenti con le quantità (es. 80g pasta) nel piano.": "No puedo calcular proteínas, carbohidratos y grasas: escribe los alimentos con las cantidades (p. ej. 80g pasta) en el plan.",
+  "Scopri di più ›": "Saber más ›",
+  "Segna i pasti fatti per riempire le barre.": "Marca las comidas hechas para llenar las barras.",
+  "Valori del pasto": "Valores de la comida",
+  "Valori stimati da tabelle medie: servono a orientarsi, non sostituiscono il nutrizionista.": "Valores estimados con tablas medias: sirven de orientación, no sustituyen al nutricionista.",
+  "Proteine": "Proteínas"
 };

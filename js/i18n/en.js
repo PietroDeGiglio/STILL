@@ -1530,5 +1530,18 @@ I18N_DICTS.en = {
   "Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.": "It is added to your routines. Weights are not included: you set them at your first workout.",
   "Le prossime sessioni, se va come previsto": "Your next sessions, if all goes to plan",
   "Carboidrati": "Carbs",
-  "Grassi": "Fat"
+  "Grassi": "Fat",
+  "· {0} g di alimento": "· {0} g of food",
+  "{0}% delle kcal": "{0}% of kcal",
+  "🔥 Calorie": "🔥 Calories",
+  "🔥 Calorie di oggi": "🔥 Today's calories",
+  "Alimento per alimento": "Food by food",
+  "Gli alimenti che non conosco non sono contati.": "Foods I do not know are not counted.",
+  "Le calorie sono quelle scritte nel piano. Dagli alimenti ne stimo ≈ {0}.": "Calories are the ones written in the plan. From the foods I estimate ≈ {0}.",
+  "Non riesco a calcolare proteine, carboidrati e grassi: scrivi gli alimenti con le quantità (es. 80g pasta) nel piano.": "I cannot work out protein, carbs and fat: write the foods with quantities (e.g. 80g pasta) in the plan.",
+  "Scopri di più ›": "Find out more ›",
+  "Segna i pasti fatti per riempire le barre.": "Mark the meals you have eaten to fill the bars.",
+  "Valori del pasto": "Meal values",
+  "Valori stimati da tabelle medie: servono a orientarsi, non sostituiscono il nutrizionista.": "Values estimated from average tables: a guide, not a replacement for your nutritionist.",
+  "Proteine": "Protein"
 };

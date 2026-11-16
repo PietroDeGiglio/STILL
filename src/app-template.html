@@ -377,31 +377,30 @@
           <button v-else @click="openDiaryEditor(todayDateKey, 'extra')" class="text-xs font-bold text-salvia">+ Fuori pasto</button>
         </div>
 
-        <!-- Proteine di oggi (stimate dagli alimenti del menù) -->
-        <div v-if="todayProtein && todayActiveMeals.length" class="bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm mx-1">
+        <!-- Contatori di oggi: calorie, proteine, carboidrati e grassi (si riempiono segnando i pasti) -->
+        <div v-if="todayMenuCounters" class="bg-white rounded-2xl px-4 py-3 border border-gray-100 shadow-sm mx-1">
           <div class="flex justify-between items-baseline gap-2">
-            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">🥩 Proteine di oggi</span>
-            <span class="text-sm font-extrabold text-antracite">{{ todayProtein.eaten }} <span class="text-[11px] font-bold text-gray-400">/ {{ proteinGoal }} g</span></span>
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">🔥 Calorie di oggi</span>
+            <span class="text-sm font-extrabold text-antracite">{{ formatNumber(todayMenuCounters.kcal.eaten) }} <span class="text-[11px] font-bold text-gray-400">/ {{ formatNumber(todayMenuCounters.kcal.planned) }} kcal</span></span>
           </div>
           <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden mt-2">
-            <div class="h-full rounded-full bg-salvia transition-all duration-500" :style="{ width: Math.min(100, Math.round(todayProtein.eaten / Math.max(1, proteinGoal) * 100)) + '%' }"></div>
+            <div class="h-full rounded-full transition-all duration-500" :class="intakeBarClass(todayMenuCounters.kcal.eaten, todayMenuCounters.kcal.planned)" :style="{ width: todayMenuCounters.kcal.pct + '%' }"></div>
           </div>
-          <div v-if="todayMacros" class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
-            <div v-for="mc in todayMacros" :key="'tm' + mc.id">
-              <div class="flex justify-between items-baseline gap-1">
-                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ mc.icon }} {{ $tv(mc.label) }}</span>
-                <span class="text-xs font-extrabold text-antracite">{{ mc.eaten }}<span v-if="mc.planned" class="text-[10px] font-bold text-gray-400"> / {{ mc.planned }}</span> <span class="text-[10px] font-bold text-gray-400">g</span></span>
-              </div>
+          <div class="grid grid-cols-3 gap-3 mt-3 pt-3 border-t border-gray-100">
+            <div v-for="mc in todayMenuCounters.macros" :key="'tm' + mc.id" class="min-w-0">
+              <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider truncate">{{ mc.icon }} {{ $tv(mc.label) }}</div>
+              <div class="text-sm font-extrabold text-antracite leading-tight mt-0.5">{{ mc.eaten }}<span v-if="mc.planned" class="text-[10px] font-bold text-gray-400"> / {{ mc.planned }}</span> <span class="text-[10px] font-bold text-gray-400">g</span></div>
               <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-1.5">
-                <div class="h-full rounded-full transition-all duration-500" :class="mc.id === 'carbs' ? 'bg-arancione' : 'bg-viola'" :style="{ width: mc.pct + '%' }"></div>
+                <div class="h-full rounded-full transition-all duration-500" :class="mc.bar" :style="{ width: mc.pct + '%' }"></div>
               </div>
             </div>
           </div>
-          <p class="text-[10px] font-medium text-gray-400 mt-1.5 leading-snug">
+          <p v-if="todayProtein" class="text-[10px] font-medium text-gray-400 mt-2 leading-snug">
             <template v-if="bodyStats.protein">Obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g · il menù di oggi ne ha <b :class="todayProtein.planned < bodyStats.protein.min ? 'text-arancione' : 'text-salvia'">≈ {{ todayProtein.planned }} g</b>.</template>
             <template v-else>Il menù di oggi ne ha ≈ {{ todayProtein.planned }} g. Aggiungi il peso in Progressi per il tuo obiettivo.</template>
-            Segna i pasti fatti per riempire la barra.
+            Segna i pasti fatti per riempire le barre.
           </p>
+          <p v-else class="text-[10px] font-medium text-gray-400 mt-2 leading-snug">Segna i pasti fatti per riempire le barre.</p>
         </div>
         
         <div v-if="todayActiveMeals.length === 0" class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft mx-1 space-y-3.5">
@@ -449,11 +448,12 @@
                   <div>
                     <h4 class="text-base font-extrabold text-antracite">{{ meal.name }}</h4>
                     <span class="text-[11px] font-bold text-salvia uppercase tracking-wider">
-                      {{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'Calorie n.d.' }}{{ mealProteinLabel(meal) }}
+                      {{ meal.calories !== null ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'Calorie n.d.' }}
                     </span>
                   </div>
                 </div>
                 <p class="text-sm text-gray-500 font-medium leading-relaxed">{{ meal.description }}</p>
+                <button @click="openMealInfo(meal)" class="mt-2 text-[11px] font-bold text-salvia">Scopri di più ›</button>
                 <p v-if="todayMealLogs[meal.id]?.status === 'other'" class="mt-2 text-[11px] font-semibold text-viola bg-viola/10 rounded-xl px-2.5 py-1.5 leading-snug">🍕 Hai mangiato: {{ todayMealLogs[meal.id].text || 'altro' }}<span v-if="todayMealLogs[meal.id].kcal !== null"> · ≈ {{ todayMealLogs[meal.id].kcal }} kcal</span></p>
               </div>
             </div>
@@ -2223,9 +2223,10 @@
             <div class="flex-1">
               <div class="flex justify-between items-center mb-1">
                 <h5 class="text-sm font-bold text-antracite">{{ meal.name }}</h5>
-                <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}{{ mealProteinLabel(meal) }}</span>
+                <span class="text-[10px] font-bold text-salvia bg-salvia/10 px-2 py-0.5 rounded-md">{{ meal.calories !== null && meal.calories !== undefined && meal.calories !== '-' ? (meal.caloriesEstimated ? '≈ ' : '') + meal.calories + ' kcal' : 'kcal n.d.' }}</span>
               </div>
               <p class="text-xs text-gray-500 leading-relaxed">{{ meal.description }}</p>
+              <button @click="openMealInfo(meal)" class="mt-1.5 text-[11px] font-bold text-salvia">Scopri di più ›</button>
             </div>
           </div>
         </div>
@@ -2878,6 +2879,53 @@
     </div>
   </div>
 
+
+  <!-- DETTAGLIO DEL PASTO: calorie e macro del pasto e di ogni alimento -->
+  <div v-if="mealInfo.isOpen && mealInfoData" @click.self="closeMealInfo" class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn">
+    <div class="w-full sm:max-w-sm bg-white rounded-t-3xl sm:rounded-3xl p-6 space-y-4 shadow-2xl max-h-[88vh] overflow-y-auto hide-scrollbar" role="dialog" aria-modal="true">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <div class="w-11 h-11 shrink-0 rounded-2xl bg-salvia/10 flex items-center justify-center text-2xl border border-salvia/20">{{ mealInfoData.icon }}</div>
+          <div class="min-w-0">
+            <h3 class="text-lg font-bold text-antracite leading-tight truncate">{{ mealInfoData.name }}</h3>
+            <p class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Valori del pasto</p>
+          </div>
+        </div>
+        <button @click="closeMealInfo" class="p-1 text-gray-400 hover:text-antracite" aria-label="Chiudi"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+      </div>
+
+      <div class="rounded-2xl bg-salvia/10 border border-salvia/20 px-4 py-3 flex items-baseline justify-between gap-2">
+        <span class="text-[10px] font-bold text-gray-500 uppercase tracking-widest">🔥 Calorie</span>
+        <span class="text-2xl font-extrabold text-antracite">{{ mealInfoData.calories !== null ? (mealInfoData.estimated ? '≈ ' : '') + formatNumber(mealInfoData.calories) : '—' }} <span class="text-xs font-bold text-gray-400">kcal</span></span>
+      </div>
+      <p v-if="mealInfoData.estimate !== null" class="text-[10px] font-medium text-gray-400 leading-snug -mt-2">Le calorie sono quelle scritte nel piano. Dagli alimenti ne stimo ≈ {{ formatNumber(mealInfoData.estimate) }}.</p>
+
+      <div v-if="mealInfoData.hasMacros" class="grid grid-cols-3 gap-2">
+        <div v-for="mc in mealInfoData.macros" :key="'mim' + mc.id" class="rounded-2xl bg-gray-50 border border-gray-100 p-3 min-w-0">
+          <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider truncate">{{ mc.icon }} {{ $tv(mc.label) }}</div>
+          <div class="text-lg font-extrabold text-antracite leading-tight mt-1">{{ formatNumber(mc.grams) }} <span class="text-[10px] font-bold text-gray-400">g</span></div>
+          <div class="w-full bg-gray-200 h-1.5 rounded-full overflow-hidden mt-1.5">
+            <div class="h-full rounded-full" :class="mc.bar" :style="{ width: mc.share + '%' }"></div>
+          </div>
+          <div class="text-[9px] font-bold text-gray-400 mt-1">{{ mc.share }}% delle kcal</div>
+        </div>
+      </div>
+      <p v-else class="text-xs font-medium text-gray-500 bg-gray-50 border border-gray-100 rounded-2xl p-3 leading-snug">Non riesco a calcolare proteine, carboidrati e grassi: scrivi gli alimenti con le quantità (es. 80g pasta) nel piano.</p>
+
+      <div v-if="mealInfoData.foods.length" class="space-y-1.5">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Alimento per alimento</div>
+        <div v-for="(f, i) in mealInfoData.foods" :key="'mif' + i" class="rounded-2xl border border-gray-100 px-3 py-2.5">
+          <div class="flex items-baseline justify-between gap-2">
+            <span class="text-xs font-bold text-antracite min-w-0 truncate">{{ f.text }}</span>
+            <span v-if="f.known" class="shrink-0 text-xs font-extrabold text-salvia">≈ {{ f.kcal }} kcal</span>
+            <span v-else class="shrink-0 text-[10px] font-bold text-amber-600">non lo conosco</span>
+          </div>
+          <div v-if="f.known" class="text-[10px] font-semibold text-gray-500 mt-0.5">🥩 {{ formatNumber(f.protein) }} g · 🍞 {{ formatNumber(f.carbs) }} g · 🥑 {{ formatNumber(f.fat) }} g&nbsp;<span v-if="f.grams" class="text-gray-400">· {{ f.grams }} g di alimento</span></div>
+        </div>
+      </div>
+      <p class="text-[10px] font-medium text-gray-400 leading-snug">Valori stimati da tabelle medie: servono a orientarsi, non sostituiscono il nutrizionista.<span v-if="mealInfoData.unknown"> Gli alimenti che non conosco non sono contati.</span></p>
+    </div>
+  </div>
 
   <!-- SCHEDA RICEVUTA DA UN LINK -->
   <div v-if="sharedSheet && isAuthenticated" class="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-fadeIn">

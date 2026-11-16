@@ -566,6 +566,7 @@ const stillApp = createApp({
           protein: auto.protein,   // grammi stimati dagli alimenti (null se nessuno è riconosciuto)
           carbs: auto.carbs,
           fat: auto.fat,
+          items: (m.items || []).map(it => String(it || '').trim()).filter(Boolean),   // per il dettaglio del pasto
           description: (m.items || []).filter(it => it && it.trim() !== '').join(', ') || 'Nessun dettaglio.'
         };
       });
@@ -724,17 +725,57 @@ const stillApp = createApp({
       return { planned, eaten };
     });
 
-    // Carboidrati e grassi di oggi: quanto prevede il menù e quanto hai già mangiato (pasti segnati + diario)
-    const todayMacros = computed(() => {
+    // Contatori di oggi in home: calorie, proteine, carboidrati e grassi. Per ognuno quanto hai già mangiato
+    // (pasti segnati + diario) e quanto prevede il menù: le barre si riempiono segnando i pasti.
+    const todayMenuCounters = computed(() => {
       const meals = todayActiveMeals.value;
-      const planned = { carbs: meals.reduce((s, m) => s + (m.carbs || 0), 0), fat: meals.reduce((s, m) => s + (m.fat || 0), 0) };
+      if (!meals.length) return null;
       const eaten = todayIntake.value;
-      if (!planned.carbs && !planned.fat && !eaten.carbs && !eaten.fat) return null;
+      const sum = (key) => meals.reduce((s, m) => s + (m[key] || 0), 0);
       const pct = (a, b) => Math.min(100, Math.round((a / Math.max(1, b)) * 100));
-      return [
-        { id: 'carbs', icon: '🍞', label: 'Carboidrati', eaten: eaten.carbs, planned: planned.carbs, pct: pct(eaten.carbs, planned.carbs) },
-        { id: 'fat', icon: '🥑', label: 'Grassi', eaten: eaten.fat, planned: planned.fat, pct: pct(eaten.fat, planned.fat) }
-      ];
+      const protein = todayProtein.value;
+      const macro = (id, icon, label, done, planned, bar) => ({ id, icon, label, eaten: done, planned, pct: pct(done, planned), bar });
+      return {
+        kcal: { eaten: eaten.kcal, planned: eaten.target, pct: pct(eaten.kcal, eaten.target) },
+        macros: [
+          macro('protein', '🥩', 'Proteine', protein ? protein.eaten : eaten.protein, protein ? proteinGoal.value : sum('protein'), 'bg-salvia'),
+          macro('carbs', '🍞', 'Carboidrati', eaten.carbs, sum('carbs'), 'bg-arancione'),
+          macro('fat', '🥑', 'Grassi', eaten.fat, sum('fat'), 'bg-viola')
+        ]
+      };
+    });
+
+    // DETTAGLIO DEL PASTO ("Scopri di più"): calorie, proteine, carboidrati e grassi del pasto e di ogni alimento
+    const mealInfo = ref({ isOpen: false, meal: null });
+    const openMealInfo = (meal) => { mealInfo.value = { isOpen: true, meal }; };
+    const closeMealInfo = () => { mealInfo.value.isOpen = false; };
+    const mealInfoData = computed(() => {
+      const meal = mealInfo.value.meal;
+      if (!mealInfo.value.isOpen || !meal) return null;
+      const round1 = (x) => Math.round(x * 10) / 10;
+      const foods = (meal.items || []).map(text => {
+        const e = estimateFoodKcal(text);
+        return e ? { text, known: true, kcal: e.kcal, protein: round1(e.protein), carbs: round1(e.carbs), fat: round1(e.fat), grams: e.grams }
+          : { text, known: false };
+      });
+      const known = foods.filter(f => f.known);
+      const protein = meal.protein || 0, carbs = meal.carbs || 0, fat = meal.fat || 0;
+      const energy = protein * 4 + carbs * 4 + fat * 9;
+      const share = (kcal) => (energy ? Math.round((kcal / energy) * 100) : 0);
+      const estimate = known.length ? Math.round(known.reduce((s, f) => s + f.kcal, 0) / 5) * 5 : null;
+      return {
+        name: meal.name, icon: meal.icon, calories: meal.calories, estimated: !!meal.caloriesEstimated,
+        // Calorie scritte nel piano diverse da quelle stimate dagli alimenti: si mostrano tutte e due
+        estimate: !meal.caloriesEstimated && meal.calories !== null && estimate !== null && Math.abs(estimate - meal.calories) > 30 ? estimate : null,
+        hasMacros: known.length > 0,
+        macros: [
+          { id: 'protein', icon: '🥩', label: 'Proteine', grams: protein, share: share(protein * 4), bar: 'bg-salvia' },
+          { id: 'carbs', icon: '🍞', label: 'Carboidrati', grams: carbs, share: share(carbs * 4), bar: 'bg-arancione' },
+          { id: 'fat', icon: '🥑', label: 'Grassi', grams: fat, share: share(fat * 9), bar: 'bg-viola' }
+        ],
+        foods,
+        unknown: foods.length - known.length
+      };
     });
 
     // Si possono segnare solo pasti di oggi o dei giorni passati
@@ -6603,7 +6644,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 19';
+    const APP_VERSION = 'beta 20';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8382,7 +8423,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, todayMacros, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, todayMenuCounters, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale
