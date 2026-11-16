@@ -564,6 +564,8 @@ const stillApp = createApp({
           calories: written !== null ? written : estimate,
           caloriesEstimated: written === null && estimate !== null,
           protein: auto.protein,   // grammi stimati dagli alimenti (null se nessuno è riconosciuto)
+          carbs: auto.carbs,
+          fat: auto.fat,
           description: (m.items || []).filter(it => it && it.trim() !== '').join(', ') || 'Nessun dettaglio.'
         };
       });
@@ -658,25 +660,40 @@ const stillApp = createApp({
       settings.value.diary = { ...(settings.value.diary || {}), kcal: n && n >= 800 && n <= 6000 ? Math.round(n) : null };
     };
 
+    // Carboidrati e grassi di un pasto scritto a parole: si ricalcolano dal testo (vale anche per i pasti
+    // salvati prima che l'app conoscesse le macro), con una piccola memoria per non rifare i conti
+    const textMacroCache = new Map();
+    const macrosOfText = (text) => {
+      const key = String(text || '').trim().toLowerCase();
+      if (!key) return { carbs: 0, fat: 0 };
+      if (!textMacroCache.has(key)) {
+        if (textMacroCache.size > 500) textMacroCache.clear();
+        const e = estimateFoodText(key);
+        textMacroCache.set(key, { carbs: e.carbs || 0, fat: e.fat || 0 });
+      }
+      return textMacroCache.get(key);
+    };
+
     // Quello che hai mangiato in un giorno: pasti del piano segnati (fatti o "altro") + diario
     const dayIntake = (dateKey) => {
       const meals = getMealsForDate(new Date(dateKey + 'T00:00:00'));
       const logs = mealLogs.value[dateKey] || {};
-      let kcal = 0, protein = 0, logged = 0, unknown = 0;
+      let kcal = 0, protein = 0, carbs = 0, fat = 0, logged = 0, unknown = 0;
+      const addText = (text) => { const m = macrosOfText(text); carbs += m.carbs; fat += m.fat; };
       meals.forEach(m => {
         const l = logs[m.id];
         if (!l) return;
         logged++;
-        if (l.status === 'done') { kcal += m.calories || 0; protein += m.protein || 0; }
-        else if (l.status === 'other') { if (l.kcal !== null && l.kcal !== undefined) kcal += l.kcal; else unknown++; protein += l.protein || 0; }
+        if (l.status === 'done') { kcal += m.calories || 0; protein += m.protein || 0; carbs += m.carbs || 0; fat += m.fat || 0; }
+        else if (l.status === 'other') { if (l.kcal !== null && l.kcal !== undefined) kcal += l.kcal; else unknown++; protein += l.protein || 0; addText(l.text); }
       });
       const diary = foodDiary.value[dateKey] || {};
       const entries = Object.keys(diary).filter(k => diary[k] && (diary[k].text || diary[k].kcal));
-      entries.forEach(k => { const e = diary[k]; if (e.kcal !== null && e.kcal !== undefined) kcal += e.kcal; else unknown++; protein += e.protein || 0; });
+      entries.forEach(k => { const e = diary[k]; if (e.kcal !== null && e.kcal !== undefined) kcal += e.kcal; else unknown++; protein += e.protein || 0; addText(e.text); });
       const planTarget = meals.reduce((s, m) => s + (m.calories || 0), 0);
       return {
         plan: meals.length > 0, meals, logs, diary, entries: entries.length, logged, unknown,
-        kcal: Math.round(kcal), protein: Math.round(protein),
+        kcal: Math.round(kcal), protein: Math.round(protein), carbs: Math.round(carbs), fat: Math.round(fat),
         target: meals.length && planTarget ? planTarget : diaryTarget.value.kcal
       };
     };
@@ -861,6 +878,20 @@ const stillApp = createApp({
       return list.filter(x => x.text.toLowerCase() !== (diaryEditor.value.text || '').trim().toLowerCase()).slice(0, 6);
     });
     const useDiaryFrequent = (item) => { diaryEditor.value.text = item.text; diaryEditor.value.manualKcal = ''; };
+    // Pasti preferiti: li scegli tu con la stella e restano sempre in cima (settings.favMeals)
+    const diaryFavorites = computed(() => (Array.isArray(settings.value.favMeals) ? settings.value.favMeals : []).filter(t => typeof t === 'string' && t.trim()));
+    const favKey = (text) => String(text || '').trim().toLowerCase();
+    const diaryIsFav = computed(() => {
+      const key = favKey(diaryEditor.value.text);
+      return !!key && diaryFavorites.value.some(t => favKey(t) === key);
+    });
+    const toggleDiaryFav = () => {
+      const text = String(diaryEditor.value.text || '').trim();
+      if (!text) return;
+      const key = favKey(text);
+      const list = diaryFavorites.value;
+      settings.value.favMeals = list.some(t => favKey(t) === key) ? list.filter(t => favKey(t) !== key) : [text, ...list].slice(0, 20);
+    };
 
     // --- Diario: la giornata e la settimana ---
     const diaryDate = ref(toISODate(new Date()));
@@ -1225,6 +1256,14 @@ const stillApp = createApp({
     const selectedPlanDayProtein = computed(() => {
       const list = selectedPlanDayMeals.value.filter(m => m.protein !== null && m.protein !== undefined);
       return list.length ? list.reduce((sum, m) => sum + m.protein, 0) : null;
+    });
+
+    // Carboidrati e grassi del giorno del piano (null se nessun alimento è riconosciuto)
+    const selectedPlanDayMacros = computed(() => {
+      const list = selectedPlanDayMeals.value;
+      const carbs = list.reduce((sum, m) => sum + (m.carbs || 0), 0);
+      const fat = list.reduce((sum, m) => sum + (m.fat || 0), 0);
+      return carbs || fat ? { carbs, fat } : null;
     });
 
     const selectedPlanDayCalories = computed(() => {
@@ -1993,6 +2032,131 @@ const stillApp = createApp({
       }
     };
 
+    // ---------------------------------------------------------------
+    // SCHEDA CONDIVISA: la scheda viaggia dentro il link (niente server). Chi lo apre trova STILL
+    // con la proposta di aggiungerla alle proprie schede. I pesi non partono: ognuno mette i suoi.
+    // Formato: #scheda=1.<dati compressi> oppure #scheda=0.<dati non compressi>, in base64 per indirizzi.
+    // ---------------------------------------------------------------
+    const b64urlEncode = (bytes) => {
+      let bin = '';
+      for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000));
+      return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    };
+    const b64urlDecode = (text) => {
+      const bin = atob(String(text).replace(/-/g, '+').replace(/_/g, '/'));
+      const bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return bytes;
+    };
+    const streamBytes = async (bytes, transform) => new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(transform)).arrayBuffer());
+    const shortText = (value, max) => String(value === null || value === undefined ? '' : value).trim().slice(0, max);
+    // Pulisce una scheda arrivata da fuori: solo i campi previsti, lunghezze limitate, niente pesi
+    const cleanSharedSheet = (raw) => {
+      if (!raw || typeof raw !== 'object' || !Array.isArray(raw.days)) return null;
+      const stamp = Date.now();
+      let counter = 0;
+      const supersets = {};
+      const days = raw.days.slice(0, 14).map(day => ({
+        name: shortText(day && day.name, 60) || 'Giorno',
+        exercises: (Array.isArray(day && day.exercises) ? day.exercises : []).slice(0, 40).map(ex => {
+          if (!ex || typeof ex !== 'object' || !shortText(ex.name, 80)) return null;
+          const type = ex.type === 'cardio' ? 'cardio' : 'strength';
+          const pyramid = type === 'strength' && !!ex.pyramid && Array.isArray(ex.setsDetail) && ex.setsDetail.length > 0;
+          const key = shortText(ex.superset, 40);
+          if (key && !supersets[key]) supersets[key] = 'ss_' + stamp + '_' + (counter++);
+          const setsDetail = pyramid ? ex.setsDetail.slice(0, 12).map(set => ({ weight: '', reps: shortText(set && set.reps, 20) })) : [];
+          return {
+            id: 'ex_' + stamp + '_' + (counter++),
+            type,
+            name: shortText(ex.name, 80),
+            weight: '',
+            rest: type === 'strength' ? (parseOptionalNumber(ex.rest) ?? '') : '',
+            sets: type === 'strength' ? (pyramid ? String(setsDetail.length) : shortText(ex.sets, 10)) : '',
+            reps: type === 'strength' && !pyramid ? shortText(ex.reps, 30) : '',
+            duration: type === 'cardio' ? (parseOptionalNumber(ex.duration) ?? '') : '',
+            intensity: type === 'cardio' ? shortText(ex.intensity, 60) : '',
+            superset: key ? supersets[key] : '',
+            pyramid,
+            setsDetail
+          };
+        }).filter(Boolean)
+      })).filter(day => day.exercises.length);
+      if (!days.length) return null;
+      return { name: shortText(raw.name, 60) || 'Scheda ricevuta', days };
+    };
+    const sheetShareLink = async (sheet) => {
+      const data = {
+        name: sheet.name,
+        days: (sheet.days || []).map(day => ({
+          name: day.name,
+          exercises: (day.exercises || []).map(ex => {
+            const out = { name: ex.name };
+            if (ex.type === 'cardio') { out.type = 'cardio'; if (ex.duration !== '') out.duration = ex.duration; if (ex.intensity) out.intensity = ex.intensity; }
+            else {
+              if (ex.rest !== '' && ex.rest !== null && ex.rest !== undefined) out.rest = ex.rest;
+              if (ex.pyramid) { out.pyramid = true; out.setsDetail = (ex.setsDetail || []).map(set => ({ reps: set.reps })); }
+              else { out.sets = ex.sets; out.reps = ex.reps; }
+            }
+            if (ex.superset) out.superset = ex.superset;
+            return out;
+          })
+        }))
+      };
+      const bytes = new TextEncoder().encode(JSON.stringify(data));
+      let payload = '0.' + b64urlEncode(bytes);
+      try {
+        if (typeof CompressionStream === 'function') payload = '1.' + b64urlEncode(await streamBytes(bytes, new CompressionStream('deflate-raw')));
+      } catch (e) { /* resta la versione non compressa */ }
+      return APP_URL + '#scheda=' + payload;
+    };
+    const shareSheet = async (sheet) => {
+      if (!sheet) return;
+      let url;
+      try { url = await sheetShareLink(sheet); } catch (e) { showToastMessage('Non sono riuscito a preparare il link della scheda.'); return; }
+      const text = 'Ti passo la mia scheda "' + sheet.name + '" su STILL 💪 Apri il link per aggiungerla alle tue:';
+      try {
+        if (navigator.share) { await navigator.share({ title: 'Scheda STILL', text, url }); return; }
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+      }
+      try {
+        await navigator.clipboard.writeText(text + ' ' + url);
+        showToastMessage('Link della scheda copiato: incollalo in una chat per mandarlo a chi vuoi. 📋');
+      } catch (e) {
+        showToastMessage('Non riesco a copiare il link su questo dispositivo.');
+      }
+    };
+    // Scheda in arrivo dal link (la proposta compare appena si è dentro l'app)
+    const sharedSheet = ref(null);
+    const readSharedLink = async () => {
+      const m = /[#&]scheda=([01])\.([A-Za-z0-9_-]+)/.exec(window.location.hash || '');
+      if (!m) return;
+      // Il link si toglie subito dall'indirizzo: ricaricando la pagina non deve riproporsi
+      try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { /* ignora */ }
+      try {
+        if (m[2].length > 60000) return;
+        let bytes = b64urlDecode(m[2]);
+        if (m[1] === '1') bytes = await streamBytes(bytes, new DecompressionStream('deflate-raw'));
+        if (bytes.length > 200000) return;
+        const sheet = cleanSharedSheet(JSON.parse(new TextDecoder().decode(bytes)));
+        if (sheet) sharedSheet.value = sheet;
+      } catch (e) {
+        console.warn('Link della scheda non valido', e);
+      }
+    };
+    readSharedLink();
+    window.addEventListener('hashchange', readSharedLink);
+    const acceptSharedSheet = () => {
+      const sheet = sharedSheet.value;
+      sharedSheet.value = null;
+      if (!sheet) return;
+      const nextId = Math.max(Date.now(), ...workoutSheets.value.map(item => (Number(item.id) || 0) + 1));
+      workoutSheets.value.unshift({ id: nextId, createdAt: toISODate(), ...sheet });
+      activeTab.value = 'allenamento';
+      workoutView.value = 'list';
+      showToastMessage('Scheda "' + sheet.name + '" aggiunta! 💪 Metti i tuoi pesi al primo allenamento.');
+    };
+
     const promptDeleteSheet = () => {
       if (editingSheetId.value === null) return;
       const sheetId = editingSheetId.value;
@@ -2402,10 +2566,23 @@ const stillApp = createApp({
       return weights.length ? Math.max(...weights) : null;
     };
 
+    // Settimana di scarico (settings.deload = { start, until }): vedi più sotto, sezione SCARICO
+    const deloadActive = () => {
+      const d = settings.value.deload;
+      const today = toISODate();
+      return !!(d && d.start && d.until && today >= d.start && today <= d.until);
+    };
     const currentExerciseWeight = (exercise) => {
-      const last = lastExerciseLog(exercise);
+      // Fuori dallo scarico i pesi leggeri di quella settimana non contano: si riparte dal carico vero
+      const all = exerciseLogsFor(exercise);
+      const inDeload = deloadActive();
+      const usable = inDeload ? all : all.filter(log => !log.deload);
+      const last = usable.length ? usable[usable.length - 1] : null;
       const lastWeight = parseOptionalNumber(last && last.weight);
-      if (lastWeight !== null) return lastWeight;
+      if (lastWeight !== null) {
+        if (inDeload && !last.deload && lastWeight > 0) return roundLoad(lastWeight * 0.6, loadStep(lastWeight * 0.6));
+        return lastWeight;
+      }
       if (exercise && exercise.pyramid) {
         const top = pyramidTopWeight(exercise);
         if (top !== null) return top;
@@ -2464,7 +2641,7 @@ const stillApp = createApp({
     const roundLoad = (value, step) => Math.max(0, Math.round(value / step) * step);
     const exerciseSuggestion = (exercise) => {
       if (!exercise || exercise.type === 'cardio') return null;
-      const logs = exerciseLogsFor(exercise).filter(log => parseOptionalNumber(log.weight) !== null);
+      const logs = exerciseLogsFor(exercise).filter(log => !log.deload && parseOptionalNumber(log.weight) !== null);
       if (!logs.length) return null;
       const last = logs[logs.length - 1];
       const prev = logs.length > 1 ? logs[logs.length - 2] : null;
@@ -2477,6 +2654,7 @@ const stillApp = createApp({
       const top = exercise.pyramid ? ' (serie più pesante)' : '';
       const fw = formatNumber(w) + ' kg';
       const make = (value, kind, reason) => ({ value, kind, reason, unit: 'kg', delta: Math.round((value - w) * 10) / 10, top });
+      if (deloadActive()) return make(roundLoad(w * 0.6, loadStep(w * 0.6)), 'down', `Settimana di scarico: circa il 60% del tuo solito (${fw}), stesse ripetizioni e senza arrivare al limite.`);
       if (last.feel === 'easy') return make(up, 'up', `L'ultima volta ${fw} era facile: è ora di salire.`);
       if (last.feel === 'hard') {
         if (samePrev && prev.feel === 'hard' && down > 0) return make(down, 'down', `${fw} è stato duro due volte di fila: scendi un po' e cura la tecnica.`);
@@ -2492,6 +2670,37 @@ const stillApp = createApp({
       if (streak >= 3) return make(up, 'up', `Sei a ${fw} da ${streak} sessioni: prova a salire.`);
       return make(w, 'same', `Consolida ${fw} (${streak} di 3 sessioni prima di salire). Dimmi com'è andata per consigli più precisi.`);
     };
+
+    // ---------------------------------------------------------------
+    // SCARICO: dopo tante settimane di fila il corpo ha bisogno di una settimana leggera.
+    //  - consigliato dopo 6 settimane consecutive con almeno 2 allenamenti (contate dall'ultimo scarico)
+    //  - per 7 giorni i carichi consigliati scendono a circa il 60% e quelle sessioni non contano
+    //    per i consigli successivi né fanno sembrare "fermo" un esercizio
+    // ---------------------------------------------------------------
+    const DELOAD_AFTER_WEEKS = 6;
+    const mondayKeyOf = (key) => { const d = new Date(key + 'T12:00:00'); d.setDate(d.getDate() - ((d.getDay() + 6) % 7)); return toISODate(d); };
+    const deload = computed(() => {
+      const d = settings.value.deload || {};
+      const today = toISODate();
+      if (deloadActive()) return { active: true, until: d.until, due: false, weeks: 0 };
+      // Settimane di fila con almeno 2 allenamenti, andando indietro da questa (o dalla scorsa, se questa è appena iniziata)
+      const perWeek = {};
+      trainingDaySet.value.forEach(key => {
+        if (key > today || (d.until && key <= d.until)) return;
+        const monday = mondayKeyOf(key);
+        perWeek[monday] = (perWeek[monday] || 0) + 1;
+      });
+      const cursor = new Date(mondayKeyOf(today) + 'T12:00:00');
+      if ((perWeek[toISODate(cursor)] || 0) < 2) cursor.setDate(cursor.getDate() - 7);
+      let weeks = 0;
+      while ((perWeek[toISODate(cursor)] || 0) >= 2 && weeks < 104) { weeks++; cursor.setDate(cursor.getDate() - 7); }
+      const snoozed = !!(d.snoozeUntil && today < d.snoozeUntil);
+      return { active: false, until: '', due: weeks >= DELOAD_AFTER_WEEKS && !snoozed, weeks };
+    });
+    const dayKeyPlus = (days) => { const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + days); return toISODate(d); };
+    const startDeload = () => { settings.value.deload = { start: toISODate(), until: dayKeyPlus(6) }; };
+    const snoozeDeload = () => { settings.value.deload = { ...(settings.value.deload || {}), snoozeUntil: dayKeyPlus(14) }; };
+    const endDeload = () => { settings.value.deload = { ...(settings.value.deload || {}), until: dayKeyPlus(-1) }; };
 
     // ---------------------------------------------------------------
     // ALTERNATIVE DEL COACH: esercizi della libreria per gli stessi muscoli, in palestra o a casa.
@@ -2517,8 +2726,8 @@ const stillApp = createApp({
     };
     // Fermo: 4 sessioni o più allo stesso peso in almeno 10 giorni, oppure "duro" due volte di fila
     const exerciseStall = (exercise) => {
-      if (!exercise || exercise.type === 'cardio') return null;
-      const logs = exerciseLogsFor(exercise).filter(log => parseOptionalNumber(log.weight) !== null);
+      if (!exercise || exercise.type === 'cardio' || deloadActive()) return null;
+      const logs = exerciseLogsFor(exercise).filter(log => !log.deload && parseOptionalNumber(log.weight) !== null);
       if (logs.length < 2) return null;
       const last = logs[logs.length - 1], prev = logs[logs.length - 2];
       const w = parseOptionalNumber(last.weight);
@@ -2589,8 +2798,9 @@ const stillApp = createApp({
       const date = toISODate();
       const sheet = selectedSheet.value;
       const existing = workoutLogs.value.find(log => log.date === date && sameExercise(log, exercise));
+      const deloadMark = deloadActive() ? { deload: true } : {};
       if (existing) {
-        Object.assign(existing, payload, { exerciseId: exercise.id, exerciseName: exercise.name });
+        Object.assign(existing, payload, { exerciseId: exercise.id, exerciseName: exercise.name }, deloadMark);
         return;
       }
       workoutLogs.value.push({
@@ -2600,7 +2810,8 @@ const stillApp = createApp({
         sheetName: sheet ? sheet.name : '',
         exerciseId: exercise.id,
         exerciseName: exercise.name,
-        ...payload
+        ...payload,
+        ...deloadMark
       });
     };
 
@@ -2931,6 +3142,35 @@ const stillApp = createApp({
       if (!logs.length) return null;
       const info = findExerciseInfo(logs[logs.length - 1]);
       return exerciseSuggestion(info ? info.exercise : { ...target, type: 'strength' });
+    });
+
+    // Massimale stimato (1RM) con la formula di Epley: peso × (1 + ripetizioni / 30).
+    // Si usa la serie migliore tra quelle registrate con 1-12 ripetizioni (oltre, la stima è poco affidabile).
+    const exerciseOneRm = computed(() => {
+      const modal = exerciseHistoryModal.value;
+      if (!modal.isOpen) return null;
+      const repsOf = (value) => { const n = parseInt(String(value === null || value === undefined ? '' : value), 10); return n >= 1 && n <= 12 ? n : null; };
+      let best = null;
+      exerciseLogsFor({ id: modal.exerciseId, name: modal.exerciseName }).forEach(log => {
+        if (log.deload) return;
+        const info = findExerciseInfo(log);
+        const planned = info && info.exercise ? info.exercise.reps : null;
+        const sets = Array.isArray(log.setsDetail) && log.setsDetail.length ? log.setsDetail : [{ weight: log.weight, reps: log.reps }];
+        sets.forEach(set => {
+          const weight = parseOptionalNumber(set && set.weight);
+          const reps = repsOf(set && set.reps) || repsOf(log.reps) || repsOf(planned);
+          if (weight === null || weight <= 0 || !reps) return;
+          const value = reps === 1 ? weight : weight * (1 + reps / 30);
+          if (!best || value > best.raw) best = { raw: value, weight, reps, date: log.date };
+        });
+      });
+      if (!best) return null;
+      const value = Math.round(best.raw * 2) / 2;
+      return {
+        value, weight: best.weight, reps: best.reps, date: best.date,
+        // Carichi indicativi per le ripetizioni più usate
+        table: [3, 5, 8, 10].map(reps => ({ reps, kg: roundLoad(best.raw / (1 + reps / 30), 2.5) }))
+      };
     });
 
     // Grafico andamento esercizio (ordine cronologico, un punto per sessione)
@@ -8054,6 +8294,9 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
+selectedPlanDayMacros, diaryFavorites, diaryIsFav, toggleDiaryFav,
+      deload, startDeload, snoozeDeload, endDeload, exerciseOneRm,
+      shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale
     };
   },

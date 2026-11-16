@@ -386,6 +386,10 @@
           <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden mt-2">
             <div class="h-full rounded-full bg-salvia transition-all duration-500" :style="{ width: Math.min(100, Math.round(todayProtein.eaten / Math.max(1, proteinGoal) * 100)) + '%' }"></div>
           </div>
+          <div v-if="todayIntake.carbs || todayIntake.fat" class="flex gap-4 text-[11px] font-semibold text-gray-500 mt-2">
+            <span>🍞 Carboidrati <b class="text-antracite">{{ todayIntake.carbs }} g</b></span>
+            <span>🥑 Grassi <b class="text-antracite">{{ todayIntake.fat }} g</b></span>
+          </div>
           <p class="text-[10px] font-medium text-gray-400 mt-1.5 leading-snug">
             <template v-if="bodyStats.protein">Obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g · il menù di oggi ne ha <b :class="todayProtein.planned < bodyStats.protein.min ? 'text-arancione' : 'text-salvia'">≈ {{ todayProtein.planned }} g</b>.</template>
             <template v-else>Il menù di oggi ne ha ≈ {{ todayProtein.planned }} g. Aggiungi il peso in Progressi per il tuo obiettivo.</template>
@@ -399,7 +403,7 @@
               <span class="text-2xl font-extrabold" :class="todayIntake.kcal ? intakeTextClass(todayIntake.kcal, todayIntake.target) : 'text-antracite'">{{ formatNumber(todayIntake.kcal) }}</span>
               <span class="text-xs font-bold text-gray-400">/ {{ formatNumber(todayIntake.target) }} kcal</span>
             </div>
-            <span class="text-[11px] font-semibold text-gray-500">🥩 {{ todayIntake.protein }} g</span>
+            <span class="text-[11px] font-semibold text-gray-500">🥩 {{ todayIntake.protein }} g · 🍞 {{ todayIntake.carbs }} g · 🥑 {{ todayIntake.fat }} g</span>
           </div>
           <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden">
             <div class="h-full rounded-full transition-all duration-500" :class="intakeBarClass(todayIntake.kcal, todayIntake.target)" :style="{ width: Math.min(100, Math.round(todayIntake.kcal / Math.max(1, todayIntake.target) * 100)) + '%' }"></div>
@@ -718,6 +722,24 @@
             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
             Nuova
           </button>
+        </div>
+
+        <!-- SCARICO: settimana leggera in corso, oppure consigliata dopo tante settimane di fila -->
+        <div v-if="deload.active" class="bg-sky-500/10 border border-sky-500/30 rounded-3xl p-4 space-y-2">
+          <div class="text-[10px] font-bold text-sky-600 uppercase tracking-widest">🌊 Settimana di scarico</div>
+          <p class="text-xs font-medium text-gray-500 leading-snug">Fino al {{ formatDate(deload.until) }}: stessi esercizi con circa il 60% del carico. I pesi consigliati sono già ridotti e questa settimana non conta per i prossimi consigli.</p>
+          <button @click="endDeload" class="text-[11px] font-bold text-sky-600">Termina ora</button>
+        </div>
+        <div v-else-if="deload.due" class="bg-white rounded-3xl border border-gray-100 shadow-soft p-4 space-y-3">
+          <div class="space-y-1">
+            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">🌊 Consiglio del coach</div>
+            <div class="text-sm font-bold text-antracite leading-snug">Ti alleni da {{ deload.weeks }} settimane di fila: è ora di una settimana di scarico</div>
+            <p class="text-[11px] font-medium text-gray-500 leading-snug">Sette giorni con carichi più leggeri fanno recuperare muscoli e articolazioni: poi si riparte più forti.</p>
+          </div>
+          <div class="flex gap-2">
+            <button @click="startDeload" class="flex-1 bg-salvia text-white font-bold py-2.5 rounded-xl text-xs active:scale-95 transition-all">Inizia lo scarico</button>
+            <button @click="snoozeDeload" class="flex-1 bg-gray-100 text-gray-500 font-bold py-2.5 rounded-xl text-xs active:scale-95 transition-all">Non ora</button>
+          </div>
         </div>
 
         <!-- IDEA PER OGGI: in base ai muscoli riposati (js/utils/coach.js). Solo nei giorni senza allenamento, chiusa finché non la apri -->
@@ -1083,6 +1105,9 @@
             <div class="text-[10px] font-bold text-gray-400 uppercase mt-1">{{ selectedSheet.days.length }} {{ selectedSheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(selectedSheet) }} {{ (totalSheetExercises(selectedSheet)) === 1 ? 'esercizio' : 'esercizi' }}</div>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
+            <button @click="shareSheet(selectedSheet)" class="p-2 bg-salvia/10 text-salvia rounded-xl hover:bg-salvia/20 transition-colors shadow-sm" aria-label="Condividi scheda">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"/></svg>
+            </button>
             <button @click="editSheet(selectedSheet)" class="p-2 bg-arancione/10 text-arancione rounded-xl hover:bg-arancione/20 transition-colors shadow-sm" aria-label="Modifica scheda">
               <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
             </button>
@@ -1741,7 +1766,7 @@
           <div class="flex items-center justify-between gap-3 text-[11px] font-semibold text-gray-500">
             <span v-if="diaryDay.kcal <= diaryDay.target">Ti restano <b class="text-antracite">≈ {{ formatNumber(diaryDay.target - diaryDay.kcal) }} kcal</b></span>
             <span v-else><b :class="intakeTextClass(diaryDay.kcal, diaryDay.target)">≈ {{ formatNumber(diaryDay.kcal - diaryDay.target) }} kcal</b> oltre l'obiettivo</span>
-            <span>🥩 {{ diaryDay.protein }} g<span v-if="bodyStats.protein" class="text-gray-400"> / {{ bodyStats.protein.min }} g</span></span>
+            <span>🥩 {{ diaryDay.protein }} g<span v-if="bodyStats.protein" class="text-gray-400"> / {{ bodyStats.protein.min }} g</span> · 🍞 {{ diaryDay.carbs }} g · 🥑 {{ diaryDay.fat }} g</span>
           </div>
           <p v-if="diaryDay.status === 'under'" class="text-[11px] font-medium text-amber-700 bg-amber-50 border border-amber-100 rounded-xl px-3 py-2 leading-snug">Hai mangiato molto meno del tuo fabbisogno. Ogni tanto capita, ma se succede spesso rallenta i risultati e ti toglie energie.</p>
           <p v-if="diaryDay.unknown" class="text-[10px] font-medium text-gray-400 leading-snug">⚠️ {{ diaryDay.unknown }} {{ diaryDay.unknown === 1 ? 'pasto ha' : 'pasti hanno' }} alimenti che non conosco: aggiungi le calorie a mano per un totale preciso.</p>
@@ -2170,6 +2195,10 @@
             <span class="text-sm font-extrabold text-antracite">≈ {{ selectedPlanDayProtein }} g
               <span v-if="bodyStats.protein" class="text-[11px] font-medium" :class="selectedPlanDayProtein >= bodyStats.protein.min ? 'text-salvia' : 'text-arancione'">· obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g</span>
             </span>
+          </div>
+          <div v-if="selectedPlanDayMacros" class="flex justify-between items-center -mt-2 mb-4">
+            <span class="text-xs font-bold text-gray-500 uppercase">🍞 Carboidrati · 🥑 Grassi</span>
+            <span class="text-sm font-extrabold text-antracite">≈ {{ selectedPlanDayMacros.carbs }} g · {{ selectedPlanDayMacros.fat }} g</span>
           </div>
           <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4">
             <div class="bg-salvia h-full rounded-full" style="width: 100%"></div>
@@ -2798,6 +2827,12 @@
         <button v-for="m in DIARY_MEALS" :key="'dem' + m.id" @click="diaryEditor.slot = m.id" class="shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all"
                 :class="diaryEditor.slot === m.id ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'">{{ m.icon }} {{ m.label }}</button>
       </div>
+      <div v-if="diaryFavorites.length" class="space-y-1.5">
+        <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">⭐ I tuoi preferiti</div>
+        <div class="flex flex-wrap gap-1.5">
+          <button v-for="f in diaryFavorites" :key="'dfav' + f" @click="useDiaryFrequent({ text: f })" class="max-w-full text-left px-2.5 py-1.5 rounded-xl bg-arancione/10 border border-arancione/30 text-[11px] font-semibold text-antracite truncate">{{ f }}</button>
+        </div>
+      </div>
       <div v-if="diaryFrequent.length" class="space-y-1.5">
         <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">I tuoi soliti</div>
         <div class="flex flex-wrap gap-1.5">
@@ -2811,6 +2846,7 @@
         <textarea v-model="diaryEditor.text" rows="3" placeholder="Es: pasta al pomodoro, insalata e una mela"
                   class="w-full bg-gray-50 border border-gray-200 focus:border-salvia focus:ring-2 focus:ring-salvia/20 rounded-2xl p-3 text-sm text-antracite outline-none resize-none"></textarea>
         <p class="text-[10px] font-medium text-gray-400 leading-snug">Separa con virgole o "e". Se sai le quantità scrivile (80g pasta, 2 uova): la stima è più precisa.</p>
+        <button v-if="(diaryEditor.text || '').trim()" @click="toggleDiaryFav" class="text-[11px] font-bold" :class="diaryIsFav ? 'text-arancione' : 'text-gray-400'" :aria-pressed="diaryIsFav">{{ diaryIsFav ? '★ Nei preferiti (tocca per togliere)' : '☆ Salva tra i preferiti' }}</button>
       </div>
       <div v-if="diaryEstimate.items.length" class="rounded-2xl bg-gray-50 border border-gray-100 p-3 space-y-1.5">
         <div v-for="(it, i) in diaryEstimate.items" :key="'dei' + i" class="flex items-center justify-between gap-2 text-xs">
@@ -2820,7 +2856,7 @@
         </div>
         <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-gray-200 text-xs">
           <span class="font-bold text-gray-400 uppercase tracking-wider text-[10px]">Totale</span>
-          <span class="font-extrabold text-salvia">{{ diaryEstimate.kcal !== null ? '≈ ' + diaryEstimate.kcal + ' kcal' : '—' }}<span v-if="diaryEstimate.protein" class="text-gray-400 font-bold"> · {{ diaryEstimate.protein }} g prot</span></span>
+          <span class="font-extrabold text-salvia">{{ diaryEstimate.kcal !== null ? '≈ ' + diaryEstimate.kcal + ' kcal' : '—' }}<span v-if="diaryEstimate.protein" class="text-gray-400 font-bold"> · {{ diaryEstimate.protein }} g prot</span><span v-if="diaryEstimate.carbs !== null" class="text-gray-400 font-bold"> · {{ diaryEstimate.carbs }} g carb · {{ diaryEstimate.fat }} g grassi</span></span>
         </div>
       </div>
       <label class="flex items-center justify-between gap-3 text-[11px] font-semibold text-gray-500">
@@ -2835,6 +2871,25 @@
     </div>
   </div>
 
+
+  <!-- SCHEDA RICEVUTA DA UN LINK -->
+  <div v-if="sharedSheet && isAuthenticated" class="fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/60 backdrop-blur-sm animate-fadeIn">
+    <div class="w-full max-w-sm bg-white rounded-3xl p-6 space-y-4 shadow-2xl">
+      <div class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Scheda ricevuta</div>
+      <div>
+        <h3 class="text-xl font-bold text-antracite leading-tight">{{ sharedSheet.name }}</h3>
+        <p class="text-xs font-semibold text-gray-500 mt-1">{{ sharedSheet.days.length }} {{ sharedSheet.days.length === 1 ? 'giorno' : 'giorni' }} • {{ totalSheetExercises(sharedSheet) }} {{ totalSheetExercises(sharedSheet) === 1 ? 'esercizio' : 'esercizi' }}</p>
+      </div>
+      <div class="max-h-40 overflow-y-auto space-y-1.5 hide-scrollbar">
+        <div v-for="(d, i) in sharedSheet.days" :key="'shd' + i" class="text-[11px] font-medium text-gray-500 leading-snug"><b class="text-antracite">{{ d.name }}</b>: {{ d.exercises.map(e => e.name).join(', ') }}</div>
+      </div>
+      <p class="text-[11px] font-medium text-gray-400 leading-snug">Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.</p>
+      <div class="space-y-2">
+        <button @click="acceptSharedSheet" class="w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all">Aggiungi alle mie schede</button>
+        <button @click="sharedSheet = null" class="w-full bg-gray-100 text-gray-500 font-bold py-3 rounded-2xl active:scale-95 transition-all">No, grazie</button>
+      </div>
+    </div>
+  </div>
 
   <!-- TROFEO SBLOCCATO -->
   <div v-if="trophyModal.isOpen && !trophyModalItems.length && trophyModal.levelUp" class="fixed inset-0 z-[65] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm animate-fadeIn">
@@ -3392,6 +3447,21 @@
             <span v-if="exerciseHistorySuggestion.delta" class="text-sm font-bold ml-1" :class="exerciseHistorySuggestion.delta > 0 ? 'text-salvia' : 'text-sky-600'">{{ exerciseHistorySuggestion.delta > 0 ? '+' : '' }}{{ formatNumber(exerciseHistorySuggestion.delta) }}</span>
           </div>
           <p class="text-[11px] font-medium text-gray-500 leading-snug mt-1">{{ exerciseHistorySuggestion.reason }}</p>
+        </div>
+
+        <!-- Massimale stimato -->
+        <div v-if="exerciseOneRm" class="bg-white border border-gray-100 rounded-2xl p-4 shadow-sm mb-2">
+          <div class="flex items-baseline justify-between gap-2">
+            <div class="text-[9px] font-bold text-gray-400 uppercase tracking-widest">Massimale stimato (1RM)</div>
+            <div class="text-lg font-extrabold text-antracite leading-tight">≈ {{ formatNumber(exerciseOneRm.value) }} <span class="text-[10px] font-semibold text-gray-400">kg</span></div>
+          </div>
+          <p class="text-[10px] font-medium text-gray-400 leading-snug mt-1">Calcolato da {{ formatNumber(exerciseOneRm.weight) }} kg × {{ exerciseOneRm.reps }} del {{ formatDate(exerciseOneRm.date) }}. È una stima: non serve provarlo davvero.</p>
+          <div class="grid grid-cols-4 gap-1.5 mt-2">
+            <div v-for="t in exerciseOneRm.table" :key="'rm' + t.reps" class="rounded-xl bg-gray-50 py-1.5 text-center">
+              <div class="text-xs font-extrabold text-antracite">{{ formatNumber(t.kg) }} kg</div>
+              <div class="text-[9px] font-bold text-gray-400">× {{ t.reps }}</div>
+            </div>
+          </div>
         </div>
 
         <!-- Grafico andamento -->

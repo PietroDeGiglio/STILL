@@ -1,4 +1,4 @@
-// Stima automatica di calorie e proteine dal testo degli alimenti (es. "80g pasta", "2 uova", "1 cucchiaio di olio").
+// Stima automatica di calorie, proteine, carboidrati e grassi dal testo degli alimenti (es. "80g pasta", "2 uova", "1 cucchiaio di olio").
 // Usa la tabella FOODS di js/data/foods.js. Funzioni pure: nessun accesso ai dati dell'app.
 
 // Testo semplificato: minuscolo, senza accenti e punteggiatura (l'apostrofo diventa spazio)
@@ -68,7 +68,7 @@ const estimateFoodKcal = (text, guess = false) => {
   if (!normFood(first)) return null;
   const food = findFood(first);
   if (!food) return null;
-  if (food.k === 0) return { kcal: 0, protein: 0, grams: 0, food };   // caffè, spezie, aceto…
+  if (food.k === 0) return { kcal: 0, protein: 0, carbs: 0, fat: 0, grams: 0, food };   // caffè, spezie, aceto…
   // La quantità può stare dopo l'alternativa: "pasta oppure riso 80g"
   let grams = foodGrams(first, food);
   if (grams === null && first !== String(text)) grams = foodGrams(text, food);
@@ -82,6 +82,8 @@ const estimateFoodKcal = (text, guess = false) => {
   return {
     kcal: Math.round((food.k * grams) / 100),
     protein: Math.round(((food.p || 0) * grams) / 100 * 10) / 10,
+    carbs: Math.round(((food.c || 0) * grams) / 100 * 10) / 10,
+    fat: Math.round(((food.f || 0) * grams) / 100 * 10) / 10,
     grams: Math.round(grams),
     guessed,
     food
@@ -91,14 +93,16 @@ const estimateFoodKcal = (text, guess = false) => {
 // Somma di un pasto: { kcal, protein, found, total } (kcal e protein null se nessun alimento è riconosciuto)
 const estimateMealKcal = (items) => {
   const list = (items || []).map(i => String(i || '').trim()).filter(Boolean);
-  let kcal = 0, protein = 0, found = 0;
+  let kcal = 0, protein = 0, carbs = 0, fat = 0, found = 0;
   list.forEach(item => {
     const e = estimateFoodKcal(item);
-    if (e) { kcal += e.kcal; protein += e.protein; found++; }
+    if (e) { kcal += e.kcal; protein += e.protein; carbs += e.carbs; fat += e.fat; found++; }
   });
   return {
     kcal: found ? Math.round(kcal / 5) * 5 : null,
     protein: found ? Math.round(protein) : null,
+    carbs: found ? Math.round(carbs) : null,
+    fat: found ? Math.round(fat) : null,
     found, total: list.length
   };
 };
@@ -113,7 +117,15 @@ const splitFoodText = (text) => {
     const parts = chunk.split(/\s+(?:e|ed|con|piu|più|poi|insieme a)\s+/i).map(s => s.trim()).filter(Boolean);
     if (parts.length < 2) { out.push(chunk); return; }
     const whole = findFoodEntry(chunk);
-    if (whole && /\s(e|ed|con)\s/.test(whole.name)) { out.push(chunk); return; }
+    if (whole && /\s(e|ed|con)\s/.test(whole.name)) {
+      // Il piatto resta intero, ma quello che c'è prima ("sashimi e noodles con verdure") è un altro alimento
+      const t = normFood(chunk);
+      const at = t.indexOf(whole.name.trim());
+      const before = /^(.+?)\s(?:e|ed|con|piu|poi)$/.exec(t.slice(0, Math.max(0, at)).trim());
+      if (before && findFoodEntry(before[1])) { out.push(before[1]); out.push(t.slice(at)); return; }
+      out.push(chunk);
+      return;
+    }
     // Le parti che da sole non dicono niente ("e basta") si riattaccano a quella prima
     parts.forEach(part => {
       if (!findFoodEntry(part) && out.length && !/\d/.test(part) && part.split(' ').length <= 2) out[out.length - 1] += ' ' + part;
@@ -125,13 +137,15 @@ const splitFoodText = (text) => {
 const estimateFoodText = (text) => {
   const items = splitFoodText(text).map(part => {
     const e = estimateFoodKcal(part, true);
-    return { text: part, kcal: e ? e.kcal : null, protein: e ? e.protein : null, known: !!e, guessed: !!(e && e.guessed) };
+    return { text: part, kcal: e ? e.kcal : null, protein: e ? e.protein : null, carbs: e ? e.carbs : null, fat: e ? e.fat : null, known: !!e, guessed: !!(e && e.guessed) };
   });
   const known = items.filter(i => i.known);
   return {
     items,
     kcal: known.length ? Math.round(known.reduce((s, i) => s + i.kcal, 0) / 5) * 5 : null,
     protein: known.length ? Math.round(known.reduce((s, i) => s + i.protein, 0)) : null,
+    carbs: known.length ? Math.round(known.reduce((s, i) => s + i.carbs, 0)) : null,
+    fat: known.length ? Math.round(known.reduce((s, i) => s + i.fat, 0)) : null,
     unknown: items.length - known.length
   };
 };
