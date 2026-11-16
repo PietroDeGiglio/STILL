@@ -1528,5 +1528,7 @@ I18N_DICTS.en = {
   "Termina ora": "End now",
   "Ti alleni da {0} settimane di fila: è ora di una settimana di scarico": "You have trained {0} weeks in a row: time for a deload week",
   "Viene aggiunta alle tue schede. I pesi non sono inclusi: li metti tu al primo allenamento.": "It is added to your routines. Weights are not included: you set them at your first workout.",
-  "Le prossime sessioni, se va come previsto": "Your next sessions, if all goes to plan"
+  "Le prossime sessioni, se va come previsto": "Your next sessions, if all goes to plan",
+  "Carboidrati": "Carbs",
+  "Grassi": "Fat"
 };

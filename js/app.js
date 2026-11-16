@@ -724,6 +724,19 @@ const stillApp = createApp({
       return { planned, eaten };
     });
 
+    // Carboidrati e grassi di oggi: quanto prevede il menù e quanto hai già mangiato (pasti segnati + diario)
+    const todayMacros = computed(() => {
+      const meals = todayActiveMeals.value;
+      const planned = { carbs: meals.reduce((s, m) => s + (m.carbs || 0), 0), fat: meals.reduce((s, m) => s + (m.fat || 0), 0) };
+      const eaten = todayIntake.value;
+      if (!planned.carbs && !planned.fat && !eaten.carbs && !eaten.fat) return null;
+      const pct = (a, b) => Math.min(100, Math.round((a / Math.max(1, b)) * 100));
+      return [
+        { id: 'carbs', icon: '🍞', label: 'Carboidrati', eaten: eaten.carbs, planned: planned.carbs, pct: pct(eaten.carbs, planned.carbs) },
+        { id: 'fat', icon: '🥑', label: 'Grassi', eaten: eaten.fat, planned: planned.fat, pct: pct(eaten.fat, planned.fat) }
+      ];
+    });
+
     // Si possono segnare solo pasti di oggi o dei giorni passati
     const isFutureDateKey = (dateKey) => !!dateKey && dateKey > todayDateKey.value;
 
@@ -6590,7 +6603,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 18';
+    const APP_VERSION = 'beta 19';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8369,7 +8382,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, todayMacros, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale

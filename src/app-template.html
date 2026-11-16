@@ -386,9 +386,16 @@
           <div class="w-full bg-gray-100 h-2 rounded-full overflow-hidden mt-2">
             <div class="h-full rounded-full bg-salvia transition-all duration-500" :style="{ width: Math.min(100, Math.round(todayProtein.eaten / Math.max(1, proteinGoal) * 100)) + '%' }"></div>
           </div>
-          <div v-if="todayIntake.carbs || todayIntake.fat" class="flex gap-4 text-[11px] font-semibold text-gray-500 mt-2">
-            <span>🍞 Carboidrati <b class="text-antracite">{{ todayIntake.carbs }} g</b></span>
-            <span>🥑 Grassi <b class="text-antracite">{{ todayIntake.fat }} g</b></span>
+          <div v-if="todayMacros" class="grid grid-cols-2 gap-3 mt-3 pt-3 border-t border-gray-100">
+            <div v-for="mc in todayMacros" :key="'tm' + mc.id">
+              <div class="flex justify-between items-baseline gap-1">
+                <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">{{ mc.icon }} {{ $tv(mc.label) }}</span>
+                <span class="text-xs font-extrabold text-antracite">{{ mc.eaten }}<span v-if="mc.planned" class="text-[10px] font-bold text-gray-400"> / {{ mc.planned }}</span> <span class="text-[10px] font-bold text-gray-400">g</span></span>
+              </div>
+              <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-1.5">
+                <div class="h-full rounded-full transition-all duration-500" :class="mc.id === 'carbs' ? 'bg-arancione' : 'bg-viola'" :style="{ width: mc.pct + '%' }"></div>
+              </div>
+            </div>
           </div>
           <p class="text-[10px] font-medium text-gray-400 mt-1.5 leading-snug">
             <template v-if="bodyStats.protein">Obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g · il menù di oggi ne ha <b :class="todayProtein.planned < bodyStats.protein.min ? 'text-arancione' : 'text-salvia'">≈ {{ todayProtein.planned }} g</b>.</template>
