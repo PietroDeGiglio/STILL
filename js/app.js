@@ -8,7 +8,18 @@ const stillApp = createApp({
     const activeTab = ref('dashboard');
 
     // Data locale in formato YYYY-MM-DD (usata da pasti, progressi e calendario)
+    // Il giorno di oggi come dato "vivo": l'app resta aperta in background anche per giorni, e a mezzanotte
+    // tutto quello che dipende da "oggi" (menù, pasti segnati, serie, calendari) deve ricalcolarsi.
+    // Chi legge la data passando da toISODate() o nowDate() si aggiorna da solo quando cambia il giorno.
+    const localDayKey = () => {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    };
+    const dayStamp = ref(localDayKey());
+    const refreshDay = () => { const key = localDayKey(); if (key !== dayStamp.value) dayStamp.value = key; };
+    const nowDate = () => { void dayStamp.value; return new Date(); };
     const toISODate = (date = new Date()) => {
+      void dayStamp.value;
       const local = new Date(date.getTime() - date.getTimezoneOffset() * 60000);
       return local.toISOString().split('T')[0];
     };
@@ -32,6 +43,24 @@ const stillApp = createApp({
       if (shape === 'array') return Array.isArray(value);
       if (shape === 'object') return (value === null && key === 'still_profile') || (!!value && typeof value === 'object' && !Array.isArray(value));
       return true;
+    };
+    // Dentro la forma giusta possono esserci voci rovinate (un "null" in un elenco, un giorno che non è un oggetto):
+    // basterebbe una sola a bloccare l'interfaccia a ogni avvio. Si tolgono, il resto dei dati resta com'è.
+    const isPlainObject = (v) => !!v && typeof v === 'object' && !Array.isArray(v);
+    const DAY_MAP_KEYS = ['still_meal_logs', 'still_food_diary'];   // { 'AAAA-MM-GG': { … } }
+    const cleanShape = (key, value) => {
+      if (STORAGE_SHAPES[key] === 'array' && Array.isArray(value)) {
+        const good = value.filter(isPlainObject);
+        return good.length === value.length ? value : good;
+      }
+      if (DAY_MAP_KEYS.includes(key) && isPlainObject(value)) {
+        const bad = Object.keys(value).filter(k => !isPlainObject(value[k]));
+        if (!bad.length) return value;
+        const copy = { ...value };
+        bad.forEach(k => { delete copy[k]; });
+        return copy;
+      }
+      return value;
     };
     // Se il telefono non riesce a salvare (memoria piena o bloccata) l'utente deve saperlo subito:
     // avviso a schermo, al massimo una volta al minuto per non bloccare l'app.
@@ -79,7 +108,7 @@ const stillApp = createApp({
         const raw = this.getRaw(key);
         if (raw === null) return fallback;
         const value = JSON.parse(raw);
-        if (hasShape(key, value)) return value;
+        if (hasShape(key, value)) return cleanShape(key, value);
         console.warn(`Dati con forma inattesa per ${key}: ignorati`);
         return fallback;
       },
@@ -194,8 +223,8 @@ const stillApp = createApp({
 
     // Selettore dei giorni nel dettaglio del piano (parte da oggi)
     const shortDayLabels = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom'];
-    const todayWeekDay = weekDays[(new Date().getDay() + 6) % 7];
-    const selectedNutritionDay = ref(todayWeekDay);
+    const todayWeekDay = computed(() => weekDays[(nowDate().getDay() + 6) % 7]);
+    const selectedNutritionDay = ref(todayWeekDay.value);
     
     // Builder Data State
     const editingPlanId = ref(null);
@@ -578,7 +607,7 @@ const stillApp = createApp({
     };
 
     // Computed per Dashboard: pasti di oggi
-    const todayActiveMeals = computed(() => getMealsForDate(new Date()));
+    const todayActiveMeals = computed(() => getMealsForDate(nowDate()));
 
     // ---------------------------------------------------------------
     // PASTI: check giornaliero, commenti e calendario dashboard
@@ -868,7 +897,7 @@ const stillApp = createApp({
     const diaryWeek = computed(() => {
       const days = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
+        const d = nowDate(); d.setHours(0, 0, 0, 0); d.setDate(d.getDate() - i);
         const key = toISODate(d);
         const info = dayIntake(key);
         const tracked = info.entries > 0 || info.logged > 0;
@@ -997,9 +1026,8 @@ const stillApp = createApp({
     };
 
     const dashIsToday = (day) => {
-      return day === dashToday.getDate()
-        && dashMonth.value === dashToday.getMonth()
-        && dashYear.value === dashToday.getFullYear();
+      const now = nowDate();
+      return day === now.getDate() && dashMonth.value === now.getMonth() && dashYear.value === now.getFullYear();
     };
 
     const dashboardDayStatus = (day) => dayStatusFor(new Date(dashYear.value, dashMonth.value, day));
@@ -1093,7 +1121,7 @@ const stillApp = createApp({
         return;
       }
       selectedPlan.value = activePlan.value;
-      selectedNutritionDay.value = todayWeekDay;
+      selectedNutritionDay.value = todayWeekDay.value;
       nutritionView.value = 'detail';
       openDayMenuForDate(new Date());
     };
@@ -1182,7 +1210,7 @@ const stillApp = createApp({
       const plan = selectedPlan.value;
       if (!plan) return [];
       if (plan.weeks && plan.weeks.length > 0) {
-        const now = new Date(); now.setHours(0, 0, 0, 0);
+        const now = nowDate(); now.setHours(0, 0, 0, 0);
         const startDate = new Date((plan.startDate || '') + 'T00:00:00');
         let weekIdx = 0;
         if (!Number.isNaN(startDate.getTime()) && now >= startDate) {
@@ -1208,7 +1236,7 @@ const stillApp = createApp({
 
     const openPlan = (plan) => {
       selectedPlan.value = plan;
-      selectedNutritionDay.value = todayWeekDay;
+      selectedNutritionDay.value = todayWeekDay.value;
       nutritionView.value = 'detail';
     };
 
@@ -1399,9 +1427,10 @@ const stillApp = createApp({
 
     const trainingHasSessions = (day) => trainingSessionsForDay(day).length > 0;
 
-    const trainingIsToday = (day) => day === trainingToday.getDate()
-      && trainingMonth.value === trainingToday.getMonth()
-      && trainingYear.value === trainingToday.getFullYear();
+    const trainingIsToday = (day) => {
+      const now = nowDate();
+      return day === now.getDate() && trainingMonth.value === now.getMonth() && trainingYear.value === now.getFullYear();
+    };
 
     const trainingDayClasses = (day) => {
       if (trainingHasSessions(day)) return 'bg-arancione text-white shadow-sm';
@@ -1481,8 +1510,8 @@ const stillApp = createApp({
     // Ore di allenamento per la scheda Progressi: questa settimana, questo mese e da sempre
     const trainingTimeSummary = computed(() => {
       const today = toISODate();
-      const week = new Date(); week.setHours(12, 0, 0, 0); week.setDate(week.getDate() - ((week.getDay() + 6) % 7));
-      const month = new Date(); month.setHours(12, 0, 0, 0); month.setDate(1);
+      const week = nowDate(); week.setHours(12, 0, 0, 0); week.setDate(week.getDate() - ((week.getDay() + 6) % 7));
+      const month = nowDate(); month.setHours(12, 0, 0, 0); month.setDate(1);
       const all = trainingSecondsBetween('0000-01-01', today);
       return {
         week: trainingSecondsBetween(toISODate(week), today).total,
@@ -1751,7 +1780,7 @@ const stillApp = createApp({
     const pastOccurrences = (session) => {
       const out = [];
       const today = toISODate();
-      const d = new Date(); d.setHours(12, 0, 0, 0);
+      const d = nowDate(); d.setHours(12, 0, 0, 0);
       let guard = 0;
       while (out.length < 120 && guard++ < 800) {
         const key = toISODate(d);
@@ -4525,7 +4554,7 @@ const stillApp = createApp({
     // STILL_BARS: vedi js/data/quotes.js
 
     const dayNumber = () => {
-      const d = new Date();
+      const d = nowDate();
       return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
     };
     // Permutazione stabile: lo stesso giorno mostra sempre la stessa frase, giorni vicini frasi diverse
@@ -4534,11 +4563,13 @@ const stillApp = createApp({
     const dailyBar = computed(() => STILL_BARS[pickIndex(dayNumber(), STILL_BARS.length)]);
 
     const noteForToday = computed(() => {
-      return commentsMap.value[`${todayDate.getFullYear()}-${todayDate.getMonth()}-${todayDate.getDate()}`];
+      const now = nowDate();
+      return commentsMap.value[`${now.getFullYear()}-${now.getMonth()}-${now.getDate()}`];
     });
 
     const isToday = (day) => {
-      return day === todayDate.getDate() && currentMonth.value === todayDate.getMonth() && currentYear.value === todayDate.getFullYear();
+      const now = nowDate();
+      return day === now.getDate() && currentMonth.value === now.getMonth() && currentYear.value === now.getFullYear();
     };
 
     const isSunday = (day) => {
@@ -4690,9 +4721,10 @@ const stillApp = createApp({
       if (trainingFormModal.value.isOpen || pastChecksModal.value.isOpen || lightDayModal.value.isOpen || recordModal.value.isOpen) return;
       promptPendingSportChecks();
     };
-    setInterval(() => { clockNow.value = Date.now(); autoPromptChecks(); }, 60 * 1000);
+    setInterval(() => { refreshDay(); clockNow.value = Date.now(); autoPromptChecks(); }, 60 * 1000);
     document.addEventListener('visibilitychange', () => {
       if (document.visibilityState !== 'visible') return;
+      refreshDay();
       clockNow.value = Date.now();
       setTimeout(autoPromptChecks, 500);
     });
@@ -4803,7 +4835,7 @@ const stillApp = createApp({
 
       // Attività: ore di allenamento a settimana nelle ultime 4 settimane (palestra + sport segnati)
       const today = toISODate();
-      const from = new Date(); from.setHours(12, 0, 0, 0); from.setDate(from.getDate() - 27);
+      const from = nowDate(); from.setHours(12, 0, 0, 0); from.setDate(from.getDate() - 27);
       const weeklyHours = trainingSecondsBetween(toISODate(from), today).total / 3600 / 4;
       const level = weeklyHours < 1 ? { factor: 1.2, label: 'Sedentario' }
         : weeklyHours < 3 ? { factor: 1.375, label: 'Poco attivo' }
@@ -4835,7 +4867,7 @@ const stillApp = createApp({
       if (activePlan.value && out.energy) {
         let total = 0, days = 0;
         for (let i = 0; i < 7; i++) {
-          const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
+          const d = nowDate(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
           const kcal = getMealsForDate(d).reduce((s, m) => s + (m.calories || 0), 0);
           if (kcal > 0) { total += kcal; days++; }
         }
@@ -4937,7 +4969,7 @@ const stillApp = createApp({
       if (!activePlan.value) return null;
       let kcal = 0, protein = 0, days = 0, kcalDays = 0, proteinDays = 0;
       for (let i = 0; i < 7; i++) {
-        const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
+        const d = nowDate(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() + i);
         const meals = getMealsForDate(d);
         if (!meals.length) continue;
         days++;
@@ -5113,7 +5145,7 @@ const stillApp = createApp({
         const grocery = [];
         personal.forEach(day => day.meals.forEach(m => m.items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
         plans.value.forEach(p => { if (p.status === 'active') { p.status = 'inactive'; p.results = 'Terminato'; } });
-        const end = new Date(); end.setDate(end.getDate() + 6);
+        const end = nowDate(); end.setDate(end.getDate() + 6);
         const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
         plans.value.unshift({
           id: nextId,
@@ -5236,7 +5268,7 @@ const stillApp = createApp({
       if (range) {
         start = range.start;
       } else if (periodDays) {
-        const d = new Date(); d.setDate(d.getDate() - (periodDays - 1));
+        const d = nowDate(); d.setDate(d.getDate() - (periodDays - 1));
         start = toISODate(d);
       } else {
         start = (profile.value && profile.value.createdAt) || allDates[0] || today;
@@ -5470,7 +5502,7 @@ const stillApp = createApp({
 
     // Dati del riepilogo: mese corrente (offset 0) o precedente (offset 1)
     const recapRange = (offset) => {
-      const first = new Date(); first.setHours(0, 0, 0, 0); first.setDate(1); first.setMonth(first.getMonth() - offset);
+      const first = nowDate(); first.setHours(0, 0, 0, 0); first.setDate(1); first.setMonth(first.getMonth() - offset);
       const last = new Date(first.getFullYear(), first.getMonth() + 1, 0);
       const today = toISODate();
       const end = toISODate(last) > today ? today : toISODate(last);
@@ -5480,7 +5512,7 @@ const stillApp = createApp({
     const recapMonthName = (offset) => recapRange(offset).month;
     // Settimana da lunedì a domenica: corrente (offset 0) o precedente (offset 1)
     const weekRange = (offset) => {
-      const first = new Date(); first.setHours(0, 0, 0, 0);
+      const first = nowDate(); first.setHours(0, 0, 0, 0);
       first.setDate(first.getDate() - ((first.getDay() + 6) % 7) - offset * 7);
       const last = new Date(first); last.setDate(last.getDate() + 6);
       const today = toISODate();
@@ -6337,7 +6369,7 @@ const stillApp = createApp({
         }
         // Solo le chiavi di STILL: il resto del file viene ignorato
         const clean = {};
-        validKeys.forEach(k => { clean[k] = data[k]; });
+        validKeys.forEach(k => { clean[k] = cleanShape(k, data[k]); });
         const when = payload.exportedAt ? new Date(payload.exportedAt).toLocaleString(i18nIntl()) : 'data sconosciuta';
         onValid(clean, when);
       };
@@ -6459,7 +6491,7 @@ const stillApp = createApp({
         if (set.has(today)) activeDay(today);
       }
       const todayDone = set.has(today);
-      const y = new Date(); y.setHours(12, 0, 0, 0); y.setDate(y.getDate() - 1);
+      const y = nowDate(); y.setHours(12, 0, 0, 0); y.setDate(y.getDate() - 1);
       const yesterday = toISODate(y);
       const protectedYesterday = protectedDays.has(yesterday);
 
@@ -6479,7 +6511,7 @@ const stillApp = createApp({
 
       const week = [];
       for (let i = 6; i >= 0; i--) {
-        const d = new Date(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
+        const d = nowDate(); d.setHours(12, 0, 0, 0); d.setDate(d.getDate() - i);
         const key = toISODate(d);
         week.push({ key, label: ['D', 'L', 'M', 'M', 'G', 'V', 'S'][d.getDay()], active: set.has(key), protected: protectedDays.has(key), today: i === 0 });
       }
@@ -6498,7 +6530,7 @@ const stillApp = createApp({
 
     // Riepilogo del mese scorso in evidenza nei primi giorni del mese
     const recapBanner = computed(() => {
-      if (new Date().getDate() > 7) return null;
+      if (nowDate().getDate() > 7) return null;
       const r = recapRange(1);
       let active = 0;
       const d = new Date(r.first);
@@ -6508,7 +6540,7 @@ const stillApp = createApp({
 
     // Riepilogo della settimana: domenica quella in corso, lunedì quella appena finita
     const weekBanner = computed(() => {
-      const dow = new Date().getDay();
+      const dow = nowDate().getDay();
       if (dow !== 0 && dow !== 1) return null;
       const offset = dow === 0 ? 0 : 1;
       const r = weekRange(offset);
@@ -6725,7 +6757,7 @@ const stillApp = createApp({
     const WRAPPED_SLIDE_MS = 6000;
     const wrapped = ref({ isOpen: false, data: null, idx: 0, t0: 0, now: 0 });
     let wrappedTimer = null;
-    const wrappedYearFor = (offset = 0) => new Date().getFullYear() - offset;
+    const wrappedYearFor = (offset = 0) => nowDate().getFullYear() - offset;
     const openWrapped = (offset = 0) => {
       const data = buildWrapped(wrappedYearFor(offset));
       data.offset = offset;
@@ -6766,13 +6798,13 @@ const stillApp = createApp({
     // Banner in dashboard: da dicembre a fine gennaio (a gennaio, l'anno appena finito)
     // Il racconto dell'anno si apre solo a dicembre (e a gennaio per l'anno appena finito)
     const wrappedSeason = computed(() => {
-      const month = new Date().getMonth();
+      const month = nowDate().getMonth();
       if (month !== 11 && month !== 0) return null;
       const offset = month === 0 ? 1 : 0;
       return { offset, year: wrappedYearFor(offset) };
     });
     const wrappedBanner = computed(() => {
-      const now = new Date();
+      const now = nowDate();
       const month = now.getMonth();
       if (month !== 11 && month !== 0) return null;
       const offset = month === 0 ? 1 : 0;
@@ -7450,7 +7482,7 @@ const stillApp = createApp({
       const todayKey = toISODate();
       const todayActive = activeDaySet.value.has(todayKey);
       for (let off = 0; off < 3; off++) {
-        const day = new Date(); day.setHours(12, 0, 0, 0); day.setDate(day.getDate() + off);
+        const day = nowDate(); day.setHours(12, 0, 0, 0); day.setDate(day.getDate() + off);
         const key = toISODate(day);
 
         // Pasti: cosa mangiare + "facci sapere"
@@ -8029,9 +8061,71 @@ const stillApp = createApp({
   render: STILL_RENDER
 });
 // Lingue (js/i18n/i18n.js): $t('frase') e $tv(valore) usati dall'interfaccia
+// ---------------------------------------------------------------
+// SCHERMATA DI EMERGENZA: se l'interfaccia non riesce a disegnarsi (dato rovinato, errore imprevisto)
+// l'app non deve restare bianca. Compare un avviso con: ricarica, e salvataggio dei dati in un backup.
+// È scritta senza Vue apposta: deve funzionare proprio quando Vue si è fermato.
+// ---------------------------------------------------------------
+const STILL_CRASH_TEXT = {
+  it: { head: 'Qualcosa si è bloccato', body: "STILL non riesce a mostrare questa schermata. I tuoi dati sono ancora sul telefono: salva un backup per sicurezza, poi ricarica l'app.", reload: "Ricarica l'app", backup: 'Salva un backup dei dati', saved: 'Backup salvato', detail: 'Dettaglio tecnico' },
+  en: { head: 'Something got stuck', body: 'STILL cannot show this screen. Your data is still on your phone: save a backup to be safe, then reload the app.', reload: 'Reload the app', backup: 'Save a backup of my data', saved: 'Backup saved', detail: 'Technical detail' },
+  es: { head: 'Algo se ha bloqueado', body: 'STILL no puede mostrar esta pantalla. Tus datos siguen en el teléfono: guarda una copia de seguridad y luego recarga la app.', reload: 'Recargar la app', backup: 'Guardar una copia de mis datos', saved: 'Copia guardada', detail: 'Detalle técnico' }
+};
+// Stesso formato del backup del Profilo: si ricarica da "Ripristina backup"
+const stillEmergencyBackup = () => {
+  const data = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || key.indexOf('still_') !== 0) continue;
+    try { data[key] = JSON.parse(localStorage.getItem(key)); } catch (e) { /* non è un dato dell'app */ }
+  }
+  const d = new Date();
+  const day = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  const text = JSON.stringify({ app: 'STILL', version: 1, exportedAt: d.toISOString(), data }, null, 2);
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'still-backup-' + day + '.json';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+};
+let stillCrashShown = false;
+const showStillCrash = (err) => {
+  if (stillCrashShown) return;
+  stillCrashShown = true;
+  try {
+    const t = STILL_CRASH_TEXT[(typeof i18nLocale !== 'undefined' && i18nLocale.value) || 'it'] || STILL_CRASH_TEXT.it;
+    const el = (tag, css, text) => { const n = document.createElement(tag); n.style.cssText = css; if (text) n.textContent = text; return n; };
+    const box = el('div', 'position:fixed;inset:0;z-index:99999;background:#F6F5F2;color:#1F2933;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:28px;text-align:center;font-family:inherit;overflow:auto');
+    box.setAttribute('role', 'alertdialog');
+    box.appendChild(el('div', 'font-size:22px;font-weight:900', t.head));
+    box.appendChild(el('div', 'font-size:14px;line-height:1.5;max-width:320px;color:#4B5563', t.body));
+    const btn = 'width:100%;max-width:320px;padding:14px 16px;border-radius:16px;font-size:15px;font-weight:800;border:0;cursor:pointer;';
+    const backup = el('button', btn + 'background:#fff;color:#1F2933;border:1px solid #D1D5DB', t.backup);
+    backup.type = 'button';
+    backup.addEventListener('click', () => { try { stillEmergencyBackup(); backup.textContent = t.saved + ' ✓'; } catch (e) { console.error(e); } });
+    const reload = el('button', btn + 'background:#1F2933;color:#fff', t.reload);
+    reload.type = 'button';
+    reload.addEventListener('click', () => window.location.reload());
+    box.appendChild(backup);
+    box.appendChild(reload);
+    const msg = String((err && (err.message || err)) || '').slice(0, 200);
+    if (msg) box.appendChild(el('div', 'font-size:10px;color:#9CA3AF;max-width:320px;word-break:break-word', t.detail + ': ' + msg));
+    document.body.appendChild(box);
+  } catch (e) { console.error(e); }
+};
+// Errori mentre l'app si prepara o si disegna: schermata di emergenza. Gli altri (un tasto che fallisce)
+// restano in console: l'interfaccia è ancora utilizzabile.
+// In questa versione di Vue "info" è l'indirizzo della pagina dell'errore: #runtime-0 preparazione, #runtime-1 disegno.
+stillApp.config.errorHandler = (err, instance, info) => {
+  console.error(err, info);
+  if (/#runtime-[01]$/.test(String(info)) || /setup function|render function/.test(String(info))) showStillCrash(err);
+};
 stillApp.config.globalProperties.$t = i18nT;
 stillApp.config.globalProperties.$tv = i18nTv;
-stillApp.mount('#app');
+try { stillApp.mount('#app'); } catch (err) { console.error(err); showStillCrash(err); }
 
 // App installabile e uso offline: il service worker funziona solo da un indirizzo web (non da file e non nell'APK)
 if ('serviceWorker' in navigator && /^https?:$/.test(location.protocol) && !window.Capacitor) {

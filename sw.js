@@ -1,10 +1,12 @@
 // STILL: service worker. Rende l'app installabile e la fa funzionare anche senza internet.
 // - File dell'app: prima la rete (così gli aggiornamenti arrivano subito), se offline la copia salvata.
+//   Se all'apertura la rete non risponde entro pochi secondi (palestra, poco segnale) l'app parte subito
+//   dalla copia salvata, tutta intera: mai metà file nuovi e metà vecchi.
 // - Vue, Tailwind, font e pdf.js sono salvati nell'app stessa (js/vendor, css/tailwind.css, assets/fonts).
 // - Eventuali file di altri siti: la copia salvata, aggiornata in background.
 // Quando si aggiungono file all'app, aggiungerli a APP_FILES e cambiare VERSION.
 // pdf.js (js/vendor/pdfjs, ~1,4 MB) non è in elenco: viene salvato la prima volta che si importa una dieta.
-const VERSION = 'still-v29';
+const VERSION = 'still-v30';
 const APP_FILES = [
   './',
   'index.html',
@@ -15,6 +17,7 @@ const APP_FILES = [
   'assets/fonts/plus-jakarta-sans-latin-normal.woff2',
   'assets/fonts/plus-jakarta-sans-latin-italic.woff2',
   'assets/fonts/plus-jakarta-sans-latin-ext-normal.woff2',
+  'assets/fonts/plus-jakarta-sans-latin-ext-italic.woff2',
   'js/i18n/i18n.js',
   'js/i18n/en.js',
   'js/i18n/es.js',
@@ -65,6 +68,12 @@ self.addEventListener('activate', (event) => {
   })());
 });
 
+// Rete lenta: quanto si aspetta la pagina prima di usare la copia salvata, e per quanto tempo
+// dopo i file dell'app si prendono dalla copia salvata (così la versione resta la stessa per tutti i file)
+const SLOW_NETWORK_MS = 2500;
+const SLOW_MODE_MS = 30000;
+let slowUntil = 0;
+
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   if (req.method !== 'GET') return;
@@ -75,14 +84,42 @@ self.addEventListener('fetch', (event) => {
     // App: rete, poi copia salvata
     event.respondWith((async () => {
       const cache = await caches.open(VERSION);
-      try {
-        const res = await fetch(req);
-        if (res.ok) cache.put(req, res.clone());
-        return res;
-      } catch (e) {
+      const saved = async () => {
         const hit = await cache.match(req, { ignoreSearch: true });
         if (hit) return hit;
         if (req.mode === 'navigate') return (await cache.match('index.html')) || (await cache.match('./'));
+        return undefined;
+      };
+      const fromNetwork = () => fetch(req).then(res => {
+        if (res.ok) cache.put(req, res.clone());
+        return res;
+      });
+
+      // Apertura dell'app: se la rete tarda, si parte dalla copia salvata
+      if (req.mode === 'navigate') {
+        const copy = await saved();
+        const net = fromNetwork();
+        if (!copy) { slowUntil = 0; return net; }
+        let timer;
+        const late = new Promise(resolve => { timer = setTimeout(() => resolve(null), SLOW_NETWORK_MS); });
+        const res = await Promise.race([net.catch(() => null), late]);
+        clearTimeout(timer);
+        if (res) { slowUntil = 0; return res; }
+        slowUntil = Date.now() + SLOW_MODE_MS;
+        return copy;
+      }
+
+      // Rete lenta all'apertura: i file dell'app dalla copia salvata
+      if (Date.now() < slowUntil) {
+        const copy = await saved();
+        if (copy) return copy;
+      }
+
+      try {
+        return await fromNetwork();
+      } catch (e) {
+        const copy = await saved();
+        if (copy) return copy;
         throw e;
       }
     })());
