@@ -518,34 +518,22 @@
         </div>
       </div>
 
-      <!-- QUICK STATS -->
-      <div class="grid grid-cols-2 gap-4">
-        <div @click="activeTab = 'progress'" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-viola/50 transition-colors">
-          <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-2 leading-tight">Variazione Peso</div>
-          <template v-if="weightDelta">
-            <div class="flex items-baseline gap-1 mt-1">
-              <span class="text-2xl font-extrabold" :class="weightDelta.value <= 0 ? 'text-salvia' : 'text-arancione'">{{ formatNumber(weightDelta.value) }}</span>
-              <span class="text-sm font-semibold text-gray-500">kg</span>
-            </div>
-            <p class="text-[10px] font-bold text-gray-400 mt-1">{{ weightDelta.days }} {{ weightDelta.days === 1 ? 'giorno' : 'giorni' }}</p>
-          </template>
-          <template v-else>
-            <div class="text-sm font-bold text-gray-400 mt-2">Dati insufficienti</div>
-            <p class="text-[10px] font-bold text-gray-400 mt-1">Servono 2 misurazioni</p>
-          </template>
+      <!-- PESO: le calorie di oggi sono già nel box del menù qui sopra -->
+      <div @click="activeTab = 'progress'" class="bg-white px-4 py-3.5 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-viola/50 transition-colors flex items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-tight">⚖️ Peso</div>
+          <div v-if="latestWeight" class="flex items-baseline gap-1 mt-1">
+            <span class="text-2xl font-extrabold text-antracite">{{ formatNumber(latestWeight.weight) }}</span>
+            <span class="text-sm font-semibold text-gray-500">kg</span>
+          </div>
+          <div v-else class="text-sm font-bold text-gray-400 mt-1">Aggiungi la prima pesata</div>
         </div>
-
-        <div @click="goToTodayNutrition()" class="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm cursor-pointer hover:border-salvia/50 transition-colors flex flex-col justify-between">
-          <div>
-            <div class="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1 leading-tight">Calorie Oggi</div>
-            <div class="flex items-baseline gap-1">
-              <span class="text-xl font-extrabold text-antracite">{{ todayConsumedCalories }}</span>
-              <span class="text-xs font-semibold text-gray-500">/ {{ todayTargetCalories }}</span>
-            </div>
-          </div>
-          <div class="mt-2 w-full bg-gray-100 h-1.5 rounded-full overflow-hidden">
-            <div class="h-full rounded-full transition-all" :class="intakeBarClass(todayConsumedCalories, todayTargetCalories)" :style="{ width: todayCaloriesPct + '%' }"></div>
-          </div>
+        <div class="text-right shrink-0">
+          <template v-if="weightDelta">
+            <span class="text-sm font-extrabold px-2 py-1 rounded-lg" :class="weightDelta.classes">{{ weightDelta.text }}</span>
+            <p class="text-[10px] font-bold text-gray-400 mt-1.5">in {{ weightDelta.days }} {{ weightDelta.days === 1 ? 'giorno' : 'giorni' }}</p>
+          </template>
+          <p v-else class="text-[10px] font-bold text-gray-400">Servono 2 pesate per la variazione</p>
         </div>
       </div>
 
@@ -2191,25 +2179,26 @@
           </div>
         </div>
 
-        <!-- MACROS SUMMARY (Auto-calculated) -->
+        <!-- TOTALI DEL GIORNO DEL PIANO: calorie, proteine, carboidrati e grassi (stesso stile della home) -->
         <div class="bg-white rounded-3xl p-5 border border-gray-100 shadow-soft">
-          <div class="flex justify-between items-center mb-4">
-            <span class="text-xs font-bold text-gray-500 uppercase">Obiettivo {{ selectedNutritionDay }}</span>
-            <span class="text-lg font-extrabold text-antracite">{{ selectedPlanDayCalories }} <span class="text-xs font-medium text-gray-400">kcal totali</span></span>
+          <div class="flex justify-between items-baseline gap-2">
+            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">🔥 Totale {{ selectedNutritionDay }}</span>
+            <span class="text-xl font-extrabold text-antracite">{{ formatNumber(selectedPlanDayCalories) }} <span class="text-xs font-bold text-gray-400">kcal</span></span>
           </div>
-          <div v-if="selectedPlanDayProtein !== null" class="flex justify-between items-center -mt-2 mb-4">
-            <span class="text-xs font-bold text-gray-500 uppercase">🥩 Proteine</span>
-            <span class="text-sm font-extrabold text-antracite">≈ {{ selectedPlanDayProtein }} g
-              <span v-if="bodyStats.protein" class="text-[11px] font-medium" :class="selectedPlanDayProtein >= bodyStats.protein.min ? 'text-salvia' : 'text-arancione'">· obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g</span>
-            </span>
+          <div v-if="selectedPlanDaySummary" class="grid grid-cols-3 gap-3 mt-3 pt-3 border-t border-gray-100">
+            <div v-for="mc in selectedPlanDaySummary" :key="'pd' + mc.id" class="min-w-0">
+              <div class="text-[9px] font-bold text-gray-400 uppercase tracking-wider truncate">{{ mc.icon }} {{ $tv(mc.label) }}</div>
+              <div class="text-sm font-extrabold text-antracite leading-tight mt-0.5">≈ {{ formatNumber(mc.grams) }} <span class="text-[10px] font-bold text-gray-400">g</span></div>
+              <div class="w-full bg-gray-100 h-1.5 rounded-full overflow-hidden mt-1.5">
+                <div class="h-full rounded-full" :class="mc.bar" :style="{ width: mc.share + '%' }"></div>
+              </div>
+              <div class="text-[9px] font-bold text-gray-400 mt-1">{{ mc.share }}% delle kcal</div>
+            </div>
           </div>
-          <div v-if="selectedPlanDayMacros" class="flex justify-between items-center -mt-2 mb-4">
-            <span class="text-xs font-bold text-gray-500 uppercase">🍞 Carboidrati · 🥑 Grassi</span>
-            <span class="text-sm font-extrabold text-antracite">≈ {{ selectedPlanDayMacros.carbs }} g · {{ selectedPlanDayMacros.fat }} g</span>
-          </div>
-          <div class="w-full bg-gray-100 h-2.5 rounded-full overflow-hidden mb-4">
-            <div class="bg-salvia h-full rounded-full" style="width: 100%"></div>
-          </div>
+          <p v-if="selectedPlanDayProtein !== null && bodyStats.protein" class="text-[10px] font-medium text-gray-400 mt-2 leading-snug">
+            Proteine: obiettivo {{ bodyStats.protein.min }}–{{ bodyStats.protein.max }} g, questo giorno ne ha <b :class="selectedPlanDayProtein >= bodyStats.protein.min ? 'text-salvia' : 'text-arancione'">≈ {{ selectedPlanDayProtein }} g</b>.
+          </p>
+          <p v-else-if="!selectedPlanDaySummary" class="text-[10px] font-medium text-gray-400 mt-2 leading-snug">Scrivi gli alimenti con le quantità (es. 80g pasta) per vedere proteine, carboidrati e grassi.</p>
         </div>
 
         <!-- DAILY MEALS LIST -->

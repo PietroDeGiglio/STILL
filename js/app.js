@@ -738,7 +738,7 @@ const stillApp = createApp({
       return {
         kcal: { eaten: eaten.kcal, planned: eaten.target, pct: pct(eaten.kcal, eaten.target) },
         macros: [
-          macro('protein', '🥩', 'Proteine', protein ? protein.eaten : eaten.protein, protein ? proteinGoal.value : sum('protein'), 'bg-salvia'),
+          macro('protein', '🥩', 'Proteine', protein ? protein.eaten : eaten.protein, protein ? protein.planned : sum('protein'), 'bg-salvia'),
           macro('carbs', '🍞', 'Carboidrati', eaten.carbs, sum('carbs'), 'bg-arancione'),
           macro('fat', '🥑', 'Grassi', eaten.fat, sum('fat'), 'bg-viola')
         ]
@@ -1318,6 +1318,21 @@ const stillApp = createApp({
       const carbs = list.reduce((sum, m) => sum + (m.carbs || 0), 0);
       const fat = list.reduce((sum, m) => sum + (m.fat || 0), 0);
       return carbs || fat ? { carbs, fat } : null;
+    });
+
+    // Box dei totali del giorno nel piano: grammi e quota di calorie di proteine, carboidrati e grassi
+    const selectedPlanDaySummary = computed(() => {
+      const protein = selectedPlanDayProtein.value || 0;
+      const { carbs = 0, fat = 0 } = selectedPlanDayMacros.value || {};
+      const energy = protein * 4 + carbs * 4 + fat * 9;
+      if (!energy) return null;
+      const share = (kcal) => Math.round((kcal / energy) * 100);
+      const r = (x) => Math.round(x);
+      return [
+        { id: 'protein', icon: '🥩', label: 'Proteine', grams: r(protein), share: share(protein * 4), bar: 'bg-salvia' },
+        { id: 'carbs', icon: '🍞', label: 'Carboidrati', grams: r(carbs), share: share(carbs * 4), bar: 'bg-arancione' },
+        { id: 'fat', icon: '🥑', label: 'Grassi', grams: r(fat), share: share(fat * 9), bar: 'bg-viola' }
+      ];
     });
 
     const selectedPlanDayCalories = computed(() => {
@@ -4926,7 +4941,8 @@ const stillApp = createApp({
       const d = nowDate();
       return Math.floor(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000);
     };
-    // Permutazione stabile: lo stesso giorno mostra sempre la stessa frase, giorni vicini frasi diverse
+    // Permutazione stabile: lo stesso giorno mostra sempre la stessa frase. 7919 è primo e non divide il numero
+    // di frasi, quindi si passa da tutte prima di ripeterne una (con più di 365 frasi: nessuna ripetuta in un anno)
     const pickIndex = (n, len) => ((n * 7919) % len + len) % len;
 
     const dailyBar = computed(() => STILL_BARS[pickIndex(dayNumber(), STILL_BARS.length)]);
@@ -6644,7 +6660,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 20';
+    const APP_VERSION = 'beta 21';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8423,7 +8439,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, todayMenuCounters, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale
