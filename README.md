@@ -24,3 +24,7 @@ npm run vendor       # dopo aver aggiornato Vue, pdf.js o il font in package.jso
 ```
 
 Se si aggiunge un file all'app va messo anche in `APP_FILES` di `sw.js`, cambiando `VERSION`.
+
+## Licenza
+
+© 2026 Pietro De Giglio. Tutti i diritti riservati. Il codice è pubblico solo per far funzionare l'app: non può essere copiato, modificato, ripubblicato o riutilizzato senza permesso scritto. Dettagli in [LICENSE](LICENSE).

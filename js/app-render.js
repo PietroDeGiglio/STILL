@@ -3520,7 +3520,7 @@ return function render(_ctx, _cache) {
                 (_ctx.onboarding.error)
                   ? (_openBlock(), _createElementBlock("p", _hoisted_11, _toDisplayString(_ctx.$tv(_ctx.onboarding.error)), 1 /* TEXT */))
                   : _createCommentVNode("v-if", true),
-                _createElementVNode("p", _hoisted_12, _toDisplayString(_ctx.$t("Powered by Pietro De Giglio")), 1 /* TEXT */)
+                _createElementVNode("p", _hoisted_12, _toDisplayString(_ctx.$t("© 2026 Pietro De Giglio · Tutti i diritti riservati")), 1 /* TEXT */)
               ])
             ]))
           : (_openBlock(), _createElementBlock("div", _hoisted_13, [

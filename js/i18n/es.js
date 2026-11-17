@@ -1139,7 +1139,7 @@ I18N_DICTS.es = {
   "Possono,": "Pueden,",
   "Post 4:5": "Post 4:5",
   "Post Workout": "Post entrenamiento",
-  "Powered by Pietro De Giglio": "Powered by Pietro De Giglio",
+  "© 2026 Pietro De Giglio · Tutti i diritti riservati": "© 2026 Pietro De Giglio · Todos los derechos reservados",
   "Pranzo": "Comida",
   "Precisione": "Precisión",
   "Prega per avere la forza di sopportarne una difficile.": "Reza por tener la fuerza de soportar una difícil.",

@@ -1,0 +1,22 @@
+Copyright (c) 2026 Pietro De Giglio. Tutti i diritti riservati / All rights reserved.
+
+STILL (codice sorgente, interfaccia, testi, grafica e nome) è opera di Pietro De Giglio.
+
+Il codice è visibile pubblicamente solo per far funzionare l'app online. Senza il
+permesso scritto dell'autore NON è consentito copiarlo, modificarlo, distribuirlo,
+ripubblicarlo, venderlo o usarlo per creare altre app o servizi, in tutto o in parte.
+È consentito solo usare l'app all'indirizzo ufficiale per uso personale.
+
+Fanno eccezione le parti di terzi incluse nell'app, che restano sotto le loro licenze:
+Vue, pdf.js, Plus Jakarta Sans (js/vendor, assets/fonts) e le foto degli esercizi da
+Free Exercise DB (assets/exercises, pubblico dominio, Unlicense).
+
+---
+
+The source code is publicly visible only so the app can run online. Without the
+author's written permission you may NOT copy, modify, distribute, republish, sell or
+use it to build other apps or services, in whole or in part. You may only use the app
+at its official address for personal use. Third-party parts listed above keep their
+own licenses.
+
+Per richieste / For requests: https://github.com/PietroDeGiglio
