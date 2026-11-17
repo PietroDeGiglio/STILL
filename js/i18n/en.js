@@ -2115,5 +2115,8 @@ I18N_DICTS.en = {
   "Aggiungi la prima pesata": "Add your first weigh-in",
   "Proteine: obiettivo {0}–{1} g, questo giorno ne ha": "Protein: goal {0}–{1} g, this day has",
   "Scrivi gli alimenti con le quantità (es. 80g pasta) per vedere proteine, carboidrati e grassi.": "Write foods with quantities (e.g. 80g pasta) to see protein, carbs and fat.",
-  "Servono 2 pesate per la variazione": "2 weigh-ins needed for the change"
+  "Servono 2 pesate per la variazione": "2 weigh-ins needed for the change",
+  "🏆 Rivedi il recap e condividilo": "🏆 See your recap and share it",
+  "Annulla e ricomincia": "Cancel and restart",
+  "Annulla la serie e ricomincia": "Cancel the set and restart"
 };

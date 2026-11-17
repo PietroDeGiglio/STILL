@@ -3783,6 +3783,12 @@ const stillApp = createApp({
       setPlayerPhase('working');
     };
 
+    // Serie avviata per sbaglio: torna a "pronto" senza registrare tempo né serie, il cronometro riparte da zero
+    const playerCancelSet = () => {
+      if (workoutPlayer.value.phase !== 'working') return;
+      setPlayerPhase('ready');
+    };
+
     // Serie completata: registra il tempo e passa al recupero / esercizio successivo / fine
     const playerCompleteSet = () => {
       const p = workoutPlayer.value;
@@ -3835,13 +3841,17 @@ const stillApp = createApp({
       const workSeconds = p.setDurations.reduce((sum, item) => sum + item.seconds, 0);
       const exerciseIds = [...new Set(p.steps.map(step => step.exId))];
       saveSessionReport(true);
+      const quoteIdx = Math.floor(Math.random() * motivationalQuotes.length);
+      // La frase resta legata alla sessione: riaprendo il recap dalla home si rivede la stessa
+      const session = trainingSessions.value.find(item => item.id === p.sessionId);
+      if (session && session.report) session.report.quoteIdx = quoteIdx;
       p.summary = {
         records: findSessionRecords(p.sessionId),
         totalSeconds,
         workSeconds,
         exercises: exerciseIds.length,
         sets: p.setDurations.length,
-        quote: motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)]
+        quote: motivationalQuotes[quoteIdx]
       };
       setPlayerPhase('done');
       stopPlayerTimer();
@@ -3915,6 +3925,31 @@ const stillApp = createApp({
       session.completed = completed;
       session.durationMin = Math.max(1, Math.round(report.totalSeconds / 60));
       session.report = report;
+    };
+
+    // Riapre il recap di fine allenamento di una sessione già salvata (dalla home)
+    const openWorkoutRecap = (sessionId) => {
+      const session = trainingSessions.value.find(item => item.id === sessionId);
+      const r = session && session.report;
+      if (!r) return;
+      // Record e "com'era?" leggono gli esercizi dalla scheda selezionata: si apre quella della sessione
+      const sheet = workoutSheets.value.find(item => String(item.id) === String(session.sheetId));
+      if (sheet) selectedSheet.value = sheet;
+      const exercises = r.exercises || [];
+      workoutPlayer.value = {
+        ...emptyPlayer(),
+        isOpen: true, phase: 'done', sessionId,
+        sheetName: session.sheetName || trainingSessionLabel(session), dayName: session.dayName || '',
+        steps: exercises.map(ex => ({ exId: ex.id })),
+        summary: {
+          records: findSessionRecords(sessionId),
+          totalSeconds: r.totalSeconds || 0,
+          workSeconds: r.workSeconds || 0,
+          exercises: exercises.length,
+          sets: r.sets || 0,
+          quote: motivationalQuotes[r.quoteIdx] || motivationalQuotes[Math.abs(Number(sessionId) || 0) % motivationalQuotes.length]
+        }
+      };
     };
 
     const closeGuidedWorkout = () => {
@@ -4167,7 +4202,7 @@ const stillApp = createApp({
             const r = session.report;
             detail = (r.exercises || []).length + ' esercizi · ' + (r.sets || 0) + ' serie';
           } else detail = session.kind === 'gym' ? 'Palestra' : 'Sport';
-          done.push({ id: session.id, kind: session.kind, title: trainingSessionLabel(session), dayName: session.kind === 'gym' ? session.dayName || '' : '', detail, duration: minutesLabel(min) });
+          done.push({ id: session.id, kind: session.kind, title: trainingSessionLabel(session), dayName: session.kind === 'gym' ? session.dayName || '' : '', detail, duration: minutesLabel(min), recap: hasReport });
         } else if (status !== 'skipped') {
           const start = hhmmToMin(session.time);
           planned.push({
@@ -6660,7 +6695,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 21';
+    const APP_VERSION = 'beta 22';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8439,7 +8474,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale

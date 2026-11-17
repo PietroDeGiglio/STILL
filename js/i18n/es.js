@@ -2116,5 +2116,8 @@ I18N_DICTS.es = {
   "Aggiungi la prima pesata": "Añade tu primer pesaje",
   "Proteine: obiettivo {0}–{1} g, questo giorno ne ha": "Proteínas: objetivo {0}–{1} g, este día tiene",
   "Scrivi gli alimenti con le quantità (es. 80g pasta) per vedere proteine, carboidrati e grassi.": "Escribe los alimentos con las cantidades (ej. 80g pasta) para ver proteínas, carbohidratos y grasas.",
-  "Servono 2 pesate per la variazione": "Hacen falta 2 pesajes para ver la variación"
+  "Servono 2 pesate per la variazione": "Hacen falta 2 pesajes para ver la variación",
+  "🏆 Rivedi il recap e condividilo": "🏆 Vuelve a ver el resumen y compártelo",
+  "Annulla e ricomincia": "Cancelar y empezar de nuevo",
+  "Annulla la serie e ricomincia": "Cancelar la serie y empezar de nuevo"
 };
