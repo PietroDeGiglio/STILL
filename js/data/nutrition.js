@@ -161,3 +161,79 @@ const FOOD_SWAPS = [
     { t: 'miele', tags: [] }, { t: 'marmellata', tags: [] }
   ] }
 ];
+
+// ALIMENTAZIONE PER CHI FA SPORT: la giornata cambia con il carico (periodizzazione dei carboidrati).
+// Fonti: "Nutrition and Athletic Performance", posizione congiunta ACSM, Academy of Nutrition and Dietetics e
+// Dietitians of Canada (2016); posizioni ISSN su proteine (2017) e tempi dei nutrienti (2017).
+//  - carboidrati: 3-5 g/kg nei giorni leggeri, 5-7 con ~1 ora di allenamento, 6-10 con 1-3 ore, fino a 10-12
+//    nelle 36-48 ore prima di gare di resistenza oltre i 90 minuti
+//  - pasto pre-gara 1-4 g/kg di carboidrati 1-4 ore prima; dopo, carboidrati + 20-40 g di proteine
+//  - proteine 1,2-2 g/kg al giorno, distribuite in 4-5 pasti
+// kcal = moltiplicatore del fabbisogno di mantenimento (TDEE) · le porzioni si adattano da sole
+const SPORT_DIET_KINDS = {
+  squadra: { label: 'sport di squadra', sports: ['Calcio', 'Basket', 'Pallavolo', 'Rugby'], extra: 0 },
+  racchetta: { label: 'sport di racchetta', sports: ['Tennis', 'Padel'], extra: 0 },
+  resistenza: { label: 'sport di resistenza', sports: ['Corsa', 'Ciclismo', 'Nuoto'], extra: 0.08,
+    note: 'Nella resistenza i carboidrati sono il carburante: nelle uscite oltre i 60-90 minuti porta 30-60 g di carboidrati all\'ora (gel, banana, bevanda) e prima delle gare lunghe aumenta la pasta già due giorni prima.' },
+  combattimento: { label: 'sport da combattimento', sports: ['Boxe', 'Lotta', 'Arti marziali'], extra: 0,
+    note: 'Se combatti in una categoria di peso: arrivaci con calma nelle settimane prima. Digiuni e disidratazione dell\'ultimo momento fanno perdere forza e sono pericolosi.' }
+};
+
+const SPORT_DIET_DAYS = [
+  {
+    id: 'rest', name: 'Giorno di riposo', short: 'Riposo', icon: '😴', kcal: 0.9, carbs: '3-5 g di carboidrati per kg',
+    desc: 'Meno carboidrati, tante proteine e verdure: il corpo recupera e ricostruisce.',
+    meals: {
+      colazione: ['170g yogurt greco 0', '40g fiocchi d avena', '100g frutti di bosco', '15g noci'],
+      spuntino_mattina: ['1 mela', '30g mandorle'],
+      pranzo: ['80g farro', '150g petto di pollo', 'verdure grigliate', '1 cucchiaio di olio'],
+      spuntino_pomeriggio: ['150g skyr', '1 kiwi'],
+      cena: ['200g salmone', '300g patate', 'insalata', '1 cucchiaio di olio']
+    }
+  },
+  {
+    id: 'train', name: 'Giorno di allenamento', short: 'Allenamento', icon: '🏋️', kcal: 1.05, carbs: '5-7 g di carboidrati per kg',
+    desc: 'Carboidrati intorno all\'allenamento: prima per avere energia, dopo per ricaricare. Proteine a ogni pasto.',
+    meals: {
+      colazione: ['250ml latte parzialmente scremato', '60g fiocchi d avena', '1 banana', '1 cucchiaino di miele'],
+      spuntino_mattina: ['170g yogurt greco 0', '20g mandorle'],
+      pranzo: ['110g pasta', '150g petto di tacchino', 'verdura cotta', '1 cucchiaio di olio'],
+      spuntino_pomeriggio: ['60g pane', '1 cucchiaio di marmellata', '1 banana'],
+      post_workout: ['30g whey', '1 mela', '4 gallette di riso'],
+      cena: ['200g merluzzo', '300g patate', 'insalata', '1 cucchiaio di olio', '50g pane']
+    }
+  },
+  {
+    id: 'eve', name: 'Vigilia della gara', short: 'Vigilia', icon: '🍝', kcal: 1.1, carbs: '6-8 g di carboidrati per kg',
+    desc: 'Si fa il pieno di carboidrati facili da digerire, poche fibre e grassi. Niente cibi nuovi: solo quello che conosci.',
+    meals: {
+      colazione: ['250ml latte parzialmente scremato', '50g corn flakes', '4 fette biscottate', '1 cucchiaio di marmellata'],
+      spuntino_mattina: ['1 banana', '150g yogurt magro'],
+      pranzo: ['130g pasta', '1 cucchiaio di olio', '20g grana', '120g petto di pollo', '100g zucchine'],
+      spuntino_pomeriggio: ['60g pane', '50g prosciutto cotto', '1 succo di frutta'],
+      cena: ['110g riso basmati', '150g merluzzo', '200g patate', '1 cucchiaio di olio', '1 banana']
+    }
+  },
+  {
+    id: 'match', name: 'Giorno della gara', short: 'Gara', icon: '🏆', kcal: 1.15, carbs: '1-4 g per kg nelle 1-4 ore prima',
+    desc: 'L\'ultimo pasto vero 3-4 ore prima, uno spuntino leggero un\'ora prima. Dopo la gara: carboidrati e proteine entro un\'ora.',
+    meals: {
+      colazione: ['60g pane', '1 cucchiaio di marmellata', '1 cucchiaino di miele', '150g yogurt magro', '1 banana'],
+      pranzo: ['110g pasta', '1 cucchiaio di olio', '20g grana', '80g bresaola'],
+      spuntino_pomeriggio: ['1 banana', '3 gallette di riso', '1 cucchiaino di miele'],
+      post_workout: ['300ml latte parzialmente scremato', '40g corn flakes', '1 banana'],
+      cena: ['120g riso basmati', '180g petto di pollo', 'verdure al vapore', '1 cucchiaio di olio', '60g pane']
+    }
+  },
+  {
+    id: 'after', name: 'Giorno dopo la gara', short: 'Recupero', icon: '🔋', kcal: 1, carbs: '4-6 g di carboidrati per kg',
+    desc: 'Ricostruire: proteine alte, carboidrati per riempire le scorte, frutta e verdura per sgonfiare la fatica.',
+    meals: {
+      colazione: ['3 uova', '80g pane integrale', '1 arancia'],
+      spuntino_mattina: ['170g yogurt greco 0', '100g frutti di bosco', '30g muesli'],
+      pranzo: ['100g riso basmati', '200g ceci lessati', 'verdura cotta', '1 cucchiaio di olio'],
+      spuntino_pomeriggio: ['1 pera', '30g mandorle'],
+      cena: ['200g manzo', '300g patate dolci', 'insalata', '1 cucchiaio di olio']
+    }
+  }
+];

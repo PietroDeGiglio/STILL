@@ -2306,7 +2306,7 @@ const stillApp = createApp({
     const EXERCISE_BY_NAME = {};
     EXERCISE_LIBRARY.forEach(item => { EXERCISE_BY_NAME[item.n.trim().toLowerCase()] = item; });
 
-    const guide = ref({ isOpen: false, tab: 'muscle', muscle: 'petto', place: 'gym', sport: '', selected: [], picker: false, sheetId: 'new', dayIdx: 0, newName: '' });
+    const guide = ref({ isOpen: false, tab: 'muscle', muscle: 'petto', place: 'gym', sport: '', selected: [], session: '', picker: false, sheetId: 'new', dayIdx: 0, newName: '' });
 
     // Sport dell'utente (dal calendario) prima degli altri
     const userSports = computed(() => {
@@ -2318,14 +2318,14 @@ const stillApp = createApp({
 
     const openGuide = (tab = 'muscle', extra = {}) => {
       guide.value = {
-        ...guide.value, isOpen: true, tab, selected: [], picker: false,
+        ...guide.value, isOpen: true, tab, selected: [], session: '', picker: false,
         sport: guide.value.sport || userSports.value[0] || 'Calcio',
         place: workoutSheets.value.length ? guide.value.place : 'home',
         ...extra
       };
     };
     const closeGuide = () => { guide.value.isOpen = false; guide.value.picker = false; };
-    const setGuideTab = (tab) => { guide.value.tab = tab; guide.value.selected = []; guide.value.picker = false; };
+    const setGuideTab = (tab) => { guide.value.tab = tab; guide.value.selected = []; guide.value.session = ''; guide.value.picker = false; };
 
     // In palestra si possono fare anche gli esercizi a corpo libero: se quelli da palestra sono pochi, si aggiungono
     const guideExercises = computed(() => {
@@ -2333,13 +2333,38 @@ const stillApp = createApp({
       if (g.tab === 'sport') {
         const program = SPORT_PROGRAMS[g.sport];
         const list = program ? (program[g.place] || program.home) : [];
-        return list.map(item => ({ ...EXERCISE_BY_ID[item.id], why: item.why })).filter(item => item.id);
+        return list.map(item => ({ ...EXERCISE_BY_ID[item.id], why: item.why, b: item.b || '' })).filter(item => item.id);
       }
       if (g.tab !== 'muscle') return [];
       const own = EXERCISE_LIBRARY.filter(item => item.m === g.muscle && item.w === g.place);
       if (g.place === 'gym' && own.length < 5) return [...own, ...EXERCISE_LIBRARY.filter(item => item.m === g.muscle && item.w === 'home')];
       return own;
     });
+
+    // Blocchi degli esercizi per sport in palestra
+    const SPORT_BLOCKS = {
+      forza: { icon: '💪', label: 'Forza' },
+      potenza: { icon: '⚡', label: 'Potenza ed esplosività' },
+      prevenzione: { icon: '🛡️', label: 'Prevenzione infortuni' },
+      core: { icon: '🧱', label: 'Core' },
+      campo: { icon: '🏃', label: 'Come in campo' }
+    };
+    const guideBlockStart = (idx) => {
+      const list = guideExercises.value;
+      return !!list[idx].b && (idx === 0 || list[idx - 1].b !== list[idx].b);
+    };
+    // Due sedute già pronte da 10 esercizi: in ogni blocco si alternano, così A e B lavorano su tutto
+    const guideSessionIds = (letter) => {
+      const seen = {};
+      return guideExercises.value.filter(item => {
+        const n = seen[item.b] = (seen[item.b] ?? -1) + 1;
+        return (n % 2 === 0) === (letter === 'A');
+      }).map(item => item.id);
+    };
+    const selectGuideSession = (letter) => {
+      guide.value.selected = guideSessionIds(letter);
+      guide.value.session = letter;
+    };
 
     const guidePrescription = (item) => {
       if (!item) return '';
@@ -2348,6 +2373,7 @@ const stillApp = createApp({
     };
 
     const toggleGuideSelect = (id) => {
+      guide.value.session = '';
       const list = guide.value.selected;
       const i = list.indexOf(id);
       if (i > -1) list.splice(i, 1); else list.push(id);
@@ -2355,6 +2381,7 @@ const stillApp = createApp({
     const selectAllGuide = () => {
       const all = guideExercises.value.map(item => item.id);
       guide.value.selected = guide.value.selected.length === all.length ? [] : all;
+      guide.value.session = '';
     };
 
     // Esercizio della libreria → esercizio di una scheda
@@ -2376,13 +2403,13 @@ const stillApp = createApp({
 
     const guideDefaultName = () => {
       const g = guide.value;
-      if (g.tab === 'sport') return g.sport + ' · Preparazione';
+      if (g.tab === 'sport') return g.sport + ' · Preparazione' + (g.session ? ' ' + g.session : '');
       const muscle = MUSCLE_GROUPS.find(m => m.id === g.muscle);
       return (muscle ? muscle.name : 'Allenamento') + (g.place === 'home' ? ' · Casa' : ' · Palestra');
     };
     const guideDayName = () => {
       const g = guide.value;
-      if (g.tab === 'sport') return g.sport;
+      if (g.tab === 'sport') return g.sport + (g.session ? ' · Seduta ' + g.session : '');
       const muscle = MUSCLE_GROUPS.find(m => m.id === g.muscle);
       return muscle ? muscle.name : 'Giorno A';
     };
@@ -5373,6 +5400,7 @@ const stillApp = createApp({
       const s = bodyStats.value;
       if (s.bmi && s.bmi.value >= 25) return 'lose';
       if (s.activity && s.activity.weeklyHours >= 4 && s.bmi && s.bmi.value < 22) return 'gain';
+      if (userSports.value.length) return 'sport';
       return 'keep';
     });
     const openEatGuide = (tab = 'tips') => { eatGuide.value = { isOpen: true, tab, goal: suggestedEatGoal.value }; };
@@ -5418,14 +5446,60 @@ const stillApp = createApp({
     });
 
     const MEAL_ORDER = ['colazione', 'spuntino_mattina', 'pranzo', 'spuntino_pomeriggio', 'post_workout', 'cena'];
-    const eatGoal = computed(() => NUTRITION_GOALS.find(g => g.id === eatGuide.value.goal) || NUTRITION_GOALS[0]);
+    // --- Per chi fa sport (js/data/nutrition.js, SPORT_DIET_DAYS): ogni giorno della settimana ha il suo tipo ---
+    // riposo, allenamento, vigilia, gara, recupero. Gli allenamenti fissi vengono dal calendario, le gare le scegli tu.
+    const sportDietSports = computed(() => {
+      const all = Object.values(SPORT_DIET_KINDS).flatMap(k => k.sports);
+      return [...userSports.value.filter(sp => all.includes(sp)), ...all.filter(sp => !userSports.value.includes(sp))];
+    });
+    const sportDietSport = computed(() => (settings.value.eatPrefs || {}).sport || sportDietSports.value[0]);
+    const sportDietKind = computed(() => Object.values(SPORT_DIET_KINDS).find(k => k.sports.includes(sportDietSport.value)) || SPORT_DIET_KINDS.squadra);
+    const sportMatchDays = computed(() => (settings.value.eatPrefs || {}).matchDays || []);
+    const setDietSport = (sport) => { ensureEatPrefs().sport = sport; };
+    const toggleMatchDay = (dow) => {
+      const prefs = ensureEatPrefs();
+      const list = prefs.matchDays || [];
+      prefs.matchDays = list.includes(dow) ? list.filter(d => d !== dow) : [...list, dow];
+    };
+    // La settimana in corso, da lunedì: gara > vigilia > allenamento > recupero (giorno dopo la gara) > riposo
+    const sportDietWeek = computed(() => {
+      const monday = nowDate(); monday.setHours(12, 0, 0, 0);
+      monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
+      const match = new Set(sportMatchDays.value);
+      return weekDays.map((name, i) => {
+        const d = new Date(monday); d.setDate(monday.getDate() + i);
+        const dow = d.getDay();
+        const trains = trainingSessionsOnDateKey(toISODate(d)).length > 0;
+        let type = 'rest';
+        if (match.has(dow)) type = 'match';
+        else if (match.has((dow + 1) % 7)) type = 'eve';
+        else if (trains) type = 'train';
+        else if (match.has((dow + 6) % 7)) type = 'after';
+        return { name, short: d.toLocaleDateString(i18nIntl(), { weekday: 'short' }).replace('.', ''), dow, type, trains, today: toISODate(d) === toISODate() };
+      });
+    });
+    const sportDayType = (id) => SPORT_DIET_DAYS.find(t => t.id === id) || SPORT_DIET_DAYS[0];
+    const sportGoal = computed(() => {
+      const kind = sportDietKind.value;
+      const week = sportDietWeek.value;
+      return {
+        id: 'sport', name: 'Per lo sport · ' + sportDietSport.value, icon: '🏅',
+        desc: 'Le giornate cambiano con i tuoi allenamenti e le gare: più carboidrati quando ti alleni o giochi, meno nei giorni di riposo.',
+        days: SPORT_DIET_DAYS.map(t => ({
+          name: t.icon + ' ' + t.name, meals: t.meals, typeId: t.id, desc: t.desc, carbs: t.carbs,
+          count: week.filter(d => d.type === t.id).length,
+          kcalFactor: t.kcal + (['train', 'eve', 'match'].includes(t.id) ? kind.extra : 0)
+        }))
+      };
+    });
+    const eatGoal = computed(() => (eatGuide.value.goal === 'sport' ? sportGoal.value : NUTRITION_GOALS.find(g => g.id === eatGuide.value.goal) || NUTRITION_GOALS[0]));
 
     // --- Porzioni su misura: le giornate tipo si adattano al fabbisogno calcolato dal profilo ---
     const eatTarget = computed(() => {
       const e = bodyStats.value.energy;
       if (!e) return null;
       const g = eatGuide.value.goal;
-      return g === 'lose' ? e.lose : g === 'gain' ? e.gain : e.tdee;
+      return g === 'lose' ? e.lose : g === 'gain' ? e.gain : e.tdee;   // per lo sport: il mantenimento, poi ogni giorno ha il suo
     });
     const eatBaseKcal = (goal) => {
       const days = goal.days.map(day => Object.values(day.meals).reduce((sum, items) => sum + (estimateMealKcal(items).kcal || 0), 0));
@@ -5433,6 +5507,13 @@ const stillApp = createApp({
     };
     // Si scala al massimo del 25% in meno o del 40% in più: oltre serve un piano fatto da un professionista
     const eatFactor = computed(() => (eatTarget.value ? Math.max(0.75, Math.min(1.4, eatTarget.value / eatBaseKcal(eatGoal.value))) : 1));
+    // Per lo sport ogni tipo di giornata ha il suo obiettivo (fabbisogno × moltiplicatore del giorno)
+    const eatDayFactor = (day) => {
+      if (!day.kcalFactor) return eatFactor.value;
+      const base = Object.values(day.meals).reduce((sum, items) => sum + (estimateMealKcal(items).kcal || 0), 0);
+      const target = eatTarget.value ? eatTarget.value * day.kcalFactor : 2400 * day.kcalFactor;
+      return base ? Math.max(0.75, Math.min(1.4, target / base)) : 1;
+    };
     const roundGrams = (g) => (g < 50 ? Math.max(5, Math.round(g / 5) * 5) : Math.round(g / 10) * 10);
     const scaleFoodText = (text, f) => {
       const t = String(text).trim();
@@ -5485,8 +5566,8 @@ const stillApp = createApp({
       });
 
     // Un alimento della giornata tipo, già adattato: porzione scalata, poi sostituito se escluso o se hai scelto un'alternativa
-    const personalizeFood = (text, meal, key, seed) => {
-      const scaled = scaleFoodText(text, eatFactor.value);
+    const personalizeFood = (text, meal, key, seed, factor = eatFactor.value) => {
+      const scaled = scaleFoodText(text, factor);
       const entry = swapEntryFor(scaled, meal);
       if (!entry) return { text: scaled, key, swappable: false };
       const orig = estimateFoodKcal(scaled);
@@ -5503,14 +5584,15 @@ const stillApp = createApp({
     };
 
     const eatGoalDays = computed(() => eatGoal.value.days.map((day, dayIdx) => {
+      const factor = eatDayFactor(day);
       const meals = MEAL_ORDER.filter(type => day.meals[type]).map(type => {
         const info = mealTypes.find(t => t.id === type) || mealTypes[0];
-        const foods = day.meals[type].map((text, i) => personalizeFood(text, type, eatGoal.value.id + '|' + dayIdx + '|' + type + '|' + i, dayIdx * 3 + i));
+        const foods = day.meals[type].map((text, i) => personalizeFood(text, type, eatGoal.value.id + '|' + (day.typeId || dayIdx) + '|' + type + '|' + i, dayIdx * 3 + i, factor));
         const est = estimateMealKcal(foods.map(f => f.text));
         return { type, label: info.label, icon: info.icon, foods, items: foods.map(f => f.text), kcal: est.kcal, protein: est.protein };
       });
       return {
-        name: day.name, meals,
+        name: day.name, meals, typeId: day.typeId || '', desc: day.desc || '', carbs: day.carbs || '', count: day.count,
         kcal: Math.round(meals.reduce((sum, m) => sum + (m.kcal || 0), 0) / 10) * 10,
         protein: meals.reduce((sum, m) => sum + (m.protein || 0), 0)
       };
@@ -5561,9 +5643,13 @@ const stillApp = createApp({
       const build = () => {
         const toMeals = (day) => day.meals.map(m => ({ type: m.type, items: [...m.items], calories: '' }));
         const days = {};
-        weekDays.forEach((name, i) => { days[name] = toMeals(personal[i % personal.length]); });
+        // Per lo sport ogni giorno prende la giornata del suo tipo (allenamento, gara, riposo…)
+        const sportWeek = goal.id === 'sport' ? sportDietWeek.value : null;
+        const dayFor = (i) => (sportWeek ? personal.find(d => d.typeId === sportWeek[i].type) || personal[0] : personal[i % personal.length]);
+        weekDays.forEach((name, i) => { days[name] = toMeals(dayFor(i)); });
         const grocery = [];
-        personal.forEach(day => day.meals.forEach(m => m.items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
+        weekDays.map((_, i) => dayFor(i)).filter((d, i, all) => all.indexOf(d) === i)
+          .forEach(day => day.meals.forEach(m => m.items.forEach(item => { if (!grocery.includes(item)) grocery.push(item); })));
         plans.value.forEach(p => { if (p.status === 'active') { p.status = 'inactive'; p.results = 'Terminato'; } });
         const end = nowDate(); end.setDate(end.getDate() + 6);
         const nextId = Math.max(...plans.value.map(p => p.id), 0) + 1;
@@ -6695,7 +6781,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 22';
+    const APP_VERSION = 'beta 23';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8474,7 +8560,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, SPORT_DIET_DAYS, sportDietSports, sportDietSport, sportDietKind, sportMatchDays, setDietSport, toggleMatchDay, sportDietWeek, sportDayType, eatGoal, SPORT_BLOCKS, guideBlockStart, selectGuideSession, guideSessionIds, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale

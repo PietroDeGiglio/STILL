@@ -4475,13 +4475,44 @@
           <button v-for="g in NUTRITION_GOALS" :key="'eg' + g.id" @click="eatGuide.goal = g.id"
                   class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
                   :class="eatGuide.goal === g.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ g.icon }} {{ g.name }}<span v-if="suggestedEatGoal === g.id"> ⭐</span></button>
+          <button @click="eatGuide.goal = 'sport'"
+                  class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
+                  :class="eatGuide.goal === 'sport' ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">🏅 Per il tuo sport<span v-if="suggestedEatGoal === 'sport'"> ⭐</span></button>
         </div>
         <div class="bg-salvia/10 border border-salvia/30 rounded-2xl p-4">
-          <div class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ eatTarget ? 'Su misura per te · ≈ ' + eatTarget + ' kcal al giorno' : NUTRITION_GOALS.find(g => g.id === eatGuide.goal).range }} · 3 giornate da alternare</div>
-          <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ NUTRITION_GOALS.find(g => g.id === eatGuide.goal).desc }}</p>
+          <div v-if="eatGuide.goal === 'sport'" class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ sportDietSport }} · {{ eatTarget ? 'mantenimento ≈ ' + eatTarget + ' kcal' : 'porzioni medie' }} · giornate secondo allenamenti e gare</div>
+          <div v-else class="text-[10px] font-bold text-salvia uppercase tracking-widest">{{ eatTarget ? 'Su misura per te · ≈ ' + eatTarget + ' kcal al giorno' : eatGoal.range }} · 3 giornate da alternare</div>
+          <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ eatGoal.desc }}</p>
           <p v-if="bodyStats.energy" class="text-[11px] font-medium text-gray-500 mt-1">Porzioni calcolate dal tuo fabbisogno (≈ {{ bodyStats.energy.tdee }} kcal per mantenerti, ≈ {{ bodyStats.energy.lose }} per dimagrire, ≈ {{ bodyStats.energy.gain }} per crescere). ⭐ = l'obiettivo che ti suggeriamo.</p>
           <p v-else class="text-[11px] font-bold text-arancione mt-1">Porzioni medie: completa il profilo (altezza, data di nascita, sesso) e pesati in Progressi, così le giornate si adattano a te.</p>
           <p v-if="eatTarget && (eatFactor >= 1.4 || eatFactor <= 0.75)" class="text-[11px] font-medium text-gray-500 mt-1">Il tuo fabbisogno è lontano dalla media: abbiamo adattato le porzioni fin dove ha senso, per numeri precisi chiedi a un nutrizionista.</p>
+        </div>
+
+        <!-- Per il tuo sport: sport, giorni di gara e la settimana che ne viene fuori -->
+        <div v-if="eatGuide.goal === 'sport'" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
+          <div class="flex gap-1.5 overflow-x-auto hide-scrollbar -mx-4 px-4">
+            <button v-for="sp in sportDietSports" :key="'dsp' + sp" @click="setDietSport(sp)"
+                    class="shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all"
+                    :class="sportDietSport === sp ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
+          </div>
+          <div>
+            <div class="text-sm font-extrabold text-antracite">🏆 Quando hai la gara?</div>
+            <p class="text-[11px] font-medium text-gray-500 leading-snug">Il giorno prima diventa la vigilia, quello dopo il recupero. Gli allenamenti fissi li prendo dal calendario.</p>
+          </div>
+          <div class="grid grid-cols-7 gap-1">
+            <button v-for="d in sportDietWeek" :key="'dmd' + d.dow" @click="toggleMatchDay(d.dow)"
+                    class="py-2 rounded-xl text-[10px] font-extrabold border transition-all active:scale-95"
+                    :class="sportMatchDays.includes(d.dow) ? 'bg-arancione text-white border-arancione' : 'bg-gray-50 text-gray-500 border-gray-100'">{{ d.short }}</button>
+          </div>
+          <div class="grid grid-cols-7 gap-1 pt-1 border-t border-gray-100">
+            <div v-for="d in sportDietWeek" :key="'dwk' + d.dow" class="flex flex-col items-center gap-0.5 pt-2">
+              <span class="text-lg leading-none">{{ sportDayType(d.type).icon }}</span>
+              <span class="text-[8px] font-bold uppercase tracking-wide text-center leading-tight" :class="d.today ? 'text-salvia' : 'text-gray-400'">{{ sportDayType(d.type).short }}</span>
+            </div>
+          </div>
+          <p v-if="!sportDietWeek.some(d => d.trains)" class="text-[11px] font-bold text-arancione leading-snug">Non vedo allenamenti fissi nel calendario: aggiungili in Allenamento → Calendario e la settimana si sistema da sola.</p>
+          <p v-if="sportDietKind.note" class="text-[11px] font-medium text-gray-600 bg-salvia/10 rounded-xl p-2.5 leading-snug">💡 {{ sportDietKind.note }}</p>
+          <p class="text-[10px] font-medium text-gray-400 leading-snug">📚 Carboidrati e proteine secondo la posizione ACSM e dietisti di USA e Canada su alimentazione e prestazione (2016) e le posizioni ISSN (2017).</p>
         </div>
 
         <!-- I tuoi gusti -->
@@ -4506,6 +4537,10 @@
             <span class="text-sm font-extrabold text-antracite">{{ day.name }}</span>
             <span class="text-[11px] font-bold text-salvia">≈ {{ day.kcal }} kcal · {{ day.protein }} g prot</span>
           </div>
+          <div v-if="day.typeId" class="px-4 pt-2.5 space-y-0.5">
+            <p class="text-[11px] font-medium text-gray-600 leading-snug">{{ day.desc }}</p>
+            <p class="text-[10px] font-bold text-gray-400">{{ day.carbs }} · {{ day.count ? (day.count === 1 ? '1 giorno questa settimana' : day.count + ' giorni questa settimana') : 'non in questa settimana' }}</p>
+          </div>
           <div class="divide-y divide-gray-100">
             <div v-for="m in day.meals" :key="day.name + m.type" class="px-4 py-2.5 flex gap-3">
               <span class="text-lg">{{ m.icon }}</span>
@@ -4523,7 +4558,7 @@
             </div>
           </div>
         </div>
-        <button @click="createTrialPlan" class="w-full bg-salvia text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">Prova per una settimana</button>
+        <button @click="createTrialPlan" class="w-full bg-salvia text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all">{{ eatGuide.goal === 'sport' ? 'Prova questa settimana (giorno per giorno)' : 'Prova per una settimana' }}</button>
         <p class="text-[10px] font-medium text-gray-400 leading-relaxed text-center px-2">Esempi generici, non una dieta personalizzata. Se hai patologie, allergie, sei in gravidanza o segui terapie, chiedi prima al medico. Per un piano su misura vai da un nutrizionista.</p>
       </template>
     </div>
@@ -4617,24 +4652,24 @@
       <!-- Filtri -->
       <template v-if="guide.tab === 'muscle'">
         <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
-          <button v-for="m in MUSCLE_GROUPS" :key="'gm' + m.id" @click="guide.muscle = m.id; guide.selected = []"
+          <button v-for="m in MUSCLE_GROUPS" :key="'gm' + m.id" @click="guide.muscle = m.id; guide.selected = []; guide.session = ''"
                   class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
                   :class="guide.muscle === m.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ m.icon }} {{ m.name }}</button>
         </div>
         <div class="grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100">
-          <button @click="guide.place = 'gym'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
-          <button @click="guide.place = 'home'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
+          <button @click="guide.place = 'gym'; guide.selected = []; guide.session = ''" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
+          <button @click="guide.place = 'home'; guide.selected = []; guide.session = ''" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
         </div>
       </template>
       <template v-if="guide.tab === 'sport'">
         <div class="flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5">
-          <button v-for="sp in guideSports" :key="'gs' + sp" @click="guide.sport = sp; guide.selected = []"
+          <button v-for="sp in guideSports" :key="'gs' + sp" @click="guide.sport = sp; guide.selected = []; guide.session = ''"
                   class="shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all"
                   :class="guide.sport === sp ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
         </div>
         <div class="grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100">
-          <button @click="guide.place = 'gym'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
-          <button @click="guide.place = 'home'; guide.selected = []" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
+          <button @click="guide.place = 'gym'; guide.selected = []; guide.session = ''" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏋️ In palestra</button>
+          <button @click="guide.place = 'home'; guide.selected = []; guide.session = ''" class="py-1.5 rounded-lg text-[11px] font-bold transition-all" :class="guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'">🏠 A casa</button>
         </div>
       </template>
     </div>
@@ -4645,6 +4680,17 @@
         <div class="text-[10px] font-bold text-arancione uppercase tracking-widest">Per migliorare a {{ guide.sport }}</div>
         <p class="text-sm font-bold text-antracite mt-1 leading-snug">{{ SPORT_PROGRAMS[guide.sport].focus }}</p>
         <p class="text-[11px] font-medium text-gray-500 mt-1">{{ guide.place === 'gym' ? 'In palestra, con pesi e macchine' : 'A casa, senza attrezzi o quasi' }} · 2 volte a settimana, lontano dalla partita.</p>
+        <p v-if="guide.place === 'gym' && SPORT_PROGRAMS[guide.sport].fonti" class="text-[10px] font-medium text-gray-500 mt-2 leading-snug">📚 {{ SPORT_PROGRAMS[guide.sport].fonti }}</p>
+      </div>
+
+      <!-- Scelta rapida: due sedute da 10 esercizi da alternare nella settimana -->
+      <div v-if="guide.tab === 'sport' && guide.place === 'gym' && guideExercises.length >= 12" class="bg-white rounded-2xl p-3 border border-gray-100 shadow-sm space-y-2">
+        <p class="text-[11px] font-bold text-antracite leading-snug">Non serve farli tutti: scegli una seduta pronta e alternale nella settimana.</p>
+        <div class="grid grid-cols-2 gap-2">
+          <button v-for="L in ['A', 'B']" :key="'gsa' + L" @click="selectGuideSession(L)"
+                  class="py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-95"
+                  :class="guide.session === L ? 'bg-arancione text-white border-arancione' : 'bg-arancione/10 text-arancione border-arancione/20'">Seduta {{ L }} · {{ guideSessionIds(L).length }} esercizi</button>
+        </div>
       </div>
 
       <!-- Elenco esercizi (muscolo / sport) -->
@@ -4653,7 +4699,9 @@
           <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{{ guideExercises.length }} {{ (guideExercises.length) === 1 ? 'esercizio' : 'esercizi' }} · tocca per sceglierli</span>
           <button @click="selectAllGuide" class="text-[11px] font-bold text-arancione">{{ guide.selected.length === guideExercises.length ? 'Nessuno' : 'Tutti' }}</button>
         </div>
-        <button v-for="item in guideExercises" :key="'ge' + item.id" @click="toggleGuideSelect(item.id)"
+        <template v-for="(item, idx) in guideExercises" :key="'ge' + item.id">
+        <div v-if="guide.tab === 'sport' && guideBlockStart(idx) && SPORT_BLOCKS[item.b]" class="pt-2 px-1 text-[11px] font-black text-antracite uppercase tracking-widest">{{ SPORT_BLOCKS[item.b].icon }} {{ SPORT_BLOCKS[item.b].label }}</div>
+        <button @click="toggleGuideSelect(item.id)"
                 class="w-full text-left bg-white rounded-2xl p-4 border shadow-sm flex gap-3 items-start transition-all"
                 :class="guide.selected.includes(item.id) ? 'border-arancione ring-2 ring-arancione/20' : 'border-gray-100'">
           <div class="w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all"
@@ -4675,6 +4723,7 @@
             <span class="text-[8px] font-black uppercase tracking-wider text-arancione mt-0.5">Come si fa</span>
           </span>
         </button>
+        </template>
       </template>
 
       <!-- Programmi pronti -->

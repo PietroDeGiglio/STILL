@@ -2826,122 +2826,173 @@ const _hoisted_1779 = {
 const _hoisted_1780 = { class: "flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5" }
 const _hoisted_1781 = ["onClick"]
 const _hoisted_1782 = { key: 0 }
-const _hoisted_1783 = { class: "bg-salvia/10 border border-salvia/30 rounded-2xl p-4" }
-const _hoisted_1784 = { class: "text-[10px] font-bold text-salvia uppercase tracking-widest" }
-const _hoisted_1785 = { class: "text-sm font-bold text-antracite mt-1 leading-snug" }
-const _hoisted_1786 = {
+const _hoisted_1783 = { key: 0 }
+const _hoisted_1784 = { class: "bg-salvia/10 border border-salvia/30 rounded-2xl p-4" }
+const _hoisted_1785 = {
   key: 0,
-  class: "text-[11px] font-medium text-gray-500 mt-1"
+  class: "text-[10px] font-bold text-salvia uppercase tracking-widest"
 }
-const _hoisted_1787 = {
+const _hoisted_1786 = {
   key: 1,
-  class: "text-[11px] font-bold text-arancione mt-1"
+  class: "text-[10px] font-bold text-salvia uppercase tracking-widest"
 }
+const _hoisted_1787 = { class: "text-sm font-bold text-antracite mt-1 leading-snug" }
 const _hoisted_1788 = {
   key: 2,
   class: "text-[11px] font-medium text-gray-500 mt-1"
 }
-const _hoisted_1789 = { class: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3" }
-const _hoisted_1790 = { class: "text-sm font-extrabold text-antracite" }
-const _hoisted_1791 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
-const _hoisted_1792 = { class: "flex flex-wrap gap-1.5" }
+const _hoisted_1789 = {
+  key: 3,
+  class: "text-[11px] font-bold text-arancione mt-1"
+}
+const _hoisted_1790 = {
+  key: 4,
+  class: "text-[11px] font-medium text-gray-500 mt-1"
+}
+const _hoisted_1791 = {
+  key: 0,
+  class: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3"
+}
+const _hoisted_1792 = { class: "flex gap-1.5 overflow-x-auto hide-scrollbar -mx-4 px-4" }
 const _hoisted_1793 = ["onClick"]
-const _hoisted_1794 = {
+const _hoisted_1794 = { key: 0 }
+const _hoisted_1795 = { class: "text-sm font-extrabold text-antracite" }
+const _hoisted_1796 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
+const _hoisted_1797 = { class: "grid grid-cols-7 gap-1" }
+const _hoisted_1798 = ["onClick"]
+const _hoisted_1799 = { class: "grid grid-cols-7 gap-1 pt-1 border-t border-gray-100" }
+const _hoisted_1800 = { class: "text-lg leading-none" }
+const _hoisted_1801 = {
+  key: 0,
+  class: "text-[11px] font-bold text-arancione leading-snug"
+}
+const _hoisted_1802 = {
+  key: 1,
+  class: "text-[11px] font-medium text-gray-600 bg-salvia/10 rounded-xl p-2.5 leading-snug"
+}
+const _hoisted_1803 = { class: "text-[10px] font-medium text-gray-400 leading-snug" }
+const _hoisted_1804 = { class: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3" }
+const _hoisted_1805 = { class: "text-sm font-extrabold text-antracite" }
+const _hoisted_1806 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
+const _hoisted_1807 = { class: "flex flex-wrap gap-1.5" }
+const _hoisted_1808 = ["onClick"]
+const _hoisted_1809 = {
   key: 0,
   class: "flex flex-wrap items-center gap-1.5"
 }
-const _hoisted_1795 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
-const _hoisted_1796 = ["onClick"]
-const _hoisted_1797 = {
+const _hoisted_1810 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
+const _hoisted_1811 = ["onClick"]
+const _hoisted_1812 = {
   key: 1,
   class: "text-[10px] font-bold text-salvia"
 }
-const _hoisted_1798 = { class: "flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100" }
-const _hoisted_1799 = { class: "text-sm font-extrabold text-antracite" }
-const _hoisted_1800 = { class: "text-[11px] font-bold text-salvia" }
-const _hoisted_1801 = { class: "divide-y divide-gray-100" }
-const _hoisted_1802 = { class: "text-lg" }
-const _hoisted_1803 = { class: "min-w-0 flex-1" }
-const _hoisted_1804 = { class: "flex justify-between gap-2" }
-const _hoisted_1805 = { class: "text-xs font-bold text-antracite" }
-const _hoisted_1806 = { class: "text-[10px] font-bold text-gray-400 whitespace-nowrap" }
-const _hoisted_1807 = { class: "flex flex-wrap gap-1 mt-1" }
-const _hoisted_1808 = ["onClick", "disabled"]
-const _hoisted_1809 = {
+const _hoisted_1813 = { class: "flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-100" }
+const _hoisted_1814 = { class: "text-sm font-extrabold text-antracite" }
+const _hoisted_1815 = { class: "text-[11px] font-bold text-salvia" }
+const _hoisted_1816 = {
+  key: 0,
+  class: "px-4 pt-2.5 space-y-0.5"
+}
+const _hoisted_1817 = { class: "text-[11px] font-medium text-gray-600 leading-snug" }
+const _hoisted_1818 = { class: "text-[10px] font-bold text-gray-400" }
+const _hoisted_1819 = { class: "divide-y divide-gray-100" }
+const _hoisted_1820 = { class: "text-lg" }
+const _hoisted_1821 = { class: "min-w-0 flex-1" }
+const _hoisted_1822 = { class: "flex justify-between gap-2" }
+const _hoisted_1823 = { class: "text-xs font-bold text-antracite" }
+const _hoisted_1824 = { class: "text-[10px] font-bold text-gray-400 whitespace-nowrap" }
+const _hoisted_1825 = { class: "flex flex-wrap gap-1 mt-1" }
+const _hoisted_1826 = ["onClick", "disabled"]
+const _hoisted_1827 = {
   key: 0,
   class: "text-salvia font-black"
 }
-const _hoisted_1810 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed text-center px-2" }
-const _hoisted_1811 = { class: "bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto" }
-const _hoisted_1812 = { class: "flex items-start justify-between gap-3" }
-const _hoisted_1813 = { class: "min-w-0" }
-const _hoisted_1814 = { class: "text-[10px] font-bold text-arancione uppercase tracking-widest" }
-const _hoisted_1815 = { class: "text-lg font-extrabold text-antracite leading-tight" }
-const _hoisted_1816 = ["aria-label"]
-const _hoisted_1817 = {
+const _hoisted_1828 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed text-center px-2" }
+const _hoisted_1829 = { class: "bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto" }
+const _hoisted_1830 = { class: "flex items-start justify-between gap-3" }
+const _hoisted_1831 = { class: "min-w-0" }
+const _hoisted_1832 = { class: "text-[10px] font-bold text-arancione uppercase tracking-widest" }
+const _hoisted_1833 = { class: "text-lg font-extrabold text-antracite leading-tight" }
+const _hoisted_1834 = ["aria-label"]
+const _hoisted_1835 = {
   key: 0,
   class: "relative w-full rounded-2xl overflow-hidden bg-gray-100",
   style: {"aspect-ratio":"3 / 2"}
 }
-const _hoisted_1818 = ["src", "alt"]
-const _hoisted_1819 = ["src", "alt"]
-const _hoisted_1820 = ["innerHTML"]
-const _hoisted_1821 = ["innerHTML"]
-const _hoisted_1822 = {
+const _hoisted_1836 = ["src", "alt"]
+const _hoisted_1837 = ["src", "alt"]
+const _hoisted_1838 = ["innerHTML"]
+const _hoisted_1839 = ["innerHTML"]
+const _hoisted_1840 = {
   key: 1,
   class: "flex flex-wrap content-center gap-1.5 order-first"
 }
-const _hoisted_1823 = {
+const _hoisted_1841 = {
   key: 1,
   class: "flex flex-wrap gap-1.5"
 }
-const _hoisted_1824 = { class: "text-sm font-medium text-antracite leading-snug" }
-const _hoisted_1825 = { class: "text-[10px] font-medium text-gray-400 leading-snug" }
-const _hoisted_1826 = { class: "w-full max-w-md bg-bianco rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto" }
-const _hoisted_1827 = { class: "flex items-start justify-between gap-3" }
-const _hoisted_1828 = { class: "text-[10px] font-bold text-arancione tracking-widest uppercase" }
-const _hoisted_1829 = { class: "text-lg font-extrabold text-antracite leading-tight" }
-const _hoisted_1830 = ["aria-label"]
-const _hoisted_1831 = { class: "flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400" }
-const _hoisted_1832 = { class: "space-y-1.5" }
-const _hoisted_1833 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
-const _hoisted_1834 = {
+const _hoisted_1842 = { class: "text-sm font-medium text-antracite leading-snug" }
+const _hoisted_1843 = { class: "text-[10px] font-medium text-gray-400 leading-snug" }
+const _hoisted_1844 = { class: "w-full max-w-md bg-bianco rounded-t-3xl sm:rounded-3xl p-5 space-y-4 max-h-[92vh] overflow-y-auto" }
+const _hoisted_1845 = { class: "flex items-start justify-between gap-3" }
+const _hoisted_1846 = { class: "text-[10px] font-bold text-arancione tracking-widest uppercase" }
+const _hoisted_1847 = { class: "text-lg font-extrabold text-antracite leading-tight" }
+const _hoisted_1848 = ["aria-label"]
+const _hoisted_1849 = { class: "flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-gray-400" }
+const _hoisted_1850 = { class: "space-y-1.5" }
+const _hoisted_1851 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
+const _hoisted_1852 = {
   key: 0,
   class: "text-xs font-bold text-red-500 bg-red-50 border border-red-100 rounded-xl p-3 leading-snug"
 }
-const _hoisted_1835 = ["disabled"]
-const _hoisted_1836 = { class: "text-[10px] font-medium text-gray-400 leading-snug" }
-const _hoisted_1837 = { id: "still-exercise-list" }
-const _hoisted_1838 = ["value"]
-const _hoisted_1839 = {
+const _hoisted_1853 = ["disabled"]
+const _hoisted_1854 = { class: "text-[10px] font-medium text-gray-400 leading-snug" }
+const _hoisted_1855 = { id: "still-exercise-list" }
+const _hoisted_1856 = ["value"]
+const _hoisted_1857 = {
   key: 34,
   class: "fixed inset-0 z-50 bg-bianco flex flex-col animate-fadeIn"
 }
-const _hoisted_1840 = { class: "shrink-0 px-5 pt-5 pb-3 bg-bianco border-b border-gray-100 space-y-3" }
-const _hoisted_1841 = { class: "flex items-center justify-between gap-3" }
-const _hoisted_1842 = { class: "text-[10px] font-bold text-arancione tracking-widest uppercase" }
-const _hoisted_1843 = { class: "text-xl font-extrabold text-antracite leading-tight" }
-const _hoisted_1844 = ["aria-label"]
-const _hoisted_1845 = { class: "grid grid-cols-3 gap-1 bg-white rounded-2xl p-1 border border-gray-100" }
-const _hoisted_1846 = ["onClick"]
-const _hoisted_1847 = { class: "flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5" }
-const _hoisted_1848 = ["onClick"]
-const _hoisted_1849 = { class: "grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100" }
-const _hoisted_1850 = { class: "flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5" }
-const _hoisted_1851 = ["onClick"]
-const _hoisted_1852 = { key: 0 }
-const _hoisted_1853 = { class: "grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100" }
-const _hoisted_1854 = {
+const _hoisted_1858 = { class: "shrink-0 px-5 pt-5 pb-3 bg-bianco border-b border-gray-100 space-y-3" }
+const _hoisted_1859 = { class: "flex items-center justify-between gap-3" }
+const _hoisted_1860 = { class: "text-[10px] font-bold text-arancione tracking-widest uppercase" }
+const _hoisted_1861 = { class: "text-xl font-extrabold text-antracite leading-tight" }
+const _hoisted_1862 = ["aria-label"]
+const _hoisted_1863 = { class: "grid grid-cols-3 gap-1 bg-white rounded-2xl p-1 border border-gray-100" }
+const _hoisted_1864 = ["onClick"]
+const _hoisted_1865 = { class: "flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5" }
+const _hoisted_1866 = ["onClick"]
+const _hoisted_1867 = { class: "grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100" }
+const _hoisted_1868 = { class: "flex gap-2 overflow-x-auto hide-scrollbar -mx-5 px-5" }
+const _hoisted_1869 = ["onClick"]
+const _hoisted_1870 = { key: 0 }
+const _hoisted_1871 = { class: "grid grid-cols-2 gap-1 bg-white rounded-xl p-1 border border-gray-100" }
+const _hoisted_1872 = {
   key: 0,
   class: "bg-arancione/10 border border-arancione/30 rounded-2xl p-4"
 }
-const _hoisted_1855 = { class: "text-[10px] font-bold text-arancione uppercase tracking-widest" }
-const _hoisted_1856 = { class: "text-sm font-bold text-antracite mt-1 leading-snug" }
-const _hoisted_1857 = { class: "text-[11px] font-medium text-gray-500 mt-1" }
-const _hoisted_1858 = { class: "flex items-center justify-between px-1" }
-const _hoisted_1859 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1860 = ["onClick"]
-const _hoisted_1861 = {
+const _hoisted_1873 = { class: "text-[10px] font-bold text-arancione uppercase tracking-widest" }
+const _hoisted_1874 = { class: "text-sm font-bold text-antracite mt-1 leading-snug" }
+const _hoisted_1875 = { class: "text-[11px] font-medium text-gray-500 mt-1" }
+const _hoisted_1876 = {
+  key: 0,
+  class: "text-[10px] font-medium text-gray-500 mt-2 leading-snug"
+}
+const _hoisted_1877 = {
+  key: 1,
+  class: "bg-white rounded-2xl p-3 border border-gray-100 shadow-sm space-y-2"
+}
+const _hoisted_1878 = { class: "text-[11px] font-bold text-antracite leading-snug" }
+const _hoisted_1879 = { class: "grid grid-cols-2 gap-2" }
+const _hoisted_1880 = ["onClick"]
+const _hoisted_1881 = { class: "flex items-center justify-between px-1" }
+const _hoisted_1882 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_1883 = {
+  key: 0,
+  class: "pt-2 px-1 text-[11px] font-black text-antracite uppercase tracking-widest"
+}
+const _hoisted_1884 = ["onClick"]
+const _hoisted_1885 = {
   key: 0,
   class: "w-3.5 h-3.5",
   fill: "none",
@@ -2949,277 +3000,277 @@ const _hoisted_1861 = {
   viewBox: "0 0 24 24",
   "stroke-width": "3.5"
 }
-const _hoisted_1862 = { class: "min-w-0 flex-1" }
-const _hoisted_1863 = { class: "flex items-center gap-1.5 flex-wrap" }
-const _hoisted_1864 = { class: "text-sm font-extrabold text-antracite" }
-const _hoisted_1865 = {
+const _hoisted_1886 = { class: "min-w-0 flex-1" }
+const _hoisted_1887 = { class: "flex items-center gap-1.5 flex-wrap" }
+const _hoisted_1888 = { class: "text-sm font-extrabold text-antracite" }
+const _hoisted_1889 = {
   key: 0,
   class: "text-[11px] font-bold text-antracite/80 mt-1 leading-snug"
 }
-const _hoisted_1866 = { class: "text-[11px] font-medium text-gray-500 mt-1 leading-snug" }
-const _hoisted_1867 = ["onClick", "aria-label"]
-const _hoisted_1868 = ["src"]
-const _hoisted_1869 = ["innerHTML"]
-const _hoisted_1870 = { class: "text-[8px] font-black uppercase tracking-wider text-arancione mt-0.5" }
-const _hoisted_1871 = { class: "flex items-start gap-3" }
-const _hoisted_1872 = { class: "w-11 h-11 rounded-xl bg-arancione/10 flex items-center justify-center text-xl flex-shrink-0" }
-const _hoisted_1873 = { class: "min-w-0" }
-const _hoisted_1874 = { class: "text-sm font-extrabold text-antracite" }
-const _hoisted_1875 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
-const _hoisted_1876 = { class: "text-[11px] font-medium text-gray-500 mt-1 leading-snug" }
-const _hoisted_1877 = { class: "space-y-1.5" }
-const _hoisted_1878 = { class: "text-[10px] font-black text-antracite uppercase tracking-wider" }
-const _hoisted_1879 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
-const _hoisted_1880 = ["onClick"]
-const _hoisted_1881 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed text-center px-4 pt-2" }
-const _hoisted_1882 = {
+const _hoisted_1890 = { class: "text-[11px] font-medium text-gray-500 mt-1 leading-snug" }
+const _hoisted_1891 = ["onClick", "aria-label"]
+const _hoisted_1892 = ["src"]
+const _hoisted_1893 = ["innerHTML"]
+const _hoisted_1894 = { class: "text-[8px] font-black uppercase tracking-wider text-arancione mt-0.5" }
+const _hoisted_1895 = { class: "flex items-start gap-3" }
+const _hoisted_1896 = { class: "w-11 h-11 rounded-xl bg-arancione/10 flex items-center justify-center text-xl flex-shrink-0" }
+const _hoisted_1897 = { class: "min-w-0" }
+const _hoisted_1898 = { class: "text-sm font-extrabold text-antracite" }
+const _hoisted_1899 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
+const _hoisted_1900 = { class: "text-[11px] font-medium text-gray-500 mt-1 leading-snug" }
+const _hoisted_1901 = { class: "space-y-1.5" }
+const _hoisted_1902 = { class: "text-[10px] font-black text-antracite uppercase tracking-wider" }
+const _hoisted_1903 = { class: "text-[11px] font-medium text-gray-500 leading-snug" }
+const _hoisted_1904 = ["onClick"]
+const _hoisted_1905 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed text-center px-4 pt-2" }
+const _hoisted_1906 = {
   key: 0,
   class: "absolute bottom-0 inset-x-0 p-4 bg-bianco/95 backdrop-blur border-t border-gray-100"
 }
-const _hoisted_1883 = { class: "bg-white rounded-t-3xl p-6 w-full space-y-4 max-h-[80vh] overflow-y-auto" }
-const _hoisted_1884 = { class: "flex items-center justify-between" }
-const _hoisted_1885 = { class: "text-lg font-bold text-antracite" }
-const _hoisted_1886 = ["aria-label"]
-const _hoisted_1887 = { class: "space-y-2" }
-const _hoisted_1888 = ["onClick"]
-const _hoisted_1889 = { key: 0 }
-const _hoisted_1890 = { class: "block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_1891 = {
+const _hoisted_1907 = { class: "bg-white rounded-t-3xl p-6 w-full space-y-4 max-h-[80vh] overflow-y-auto" }
+const _hoisted_1908 = { class: "flex items-center justify-between" }
+const _hoisted_1909 = { class: "text-lg font-bold text-antracite" }
+const _hoisted_1910 = ["aria-label"]
+const _hoisted_1911 = { class: "space-y-2" }
+const _hoisted_1912 = ["onClick"]
+const _hoisted_1913 = { key: 0 }
+const _hoisted_1914 = { class: "block text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_1915 = {
   key: 1,
   class: "space-y-1.5"
 }
-const _hoisted_1892 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
-const _hoisted_1893 = { class: "flex flex-wrap gap-2" }
-const _hoisted_1894 = ["onClick"]
-const _hoisted_1895 = { class: "bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto" }
-const _hoisted_1896 = ["aria-label"]
-const _hoisted_1897 = ["innerHTML"]
-const _hoisted_1898 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1" }
-const _hoisted_1899 = { key: 0 }
-const _hoisted_1900 = { class: "text-2xl font-extrabold text-antracite leading-tight" }
-const _hoisted_1901 = { class: "text-xs font-medium text-gray-500 mt-1" }
-const _hoisted_1902 = {
+const _hoisted_1916 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-wider" }
+const _hoisted_1917 = { class: "flex flex-wrap gap-2" }
+const _hoisted_1918 = ["onClick"]
+const _hoisted_1919 = { class: "bg-white rounded-t-3xl sm:rounded-3xl w-full max-w-md shadow-2xl max-h-[92vh] overflow-y-auto" }
+const _hoisted_1920 = ["aria-label"]
+const _hoisted_1921 = ["innerHTML"]
+const _hoisted_1922 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1" }
+const _hoisted_1923 = { key: 0 }
+const _hoisted_1924 = { class: "text-2xl font-extrabold text-antracite leading-tight" }
+const _hoisted_1925 = { class: "text-xs font-medium text-gray-500 mt-1" }
+const _hoisted_1926 = {
   key: 0,
   class: "h-2 rounded-full bg-gray-100 mt-3 overflow-hidden max-w-[220px] mx-auto"
 }
-const _hoisted_1903 = {
+const _hoisted_1927 = {
   key: 1,
   class: "text-[11px] font-bold text-arancione mt-2"
 }
-const _hoisted_1904 = {
+const _hoisted_1928 = {
   key: 2,
   class: "text-[10px] font-bold text-gray-400 mt-2"
 }
-const _hoisted_1905 = { class: "px-5 pb-6 space-y-5" }
-const _hoisted_1906 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
-const _hoisted_1907 = { class: "flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" }
-const _hoisted_1908 = ["innerHTML"]
-const _hoisted_1909 = { class: "text-[9px] font-bold text-gray-400" }
-const _hoisted_1910 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
-const _hoisted_1911 = { class: "flex gap-1.5 mb-3" }
-const _hoisted_1912 = ["onClick"]
-const _hoisted_1913 = { class: "grid grid-cols-4 gap-2" }
-const _hoisted_1914 = ["onClick"]
-const _hoisted_1915 = ["innerHTML"]
-const _hoisted_1916 = {
+const _hoisted_1929 = { class: "px-5 pb-6 space-y-5" }
+const _hoisted_1930 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
+const _hoisted_1931 = { class: "flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" }
+const _hoisted_1932 = ["innerHTML"]
+const _hoisted_1933 = { class: "text-[9px] font-bold text-gray-400" }
+const _hoisted_1934 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
+const _hoisted_1935 = { class: "flex gap-1.5 mb-3" }
+const _hoisted_1936 = ["onClick"]
+const _hoisted_1937 = { class: "grid grid-cols-4 gap-2" }
+const _hoisted_1938 = ["onClick"]
+const _hoisted_1939 = ["innerHTML"]
+const _hoisted_1940 = {
   key: 0,
   class: "absolute top-1 right-1 text-[9px] font-black bg-white rounded-full px-1.5 py-0.5 shadow-sm text-gray-500"
 }
-const _hoisted_1917 = { class: "text-[10px] font-medium text-gray-400 mt-2" }
-const _hoisted_1918 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
-const _hoisted_1919 = { class: "grid grid-cols-4 gap-2" }
-const _hoisted_1920 = ["innerHTML"]
-const _hoisted_1921 = {
+const _hoisted_1941 = { class: "text-[10px] font-medium text-gray-400 mt-2" }
+const _hoisted_1942 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2" }
+const _hoisted_1943 = { class: "grid grid-cols-4 gap-2" }
+const _hoisted_1944 = ["innerHTML"]
+const _hoisted_1945 = {
   key: 0,
   class: "absolute top-1 right-1 text-[10px] bg-white rounded-full w-5 h-5 flex items-center justify-center shadow-sm"
 }
-const _hoisted_1922 = { class: "text-[10px] font-medium text-gray-400 mt-2" }
-const _hoisted_1923 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center" }
-const _hoisted_1924 = ["innerHTML"]
-const _hoisted_1925 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2" }
-const _hoisted_1926 = { class: "text-2xl font-extrabold text-antracite leading-tight mt-1" }
-const _hoisted_1927 = { class: "text-sm text-gray-500 font-medium mt-2" }
-const _hoisted_1928 = { class: "p-6 pt-2" }
-const _hoisted_1929 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center" }
-const _hoisted_1930 = ["innerHTML"]
-const _hoisted_1931 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2" }
-const _hoisted_1932 = { class: "text-2xl font-extrabold text-antracite leading-tight mt-1" }
-const _hoisted_1933 = { class: "text-sm text-gray-500 font-medium mt-2" }
-const _hoisted_1934 = { key: 0 }
-const _hoisted_1935 = { class: "p-6 pt-2 space-y-2" }
-const _hoisted_1936 = {
+const _hoisted_1946 = { class: "text-[10px] font-medium text-gray-400 mt-2" }
+const _hoisted_1947 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center" }
+const _hoisted_1948 = ["innerHTML"]
+const _hoisted_1949 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2" }
+const _hoisted_1950 = { class: "text-2xl font-extrabold text-antracite leading-tight mt-1" }
+const _hoisted_1951 = { class: "text-sm text-gray-500 font-medium mt-2" }
+const _hoisted_1952 = { class: "p-6 pt-2" }
+const _hoisted_1953 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden text-center" }
+const _hoisted_1954 = ["innerHTML"]
+const _hoisted_1955 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-2" }
+const _hoisted_1956 = { class: "text-2xl font-extrabold text-antracite leading-tight mt-1" }
+const _hoisted_1957 = { class: "text-sm text-gray-500 font-medium mt-2" }
+const _hoisted_1958 = { key: 0 }
+const _hoisted_1959 = { class: "p-6 pt-2 space-y-2" }
+const _hoisted_1960 = {
   key: 38,
   class: "fixed inset-0 z-[67] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_1937 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" }
-const _hoisted_1938 = { class: "relative px-6 pt-8 pb-6 text-center bg-gradient-to-br from-salvia/15 via-arancione/10 to-viola/15" }
-const _hoisted_1939 = { class: "mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1940 = { class: "mt-1 text-2xl font-extrabold text-antracite leading-tight" }
-const _hoisted_1941 = { class: "p-6 space-y-4" }
-const _hoisted_1942 = { class: "text-sm text-gray-500 font-medium leading-relaxed text-center" }
-const _hoisted_1943 = { class: "text-sm text-antracite font-bold text-center" }
-const _hoisted_1944 = {
+const _hoisted_1961 = { class: "bg-white rounded-3xl w-full max-w-sm shadow-2xl overflow-hidden" }
+const _hoisted_1962 = { class: "relative px-6 pt-8 pb-6 text-center bg-gradient-to-br from-salvia/15 via-arancione/10 to-viola/15" }
+const _hoisted_1963 = { class: "mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_1964 = { class: "mt-1 text-2xl font-extrabold text-antracite leading-tight" }
+const _hoisted_1965 = { class: "p-6 space-y-4" }
+const _hoisted_1966 = { class: "text-sm text-gray-500 font-medium leading-relaxed text-center" }
+const _hoisted_1967 = { class: "text-sm text-antracite font-bold text-center" }
+const _hoisted_1968 = {
   key: 39,
   class: "fixed inset-0 z-[66] flex items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_1945 = { class: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4" }
-const _hoisted_1946 = { class: "flex items-center gap-3" }
-const _hoisted_1947 = { class: "min-w-0" }
-const _hoisted_1948 = { class: "text-lg font-bold text-antracite leading-tight" }
-const _hoisted_1949 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
-const _hoisted_1950 = { class: "text-sm text-gray-500 font-medium leading-relaxed" }
-const _hoisted_1951 = { class: "text-antracite" }
-const _hoisted_1952 = { class: "flex gap-2" }
-const _hoisted_1953 = { class: "text-[10px] font-medium text-gray-400 text-center" }
-const _hoisted_1954 = {
+const _hoisted_1969 = { class: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4" }
+const _hoisted_1970 = { class: "flex items-center gap-3" }
+const _hoisted_1971 = { class: "min-w-0" }
+const _hoisted_1972 = { class: "text-lg font-bold text-antracite leading-tight" }
+const _hoisted_1973 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
+const _hoisted_1974 = { class: "text-sm text-gray-500 font-medium leading-relaxed" }
+const _hoisted_1975 = { class: "text-antracite" }
+const _hoisted_1976 = { class: "flex gap-2" }
+const _hoisted_1977 = { class: "text-[10px] font-medium text-gray-400 text-center" }
+const _hoisted_1978 = {
   key: 40,
   class: "fixed inset-0 z-[65] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_1955 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]" }
-const _hoisted_1956 = { class: "flex justify-between items-start shrink-0 gap-3" }
-const _hoisted_1957 = { class: "flex items-center gap-3 min-w-0" }
-const _hoisted_1958 = { class: "min-w-0" }
-const _hoisted_1959 = { class: "text-lg font-bold text-antracite leading-tight truncate" }
-const _hoisted_1960 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
-const _hoisted_1961 = ["aria-label"]
-const _hoisted_1962 = { class: "overflow-y-auto flex-1 space-y-4 pr-1 hide-scrollbar" }
-const _hoisted_1963 = { class: "flex items-center gap-2 flex-wrap" }
-const _hoisted_1964 = {
+const _hoisted_1979 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]" }
+const _hoisted_1980 = { class: "flex justify-between items-start shrink-0 gap-3" }
+const _hoisted_1981 = { class: "flex items-center gap-3 min-w-0" }
+const _hoisted_1982 = { class: "min-w-0" }
+const _hoisted_1983 = { class: "text-lg font-bold text-antracite leading-tight truncate" }
+const _hoisted_1984 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
+const _hoisted_1985 = ["aria-label"]
+const _hoisted_1986 = { class: "overflow-y-auto flex-1 space-y-4 pr-1 hide-scrollbar" }
+const _hoisted_1987 = { class: "flex items-center gap-2 flex-wrap" }
+const _hoisted_1988 = {
   key: 0,
   class: "text-[10px] font-black uppercase tracking-widest bg-salvia/10 text-salvia border border-salvia/30 px-2 py-1 rounded-lg"
 }
-const _hoisted_1965 = {
+const _hoisted_1989 = {
   key: 1,
   class: "text-[10px] font-black uppercase tracking-widest bg-amber-50 text-amber-700 border border-amber-200 px-2 py-1 rounded-lg"
 }
-const _hoisted_1966 = {
+const _hoisted_1990 = {
   key: 2,
   class: "text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200 px-2 py-1 rounded-lg"
 }
-const _hoisted_1967 = {
+const _hoisted_1991 = {
   key: 3,
   class: "text-[10px] font-black uppercase tracking-widest bg-arancione/10 text-arancione border border-arancione/30 px-2 py-1 rounded-lg"
 }
-const _hoisted_1968 = {
+const _hoisted_1992 = {
   key: 4,
   class: "text-[10px] font-black uppercase tracking-widest bg-gray-100 text-gray-500 border border-gray-200 px-2 py-1 rounded-lg"
 }
-const _hoisted_1969 = {
+const _hoisted_1993 = {
   key: 5,
   class: "text-[10px] font-bold text-gray-400"
 }
-const _hoisted_1970 = {
+const _hoisted_1994 = {
   key: 0,
   class: "bg-gray-50 border border-dashed border-gray-200 rounded-2xl p-5 text-center text-xs text-gray-500 font-medium leading-relaxed"
 }
-const _hoisted_1971 = {
+const _hoisted_1995 = {
   key: 0,
   class: "grid grid-cols-2 gap-2"
 }
-const _hoisted_1972 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
-const _hoisted_1973 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1974 = { class: "text-lg font-extrabold text-antracite tabular-nums" }
-const _hoisted_1975 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
-const _hoisted_1976 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1977 = { class: "text-lg font-extrabold text-antracite tabular-nums" }
-const _hoisted_1978 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
-const _hoisted_1979 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1980 = { class: "text-lg font-extrabold text-antracite" }
-const _hoisted_1981 = { class: "text-sm text-gray-400" }
-const _hoisted_1982 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
-const _hoisted_1983 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_1984 = { class: "text-lg font-extrabold text-antracite" }
-const _hoisted_1985 = { class: "text-sm text-gray-400" }
-const _hoisted_1986 = {
+const _hoisted_1996 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
+const _hoisted_1997 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_1998 = { class: "text-lg font-extrabold text-antracite tabular-nums" }
+const _hoisted_1999 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
+const _hoisted_2000 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_2001 = { class: "text-lg font-extrabold text-antracite tabular-nums" }
+const _hoisted_2002 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
+const _hoisted_2003 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_2004 = { class: "text-lg font-extrabold text-antracite" }
+const _hoisted_2005 = { class: "text-sm text-gray-400" }
+const _hoisted_2006 = { class: "bg-gray-50 border border-gray-100 rounded-2xl p-3" }
+const _hoisted_2007 = { class: "text-[9px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_2008 = { class: "text-lg font-extrabold text-antracite" }
+const _hoisted_2009 = { class: "text-sm text-gray-400" }
+const _hoisted_2010 = {
   key: 1,
   class: "bg-salvia/10 border border-salvia/30 rounded-2xl px-3 py-2.5 text-[11px] font-bold text-salvia"
 }
-const _hoisted_1987 = { class: "space-y-2" }
-const _hoisted_1988 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1" }
-const _hoisted_1989 = { class: "flex items-start justify-between gap-2" }
-const _hoisted_1990 = { class: "min-w-0" }
-const _hoisted_1991 = { class: "flex items-center gap-1.5 flex-wrap" }
-const _hoisted_1992 = { class: "text-sm font-extrabold text-antracite break-words" }
-const _hoisted_1993 = {
+const _hoisted_2011 = { class: "space-y-2" }
+const _hoisted_2012 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest px-1" }
+const _hoisted_2013 = { class: "flex items-start justify-between gap-2" }
+const _hoisted_2014 = { class: "min-w-0" }
+const _hoisted_2015 = { class: "flex items-center gap-1.5 flex-wrap" }
+const _hoisted_2016 = { class: "text-sm font-extrabold text-antracite break-words" }
+const _hoisted_2017 = {
   key: 0,
   class: "text-[9px] font-black uppercase bg-amber-300 text-amber-900 px-1.5 py-0.5 rounded-md"
 }
-const _hoisted_1994 = {
+const _hoisted_2018 = {
   key: 0,
   class: "text-[10px] font-medium text-gray-500 mt-0.5"
 }
-const _hoisted_1995 = { key: 0 }
-const _hoisted_1996 = { key: 1 }
-const _hoisted_1997 = {
-  key: 1,
-  class: "text-[10px] font-medium text-gray-500 mt-0.5"
-}
-const _hoisted_1998 = {
-  key: 0,
-  class: "text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md flex-shrink-0"
-}
-const _hoisted_1999 = { class: "flex items-center justify-between gap-2 bg-white rounded-xl px-3 py-2 border border-gray-100" }
-const _hoisted_2000 = { class: "flex items-baseline gap-1.5 flex-wrap" }
-const _hoisted_2001 = { class: "text-xs font-bold text-gray-400 line-through" }
-const _hoisted_2002 = {
-  key: 0,
-  class: "text-[10px] font-black px-2 py-0.5 rounded-md bg-viola/10 text-viola flex-shrink-0"
-}
-const _hoisted_2003 = {
-  key: 2,
-  class: "text-[10px] font-bold text-gray-400 flex-shrink-0"
-}
-const _hoisted_2004 = {
-  key: 0,
-  class: "text-[10px] font-medium text-amber-700 leading-snug break-words"
-}
-const _hoisted_2005 = {
-  key: 1,
-  class: "text-[10px] font-medium text-gray-500"
-}
-const _hoisted_2006 = {
-  key: 2,
-  class: "text-[10px] font-medium text-gray-500 leading-snug"
-}
-const _hoisted_2007 = { class: "font-bold text-antracite" }
-const _hoisted_2008 = {
-  key: 0,
-  class: "text-gray-400"
-}
-const _hoisted_2009 = {
-  key: 2,
-  class: "text-[10px] font-medium text-gray-400 leading-snug px-1"
-}
-const _hoisted_2010 = { class: "shrink-0 flex gap-2 pt-2 border-t border-gray-100" }
-const _hoisted_2011 = ["aria-label"]
-const _hoisted_2012 = {
-  key: 41,
-  class: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
-}
-const _hoisted_2013 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]" }
-const _hoisted_2014 = { class: "flex justify-between items-center shrink-0 gap-3" }
-const _hoisted_2015 = { class: "flex items-center gap-3 min-w-0" }
-const _hoisted_2016 = { class: "min-w-0" }
-const _hoisted_2017 = { class: "text-lg font-bold text-antracite leading-tight" }
-const _hoisted_2018 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
-const _hoisted_2019 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0" }
-const _hoisted_2020 = {
-  key: 0,
-  class: "py-6 text-center text-sm text-gray-400 font-medium"
-}
+const _hoisted_2019 = { key: 0 }
+const _hoisted_2020 = { key: 1 }
 const _hoisted_2021 = {
   key: 1,
-  class: "overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar"
+  class: "text-[10px] font-medium text-gray-500 mt-0.5"
 }
 const _hoisted_2022 = {
   key: 0,
+  class: "text-[9px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded-md flex-shrink-0"
+}
+const _hoisted_2023 = { class: "flex items-center justify-between gap-2 bg-white rounded-xl px-3 py-2 border border-gray-100" }
+const _hoisted_2024 = { class: "flex items-baseline gap-1.5 flex-wrap" }
+const _hoisted_2025 = { class: "text-xs font-bold text-gray-400 line-through" }
+const _hoisted_2026 = {
+  key: 0,
+  class: "text-[10px] font-black px-2 py-0.5 rounded-md bg-viola/10 text-viola flex-shrink-0"
+}
+const _hoisted_2027 = {
+  key: 2,
+  class: "text-[10px] font-bold text-gray-400 flex-shrink-0"
+}
+const _hoisted_2028 = {
+  key: 0,
+  class: "text-[10px] font-medium text-amber-700 leading-snug break-words"
+}
+const _hoisted_2029 = {
+  key: 1,
+  class: "text-[10px] font-medium text-gray-500"
+}
+const _hoisted_2030 = {
+  key: 2,
+  class: "text-[10px] font-medium text-gray-500 leading-snug"
+}
+const _hoisted_2031 = { class: "font-bold text-antracite" }
+const _hoisted_2032 = {
+  key: 0,
+  class: "text-gray-400"
+}
+const _hoisted_2033 = {
+  key: 2,
+  class: "text-[10px] font-medium text-gray-400 leading-snug px-1"
+}
+const _hoisted_2034 = { class: "shrink-0 flex gap-2 pt-2 border-t border-gray-100" }
+const _hoisted_2035 = ["aria-label"]
+const _hoisted_2036 = {
+  key: 41,
+  class: "fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
+}
+const _hoisted_2037 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[90vh]" }
+const _hoisted_2038 = { class: "flex justify-between items-center shrink-0 gap-3" }
+const _hoisted_2039 = { class: "flex items-center gap-3 min-w-0" }
+const _hoisted_2040 = { class: "min-w-0" }
+const _hoisted_2041 = { class: "text-lg font-bold text-antracite leading-tight" }
+const _hoisted_2042 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
+const _hoisted_2043 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest shrink-0" }
+const _hoisted_2044 = {
+  key: 0,
+  class: "py-6 text-center text-sm text-gray-400 font-medium"
+}
+const _hoisted_2045 = {
+  key: 1,
+  class: "overflow-y-auto flex-1 space-y-2 pr-1 hide-scrollbar"
+}
+const _hoisted_2046 = {
+  key: 0,
   class: "w-4 h-4",
   fill: "none",
   stroke: "currentColor",
   viewBox: "0 0 24 24",
   "stroke-width": "2"
 }
-const _hoisted_2023 = {
+const _hoisted_2047 = {
   key: 1,
   class: "w-4 h-4",
   fill: "none",
@@ -3227,172 +3278,172 @@ const _hoisted_2023 = {
   viewBox: "0 0 24 24",
   "stroke-width": "2"
 }
-const _hoisted_2024 = ["onClick"]
-const _hoisted_2025 = { class: "text-[11px] font-bold text-antracite truncate" }
-const _hoisted_2026 = { class: "text-[9px] font-medium text-gray-400 truncate" }
-const _hoisted_2027 = { key: 0 }
-const _hoisted_2028 = {
+const _hoisted_2048 = ["onClick"]
+const _hoisted_2049 = { class: "text-[11px] font-bold text-antracite truncate" }
+const _hoisted_2050 = { class: "text-[9px] font-medium text-gray-400 truncate" }
+const _hoisted_2051 = { key: 0 }
+const _hoisted_2052 = {
   key: 1,
   class: "text-salvia font-bold"
 }
-const _hoisted_2029 = {
+const _hoisted_2053 = {
   key: 2,
   class: "text-salvia font-bold"
 }
-const _hoisted_2030 = {
+const _hoisted_2054 = {
   key: 3,
   class: "text-red-500 font-bold"
 }
-const _hoisted_2031 = {
+const _hoisted_2055 = {
   key: 4,
   class: "text-sky-600 font-bold"
 }
-const _hoisted_2032 = {
+const _hoisted_2056 = {
   key: 0,
   class: "text-[9px] font-medium text-sky-600 truncate mt-0.5"
 }
-const _hoisted_2033 = ["onClick", "aria-label"]
-const _hoisted_2034 = ["onClick", "aria-label"]
-const _hoisted_2035 = { class: "shrink-0 pt-2 border-t border-gray-100" }
-const _hoisted_2036 = {
+const _hoisted_2057 = ["onClick", "aria-label"]
+const _hoisted_2058 = ["onClick", "aria-label"]
+const _hoisted_2059 = { class: "shrink-0 pt-2 border-t border-gray-100" }
+const _hoisted_2060 = {
   key: 42,
   class: "fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_2037 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5" }
-const _hoisted_2038 = { class: "flex justify-between items-start gap-3" }
-const _hoisted_2039 = { class: "flex items-center gap-3 min-w-0" }
-const _hoisted_2040 = { class: "w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-2xl flex-shrink-0" }
-const _hoisted_2041 = { class: "min-w-0" }
-const _hoisted_2042 = { class: "text-lg font-bold text-antracite leading-tight truncate" }
-const _hoisted_2043 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
-const _hoisted_2044 = { key: 0 }
-const _hoisted_2045 = ["aria-label"]
-const _hoisted_2046 = { class: "text-center space-y-1" }
-const _hoisted_2047 = { class: "text-base font-extrabold text-antracite" }
-const _hoisted_2048 = { class: "text-[11px] font-medium text-gray-400" }
-const _hoisted_2049 = {
+const _hoisted_2061 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5" }
+const _hoisted_2062 = { class: "flex justify-between items-start gap-3" }
+const _hoisted_2063 = { class: "flex items-center gap-3 min-w-0" }
+const _hoisted_2064 = { class: "w-12 h-12 rounded-2xl bg-sky-500/10 border border-sky-200 flex items-center justify-center text-2xl flex-shrink-0" }
+const _hoisted_2065 = { class: "min-w-0" }
+const _hoisted_2066 = { class: "text-lg font-bold text-antracite leading-tight truncate" }
+const _hoisted_2067 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
+const _hoisted_2068 = { key: 0 }
+const _hoisted_2069 = ["aria-label"]
+const _hoisted_2070 = { class: "text-center space-y-1" }
+const _hoisted_2071 = { class: "text-base font-extrabold text-antracite" }
+const _hoisted_2072 = { class: "text-[11px] font-medium text-gray-400" }
+const _hoisted_2073 = {
   key: 0,
   class: "text-[10px] font-bold text-sky-600 uppercase tracking-widest pt-1"
 }
-const _hoisted_2050 = { class: "grid grid-cols-2 gap-3" }
-const _hoisted_2051 = { class: "flex items-center justify-between gap-2 pt-1 border-t border-gray-100" }
-const _hoisted_2052 = { class: "flex items-center gap-3" }
-const _hoisted_2053 = {
+const _hoisted_2074 = { class: "grid grid-cols-2 gap-3" }
+const _hoisted_2075 = { class: "flex items-center justify-between gap-2 pt-1 border-t border-gray-100" }
+const _hoisted_2076 = { class: "flex items-center gap-3" }
+const _hoisted_2077 = {
   key: 43,
   class: "fixed inset-0 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_2054 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[92vh]" }
-const _hoisted_2055 = { class: "flex justify-between items-center shrink-0 gap-3" }
-const _hoisted_2056 = { class: "flex items-center gap-3 min-w-0" }
-const _hoisted_2057 = { class: "min-w-0" }
-const _hoisted_2058 = { class: "text-lg font-bold text-antracite leading-tight" }
-const _hoisted_2059 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
-const _hoisted_2060 = { class: "grid grid-cols-2 gap-2 shrink-0" }
-const _hoisted_2061 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2062 = { class: "grid grid-cols-2 gap-1.5" }
-const _hoisted_2063 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2064 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2065 = { class: "text-[10px] font-medium text-gray-400 -mt-1 shrink-0" }
-const _hoisted_2066 = {
+const _hoisted_2078 = { class: "bg-white rounded-t-3xl sm:rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 flex flex-col max-h-[92vh]" }
+const _hoisted_2079 = { class: "flex justify-between items-center shrink-0 gap-3" }
+const _hoisted_2080 = { class: "flex items-center gap-3 min-w-0" }
+const _hoisted_2081 = { class: "min-w-0" }
+const _hoisted_2082 = { class: "text-lg font-bold text-antracite leading-tight" }
+const _hoisted_2083 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate" }
+const _hoisted_2084 = { class: "grid grid-cols-2 gap-2 shrink-0" }
+const _hoisted_2085 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2086 = { class: "grid grid-cols-2 gap-1.5" }
+const _hoisted_2087 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2088 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2089 = { class: "text-[10px] font-medium text-gray-400 -mt-1 shrink-0" }
+const _hoisted_2090 = {
   key: 0,
   class: "shrink-0 space-y-1.5"
 }
-const _hoisted_2067 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider" }
-const _hoisted_2068 = { class: "grid grid-cols-2 gap-1.5" }
-const _hoisted_2069 = {
+const _hoisted_2091 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider" }
+const _hoisted_2092 = { class: "grid grid-cols-2 gap-1.5" }
+const _hoisted_2093 = {
   key: 1,
   class: "text-[10px] font-bold text-sky-700 bg-sky-50 border border-sky-200 rounded-xl px-3 py-2 shrink-0 leading-snug"
 }
-const _hoisted_2070 = {
+const _hoisted_2094 = {
   key: 2,
   class: "text-[10px] font-medium text-gray-500 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 shrink-0 leading-snug"
 }
-const _hoisted_2071 = { class: "font-bold" }
-const _hoisted_2072 = { class: "flex bg-gray-100 rounded-xl p-1 shrink-0" }
-const _hoisted_2073 = { class: "overflow-y-auto flex-1 space-y-3 pr-1 hide-scrollbar" }
-const _hoisted_2074 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2075 = ["value"]
-const _hoisted_2076 = {
+const _hoisted_2095 = { class: "font-bold" }
+const _hoisted_2096 = { class: "flex bg-gray-100 rounded-xl p-1 shrink-0" }
+const _hoisted_2097 = { class: "overflow-y-auto flex-1 space-y-3 pr-1 hide-scrollbar" }
+const _hoisted_2098 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2099 = ["value"]
+const _hoisted_2100 = {
   key: 1,
   class: "bg-amber-50 border border-amber-200 rounded-xl px-3 py-2.5 text-[10px] font-medium text-amber-800 leading-relaxed"
 }
-const _hoisted_2077 = { key: 0 }
-const _hoisted_2078 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2079 = { class: "flex flex-wrap gap-1.5" }
-const _hoisted_2080 = ["onClick"]
-const _hoisted_2081 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed" }
-const _hoisted_2082 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2083 = ["value"]
-const _hoisted_2084 = { class: "flex items-center justify-between gap-2" }
-const _hoisted_2085 = { class: "text-xs font-bold text-gray-500" }
-const _hoisted_2086 = {
+const _hoisted_2101 = { key: 0 }
+const _hoisted_2102 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2103 = { class: "flex flex-wrap gap-1.5" }
+const _hoisted_2104 = ["onClick"]
+const _hoisted_2105 = { class: "text-[10px] font-medium text-gray-400 leading-relaxed" }
+const _hoisted_2106 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2107 = ["value"]
+const _hoisted_2108 = { class: "flex items-center justify-between gap-2" }
+const _hoisted_2109 = { class: "text-xs font-bold text-gray-500" }
+const _hoisted_2110 = {
   key: 0,
   class: "space-y-1.5"
 }
-const _hoisted_2087 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider" }
-const _hoisted_2088 = { class: "flex gap-1.5" }
-const _hoisted_2089 = ["onClick"]
-const _hoisted_2090 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
-const _hoisted_2091 = {
+const _hoisted_2111 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider" }
+const _hoisted_2112 = { class: "flex gap-1.5" }
+const _hoisted_2113 = ["onClick"]
+const _hoisted_2114 = { class: "block text-[9px] font-bold text-gray-400 uppercase tracking-wider mb-1" }
+const _hoisted_2115 = {
   key: 3,
   class: "text-[10px] font-bold text-red-500 bg-red-50 border border-red-200 rounded-xl px-3 py-2 shrink-0"
 }
-const _hoisted_2092 = { class: "shrink-0 flex gap-2 pt-2 border-t border-gray-100" }
-const _hoisted_2093 = { class: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5" }
-const _hoisted_2094 = { class: "text-center" }
-const _hoisted_2095 = { class: "text-lg font-extrabold text-antracite mt-2" }
-const _hoisted_2096 = { class: "text-xs text-gray-500 font-medium mt-1 leading-relaxed" }
-const _hoisted_2097 = { class: "space-y-2" }
-const _hoisted_2098 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_2099 = { class: "grid grid-cols-4 gap-1.5" }
-const _hoisted_2100 = ["onClick"]
-const _hoisted_2101 = { class: "text-xl leading-none" }
-const _hoisted_2102 = { class: "text-[10px] font-bold leading-tight text-center" }
-const _hoisted_2103 = { class: "space-y-2" }
-const _hoisted_2104 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
-const _hoisted_2105 = { class: "grid grid-cols-5 gap-1.5" }
-const _hoisted_2106 = ["onClick"]
-const _hoisted_2107 = { class: "space-y-2" }
-const _hoisted_2108 = {
+const _hoisted_2116 = { class: "shrink-0 flex gap-2 pt-2 border-t border-gray-100" }
+const _hoisted_2117 = { class: "bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-5" }
+const _hoisted_2118 = { class: "text-center" }
+const _hoisted_2119 = { class: "text-lg font-extrabold text-antracite mt-2" }
+const _hoisted_2120 = { class: "text-xs text-gray-500 font-medium mt-1 leading-relaxed" }
+const _hoisted_2121 = { class: "space-y-2" }
+const _hoisted_2122 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_2123 = { class: "grid grid-cols-4 gap-1.5" }
+const _hoisted_2124 = ["onClick"]
+const _hoisted_2125 = { class: "text-xl leading-none" }
+const _hoisted_2126 = { class: "text-[10px] font-bold leading-tight text-center" }
+const _hoisted_2127 = { class: "space-y-2" }
+const _hoisted_2128 = { class: "text-[10px] font-bold text-gray-400 uppercase tracking-widest" }
+const _hoisted_2129 = { class: "grid grid-cols-5 gap-1.5" }
+const _hoisted_2130 = ["onClick"]
+const _hoisted_2131 = { class: "space-y-2" }
+const _hoisted_2132 = {
   key: 45,
   class: "fixed inset-0 z-[75] flex items-center justify-center p-4 bg-antracite/60 backdrop-blur-sm animate-fadeIn"
 }
-const _hoisted_2109 = { class: "record-pop bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center relative overflow-hidden" }
-const _hoisted_2110 = {
+const _hoisted_2133 = { class: "record-pop bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl space-y-4 text-center relative overflow-hidden" }
+const _hoisted_2134 = {
   class: "record-confetti",
   "aria-hidden": "true"
 }
-const _hoisted_2111 = { class: "relative" }
-const _hoisted_2112 = { class: "text-[10px] font-black uppercase tracking-[0.2em] text-arancione mt-3" }
-const _hoisted_2113 = { class: "text-xl font-extrabold text-antracite mt-1 leading-tight" }
-const _hoisted_2114 = { class: "text-4xl font-black text-antracite mt-2" }
-const _hoisted_2115 = { class: "text-lg font-bold text-gray-400" }
-const _hoisted_2116 = { class: "text-xs font-semibold text-gray-500 mt-1" }
-const _hoisted_2117 = { class: "text-salvia" }
-const _hoisted_2118 = { class: "space-y-2 relative" }
-const _hoisted_2119 = { class: "bg-white/95 backdrop-blur-lg border-t border-gray-200 px-2 py-2.5 flex justify-between items-center z-20 absolute bottom-0 left-0 right-0 pb-6 sm:pb-2.5" }
-const _hoisted_2120 = { class: "text-[10px] font-bold" }
-const _hoisted_2121 = {
+const _hoisted_2135 = { class: "relative" }
+const _hoisted_2136 = { class: "text-[10px] font-black uppercase tracking-[0.2em] text-arancione mt-3" }
+const _hoisted_2137 = { class: "text-xl font-extrabold text-antracite mt-1 leading-tight" }
+const _hoisted_2138 = { class: "text-4xl font-black text-antracite mt-2" }
+const _hoisted_2139 = { class: "text-lg font-bold text-gray-400" }
+const _hoisted_2140 = { class: "text-xs font-semibold text-gray-500 mt-1" }
+const _hoisted_2141 = { class: "text-salvia" }
+const _hoisted_2142 = { class: "space-y-2 relative" }
+const _hoisted_2143 = { class: "bg-white/95 backdrop-blur-lg border-t border-gray-200 px-2 py-2.5 flex justify-between items-center z-20 absolute bottom-0 left-0 right-0 pb-6 sm:pb-2.5" }
+const _hoisted_2144 = { class: "text-[10px] font-bold" }
+const _hoisted_2145 = {
   key: 0,
   class: "w-1.5 h-1.5 bg-viola rounded-full absolute bottom-0"
 }
-const _hoisted_2122 = { class: "text-[10px] font-bold" }
-const _hoisted_2123 = {
+const _hoisted_2146 = { class: "text-[10px] font-bold" }
+const _hoisted_2147 = {
   key: 0,
   class: "w-1.5 h-1.5 bg-arancione rounded-full absolute bottom-0"
 }
-const _hoisted_2124 = { class: "text-[10px] font-bold" }
-const _hoisted_2125 = {
+const _hoisted_2148 = { class: "text-[10px] font-bold" }
+const _hoisted_2149 = {
   key: 0,
   class: "w-1.5 h-1.5 bg-salvia rounded-full absolute bottom-0"
 }
-const _hoisted_2126 = { class: "text-[10px] font-bold" }
-const _hoisted_2127 = {
+const _hoisted_2150 = { class: "text-[10px] font-bold" }
+const _hoisted_2151 = {
   key: 0,
   class: "w-1.5 h-1.5 bg-viola rounded-full absolute bottom-0"
 }
-const _hoisted_2128 = { class: "text-[10px] font-bold" }
-const _hoisted_2129 = {
+const _hoisted_2152 = { class: "text-[10px] font-bold" }
+const _hoisted_2153 = {
   key: 0,
   class: "w-1.5 h-1.5 bg-arancione rounded-full absolute bottom-0"
 }
@@ -3400,13 +3451,13 @@ const _hoisted_2129 = {
 return function render(_ctx, _cache) {
   return (!_ctx.isAuthenticated && !_ctx.authLoading)
     ? (_openBlock(), _createElementBlock("div", _hoisted_1, [
-        _cache[384] || (_cache[384] = _createElementVNode("div", { class: "absolute -top-10 -left-10 w-64 h-64 bg-salvia/15 rounded-full blur-[80px] animate-float-1 pointer-events-none" }, null, -1 /* CACHED */)),
-        _cache[385] || (_cache[385] = _createElementVNode("div", { class: "absolute top-[35%] -right-10 w-64 h-64 bg-arancione/15 rounded-full blur-[80px] animate-float-2 pointer-events-none" }, null, -1 /* CACHED */)),
-        _cache[386] || (_cache[386] = _createElementVNode("div", { class: "absolute -bottom-10 -left-10 w-72 h-72 bg-viola/15 rounded-full blur-[80px] animate-float-3 pointer-events-none" }, null, -1 /* CACHED */)),
+        _cache[385] || (_cache[385] = _createElementVNode("div", { class: "absolute -top-10 -left-10 w-64 h-64 bg-salvia/15 rounded-full blur-[80px] animate-float-1 pointer-events-none" }, null, -1 /* CACHED */)),
+        _cache[386] || (_cache[386] = _createElementVNode("div", { class: "absolute top-[35%] -right-10 w-64 h-64 bg-arancione/15 rounded-full blur-[80px] animate-float-2 pointer-events-none" }, null, -1 /* CACHED */)),
+        _cache[387] || (_cache[387] = _createElementVNode("div", { class: "absolute -bottom-10 -left-10 w-72 h-72 bg-viola/15 rounded-full blur-[80px] animate-float-3 pointer-events-none" }, null, -1 /* CACHED */)),
         (_ctx.onboarding.step === 0)
           ? (_openBlock(), _createElementBlock("div", _hoisted_2, [
               _createElementVNode("div", _hoisted_3, [
-                _cache[381] || (_cache[381] = _createElementVNode("div", { class: "w-36 h-36 flex items-center justify-center relative drop-shadow-md" }, [
+                _cache[382] || (_cache[382] = _createElementVNode("div", { class: "w-36 h-36 flex items-center justify-center relative drop-shadow-md" }, [
                   _createElementVNode("div", { class: "w-full h-full cangiante-btn logo-mask" })
                 ], -1 /* CACHED */)),
                 _createElementVNode("div", _hoisted_4, [
@@ -3414,16 +3465,16 @@ return function render(_ctx, _cache) {
                   _createElementVNode("div", _hoisted_6, [
                     _createElementVNode("div", _hoisted_7, [
                       _createElementVNode("span", null, _toDisplayString(_ctx.$t("IERI.")), 1 /* TEXT */),
-                      _cache[377] || (_cache[377] = _createTextVNode()),
-                      _createElementVNode("span", null, _toDisplayString(_ctx.$t("OGGI.")), 1 /* TEXT */),
                       _cache[378] || (_cache[378] = _createTextVNode()),
+                      _createElementVNode("span", null, _toDisplayString(_ctx.$t("OGGI.")), 1 /* TEXT */),
+                      _cache[379] || (_cache[379] = _createTextVNode()),
                       _createElementVNode("span", null, _toDisplayString(_ctx.$t("DOMANI.")), 1 /* TEXT */)
                     ]),
                     _createElementVNode("div", _hoisted_8, [
                       _createElementVNode("span", null, _toDisplayString(_ctx.$t("ANCORA.")), 1 /* TEXT */),
-                      _cache[379] || (_cache[379] = _createTextVNode()),
-                      _createElementVNode("span", null, _toDisplayString(_ctx.$t("ANCORA.")), 1 /* TEXT */),
                       _cache[380] || (_cache[380] = _createTextVNode()),
+                      _createElementVNode("span", null, _toDisplayString(_ctx.$t("ANCORA.")), 1 /* TEXT */),
+                      _cache[381] || (_cache[381] = _createTextVNode()),
                       _createElementVNode("span", null, _toDisplayString(_ctx.$t("ANCORA.")), 1 /* TEXT */)
                     ])
                   ])
@@ -3435,7 +3486,7 @@ return function render(_ctx, _cache) {
                   class: "w-full cangiante-btn text-white font-extrabold py-4 rounded-2xl shadow-lg transition-all transform active:scale-95 flex items-center justify-center gap-2 hover:opacity-95"
                 }, [
                   _createElementVNode("span", null, _toDisplayString(_ctx.$tv(_ctx.hasProfile ? 'Entra' : 'Inizia')), 1 /* TEXT */),
-                  _cache[382] || (_cache[382] = _createElementVNode("svg", {
+                  _cache[383] || (_cache[383] = _createElementVNode("svg", {
                     class: "w-5 h-5",
                     fill: "none",
                     stroke: "currentColor",
@@ -3474,7 +3525,7 @@ return function render(_ctx, _cache) {
             ]))
           : (_openBlock(), _createElementBlock("div", _hoisted_13, [
               _createElementVNode("div", _hoisted_14, [
-                _cache[383] || (_cache[383] = _createElementVNode("div", { class: "h-1.5 flex-1 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
+                _cache[384] || (_cache[384] = _createElementVNode("div", { class: "h-1.5 flex-1 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
                 _createElementVNode("div", {
                   class: _normalizeClass(["h-1.5 flex-1 rounded-full transition-colors", _ctx.onboarding.step === 2 ? 'bg-salvia' : 'bg-gray-200'])
                 }, null, 2 /* CLASS */)
@@ -3659,7 +3710,7 @@ return function render(_ctx, _cache) {
             ]))
       ]))
     : (_ctx.authLoading)
-      ? (_openBlock(), _createElementBlock("div", _hoisted_48, [...(_cache[387] || (_cache[387] = [
+      ? (_openBlock(), _createElementBlock("div", _hoisted_48, [...(_cache[388] || (_cache[388] = [
           _createElementVNode("div", { class: "w-8 h-8 border-4 border-salvia border-t-transparent rounded-full animate-spin" }, null, -1 /* CACHED */)
         ]))]))
       : (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
@@ -3672,7 +3723,7 @@ return function render(_ctx, _cache) {
               }, _toDisplayString(_ctx.$tv(_ctx.profileInitial)), 9 /* TEXT, PROPS */, _hoisted_51)
             ]),
             _createElementVNode("div", _hoisted_52, [
-              _cache[388] || (_cache[388] = _createElementVNode("div", { class: "w-8 h-8 flex items-center justify-center" }, [
+              _cache[389] || (_cache[389] = _createElementVNode("div", { class: "w-8 h-8 flex items-center justify-center" }, [
                 _createElementVNode("div", { class: "w-full h-full cangiante-btn logo-mask" })
               ], -1 /* CACHED */)),
               _createElementVNode("span", _hoisted_53, _toDisplayString(_ctx.$t("STILL")), 1 /* TEXT */)
@@ -3681,7 +3732,7 @@ return function render(_ctx, _cache) {
               onClick: _cache[17] || (_cache[17] = (...args) => (_ctx.openBackupModal && _ctx.openBackupModal(...args))),
               class: "p-2 rounded-xl bg-white hover:bg-gray-100 text-gray-600 border border-gray-200 transition-all",
               "aria-label": _ctx.$t("Impostazioni")
-            }, [...(_cache[389] || (_cache[389] = [
+            }, [...(_cache[390] || (_cache[390] = [
               _createElementVNode("svg", {
                 class: "w-4 h-4",
                 fill: "none",
@@ -3706,7 +3757,7 @@ return function render(_ctx, _cache) {
             (_ctx.activeTab === 'dashboard')
               ? (_openBlock(), _createElementBlock("div", _hoisted_56, [
                   _createElementVNode("div", _hoisted_57, [
-                    _cache[392] || (_cache[392] = _createElementVNode("svg", {
+                    _cache[393] || (_cache[393] = _createElementVNode("svg", {
                       class: "absolute right-0 top-0 w-32 h-32 text-white/5",
                       fill: "currentColor",
                       viewBox: "0 0 100 100"
@@ -3720,7 +3771,7 @@ return function render(_ctx, _cache) {
                         class: "px-2.5 py-1 rounded-full cangiante-btn text-[11px] font-bold text-white flex items-center gap-1",
                         title: _ctx.$t("Condividi nelle storie")
                       }, [
-                        _cache[390] || (_cache[390] = _createElementVNode("svg", {
+                        _cache[391] || (_cache[391] = _createElementVNode("svg", {
                           class: "w-3 h-3",
                           fill: "none",
                           stroke: "currentColor",
@@ -3739,7 +3790,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("p", _hoisted_61, [
                       _createTextVNode(" \"" + _toDisplayString(_ctx.$tv(_ctx.dailyBar.pre)) + " ", 1 /* TEXT */),
                       _createElementVNode("span", _hoisted_62, _toDisplayString(_ctx.$tv(_ctx.dailyBar.hi)), 1 /* TEXT */),
-                      _cache[391] || (_cache[391] = _createTextVNode("\" ", -1 /* CACHED */))
+                      _cache[392] || (_cache[392] = _createTextVNode("\" ", -1 /* CACHED */))
                     ]),
                     (_ctx.dailyBar.by)
                       ? (_openBlock(), _createElementBlock("p", _hoisted_63, "— " + _toDisplayString(_ctx.$tv(_ctx.dailyBar.by)), 1 /* TEXT */))
@@ -3747,13 +3798,13 @@ return function render(_ctx, _cache) {
                   ]),
                   (_ctx.backupDue)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_64, [
-                        _cache[394] || (_cache[394] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/15 flex items-center justify-center text-lg flex-shrink-0" }, "💾", -1 /* CACHED */)),
+                        _cache[395] || (_cache[395] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/15 flex items-center justify-center text-lg flex-shrink-0" }, "💾", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_65, [
                           _createElementVNode("div", _hoisted_66, _toDisplayString(_ctx.$t("Salva una copia dei tuoi progressi")), 1 /* TEXT */),
                           _createElementVNode("p", _hoisted_67, [
                             _createTextVNode(_toDisplayString(_ctx.$t("Sono solo su questo telefono. Ultimo backup:")) + " ", 1 /* TEXT */),
                             _createElementVNode("span", _hoisted_68, _toDisplayString(_ctx.$tv(_ctx.lastBackupLabel)), 1 /* TEXT */),
-                            _cache[393] || (_cache[393] = _createTextVNode(".", -1 /* CACHED */))
+                            _cache[394] || (_cache[394] = _createTextVNode(".", -1 /* CACHED */))
                           ]),
                           _createElementVNode("div", _hoisted_69, [
                             _createElementVNode("button", {
@@ -3770,7 +3821,7 @@ return function render(_ctx, _cache) {
                     : _createCommentVNode("v-if", true),
                   (_ctx.photoDue && !_ctx.backupDue)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_70, [
-                        _cache[395] || (_cache[395] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-lg flex-shrink-0" }, "📸", -1 /* CACHED */)),
+                        _cache[396] || (_cache[396] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-lg flex-shrink-0" }, "📸", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_71, [
                           _createElementVNode("div", _hoisted_72, _toDisplayString(_ctx.$t("È il momento della foto del mese")), 1 /* TEXT */),
                           _createElementVNode("p", _hoisted_73, _toDisplayString(_ctx.$t("L'ultima è di {0} giorni fa. Stessa posa e stessa luce: poi ti preparo la storia \"Prima e dopo\".", [(_ctx.photoDue)])), 1 /* TEXT */),
@@ -3793,8 +3844,8 @@ return function render(_ctx, _cache) {
                   ]),
                   (_ctx.installBanner)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_78, [
-                        _cache[397] || (_cache[397] = _createElementVNode("div", { class: "absolute -right-8 -top-8 w-28 h-28 bg-salvia/25 rounded-full blur-2xl pointer-events-none" }, null, -1 /* CACHED */)),
-                        _cache[398] || (_cache[398] = _createElementVNode("img", {
+                        _cache[398] || (_cache[398] = _createElementVNode("div", { class: "absolute -right-8 -top-8 w-28 h-28 bg-salvia/25 rounded-full blur-2xl pointer-events-none" }, null, -1 /* CACHED */)),
+                        _cache[399] || (_cache[399] = _createElementVNode("img", {
                           src: "assets/icon-192.png",
                           alt: "",
                           class: "w-11 h-11 rounded-xl shrink-0 relative z-10"
@@ -3811,7 +3862,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[24] || (_cache[24] = (...args) => (_ctx.dismissInstall && _ctx.dismissInstall(...args))),
                           class: "relative z-10 shrink-0 p-1 text-white/40 hover:text-white",
                           "aria-label": _ctx.$t("Chiudi")
-                        }, [...(_cache[396] || (_cache[396] = [
+                        }, [...(_cache[397] || (_cache[397] = [
                           _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
@@ -3835,12 +3886,12 @@ return function render(_ctx, _cache) {
                         class: "w-full rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform relative overflow-hidden",
                         style: {"background":"linear-gradient(120deg, #7A4DF1, #EC4899, #F5A623)"}
                       }, [
-                        _cache[399] || (_cache[399] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎁", -1 /* CACHED */)),
+                        _cache[400] || (_cache[400] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎁", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_83, [
                           _createElementVNode("div", _hoisted_84, _toDisplayString(_ctx.$t("Il tuo {0} su STILL è pronto", [(_ctx.wrappedBanner.year)])), 1 /* TEXT */),
                           _createElementVNode("div", _hoisted_85, _toDisplayString(_ctx.$t("{0} {1} attivi, numeri pazzi e che atleta sei. Guardalo!", [(_ctx.wrappedBanner.active), ((_ctx.wrappedBanner.active) === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */)
                         ]),
-                        _cache[400] || (_cache[400] = _createElementVNode("svg", {
+                        _cache[401] || (_cache[401] = _createElementVNode("svg", {
                           class: "w-5 h-5 text-white shrink-0",
                           fill: "none",
                           stroke: "currentColor",
@@ -3861,12 +3912,12 @@ return function render(_ctx, _cache) {
                         onClick: _cache[26] || (_cache[26] = $event => (_ctx.openRecap(1))),
                         class: "w-full cangiante-btn rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
                       }, [
-                        _cache[401] || (_cache[401] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎬", -1 /* CACHED */)),
+                        _cache[402] || (_cache[402] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎬", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_86, [
                           _createElementVNode("div", _hoisted_87, _toDisplayString(_ctx.$t("Il tuo {0} è pronto", [(_ctx.recapBanner.month.toLowerCase())])), 1 /* TEXT */),
                           _createElementVNode("div", _hoisted_88, _toDisplayString(_ctx.$t("{0} {1} attivi. Guardalo e condividilo nelle storie.", [(_ctx.recapBanner.active), ((_ctx.recapBanner.active) === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */)
                         ]),
-                        _cache[402] || (_cache[402] = _createElementVNode("svg", {
+                        _cache[403] || (_cache[403] = _createElementVNode("svg", {
                           class: "w-5 h-5 text-white shrink-0",
                           fill: "none",
                           stroke: "currentColor",
@@ -3886,12 +3937,12 @@ return function render(_ctx, _cache) {
                           onClick: _cache[27] || (_cache[27] = $event => (_ctx.openRecap(_ctx.weekBanner.offset, 'week'))),
                           class: "w-full cangiante-btn rounded-2xl p-4 shadow-lg flex items-center gap-3 text-left active:scale-[0.98] transition-transform"
                         }, [
-                          _cache[403] || (_cache[403] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎬", -1 /* CACHED */)),
+                          _cache[404] || (_cache[404] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-white/20 flex items-center justify-center text-2xl shrink-0" }, "🎬", -1 /* CACHED */)),
                           _createElementVNode("div", _hoisted_89, [
                             _createElementVNode("div", _hoisted_90, _toDisplayString(_ctx.$tv(_ctx.weekBanner.offset ? 'La tua settimana è pronta' : 'La tua settimana fin qui')), 1 /* TEXT */),
                             _createElementVNode("div", _hoisted_91, _toDisplayString(_ctx.$t("{0} {1} ({2}). Condividila nelle storie.", [(_ctx.weekBanner.active), (_ctx.weekBanner.active === 1 ? 'giorno attivo' : 'giorni attivi'), (_ctx.weekBanner.label)])), 1 /* TEXT */)
                           ]),
-                          _cache[404] || (_cache[404] = _createElementVNode("svg", {
+                          _cache[405] || (_cache[405] = _createElementVNode("svg", {
                             class: "w-5 h-5 text-white shrink-0",
                             fill: "none",
                             stroke: "currentColor",
@@ -3942,7 +3993,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[29] || (_cache[29] = $event => (_ctx.openRecap(0, 'week'))),
                         class: "shrink-0 flex flex-col items-center gap-0.5 cangiante-btn text-white px-3.5 py-2.5 rounded-2xl shadow-md active:scale-95 transition-transform"
                       }, [
-                        _cache[405] || (_cache[405] = _createElementVNode("span", { class: "text-lg leading-none" }, "🎬", -1 /* CACHED */)),
+                        _cache[406] || (_cache[406] = _createElementVNode("span", { class: "text-lg leading-none" }, "🎬", -1 /* CACHED */)),
                         _createElementVNode("span", _hoisted_100, _toDisplayString(_ctx.$t("Riepilogo")), 1 /* TEXT */)
                       ])
                     ]),
@@ -3985,12 +4036,12 @@ return function render(_ctx, _cache) {
                             onClick: _cache[31] || (_cache[31] = (...args) => (_ctx.openLightDay && _ctx.openLightDay(...args))),
                             class: "mt-3 w-full rounded-2xl px-3 py-2.5 bg-gray-50 border border-dashed border-gray-200 flex items-center gap-2.5 text-left active:scale-[0.99] transition-all"
                           }, [
-                            _cache[406] || (_cache[406] = _createElementVNode("span", { class: "text-lg leading-none" }, "🌱", -1 /* CACHED */)),
+                            _cache[407] || (_cache[407] = _createElementVNode("span", { class: "text-lg leading-none" }, "🌱", -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_107, [
                               _createElementVNode("span", _hoisted_108, _toDisplayString(_ctx.$t("Giornata no? Bastano 10 minuti")), 1 /* TEXT */),
                               _createElementVNode("span", _hoisted_109, _toDisplayString(_ctx.$t("Una camminata o un po' di stretching e la serie continua.")), 1 /* TEXT */)
                             ]),
-                            _cache[407] || (_cache[407] = _createElementVNode("svg", {
+                            _cache[408] || (_cache[408] = _createElementVNode("svg", {
                               class: "w-4 h-4 text-gray-300 shrink-0",
                               fill: "none",
                               stroke: "currentColor",
@@ -4007,7 +4058,7 @@ return function render(_ctx, _cache) {
                         : _createCommentVNode("v-if", true),
                     (_ctx.streakInfo.recoverable)
                       ? (_openBlock(), _createElementBlock("div", _hoisted_110, [
-                          _cache[408] || (_cache[408] = _createElementVNode("div", { class: "text-2xl shrink-0" }, "🆘", -1 /* CACHED */)),
+                          _cache[409] || (_cache[409] = _createElementVNode("div", { class: "text-2xl shrink-0" }, "🆘", -1 /* CACHED */)),
                           _createElementVNode("div", _hoisted_111, [
                             _createElementVNode("div", _hoisted_112, _toDisplayString(_ctx.$t("Hai perso una serie di {0} {1}", [(_ctx.streakInfo.recoverable.length), ((_ctx.streakInfo.recoverable.length) === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */),
                             _createElementVNode("div", _hoisted_113, _toDisplayString(_ctx.$t("Condividi una storia con i tuoi risultati su STILL e la serie torna com'era.")), 1 /* TEXT */)
@@ -4040,7 +4091,7 @@ return function render(_ctx, _cache) {
                       ]),
                       _createElementVNode("div", _hoisted_122, _toDisplayString(_ctx.$t("{0} XP al livello {1}", [(_ctx.playerLevel.need - _ctx.playerLevel.into), (_ctx.playerLevel.level + 1)])), 1 /* TEXT */)
                     ]),
-                    _cache[409] || (_cache[409] = _createElementVNode("svg", {
+                    _cache[410] || (_cache[410] = _createElementVNode("svg", {
                       class: "w-4 h-4 text-gray-300 shrink-0",
                       fill: "none",
                       stroke: "currentColor",
@@ -4056,7 +4107,7 @@ return function render(_ctx, _cache) {
                   ]),
                   (_ctx.noteForToday)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_123, [
-                        _cache[410] || (_cache[410] = _createElementVNode("div", { class: "text-sky-600 text-xl pt-0.5" }, "💡", -1 /* CACHED */)),
+                        _cache[411] || (_cache[411] = _createElementVNode("div", { class: "text-sky-600 text-xl pt-0.5" }, "💡", -1 /* CACHED */)),
                         _createElementVNode("div", null, [
                           _createElementVNode("div", _hoisted_124, _toDisplayString(_ctx.$t("La tua nota di oggi")), 1 /* TEXT */),
                           _createElementVNode("p", _hoisted_125, _toDisplayString(_ctx.$tv(_ctx.noteForToday)), 1 /* TEXT */)
@@ -4080,7 +4131,7 @@ return function render(_ctx, _cache) {
                         ]),
                         _createElementVNode("div", {
                           class: _normalizeClass(_ctx.allGroceryChecked ? 'text-salvia' : 'text-viola')
-                        }, [...(_cache[411] || (_cache[411] = [
+                        }, [...(_cache[412] || (_cache[412] = [
                           _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
@@ -4139,8 +4190,8 @@ return function render(_ctx, _cache) {
                                   (mc.planned)
                                     ? (_openBlock(), _createElementBlock("span", _hoisted_140, " / " + _toDisplayString(_ctx.$tv(mc.planned)), 1 /* TEXT */))
                                     : _createCommentVNode("v-if", true),
-                                  _cache[412] || (_cache[412] = _createTextVNode()),
-                                  _cache[413] || (_cache[413] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
+                                  _cache[413] || (_cache[413] = _createTextVNode()),
+                                  _cache[414] || (_cache[414] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
                                 ]),
                                 _createElementVNode("div", _hoisted_141, [
                                   _createElementVNode("div", {
@@ -4159,7 +4210,7 @@ return function render(_ctx, _cache) {
                                       _createElementVNode("b", {
                                         class: _normalizeClass(_ctx.todayProtein.planned < _ctx.bodyStats.protein.min ? 'text-arancione' : 'text-salvia')
                                       }, "≈ " + _toDisplayString(_ctx.$tv(_ctx.todayProtein.planned)) + " g", 3 /* TEXT, CLASS */),
-                                      _cache[414] || (_cache[414] = _createTextVNode(".", -1 /* CACHED */))
+                                      _cache[415] || (_cache[415] = _createTextVNode(".", -1 /* CACHED */))
                                     ], 64 /* STABLE_FRAGMENT */))
                                   : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                                       _createTextVNode(_toDisplayString(_ctx.$t("Il menù di oggi ne ha ≈ {0} g. Aggiungi il peso in Progressi per il tuo obiettivo.", [(_ctx.todayProtein.planned)])), 1 /* TEXT */)
@@ -4256,7 +4307,7 @@ return function render(_ctx, _cache) {
                                   onClick: $event => (_ctx.setMealDone(_ctx.todayDateKey, meal)),
                                   "aria-label": _ctx.$t("Pasto eseguito"),
                                   class: _normalizeClass(["w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90", _ctx.todayMealLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white shadow-sm' : 'bg-salvia/10 text-salvia/60 hover:bg-salvia/20 hover:text-salvia'])
-                                }, [...(_cache[415] || (_cache[415] = [
+                                }, [...(_cache[416] || (_cache[416] = [
                                   _createElementVNode("svg", {
                                     class: "w-5 h-5",
                                     fill: "none",
@@ -4275,7 +4326,7 @@ return function render(_ctx, _cache) {
                                   onClick: $event => (_ctx.promptSkipMeal(_ctx.todayDateKey, meal)),
                                   "aria-label": _ctx.$t("Pasto saltato"),
                                   class: _normalizeClass(["w-10 h-10 rounded-full flex items-center justify-center transition-all active:scale-90", _ctx.todayMealLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : _ctx.todayMealLogs[meal.id]?.status === 'other' ? 'bg-viola text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'])
-                                }, [...(_cache[416] || (_cache[416] = [
+                                }, [...(_cache[417] || (_cache[417] = [
                                   _createElementVNode("svg", {
                                     class: "w-5 h-5",
                                     fill: "none",
@@ -4415,7 +4466,7 @@ return function render(_ctx, _cache) {
                     (_ctx.todayWorkout.state === 'done')
                       ? (_openBlock(), _createElementBlock("div", _hoisted_204, [
                           _createElementVNode("div", _hoisted_205, [
-                            _cache[417] || (_cache[417] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20 shrink-0" }, [
+                            _cache[418] || (_cache[418] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20 shrink-0" }, [
                               _createElementVNode("svg", {
                                 class: "w-6 h-6",
                                 fill: "none",
@@ -4467,7 +4518,7 @@ return function render(_ctx, _cache) {
                             ? (_openBlock(), _createElementBlock("p", _hoisted_216, [
                                 _createTextVNode(_toDisplayString(_ctx.$t("Prossima volta con")) + " ", 1 /* TEXT */),
                                 _createElementVNode("span", _hoisted_217, _toDisplayString(_ctx.$tv(_ctx.activeSheet.name)), 1 /* TEXT */),
-                                _cache[418] || (_cache[418] = _createTextVNode(": ", -1 /* CACHED */)),
+                                _cache[419] || (_cache[419] = _createTextVNode(": ", -1 /* CACHED */)),
                                 _createElementVNode("span", _hoisted_218, _toDisplayString(_ctx.$tv(_ctx.activeSheetNext.upcoming.name)), 1 /* TEXT */)
                               ]))
                             : _createCommentVNode("v-if", true),
@@ -4488,7 +4539,7 @@ return function render(_ctx, _cache) {
                       : (_ctx.todayWorkout.state === 'planned')
                         ? (_openBlock(), _createElementBlock("div", _hoisted_222, [
                             _createElementVNode("div", _hoisted_223, [
-                              _cache[419] || (_cache[419] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0" }, [
+                              _cache[420] || (_cache[420] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0" }, [
                                 _createElementVNode("svg", {
                                   class: "w-6 h-6",
                                   fill: "none",
@@ -4530,7 +4581,7 @@ return function render(_ctx, _cache) {
                         : (_ctx.activeSheet && _ctx.activeSheetNext.day)
                           ? (_openBlock(), _createElementBlock("div", _hoisted_233, [
                               _createElementVNode("div", _hoisted_234, [
-                                _cache[420] || (_cache[420] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0" }, [
+                                _cache[421] || (_cache[421] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 shrink-0" }, [
                                   _createElementVNode("svg", {
                                     class: "w-6 h-6",
                                     fill: "none",
@@ -4563,7 +4614,7 @@ return function render(_ctx, _cache) {
                                   ])
                                 ]),
                                 _createElementVNode("span", _hoisted_243, [
-                                  _cache[421] || (_cache[421] = _createElementVNode("svg", {
+                                  _cache[422] || (_cache[422] = _createElementVNode("svg", {
                                     class: "w-3.5 h-3.5",
                                     fill: "currentColor",
                                     viewBox: "0 0 24 24"
@@ -4576,7 +4627,7 @@ return function render(_ctx, _cache) {
                             ]))
                           : (_openBlock(), _createElementBlock("div", _hoisted_244, [
                               _createElementVNode("div", _hoisted_245, [
-                                _cache[422] || (_cache[422] = _createElementVNode("div", { class: "w-10 h-10 rounded-2xl bg-salvia/10 border border-salvia/20 flex items-center justify-center text-lg shrink-0" }, "🌿", -1 /* CACHED */)),
+                                _cache[423] || (_cache[423] = _createElementVNode("div", { class: "w-10 h-10 rounded-2xl bg-salvia/10 border border-salvia/20 flex items-center justify-center text-lg shrink-0" }, "🌿", -1 /* CACHED */)),
                                 _createElementVNode("div", _hoisted_246, [
                                   _createElementVNode("h4", _hoisted_247, _toDisplayString(_ctx.$t("Giornata libera")), 1 /* TEXT */),
                                   _createElementVNode("p", _hoisted_248, _toDisplayString(_ctx.$t("Anche il riposo fa parte del percorso.")), 1 /* TEXT */)
@@ -4591,7 +4642,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("b", _hoisted_250, _toDisplayString(_ctx.$tv(_ctx.todaySuggestion.title)), 1 /* TEXT */),
                                   _createTextVNode(" " + _toDisplayString(_ctx.$t("· {0} min", [(_ctx.todaySuggestion.minutes)])), 1 /* TEXT */)
                                 ]),
-                                _cache[423] || (_cache[423] = _createElementVNode("svg", {
+                                _cache[424] || (_cache[424] = _createElementVNode("svg", {
                                   class: "w-4 h-4 text-gray-400 shrink-0",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -4614,7 +4665,7 @@ return function render(_ctx, _cache) {
                         _createElementVNode("button", {
                           onClick: _cache[44] || (_cache[44] = (...args) => (_ctx.dashPrevMonth && _ctx.dashPrevMonth(...args))),
                           class: "p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                        }, [...(_cache[424] || (_cache[424] = [
+                        }, [...(_cache[425] || (_cache[425] = [
                           _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
@@ -4633,7 +4684,7 @@ return function render(_ctx, _cache) {
                         _createElementVNode("button", {
                           onClick: _cache[45] || (_cache[45] = (...args) => (_ctx.dashNextMonth && _ctx.dashNextMonth(...args))),
                           class: "p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                        }, [...(_cache[425] || (_cache[425] = [
+                        }, [...(_cache[426] || (_cache[426] = [
                           _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
@@ -4680,27 +4731,27 @@ return function render(_ctx, _cache) {
                       ]),
                       _createElementVNode("div", _hoisted_261, [
                         _createElementVNode("div", _hoisted_262, [
-                          _cache[426] || (_cache[426] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
+                          _cache[427] || (_cache[427] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_263, _toDisplayString(_ctx.$t("Perfetta")), 1 /* TEXT */)
                         ]),
                         _createElementVNode("div", _hoisted_264, [
-                          _cache[427] || (_cache[427] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-red-500" }, null, -1 /* CACHED */)),
+                          _cache[428] || (_cache[428] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-red-500" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_265, _toDisplayString(_ctx.$t("Sgarro")), 1 /* TEXT */)
                         ]),
                         _createElementVNode("div", _hoisted_266, [
-                          _cache[428] || (_cache[428] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-viola" }, null, -1 /* CACHED */)),
+                          _cache[429] || (_cache[429] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-viola" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_267, _toDisplayString(_ctx.$t("Piccolo sgarro")), 1 /* TEXT */)
                         ]),
                         _createElementVNode("div", _hoisted_268, [
-                          _cache[429] || (_cache[429] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-amber-300" }, null, -1 /* CACHED */)),
+                          _cache[430] || (_cache[430] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-amber-300" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_269, _toDisplayString(_ctx.$t("Poco")), 1 /* TEXT */)
                         ]),
                         _createElementVNode("div", _hoisted_270, [
-                          _cache[430] || (_cache[430] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-sky-500" }, null, -1 /* CACHED */)),
+                          _cache[431] || (_cache[431] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-sky-500" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_271, _toDisplayString(_ctx.$t("Nota")), 1 /* TEXT */)
                         ]),
                         _createElementVNode("div", _hoisted_272, [
-                          _cache[431] || (_cache[431] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full border-2 border-arancione" }, null, -1 /* CACHED */)),
+                          _cache[432] || (_cache[432] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full border-2 border-arancione" }, null, -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_273, _toDisplayString(_ctx.$t("Allenamento")), 1 /* TEXT */)
                         ])
                       ])
@@ -4716,7 +4767,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[46] || (_cache[46] = $event => (_ctx.workoutView = 'list')),
                           class: _normalizeClass(["flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.workoutView === 'list' ? 'bg-arancione text-white shadow-sm' : 'text-gray-500 hover:text-antracite'])
                         }, [
-                          _cache[432] || (_cache[432] = _createElementVNode("svg", {
+                          _cache[433] || (_cache[433] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -4735,7 +4786,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[47] || (_cache[47] = $event => (_ctx.workoutView = 'calendar')),
                           class: _normalizeClass(["flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.workoutView === 'calendar' ? 'bg-arancione text-white shadow-sm' : 'text-gray-500 hover:text-antracite'])
                         }, [
-                          _cache[433] || (_cache[433] = _createElementVNode("svg", {
+                          _cache[434] || (_cache[434] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -4763,7 +4814,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[48] || (_cache[48] = (...args) => (_ctx.startNewSheet && _ctx.startNewSheet(...args))),
                             class: "bg-arancione text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-arancione/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
                           }, [
-                            _cache[434] || (_cache[434] = _createElementVNode("svg", {
+                            _cache[435] || (_cache[435] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -4827,7 +4878,7 @@ return function render(_ctx, _cache) {
                                   stroke: "currentColor",
                                   viewBox: "0 0 24 24",
                                   "stroke-width": "2.5"
-                                }, [...(_cache[435] || (_cache[435] = [
+                                }, [...(_cache[436] || (_cache[436] = [
                                   _createElementVNode("path", {
                                     "stroke-linecap": "round",
                                     "stroke-linejoin": "round",
@@ -4890,15 +4941,15 @@ return function render(_ctx, _cache) {
                                     ]),
                                     _createElementVNode("div", _hoisted_306, [
                                       _createElementVNode("span", _hoisted_307, [
-                                        _cache[436] || (_cache[436] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#20C997]" }, null, -1 /* CACHED */)),
+                                        _cache[437] || (_cache[437] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#20C997]" }, null, -1 /* CACHED */)),
                                         _createTextVNode(_toDisplayString(_ctx.$t("Pronto")), 1 /* TEXT */)
                                       ]),
                                       _createElementVNode("span", _hoisted_308, [
-                                        _cache[437] || (_cache[437] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#F5C042]" }, null, -1 /* CACHED */)),
+                                        _cache[438] || (_cache[438] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#F5C042]" }, null, -1 /* CACHED */)),
                                         _createTextVNode(_toDisplayString(_ctx.$t("In recupero")), 1 /* TEXT */)
                                       ]),
                                       _createElementVNode("span", _hoisted_309, [
-                                        _cache[438] || (_cache[438] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#EF6B5B]" }, null, -1 /* CACHED */)),
+                                        _cache[439] || (_cache[439] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-[#EF6B5B]" }, null, -1 /* CACHED */)),
                                         _createTextVNode(_toDisplayString(_ctx.$t("Stanco")), 1 /* TEXT */)
                                       ])
                                     ]),
@@ -4907,7 +4958,7 @@ return function render(_ctx, _cache) {
                                         onClick: _cache[53] || (_cache[53] = (...args) => (_ctx.startTodaySuggestion && _ctx.startTodaySuggestion(...args))),
                                         class: "flex-1 bg-arancione text-white font-bold py-3 rounded-2xl text-sm shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
                                       }, [
-                                        _cache[439] || (_cache[439] = _createElementVNode("svg", {
+                                        _cache[440] || (_cache[440] = _createElementVNode("svg", {
                                           class: "w-4 h-4",
                                           fill: "currentColor",
                                           viewBox: "0 0 24 24"
@@ -4970,7 +5021,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[56] || (_cache[56] = $event => (_ctx.openGuide(_ctx.userSports.length ? 'sport' : 'muscle'))),
                           class: "w-full text-left bg-antracite rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all"
                         }, [
-                          _cache[440] || (_cache[440] = _createElementVNode("div", { class: "absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none" }, "🏋️", -1 /* CACHED */)),
+                          _cache[441] || (_cache[441] = _createElementVNode("div", { class: "absolute -right-6 -bottom-8 text-[90px] opacity-10 select-none" }, "🏋️", -1 /* CACHED */)),
                           _createElementVNode("div", _hoisted_324, _toDisplayString(_ctx.$t("Non sai cosa fare?")), 1 /* TEXT */),
                           _createElementVNode("div", _hoisted_325, _toDisplayString(_ctx.$t("Allenamenti consigliati")), 1 /* TEXT */),
                           _createElementVNode("p", _hoisted_326, [
@@ -4987,12 +5038,12 @@ return function render(_ctx, _cache) {
                           onClick: _cache[57] || (_cache[57] = (...args) => (_ctx.openWorkoutImport && _ctx.openWorkoutImport(...args))),
                           class: "w-full text-left bg-white rounded-3xl p-4 border border-gray-100 shadow-soft flex items-center gap-3 active:scale-[0.98] transition-all"
                         }, [
-                          _cache[441] || (_cache[441] = _createElementVNode("span", { class: "w-11 h-11 shrink-0 rounded-2xl bg-arancione/10 text-arancione flex items-center justify-center text-xl" }, "📄", -1 /* CACHED */)),
+                          _cache[442] || (_cache[442] = _createElementVNode("span", { class: "w-11 h-11 shrink-0 rounded-2xl bg-arancione/10 text-arancione flex items-center justify-center text-xl" }, "📄", -1 /* CACHED */)),
                           _createElementVNode("span", _hoisted_327, [
                             _createElementVNode("span", _hoisted_328, _toDisplayString(_ctx.$t("Hai già una scheda?")), 1 /* TEXT */),
                             _createElementVNode("span", _hoisted_329, _toDisplayString(_ctx.$t("Importala da PDF, Word o testo, oppure incollala dalle Note.")), 1 /* TEXT */)
                           ]),
-                          _cache[442] || (_cache[442] = _createElementVNode("svg", {
+                          _cache[443] || (_cache[443] = _createElementVNode("svg", {
                             class: "w-4 h-4 text-gray-300 shrink-0",
                             fill: "none",
                             stroke: "currentColor",
@@ -5008,7 +5059,7 @@ return function render(_ctx, _cache) {
                         ]),
                         (_ctx.workoutSheets.length === 0)
                           ? (_openBlock(), _createElementBlock("div", _hoisted_330, [
-                              _cache[444] || (_cache[444] = _createElementVNode("div", { class: "w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20" }, [
+                              _cache[445] || (_cache[445] = _createElementVNode("div", { class: "w-16 h-16 bg-arancione/10 rounded-full flex items-center justify-center text-arancione border border-arancione/20" }, [
                                 _createElementVNode("svg", {
                                   class: "w-8 h-8",
                                   fill: "none",
@@ -5031,7 +5082,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[58] || (_cache[58] = (...args) => (_ctx.startNewSheet && _ctx.startNewSheet(...args))),
                                 class: "w-full bg-arancione text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-arancione/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                               }, [
-                                _cache[443] || (_cache[443] = _createElementVNode("svg", {
+                                _cache[444] || (_cache[444] = _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -5055,7 +5106,7 @@ return function render(_ctx, _cache) {
                                   class: _normalizeClass(["bg-white rounded-3xl p-5 border shadow-soft cursor-pointer hover:border-arancione/50 transition-all flex items-center justify-between gap-3 group", _ctx.isActiveSheet(sheet) ? 'border-arancione ring-2 ring-arancione/15' : 'border-gray-100'])
                                 }, [
                                   _createElementVNode("div", _hoisted_335, [
-                                    _cache[445] || (_cache[445] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 text-arancione border border-arancione/20 flex items-center justify-center flex-shrink-0" }, [
+                                    _cache[446] || (_cache[446] = _createElementVNode("div", { class: "w-12 h-12 rounded-2xl bg-arancione/10 text-arancione border border-arancione/20 flex items-center justify-center flex-shrink-0" }, [
                                       _createElementVNode("svg", {
                                         class: "w-6 h-6",
                                         fill: "none",
@@ -5082,7 +5133,7 @@ return function render(_ctx, _cache) {
                                       _createElementVNode("p", _hoisted_341, _toDisplayString(_ctx.$tv(_ctx.sheetLastSessionDate(sheet) ? 'Ultima sessione: ' + _ctx.formatDate(_ctx.sheetLastSessionDate(sheet)) : 'Mai allenata')), 1 /* TEXT */)
                                     ])
                                   ]),
-                                  _cache[446] || (_cache[446] = _createElementVNode("div", { class: "text-gray-400 group-hover:text-arancione transition-colors flex-shrink-0" }, [
+                                  _cache[447] || (_cache[447] = _createElementVNode("div", { class: "text-gray-400 group-hover:text-arancione transition-colors flex-shrink-0" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
                                       fill: "none",
@@ -5113,7 +5164,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[59] || (_cache[59] = $event => (_ctx.openTrainingForm())),
                             class: "bg-arancione text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-arancione/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
                           }, [
-                            _cache[447] || (_cache[447] = _createElementVNode("svg", {
+                            _cache[448] || (_cache[448] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -5134,7 +5185,7 @@ return function render(_ctx, _cache) {
                             _createElementVNode("button", {
                               onClick: _cache[60] || (_cache[60] = (...args) => (_ctx.trainingPrevMonth && _ctx.trainingPrevMonth(...args))),
                               class: "p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                            }, [...(_cache[448] || (_cache[448] = [
+                            }, [...(_cache[449] || (_cache[449] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -5153,7 +5204,7 @@ return function render(_ctx, _cache) {
                             _createElementVNode("button", {
                               onClick: _cache[61] || (_cache[61] = (...args) => (_ctx.trainingNextMonth && _ctx.trainingNextMonth(...args))),
                               class: "p-1.5 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 transition-colors"
-                            }, [...(_cache[449] || (_cache[449] = [
+                            }, [...(_cache[450] || (_cache[450] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -5204,7 +5255,7 @@ return function render(_ctx, _cache) {
                             }), 128 /* KEYED_FRAGMENT */))
                           ]),
                           _createElementVNode("div", _hoisted_353, [
-                            _cache[450] || (_cache[450] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-arancione" }, null, -1 /* CACHED */)),
+                            _cache[451] || (_cache[451] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-arancione" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_354, _toDisplayString(_ctx.$t("Giorno di allenamento")), 1 /* TEXT */)
                           ])
                         ]),
@@ -5222,14 +5273,14 @@ return function render(_ctx, _cache) {
                                 class: _normalizeClass(["w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 border", session.kind === 'gym' ? 'bg-arancione/10 text-arancione border-arancione/20' : 'bg-sky-500/10 text-sky-600 border-sky-200'])
                               }, [
                                 (session.kind === 'gym')
-                                  ? (_openBlock(), _createElementBlock("svg", _hoisted_358, [...(_cache[451] || (_cache[451] = [
+                                  ? (_openBlock(), _createElementBlock("svg", _hoisted_358, [...(_cache[452] || (_cache[452] = [
                                       _createElementVNode("path", {
                                         "stroke-linecap": "round",
                                         "stroke-linejoin": "round",
                                         d: "M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"
                                       }, null, -1 /* CACHED */)
                                     ]))]))
-                                  : (_openBlock(), _createElementBlock("svg", _hoisted_359, [...(_cache[452] || (_cache[452] = [
+                                  : (_openBlock(), _createElementBlock("svg", _hoisted_359, [...(_cache[453] || (_cache[453] = [
                                       _createElementVNode("path", {
                                         "stroke-linecap": "round",
                                         "stroke-linejoin": "round",
@@ -5262,7 +5313,7 @@ return function render(_ctx, _cache) {
                                 onClick: $event => (_ctx.editTrainingSession(session, session.occurrenceDate)),
                                 class: "p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0",
                                 "aria-label": _ctx.$t("Modifica allenamento")
-                              }, [...(_cache[453] || (_cache[453] = [
+                              }, [...(_cache[454] || (_cache[454] = [
                                 _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
@@ -5281,7 +5332,7 @@ return function render(_ctx, _cache) {
                                 onClick: $event => (_ctx.removeTrainingSession(session)),
                                 class: "p-2 rounded-xl bg-gray-50 border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0",
                                 "aria-label": _ctx.$t("Elimina allenamento")
-                              }, [...(_cache[454] || (_cache[454] = [
+                              }, [...(_cache[455] || (_cache[455] = [
                                 _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
@@ -5307,7 +5358,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             onClick: _cache[62] || (_cache[62] = $event => (_ctx.workoutView = 'list')),
                             class: "p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors"
-                          }, [...(_cache[455] || (_cache[455] = [
+                          }, [...(_cache[456] || (_cache[456] = [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -5359,7 +5410,7 @@ return function render(_ctx, _cache) {
                                     onClick: $event => (_ctx.removeSheetDay(dIdx)),
                                     class: "p-2 text-gray-400 hover:text-red-500 flex-shrink-0",
                                     "aria-label": _ctx.$t("Rimuovi giorno")
-                                  }, [...(_cache[456] || (_cache[456] = [
+                                  }, [...(_cache[457] || (_cache[457] = [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
                                       fill: "none",
@@ -5406,7 +5457,7 @@ return function render(_ctx, _cache) {
                                     onClick: $event => (_ctx.removeExercise(day, eIdx)),
                                     class: "p-1.5 text-gray-400 hover:text-red-500 flex-shrink-0",
                                     "aria-label": _ctx.$t("Rimuovi esercizio")
-                                  }, [...(_cache[457] || (_cache[457] = [
+                                  }, [...(_cache[458] || (_cache[458] = [
                                     _createElementVNode("svg", {
                                       class: "w-4 h-4",
                                       fill: "none",
@@ -5553,7 +5604,7 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (_ctx.addSupersetPair(day, eIdx)),
                                         class: "text-[10px] font-bold text-amber-700 hover:text-amber-800 flex-shrink-0 flex items-center gap-1"
                                       }, [
-                                        _cache[458] || (_cache[458] = _createElementVNode("svg", {
+                                        _cache[459] || (_cache[459] = _createElementVNode("svg", {
                                           class: "w-3.5 h-3.5",
                                           fill: "none",
                                           stroke: "currentColor",
@@ -5575,7 +5626,7 @@ return function render(_ctx, _cache) {
                               onClick: $event => (_ctx.addExercise(day)),
                               class: "w-full py-2.5 border-2 border-dashed border-gray-200 bg-white rounded-xl text-gray-500 font-bold text-xs hover:border-arancione/40 hover:text-arancione transition-colors flex items-center justify-center gap-1.5"
                             }, [
-                              _cache[459] || (_cache[459] = _createElementVNode("svg", {
+                              _cache[460] || (_cache[460] = _createElementVNode("svg", {
                                 class: "w-3.5 h-3.5",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -5601,7 +5652,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[64] || (_cache[64] = (...args) => (_ctx.addSheetDay && _ctx.addSheetDay(...args))),
                           class: "w-full py-3.5 border-2 border-dashed border-arancione/40 bg-arancione/5 rounded-2xl text-arancione font-bold text-xs hover:border-arancione hover:bg-arancione/10 transition-colors flex items-center justify-center gap-2"
                         }, [
-                          _cache[460] || (_cache[460] = _createElementVNode("svg", {
+                          _cache[461] || (_cache[461] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -5621,7 +5672,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[65] || (_cache[65] = (...args) => (_ctx.saveSheet && _ctx.saveSheet(...args))),
                             class: "w-full bg-salvia text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                           }, [
-                            _cache[461] || (_cache[461] = _createElementVNode("svg", {
+                            _cache[462] || (_cache[462] = _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
                               stroke: "currentColor",
@@ -5642,7 +5693,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[66] || (_cache[66] = (...args) => (_ctx.promptDeleteSheet && _ctx.promptDeleteSheet(...args))),
                                 class: "w-full bg-white border border-red-200 text-red-500 font-bold py-3.5 rounded-2xl shadow-sm hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2"
                               }, [
-                                _cache[462] || (_cache[462] = _createElementVNode("svg", {
+                                _cache[463] || (_cache[463] = _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -5669,7 +5720,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[67] || (_cache[67] = $event => (_ctx.workoutView = 'list')),
                               class: "flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors mb-2"
                             }, [
-                              _cache[463] || (_cache[463] = _createElementVNode("svg", {
+                              _cache[464] || (_cache[464] = _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -5692,7 +5743,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[68] || (_cache[68] = $event => (_ctx.shareSheet(_ctx.selectedSheet))),
                               class: "p-2 bg-salvia/10 text-salvia rounded-xl hover:bg-salvia/20 transition-colors shadow-sm",
                               "aria-label": _ctx.$t("Condividi scheda")
-                            }, [...(_cache[464] || (_cache[464] = [
+                            }, [...(_cache[465] || (_cache[465] = [
                               _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
@@ -5711,7 +5762,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[69] || (_cache[69] = $event => (_ctx.editSheet(_ctx.selectedSheet))),
                               class: "p-2 bg-arancione/10 text-arancione rounded-xl hover:bg-arancione/20 transition-colors shadow-sm",
                               "aria-label": _ctx.$t("Modifica scheda")
-                            }, [...(_cache[465] || (_cache[465] = [
+                            }, [...(_cache[466] || (_cache[466] = [
                               _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
@@ -5730,7 +5781,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[70] || (_cache[70] = (...args) => (_ctx.promptDeleteSelectedSheet && _ctx.promptDeleteSelectedSheet(...args))),
                               class: "p-2 bg-white border border-gray-200 text-gray-400 rounded-xl hover:text-red-500 hover:border-red-200 transition-colors shadow-sm",
                               "aria-label": _ctx.$t("Elimina scheda")
-                            }, [...(_cache[466] || (_cache[466] = [
+                            }, [...(_cache[467] || (_cache[467] = [
                               _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
@@ -5791,7 +5842,7 @@ return function render(_ctx, _cache) {
                             _createElementVNode("div", _hoisted_438, _toDisplayString(_ctx.$t("Storico scheda")), 1 /* TEXT */),
                             _createElementVNode("div", _hoisted_439, [
                               _createTextVNode(_toDisplayString(_ctx.$t("Consulta i progressi")) + " ", 1 /* TEXT */),
-                              _cache[467] || (_cache[467] = _createElementVNode("svg", {
+                              _cache[468] || (_cache[468] = _createElementVNode("svg", {
                                 class: "w-3.5 h-3.5",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -5811,7 +5862,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[73] || (_cache[73] = (...args) => (_ctx.openSessionPreview && _ctx.openSessionPreview(...args))),
                           class: "w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-arancione/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                         }, [
-                          _cache[468] || (_cache[468] = _createElementVNode("svg", {
+                          _cache[469] || (_cache[469] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "currentColor",
                             viewBox: "0 0 24 24"
@@ -5895,7 +5946,7 @@ return function render(_ctx, _cache) {
                                         onClick: $event => (_ctx.openExerciseHistory(ex)),
                                         class: "p-1.5 text-gray-400 hover:text-arancione flex-shrink-0",
                                         "aria-label": _ctx.$t("Storico esercizio")
-                                      }, [...(_cache[469] || (_cache[469] = [
+                                      }, [...(_cache[470] || (_cache[470] = [
                                         _createElementVNode("svg", {
                                           class: "w-5 h-5",
                                           fill: "none",
@@ -5918,7 +5969,7 @@ return function render(_ctx, _cache) {
                                           (_ctx.exerciseDeltaValue(ex) !== null && _ctx.exerciseDeltaValue(ex) !== 0)
                                             ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                                                 _createElementVNode("span", _hoisted_462, _toDisplayString(_ctx.$tv(_ctx.formatNumber(_ctx.exerciseStartValue(ex)))), 1 /* TEXT */),
-                                                _cache[470] || (_cache[470] = _createElementVNode("span", { class: "text-[10px] text-gray-400" }, "→", -1 /* CACHED */))
+                                                _cache[471] || (_cache[471] = _createElementVNode("span", { class: "text-[10px] text-gray-400" }, "→", -1 /* CACHED */))
                                               ], 64 /* STABLE_FRAGMENT */))
                                             : _createCommentVNode("v-if", true),
                                           _createElementVNode("span", {
@@ -5966,7 +6017,7 @@ return function render(_ctx, _cache) {
                                                         _createElementVNode("span", _hoisted_468, _toDisplayString(_ctx.$tv(stl.home.n)), 1 /* TEXT */)
                                                       ], 64 /* STABLE_FRAGMENT */))
                                                     : _createCommentVNode("v-if", true),
-                                                  _cache[471] || (_cache[471] = _createTextVNode(". ", -1 /* CACHED */))
+                                                  _cache[472] || (_cache[472] = _createTextVNode(". ", -1 /* CACHED */))
                                                 ]))
                                               : _createCommentVNode("v-if", true)
                                           ], 64 /* STABLE_FRAGMENT */))
@@ -5979,7 +6030,7 @@ return function render(_ctx, _cache) {
                                               onClick: $event => (_ctx.openPyramidLogModal(ex)),
                                               class: "h-9 px-3 rounded-xl bg-amber-500 text-white text-[10px] font-bold shadow-sm flex items-center gap-1 active:scale-95 transition-all"
                                             }, [
-                                              _cache[472] || (_cache[472] = _createElementVNode("svg", {
+                                              _cache[473] || (_cache[473] = _createElementVNode("svg", {
                                                 class: "w-3.5 h-3.5",
                                                 fill: "none",
                                                 stroke: "currentColor",
@@ -6010,7 +6061,7 @@ return function render(_ctx, _cache) {
                                                 class: "w-9 h-9 rounded-full bg-arancione text-white shadow-sm flex items-center justify-center active:scale-90 transition-all",
                                                 "aria-label": _ctx.$t("Conferma e registra nuovo valore"),
                                                 title: _ctx.$t("Conferma e registra")
-                                              }, [...(_cache[473] || (_cache[473] = [
+                                              }, [...(_cache[474] || (_cache[474] = [
                                                 _createElementVNode("svg", {
                                                   class: "w-4 h-4",
                                                   fill: "none",
@@ -6061,7 +6112,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[76] || (_cache[76] = $event => (_ctx.openShareStudio('progress'))),
                             class: "cangiante-btn text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
                           }, [
-                            _cache[474] || (_cache[474] = _createElementVNode("svg", {
+                            _cache[475] || (_cache[475] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -6080,7 +6131,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[77] || (_cache[77] = $event => (_ctx.openMeasurementModal())),
                             class: "bg-salvia text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-1.5"
                           }, [
-                            _cache[475] || (_cache[475] = _createElementVNode("svg", {
+                            _cache[476] || (_cache[476] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -6113,7 +6164,7 @@ return function render(_ctx, _cache) {
                             class: "text-[10px] font-bold text-salvia flex items-center gap-0.5 flex-shrink-0 pt-0.5"
                           }, [
                             _createTextVNode(_toDisplayString(_ctx.$t("Galleria")) + " ", 1 /* TEXT */),
-                            _cache[476] || (_cache[476] = _createElementVNode("svg", {
+                            _cache[477] || (_cache[477] = _createElementVNode("svg", {
                               class: "w-3.5 h-3.5",
                               fill: "none",
                               stroke: "currentColor",
@@ -6158,7 +6209,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[79] || (_cache[79] = (...args) => (_ctx.triggerPhotoInput && _ctx.triggerPhotoInput(...args))),
                         class: "bg-salvia text-white font-bold text-xs py-3 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
                       }, [
-                        _cache[477] || (_cache[477] = _createElementVNode("svg", {
+                        _cache[478] || (_cache[478] = _createElementVNode("svg", {
                           class: "w-4 h-4",
                           fill: "none",
                           stroke: "currentColor",
@@ -6184,7 +6235,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[80] || (_cache[80] = (...args) => (_ctx.openQuickCompare && _ctx.openQuickCompare(...args))),
                             class: "cangiante-btn text-white font-bold text-xs py-3 rounded-xl shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5"
                           }, [
-                            _cache[478] || (_cache[478] = _createElementVNode("svg", {
+                            _cache[479] || (_cache[479] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -6204,7 +6255,7 @@ return function render(_ctx, _cache) {
                   ]),
                   (_ctx.measurements.length === 0 && _ctx.workoutGroups.length === 0 && _ctx.trainingTimeSummary.total === 0)
                     ? (_openBlock(), _createElementBlock("div", _hoisted_491, [
-                        _cache[480] || (_cache[480] = _createElementVNode("div", { class: "w-16 h-16 rounded-full bg-salvia/10 border border-salvia/20 flex items-center justify-center text-salvia" }, [
+                        _cache[481] || (_cache[481] = _createElementVNode("div", { class: "w-16 h-16 rounded-full bg-salvia/10 border border-salvia/20 flex items-center justify-center text-salvia" }, [
                           _createElementVNode("svg", {
                             class: "w-8 h-8",
                             fill: "none",
@@ -6227,7 +6278,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[81] || (_cache[81] = $event => (_ctx.openMeasurementModal())),
                           class: "w-full bg-salvia text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                         }, [
-                          _cache[479] || (_cache[479] = _createElementVNode("svg", {
+                          _cache[480] || (_cache[480] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
                             stroke: "currentColor",
@@ -6269,7 +6320,7 @@ return function render(_ctx, _cache) {
                                     : _createCommentVNode("v-if", true),
                                   _createElementVNode("span", _hoisted_500, [
                                     _createTextVNode(_toDisplayString(_ctx.$t("Storico")) + " ", 1 /* TEXT */),
-                                    _cache[481] || (_cache[481] = _createElementVNode("svg", {
+                                    _cache[482] || (_cache[482] = _createElementVNode("svg", {
                                       class: "w-3.5 h-3.5",
                                       fill: "none",
                                       stroke: "currentColor",
@@ -6287,7 +6338,7 @@ return function render(_ctx, _cache) {
                               ]),
                               _createElementVNode("div", _hoisted_501, [
                                 (_openBlock(), _createElementBlock("svg", _hoisted_502, [
-                                  _cache[482] || (_cache[482] = _createStaticVNode("<line x1=\"0\" y1=\"30\" x2=\"300\" y2=\"30\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><line x1=\"0\" y1=\"75\" x2=\"300\" y2=\"75\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><line x1=\"0\" y1=\"120\" x2=\"300\" y2=\"120\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><defs><linearGradient id=\"lightAreaGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0%\" stop-color=\"#10B981\" stop-opacity=\"0.3\"></stop><stop offset=\"100%\" stop-color=\"#10B981\" stop-opacity=\"0\"></stop></linearGradient></defs>", 4)),
+                                  _cache[483] || (_cache[483] = _createStaticVNode("<line x1=\"0\" y1=\"30\" x2=\"300\" y2=\"30\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><line x1=\"0\" y1=\"75\" x2=\"300\" y2=\"75\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><line x1=\"0\" y1=\"120\" x2=\"300\" y2=\"120\" class=\"chart-grid\" stroke=\"#E5E7EB\" stroke-dasharray=\"3,3\"></line><defs><linearGradient id=\"lightAreaGrad\" x1=\"0\" y1=\"0\" x2=\"0\" y2=\"1\"><stop offset=\"0%\" stop-color=\"#10B981\" stop-opacity=\"0.3\"></stop><stop offset=\"100%\" stop-color=\"#10B981\" stop-opacity=\"0\"></stop></linearGradient></defs>", 4)),
                                   _createElementVNode("polygon", {
                                     points: _ctx.weightChart.area,
                                     fill: "url(#lightAreaGrad)"
@@ -6346,7 +6397,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[83] || (_cache[83] = (...args) => (_ctx.openProfileCompletion && _ctx.openProfileCompletion(...args))),
                                 class: "w-full text-left bg-viola/10 border border-viola/20 rounded-2xl p-3.5 flex items-center gap-3 active:scale-[0.99] transition-transform"
                               }, [
-                                _cache[483] || (_cache[483] = _createElementVNode("span", { class: "text-xl" }, "🧬", -1 /* CACHED */)),
+                                _cache[484] || (_cache[484] = _createElementVNode("span", { class: "text-xl" }, "🧬", -1 /* CACHED */)),
                                 _createElementVNode("span", _hoisted_513, [
                                   _createTextVNode(_toDisplayString(_ctx.$t("Aggiungi")) + " ", 1 /* TEXT */),
                                   _createElementVNode("b", null, _toDisplayString(_ctx.$tv(_ctx.bodyStats.missing.filter(x => x !== 'peso').join(', ') || 'una pesata')), 1 /* TEXT */),
@@ -6395,7 +6446,7 @@ return function render(_ctx, _cache) {
                                         (Math.abs(_ctx.bodyStats.plan.balance) < 100)
                                           ? (_openBlock(), _createElementBlock("span", _hoisted_535, _toDisplayString(_ctx.$t("· in linea col fabbisogno")), 1 /* TEXT */))
                                           : (_openBlock(), _createElementBlock("span", _hoisted_536, [
-                                              _cache[484] || (_cache[484] = _createTextVNode(" · ", -1 /* CACHED */)),
+                                              _cache[485] || (_cache[485] = _createTextVNode(" · ", -1 /* CACHED */)),
                                               _createElementVNode("b", {
                                                 class: _normalizeClass(_ctx.bodyStats.plan.balance < 0 ? 'text-sky-600' : 'text-arancione')
                                               }, _toDisplayString(_ctx.$t("{0}{1} kcal", [(_ctx.bodyStats.plan.balance > 0 ? '+' : ''), (_ctx.bodyStats.plan.balance)])), 3 /* TEXT, CLASS */),
@@ -6510,7 +6561,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("div", {
                                     class: _normalizeClass(["text-[11px] font-bold", _ctx.bodyStats.bmi.color])
                                   }, _toDisplayString(_ctx.$tv(_ctx.bodyStats.bmi.label)), 3 /* TEXT, CLASS */),
-                                  _cache[485] || (_cache[485] = _createStaticVNode("<div class=\"relative mt-2 h-1.5 rounded-full overflow-hidden flex\"><div class=\"h-full bg-sky-400\" style=\"width:17.5%;\"></div><div class=\"h-full bg-salvia\" style=\"width:32.5%;\"></div><div class=\"h-full bg-arancione\" style=\"width:25%;\"></div><div class=\"h-full bg-red-500\" style=\"width:25%;\"></div></div>", 1)),
+                                  _cache[486] || (_cache[486] = _createStaticVNode("<div class=\"relative mt-2 h-1.5 rounded-full overflow-hidden flex\"><div class=\"h-full bg-sky-400\" style=\"width:17.5%;\"></div><div class=\"h-full bg-salvia\" style=\"width:32.5%;\"></div><div class=\"h-full bg-arancione\" style=\"width:25%;\"></div><div class=\"h-full bg-red-500\" style=\"width:25%;\"></div></div>", 1)),
                                   _createElementVNode("div", _hoisted_569, [
                                     _createElementVNode("div", {
                                       class: "absolute -top-0.5 w-1.5 h-2.5 rounded-full bg-antracite ring-2 ring-white",
@@ -6532,7 +6583,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("div", _hoisted_571, _toDisplayString(_ctx.$t("Massa grassa")), 1 /* TEXT */),
                                   _createElementVNode("div", _hoisted_572, [
                                     _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatNumber(Math.round(_ctx.bodyStats.bodyFat.value * 10) / 10))), 1 /* TEXT */),
-                                    _cache[486] || (_cache[486] = _createElementVNode("span", { class: "text-sm font-bold text-gray-400" }, "%", -1 /* CACHED */))
+                                    _cache[487] || (_cache[487] = _createElementVNode("span", { class: "text-sm font-bold text-gray-400" }, "%", -1 /* CACHED */))
                                   ]),
                                   _createElementVNode("div", {
                                     class: _normalizeClass(["text-[11px] font-bold", _ctx.bodyStats.bodyFat.color])
@@ -6590,7 +6641,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("div", _hoisted_582, _toDisplayString(_ctx.$t("💧 Acqua")), 1 /* TEXT */),
                                   _createElementVNode("div", _hoisted_583, [
                                     _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatNumber(_ctx.bodyStats.water))) + " ", 1 /* TEXT */),
-                                    _cache[487] || (_cache[487] = _createElementVNode("span", { class: "text-sm font-bold text-gray-400" }, "L", -1 /* CACHED */))
+                                    _cache[488] || (_cache[488] = _createElementVNode("span", { class: "text-sm font-bold text-gray-400" }, "L", -1 /* CACHED */))
                                   ]),
                                   _createElementVNode("div", _hoisted_584, _toDisplayString(_ctx.$t("al giorno")), 1 /* TEXT */),
                                   (_ctx.bodyInfoOpen === 'water')
@@ -6608,7 +6659,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("div", _hoisted_586, _toDisplayString(_ctx.$t("🥩 Proteine")), 1 /* TEXT */),
                                   _createElementVNode("div", _hoisted_587, [
                                     _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.bodyStats.protein.min)) + "–" + _toDisplayString(_ctx.$tv(_ctx.bodyStats.protein.max)) + " ", 1 /* TEXT */),
-                                    _cache[488] || (_cache[488] = _createElementVNode("span", { class: "text-xs font-bold text-gray-400" }, "g", -1 /* CACHED */))
+                                    _cache[489] || (_cache[489] = _createElementVNode("span", { class: "text-xs font-bold text-gray-400" }, "g", -1 /* CACHED */))
                                   ]),
                                   _createElementVNode("div", _hoisted_588, _toDisplayString(_ctx.$t("al giorno")), 1 /* TEXT */),
                                   (_ctx.bodyInfoOpen === 'protein')
@@ -6648,7 +6699,7 @@ return function render(_ctx, _cache) {
                                   _createElementVNode("div", _hoisted_604, [
                                     _createElementVNode("div", _hoisted_605, [
                                       _createElementVNode("span", _hoisted_606, _toDisplayString(_ctx.$t("{0} cm", [(_ctx.formatNumber(row.initial))])), 1 /* TEXT */),
-                                      _cache[489] || (_cache[489] = _createElementVNode("svg", {
+                                      _cache[490] || (_cache[490] = _createElementVNode("svg", {
                                         class: "w-3 h-3 text-gray-300",
                                         fill: "none",
                                         stroke: "currentColor",
@@ -6677,7 +6728,7 @@ return function render(_ctx, _cache) {
                                         ], 2 /* CLASS */))
                                       : (_openBlock(), _createElementBlock("div", _hoisted_608, _toDisplayString(_ctx.$t("Prima misurazione")), 1 /* TEXT */))
                                   ]),
-                                  _cache[490] || (_cache[490] = _createElementVNode("svg", {
+                                  _cache[491] || (_cache[491] = _createElementVNode("svg", {
                                     class: "w-4 h-4 text-gray-300 flex-shrink-0",
                                     fill: "none",
                                     stroke: "currentColor",
@@ -6704,7 +6755,7 @@ return function render(_ctx, _cache) {
                           ]),
                           (_ctx.trainingTimeSummary.total > 0)
                             ? (_openBlock(), _createElementBlock("div", _hoisted_613, [
-                                _cache[491] || (_cache[491] = _createElementVNode("div", { class: "absolute -top-10 -right-10 w-40 h-40 bg-arancione/25 rounded-full blur-3xl pointer-events-none" }, null, -1 /* CACHED */)),
+                                _cache[492] || (_cache[492] = _createElementVNode("div", { class: "absolute -top-10 -right-10 w-40 h-40 bg-arancione/25 rounded-full blur-3xl pointer-events-none" }, null, -1 /* CACHED */)),
                                 _createElementVNode("div", _hoisted_614, [
                                   _createElementVNode("div", null, [
                                     _createElementVNode("div", _hoisted_615, _toDisplayString(_ctx.$t("⏱️ Ore di allenamento")), 1 /* TEXT */),
@@ -6771,7 +6822,7 @@ return function render(_ctx, _cache) {
                                 ]),
                                 _createElementVNode("span", _hoisted_636, [
                                   _createTextVNode(_toDisplayString(_ctx.$t("da {0} kg", [(_ctx.formatNumber(group.firstLoad))])) + " ", 1 /* TEXT */),
-                                  _cache[492] || (_cache[492] = _createElementVNode("svg", {
+                                  _cache[493] || (_cache[493] = _createElementVNode("svg", {
                                     class: "w-3.5 h-3.5 text-arancione",
                                     fill: "none",
                                     stroke: "currentColor",
@@ -6808,7 +6859,7 @@ return function render(_ctx, _cache) {
                         class: "w-full rounded-3xl p-5 shadow-lg text-left relative overflow-hidden active:scale-[0.98] transition-transform",
                         style: {"background":"linear-gradient(135deg, #7A4DF1, #EC4899 60%, #F5A623)"}
                       }, [
-                        _cache[493] || (_cache[493] = _createElementVNode("div", { class: "absolute -right-3 -bottom-6 text-[90px] opacity-25 select-none" }, "🎁", -1 /* CACHED */)),
+                        _cache[494] || (_cache[494] = _createElementVNode("div", { class: "absolute -right-3 -bottom-6 text-[90px] opacity-25 select-none" }, "🎁", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_642, _toDisplayString(_ctx.$t("Stile wrapped")), 1 /* TEXT */),
                         _createElementVNode("div", _hoisted_643, _toDisplayString(_ctx.$t("Il tuo {0} su STILL", [(_ctx.wrappedSeason.year)])), 1 /* TEXT */),
                         _createElementVNode("p", _hoisted_644, _toDisplayString(_ctx.$t("Pizze bruciate, salti da canguro, che atleta sei. Guardalo e condividilo nelle storie.")), 1 /* TEXT */)
@@ -6816,7 +6867,7 @@ return function render(_ctx, _cache) {
                     : _createCommentVNode("v-if", true),
                   _createElementVNode("div", _hoisted_645, [
                     _createElementVNode("div", _hoisted_646, [
-                      _cache[494] || (_cache[494] = _createElementVNode("div", { class: "absolute -top-10 -left-10 w-40 h-40 bg-viola/30 rounded-full blur-3xl pointer-events-none" }, null, -1 /* CACHED */)),
+                      _cache[495] || (_cache[495] = _createElementVNode("div", { class: "absolute -top-10 -left-10 w-40 h-40 bg-viola/30 rounded-full blur-3xl pointer-events-none" }, null, -1 /* CACHED */)),
                       _createElementVNode("div", _hoisted_647, [
                         _createElementVNode("div", _hoisted_648, [
                           _createElementVNode("span", _hoisted_649, _toDisplayString(_ctx.$t("LIVELLO")), 1 /* TEXT */),
@@ -6911,7 +6962,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[93] || (_cache[93] = $event => {_ctx.nutritionView = 'list'; _ctx.exportMode = false}),
                           class: _normalizeClass(["flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.nutritionView === 'list' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'])
                         }, [
-                          _cache[495] || (_cache[495] = _createElementVNode("svg", {
+                          _cache[496] || (_cache[496] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -6930,7 +6981,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[94] || (_cache[94] = $event => (_ctx.openDiary())),
                           class: _normalizeClass(["flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.nutritionView === 'diary' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'])
                         }, [
-                          _cache[496] || (_cache[496] = _createElementVNode("svg", {
+                          _cache[497] || (_cache[497] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -6949,7 +7000,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[95] || (_cache[95] = $event => (_ctx.nutritionView = 'calendar')),
                           class: _normalizeClass(["flex-1 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.nutritionView === 'calendar' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500 hover:text-antracite'])
                         }, [
-                          _cache[497] || (_cache[497] = _createElementVNode("svg", {
+                          _cache[498] || (_cache[498] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -6978,7 +7029,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[96] || (_cache[96] = $event => (_ctx.diaryShift(-1))),
                               class: "w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex items-center justify-center",
                               "aria-label": _ctx.$t("Giorno prima")
-                            }, [...(_cache[498] || (_cache[498] = [
+                            }, [...(_cache[499] || (_cache[499] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -6999,7 +7050,7 @@ return function render(_ctx, _cache) {
                               disabled: _ctx.diaryDate >= _ctx.todayDateKey,
                               class: "w-8 h-8 rounded-lg text-gray-500 hover:bg-gray-100 flex items-center justify-center disabled:opacity-30",
                               "aria-label": _ctx.$t("Giorno dopo")
-                            }, [...(_cache[499] || (_cache[499] = [
+                            }, [...(_cache[500] || (_cache[500] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -7290,7 +7341,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[104] || (_cache[104] = (...args) => (_ctx.startNewPlan && _ctx.startNewPlan(...args))),
                                 class: "bg-salvia text-white font-bold text-xs px-3.5 py-2.5 rounded-xl shadow-md hover:bg-salvia/90 transition-all active:scale-95 flex items-center gap-1.5 flex-shrink-0"
                               }, [
-                                _cache[500] || (_cache[500] = _createElementVNode("svg", {
+                                _cache[501] || (_cache[501] = _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -7311,14 +7362,14 @@ return function render(_ctx, _cache) {
                           onClick: _cache[105] || (_cache[105] = $event => (_ctx.openEatGuide())),
                           class: "w-full text-left bg-salvia rounded-3xl p-5 shadow-lg relative overflow-hidden active:scale-[0.98] transition-all"
                         }, [
-                          _cache[501] || (_cache[501] = _createElementVNode("div", { class: "absolute -right-4 -bottom-8 text-[90px] opacity-20 select-none" }, "🥗", -1 /* CACHED */)),
+                          _cache[502] || (_cache[502] = _createElementVNode("div", { class: "absolute -right-4 -bottom-8 text-[90px] opacity-20 select-none" }, "🥗", -1 /* CACHED */)),
                           _createElementVNode("div", _hoisted_752, _toDisplayString(_ctx.$t("Vuoi mangiare meglio?")), 1 /* TEXT */),
                           _createElementVNode("div", _hoisted_753, _toDisplayString(_ctx.$t("Consigli e giornate tipo")), 1 /* TEXT */),
                           _createElementVNode("p", _hoisted_754, _toDisplayString(_ctx.$t("Abitudini semplici e menù di esempio da provare per una settimana. Un aiuto per iniziare, poi il nutrizionista.")), 1 /* TEXT */)
                         ]),
                         (_ctx.plans.length === 0)
                           ? (_openBlock(), _createElementBlock("div", _hoisted_755, [
-                              _cache[503] || (_cache[503] = _createElementVNode("div", { class: "w-16 h-16 bg-salvia/10 rounded-full flex items-center justify-center text-salvia border border-salvia/20" }, [
+                              _cache[504] || (_cache[504] = _createElementVNode("div", { class: "w-16 h-16 bg-salvia/10 rounded-full flex items-center justify-center text-salvia border border-salvia/20" }, [
                                 _createElementVNode("svg", {
                                   class: "w-8 h-8",
                                   fill: "none",
@@ -7341,7 +7392,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[106] || (_cache[106] = (...args) => (_ctx.startNewPlan && _ctx.startNewPlan(...args))),
                                 class: "w-full bg-salvia text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                               }, [
-                                _cache[502] || (_cache[502] = _createElementVNode("svg", {
+                                _cache[503] || (_cache[503] = _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -7378,7 +7429,7 @@ return function render(_ctx, _cache) {
                                       _createElementVNode("p", _hoisted_764, _toDisplayString(_ctx.$t("Dal {0} al {1}", [(_ctx.formatDate(plan.startDate)), (_ctx.formatDate(plan.endDate))])), 1 /* TEXT */)
                                     ])
                                   ]),
-                                  _cache[504] || (_cache[504] = _createElementVNode("div", { class: "text-gray-400 group-hover:text-salvia transition-colors" }, [
+                                  _cache[505] || (_cache[505] = _createElementVNode("div", { class: "text-gray-400 group-hover:text-salvia transition-colors" }, [
                                     _createElementVNode("svg", {
                                       class: "w-5 h-5",
                                       fill: "none",
@@ -7404,7 +7455,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             onClick: _cache[107] || (_cache[107] = $event => (_ctx.nutritionView = 'list')),
                             class: "p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-viola hover:border-viola/30 transition-colors"
-                          }, [...(_cache[505] || (_cache[505] = [
+                          }, [...(_cache[506] || (_cache[506] = [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -7426,7 +7477,7 @@ return function render(_ctx, _cache) {
                         ]),
                         _createElementVNode("div", _hoisted_769, [
                           _createElementVNode("div", _hoisted_770, [
-                            _cache[506] || (_cache[506] = _createElementVNode("div", { class: "w-11 h-11 shrink-0 rounded-2xl bg-viola/10 flex items-center justify-center text-xl" }, "📄", -1 /* CACHED */)),
+                            _cache[507] || (_cache[507] = _createElementVNode("div", { class: "w-11 h-11 shrink-0 rounded-2xl bg-viola/10 flex items-center justify-center text-xl" }, "📄", -1 /* CACHED */)),
                             _createElementVNode("div", _hoisted_771, [
                               _createElementVNode("div", _hoisted_772, _toDisplayString(_ctx.$t("Hai la dieta in PDF o Word?")), 1 /* TEXT */),
                               _createElementVNode("div", _hoisted_773, _toDisplayString(_ctx.$t("La leggo io e compilo il menù: tu controlli e salvi.")), 1 /* TEXT */)
@@ -7443,7 +7494,7 @@ return function render(_ctx, _cache) {
                               onChange: _cache[108] || (_cache[108] = (...args) => (_ctx.importPlanPdf && _ctx.importPlanPdf(...args)))
                             }, null, 40 /* PROPS, NEED_HYDRATION */, _hoisted_774),
                             (_ctx.pdfImport.busy)
-                              ? (_openBlock(), _createElementBlock("svg", _hoisted_775, [...(_cache[507] || (_cache[507] = [
+                              ? (_openBlock(), _createElementBlock("svg", _hoisted_775, [...(_cache[508] || (_cache[508] = [
                                   _createElementVNode("circle", {
                                     cx: "12",
                                     cy: "12",
@@ -7461,9 +7512,9 @@ return function render(_ctx, _cache) {
                             : _createCommentVNode("v-if", true)
                         ]),
                         _createElementVNode("div", _hoisted_777, [
-                          _cache[508] || (_cache[508] = _createElementVNode("div", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */)),
+                          _cache[509] || (_cache[509] = _createElementVNode("div", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */)),
                           _createTextVNode(_toDisplayString(_ctx.$t("oppure a mano")), 1 /* TEXT */),
-                          _cache[509] || (_cache[509] = _createElementVNode("div", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */))
+                          _cache[510] || (_cache[510] = _createElementVNode("div", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */))
                         ]),
                         _createElementVNode("div", _hoisted_778, [
                           _createElementVNode("div", null, [
@@ -7516,7 +7567,7 @@ return function render(_ctx, _cache) {
                             class: "w-full bg-viola text-white font-bold py-4 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                           }, [
                             _createTextVNode(_toDisplayString(_ctx.$t("Avanti")) + " ", 1 /* TEXT */),
-                            _cache[510] || (_cache[510] = _createElementVNode("svg", {
+                            _cache[511] || (_cache[511] = _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
                               stroke: "currentColor",
@@ -7536,7 +7587,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[114] || (_cache[114] = (...args) => (_ctx.promptDeletePlan && _ctx.promptDeletePlan(...args))),
                                 class: "w-full bg-white border border-red-200 text-red-500 font-bold py-3.5 rounded-2xl shadow-sm hover:bg-red-50 transition-all active:scale-95 flex items-center justify-center gap-2"
                               }, [
-                                _cache[511] || (_cache[511] = _createElementVNode("svg", {
+                                _cache[512] || (_cache[512] = _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -7562,7 +7613,7 @@ return function render(_ctx, _cache) {
                             _createElementVNode("button", {
                               onClick: _cache[115] || (_cache[115] = $event => (_ctx.nutritionView = 'create')),
                               class: "p-2.5 bg-white border border-gray-100 shadow-sm rounded-xl text-gray-400 hover:text-viola hover:border-viola/30 transition-colors"
-                            }, [...(_cache[512] || (_cache[512] = [
+                            }, [...(_cache[513] || (_cache[513] = [
                               _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
@@ -7614,7 +7665,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[117] || (_cache[117] = (...args) => (_ctx.addWeekToBuilder && _ctx.addWeekToBuilder(...args))),
                             class: "px-3 py-2 rounded-xl text-xs font-bold bg-viola/10 text-viola whitespace-nowrap hover:bg-viola/20 transition-colors flex items-center gap-1"
                           }, [
-                            _cache[513] || (_cache[513] = _createElementVNode("svg", {
+                            _cache[514] || (_cache[514] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -7649,7 +7700,7 @@ return function render(_ctx, _cache) {
                             ? (_openBlock(), _createElementBlock("div", _hoisted_806, [
                                 _createElementVNode("p", _hoisted_807, [
                                   _createTextVNode(_toDisplayString(_ctx.$t("Nessun pasto inserito.")), 1 /* TEXT */),
-                                  _cache[514] || (_cache[514] = _createElementVNode("br", null, null, -1 /* CACHED */)),
+                                  _cache[515] || (_cache[515] = _createElementVNode("br", null, null, -1 /* CACHED */)),
                                   _createTextVNode(_toDisplayString(_ctx.$t("Inizia ad aggiungere i pasti per questa giornata.")), 1 /* TEXT */)
                                 ])
                               ]))
@@ -7662,7 +7713,7 @@ return function render(_ctx, _cache) {
                               _createElementVNode("button", {
                                 onClick: $event => (_ctx.removeMealFromBuilder(mIdx)),
                                 class: "absolute top-4 right-4 text-red-400 hover:text-red-500"
-                              }, [...(_cache[515] || (_cache[515] = [
+                              }, [...(_cache[516] || (_cache[516] = [
                                 _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
@@ -7716,7 +7767,7 @@ return function render(_ctx, _cache) {
                                           (_ctx.builderMealEstimate(meal).found < _ctx.builderMealEstimate(meal).total)
                                             ? (_openBlock(), _createElementBlock("span", _hoisted_816, " (" + _toDisplayString(_ctx.$tv(_ctx.builderMealEstimate(meal).total - _ctx.builderMealEstimate(meal).found)) + " " + _toDisplayString(_ctx.$tv(_ctx.builderMealEstimate(meal).total - _ctx.builderMealEstimate(meal).found === 1 ? 'alimento non riconosciuto' : 'alimenti non riconosciuti')) + ")", 1 /* TEXT */))
                                             : _createCommentVNode("v-if", true),
-                                          _cache[516] || (_cache[516] = _createTextVNode(".", -1 /* CACHED */))
+                                          _cache[517] || (_cache[517] = _createTextVNode(".", -1 /* CACHED */))
                                         ], 64 /* STABLE_FRAGMENT */))
                                       : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                                           _createTextVNode(_toDisplayString(_ctx.$t("Scrivi gli alimenti con la quantità (es. \"80g pasta\", \"2 uova\") e le calorie si calcolano da sole.")), 1 /* TEXT */)
@@ -7749,7 +7800,7 @@ return function render(_ctx, _cache) {
                                           key: 1,
                                           onClick: $event => (_ctx.removeSlotFromMeal(meal, iIdx)),
                                           class: "p-2 text-gray-400 hover:text-red-400"
-                                        }, [...(_cache[517] || (_cache[517] = [
+                                        }, [...(_cache[518] || (_cache[518] = [
                                           _createElementVNode("svg", {
                                             class: "w-4 h-4",
                                             fill: "none",
@@ -7772,7 +7823,7 @@ return function render(_ctx, _cache) {
                                 onClick: $event => (_ctx.addSlotToMeal(meal)),
                                 class: "text-[10px] font-bold text-viola uppercase tracking-widest flex items-center gap-1 hover:opacity-80"
                               }, [
-                                _cache[518] || (_cache[518] = _createElementVNode("svg", {
+                                _cache[519] || (_cache[519] = _createElementVNode("svg", {
                                   class: "w-3 h-3",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -7793,7 +7844,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[118] || (_cache[118] = (...args) => (_ctx.addMealToBuilder && _ctx.addMealToBuilder(...args))),
                             class: "w-full py-3.5 border-2 border-dashed border-gray-200 bg-gray-50 rounded-2xl text-gray-500 font-bold text-xs hover:border-viola/40 hover:text-viola hover:bg-viola/5 transition-colors flex items-center justify-center gap-2"
                           }, [
-                            _cache[519] || (_cache[519] = _createElementVNode("svg", {
+                            _cache[520] || (_cache[520] = _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
                               stroke: "currentColor",
@@ -7813,7 +7864,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[119] || (_cache[119] = (...args) => (_ctx.finalizeNewPlan && _ctx.finalizeNewPlan(...args))),
                           class: _normalizeClass([_ctx.isPlanBuilderComplete ? 'bg-salvia text-white shadow-lg hover:bg-salvia/90' : 'bg-transparent text-salvia border-2 border-salvia hover:bg-salvia/5', "w-full font-bold py-4 rounded-2xl transition-all active:scale-95 flex items-center justify-center gap-2 mt-6"])
                         }, [
-                          _cache[520] || (_cache[520] = _createElementVNode("svg", {
+                          _cache[521] || (_cache[521] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
                             stroke: "currentColor",
@@ -7838,7 +7889,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[120] || (_cache[120] = $event => (_ctx.nutritionView = 'list')),
                               class: "flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors mb-2"
                             }, [
-                              _cache[521] || (_cache[521] = _createElementVNode("svg", {
+                              _cache[522] || (_cache[522] = _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -7859,7 +7910,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             onClick: _cache[121] || (_cache[121] = $event => (_ctx.nutritionView = 'calendar')),
                             class: "p-2 bg-salvia/10 text-salvia rounded-xl hover:bg-salvia/20 transition-colors shadow-sm"
-                          }, [...(_cache[522] || (_cache[522] = [
+                          }, [...(_cache[523] || (_cache[523] = [
                             _createElementVNode("svg", {
                               class: "w-6 h-6",
                               fill: "none",
@@ -7887,7 +7938,7 @@ return function render(_ctx, _cache) {
                         (_ctx.noteForToday)
                           ? (_openBlock(), _createElementBlock("div", _hoisted_828, [
                               _createElementVNode("div", _hoisted_829, [
-                                _cache[523] || (_cache[523] = _createElementVNode("div", { class: "w-10 h-10 rounded-full bg-sky-500/20 flex items-center justify-center text-xl flex-shrink-0" }, "📝", -1 /* CACHED */)),
+                                _cache[524] || (_cache[524] = _createElementVNode("div", { class: "w-10 h-10 rounded-full bg-sky-500/20 flex items-center justify-center text-xl flex-shrink-0" }, "📝", -1 /* CACHED */)),
                                 _createElementVNode("div", _hoisted_830, [
                                   _createElementVNode("h4", _hoisted_831, _toDisplayString(_ctx.$t("La tua nota di oggi")), 1 /* TEXT */),
                                   _createElementVNode("p", _hoisted_832, _toDisplayString(_ctx.$tv(_ctx.noteForToday)), 1 /* TEXT */)
@@ -7913,7 +7964,7 @@ return function render(_ctx, _cache) {
                                     _createElementVNode("div", _hoisted_839, _toDisplayString(_ctx.$tv(mc.icon)) + " " + _toDisplayString(_ctx.$tv(_ctx.$tv(mc.label))), 1 /* TEXT */),
                                     _createElementVNode("div", _hoisted_840, [
                                       _createTextVNode("≈ " + _toDisplayString(_ctx.$tv(_ctx.formatNumber(mc.grams))) + " ", 1 /* TEXT */),
-                                      _cache[524] || (_cache[524] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
+                                      _cache[525] || (_cache[525] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
                                     ]),
                                     _createElementVNode("div", _hoisted_841, [
                                       _createElementVNode("div", {
@@ -7932,7 +7983,7 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("b", {
                                   class: _normalizeClass(_ctx.selectedPlanDayProtein >= _ctx.bodyStats.protein.min ? 'text-salvia' : 'text-arancione')
                                 }, "≈ " + _toDisplayString(_ctx.$tv(_ctx.selectedPlanDayProtein)) + " g", 3 /* TEXT, CLASS */),
-                                _cache[525] || (_cache[525] = _createTextVNode(". ", -1 /* CACHED */))
+                                _cache[526] || (_cache[526] = _createTextVNode(". ", -1 /* CACHED */))
                               ]))
                             : (!_ctx.selectedPlanDaySummary)
                               ? (_openBlock(), _createElementBlock("p", _hoisted_844, _toDisplayString(_ctx.$t("Scrivi gli alimenti con le quantità (es. 80g pasta) per vedere proteine, carboidrati e grassi.")), 1 /* TEXT */))
@@ -7965,7 +8016,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[122] || (_cache[122] = $event => (_ctx.editPlan(_ctx.selectedPlan))),
                             class: "w-full bg-white border-2 border-viola text-viola font-bold py-3.5 rounded-2xl shadow-sm hover:bg-viola/5 transition-all active:scale-95 flex justify-center items-center gap-2"
                           }, [
-                            _cache[526] || (_cache[526] = _createElementVNode("svg", {
+                            _cache[527] || (_cache[527] = _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
                               stroke: "currentColor",
@@ -8003,7 +8054,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[125] || (_cache[125] = $event => {_ctx.nutritionView = 'detail'; _ctx.exportMode = false}),
                                 class: "flex items-center gap-1 text-xs font-bold text-gray-400 hover:text-antracite transition-colors"
                               }, [
-                                _cache[527] || (_cache[527] = _createElementVNode("svg", {
+                                _cache[528] || (_cache[528] = _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -8035,7 +8086,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             onClick: _cache[127] || (_cache[127] = (...args) => (_ctx.prevMonth && _ctx.prevMonth(...args))),
                             class: "p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-400 hover:text-salvia transition-colors"
-                          }, [...(_cache[528] || (_cache[528] = [
+                          }, [...(_cache[529] || (_cache[529] = [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -8054,7 +8105,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("button", {
                             onClick: _cache[128] || (_cache[128] = (...args) => (_ctx.nextMonth && _ctx.nextMonth(...args))),
                             class: "p-2 bg-white rounded-full shadow-sm hover:bg-gray-50 text-gray-400 hover:text-salvia transition-colors"
-                          }, [...(_cache[529] || (_cache[529] = [
+                          }, [...(_cache[530] || (_cache[530] = [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -8107,27 +8158,27 @@ return function render(_ctx, _cache) {
                         ]),
                         _createElementVNode("div", _hoisted_867, [
                           _createElementVNode("div", _hoisted_868, [
-                            _cache[530] || (_cache[530] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
+                            _cache[531] || (_cache[531] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-salvia" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_869, _toDisplayString(_ctx.$t("Perfetta")), 1 /* TEXT */)
                           ]),
                           _createElementVNode("div", _hoisted_870, [
-                            _cache[531] || (_cache[531] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-red-500" }, null, -1 /* CACHED */)),
+                            _cache[532] || (_cache[532] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-red-500" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_871, _toDisplayString(_ctx.$t("Sgarro")), 1 /* TEXT */)
                           ]),
                           _createElementVNode("div", _hoisted_872, [
-                            _cache[532] || (_cache[532] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-viola" }, null, -1 /* CACHED */)),
+                            _cache[533] || (_cache[533] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-viola" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_873, _toDisplayString(_ctx.$t("Piccolo sgarro")), 1 /* TEXT */)
                           ]),
                           _createElementVNode("div", _hoisted_874, [
-                            _cache[533] || (_cache[533] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-amber-300" }, null, -1 /* CACHED */)),
+                            _cache[534] || (_cache[534] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full bg-amber-300" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_875, _toDisplayString(_ctx.$t("Poco")), 1 /* TEXT */)
                           ]),
                           _createElementVNode("div", _hoisted_876, [
-                            _cache[534] || (_cache[534] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-sky-500" }, null, -1 /* CACHED */)),
+                            _cache[535] || (_cache[535] = _createElementVNode("span", { class: "w-1.5 h-1.5 rounded-full bg-sky-500" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_877, _toDisplayString(_ctx.$t("Nota")), 1 /* TEXT */)
                           ]),
                           _createElementVNode("div", _hoisted_878, [
-                            _cache[535] || (_cache[535] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full border-2 border-arancione" }, null, -1 /* CACHED */)),
+                            _cache[536] || (_cache[536] = _createElementVNode("span", { class: "w-2.5 h-2.5 rounded-full border-2 border-arancione" }, null, -1 /* CACHED */)),
                             _createElementVNode("span", _hoisted_879, _toDisplayString(_ctx.$t("Allenamento")), 1 /* TEXT */)
                           ])
                         ])
@@ -8140,7 +8191,7 @@ return function render(_ctx, _cache) {
                           disabled: _ctx.exportSelectedDates.length === 0,
                           class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                         }, [
-                          _cache[536] || (_cache[536] = _createElementVNode("svg", {
+                          _cache[537] || (_cache[537] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
                             stroke: "currentColor",
@@ -8197,7 +8248,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[133] || (_cache[133] = (...args) => (_ctx.closeBackupModal && _ctx.closeBackupModal(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[537] || (_cache[537] = [
+                    }, [...(_cache[538] || (_cache[538] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -8383,7 +8434,7 @@ return function render(_ctx, _cache) {
                           _createElementVNode("div", _hoisted_940, _toDisplayString(_ctx.$t("App sul telefono")), 1 /* TEXT */),
                           _createElementVNode("div", _hoisted_941, [
                             _createElementVNode("div", _hoisted_942, [
-                              _cache[538] || (_cache[538] = _createElementVNode("img", {
+                              _cache[539] || (_cache[539] = _createElementVNode("img", {
                                 src: "assets/icon-192.png",
                                 alt: "",
                                 class: "w-9 h-9 rounded-lg shrink-0"
@@ -8561,7 +8612,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[151] || (_cache[151] = (...args) => (_ctx.exportBackup && _ctx.exportBackup(...args))),
                         class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                       }, [
-                        _cache[539] || (_cache[539] = _createElementVNode("svg", {
+                        _cache[540] || (_cache[540] = _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
                           stroke: "currentColor",
@@ -8580,7 +8631,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[152] || (_cache[152] = (...args) => (_ctx.triggerImportBackup && _ctx.triggerImportBackup(...args))),
                         class: "w-full bg-gray-100 text-antracite font-bold py-3.5 rounded-2xl hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2"
                       }, [
-                        _cache[540] || (_cache[540] = _createElementVNode("svg", {
+                        _cache[541] || (_cache[541] = _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
                           stroke: "currentColor",
@@ -8601,7 +8652,7 @@ return function render(_ctx, _cache) {
                               onClick: _cache[153] || (_cache[153] = (...args) => (_ctx.exportPhotos && _ctx.exportPhotos(...args))),
                               class: "w-full bg-gray-100 text-antracite font-bold py-3.5 rounded-2xl hover:bg-gray-200 transition-all active:scale-95 flex items-center justify-center gap-2"
                             }, [
-                              _cache[541] || (_cache[541] = _createElementVNode("svg", {
+                              _cache[542] || (_cache[542] = _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -8636,7 +8687,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[155] || (_cache[155] = (...args) => (_ctx.sendFeedback && _ctx.sendFeedback(...args))),
                         class: "w-full bg-viola/10 text-viola font-bold py-3.5 rounded-2xl hover:bg-viola/15 transition-all active:scale-95 flex items-center justify-center gap-2"
                       }, [
-                        _cache[542] || (_cache[542] = _createElementVNode("svg", {
+                        _cache[543] || (_cache[543] = _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
                           stroke: "currentColor",
@@ -8678,7 +8729,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[157] || (_cache[157] = (...args) => (_ctx.closeCommentModal && _ctx.closeCommentModal(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite"
-                    }, [...(_cache[543] || (_cache[543] = [
+                    }, [...(_cache[544] || (_cache[544] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -8765,7 +8816,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[160] || (_cache[160] = (...args) => (_ctx.closeDayMenu && _ctx.closeDayMenu(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[544] || (_cache[544] = [
+                    }, [...(_cache[545] || (_cache[545] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -8825,7 +8876,7 @@ return function render(_ctx, _cache) {
                       : _createCommentVNode("v-if", true),
                     (_ctx.dayMenuNote)
                       ? (_openBlock(), _createElementBlock("div", _hoisted_1035, [
-                          _cache[545] || (_cache[545] = _createElementVNode("div", { class: "w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sm flex-shrink-0" }, "📝", -1 /* CACHED */)),
+                          _cache[546] || (_cache[546] = _createElementVNode("div", { class: "w-7 h-7 rounded-full bg-sky-500/20 flex items-center justify-center text-sm flex-shrink-0" }, "📝", -1 /* CACHED */)),
                           _createElementVNode("div", _hoisted_1036, [
                             _createElementVNode("div", _hoisted_1037, _toDisplayString(_ctx.$t("Nota del giorno")), 1 /* TEXT */),
                             _createElementVNode("p", _hoisted_1038, _toDisplayString(_ctx.$tv(_ctx.dayMenuNote)), 1 /* TEXT */)
@@ -8899,7 +8950,7 @@ return function render(_ctx, _cache) {
                             "aria-label": _ctx.$t("Pasto eseguito"),
                             disabled: _ctx.isFutureDateKey(_ctx.dayMenuModal.dateKey),
                             class: _normalizeClass(["w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100", _ctx.dayMenuLogs[meal.id]?.status === 'done' ? 'bg-salvia text-white shadow-sm' : 'bg-salvia/10 text-salvia/60 hover:bg-salvia/20 hover:text-salvia'])
-                          }, [...(_cache[546] || (_cache[546] = [
+                          }, [...(_cache[547] || (_cache[547] = [
                             _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
@@ -8919,7 +8970,7 @@ return function render(_ctx, _cache) {
                             "aria-label": _ctx.$t("Pasto saltato"),
                             disabled: _ctx.isFutureDateKey(_ctx.dayMenuModal.dateKey),
                             class: _normalizeClass(["w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 disabled:opacity-40 disabled:cursor-not-allowed disabled:active:scale-100", _ctx.dayMenuLogs[meal.id]?.status === 'skipped' ? 'bg-red-500 text-white shadow-sm' : _ctx.dayMenuLogs[meal.id]?.status === 'other' ? 'bg-viola text-white shadow-sm' : 'bg-red-50 text-red-300 hover:bg-red-100 hover:text-red-400'])
-                          }, [...(_cache[547] || (_cache[547] = [
+                          }, [...(_cache[548] || (_cache[548] = [
                             _createElementVNode("svg", {
                               class: "w-4 h-4",
                               fill: "none",
@@ -8962,7 +9013,7 @@ return function render(_ctx, _cache) {
                             onClick: _cache[164] || (_cache[164] = $event => (_ctx.mealCommentModal.mode = 'choose')),
                             class: "w-10 h-10 rounded-xl bg-gray-100 text-gray-500 flex items-center justify-center flex-shrink-0",
                             "aria-label": _ctx.$t("Indietro")
-                          }, [...(_cache[548] || (_cache[548] = [
+                          }, [...(_cache[549] || (_cache[549] = [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
                               fill: "none",
@@ -8990,7 +9041,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[165] || (_cache[165] = $event => (_ctx.mealCommentModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[549] || (_cache[549] = [
+                    }, [...(_cache[550] || (_cache[550] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -9012,7 +9063,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[166] || (_cache[166] = $event => (_ctx.mealCommentModal.mode = 'other')),
                           class: "w-full rounded-2xl p-4 bg-viola/5 border border-viola/20 flex items-center gap-3 text-left active:scale-[0.98] transition-all"
                         }, [
-                          _cache[550] || (_cache[550] = _createElementVNode("span", { class: "w-11 h-11 rounded-2xl bg-viola/10 flex items-center justify-center text-xl shrink-0" }, "🍕", -1 /* CACHED */)),
+                          _cache[551] || (_cache[551] = _createElementVNode("span", { class: "w-11 h-11 rounded-2xl bg-viola/10 flex items-center justify-center text-xl shrink-0" }, "🍕", -1 /* CACHED */)),
                           _createElementVNode("span", null, [
                             _createElementVNode("span", _hoisted_1069, _toDisplayString(_ctx.$t("Ho mangiato altro")), 1 /* TEXT */),
                             _createElementVNode("span", _hoisted_1070, _toDisplayString(_ctx.$t("Scrivi cosa: se rientra nelle calorie del pasto non è uno sgarro.")), 1 /* TEXT */)
@@ -9022,7 +9073,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[167] || (_cache[167] = $event => (_ctx.mealCommentModal.mode = 'skipped')),
                           class: "w-full rounded-2xl p-4 bg-red-50 border border-red-100 flex items-center gap-3 text-left active:scale-[0.98] transition-all"
                         }, [
-                          _cache[551] || (_cache[551] = _createElementVNode("span", { class: "w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center text-xl shrink-0" }, "🚫", -1 /* CACHED */)),
+                          _cache[552] || (_cache[552] = _createElementVNode("span", { class: "w-11 h-11 rounded-2xl bg-red-100 flex items-center justify-center text-xl shrink-0" }, "🚫", -1 /* CACHED */)),
                           _createElementVNode("span", null, [
                             _createElementVNode("span", _hoisted_1071, _toDisplayString(_ctx.$t("Non l'ho mangiato")), 1 /* TEXT */),
                             _createElementVNode("span", _hoisted_1072, _toDisplayString(_ctx.$t("Pasto saltato: conta come uno sgarro dal piano.")), 1 /* TEXT */)
@@ -9127,7 +9178,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[175] || (_cache[175] = $event => (_ctx.diaryEditor.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[552] || (_cache[552] = [
+                    }, [...(_cache[553] || (_cache[553] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -9284,7 +9335,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[182] || (_cache[182] = (...args) => (_ctx.closeMealInfo && _ctx.closeMealInfo(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[553] || (_cache[553] = [
+                    }, [...(_cache[554] || (_cache[554] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -9320,7 +9371,7 @@ return function render(_ctx, _cache) {
                             _createElementVNode("div", _hoisted_1131, _toDisplayString(_ctx.$tv(mc.icon)) + " " + _toDisplayString(_ctx.$tv(_ctx.$tv(mc.label))), 1 /* TEXT */),
                             _createElementVNode("div", _hoisted_1132, [
                               _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatNumber(mc.grams))) + " ", 1 /* TEXT */),
-                              _cache[554] || (_cache[554] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
+                              _cache[555] || (_cache[555] = _createElementVNode("span", { class: "text-[10px] font-bold text-gray-400" }, "g", -1 /* CACHED */))
                             ]),
                             _createElementVNode("div", _hoisted_1133, [
                               _createElementVNode("div", {
@@ -9404,7 +9455,7 @@ return function render(_ctx, _cache) {
           (_ctx.trophyModal.isOpen && !_ctx.trophyModalItems.length && _ctx.trophyModal.levelUp)
             ? (_openBlock(), _createElementBlock("div", _hoisted_1155, [
                 _createElementVNode("div", _hoisted_1156, [
-                  _cache[555] || (_cache[555] = _createElementVNode("div", { class: "absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none bg-viola/40" }, null, -1 /* CACHED */)),
+                  _cache[556] || (_cache[556] = _createElementVNode("div", { class: "absolute -top-16 left-1/2 -translate-x-1/2 w-64 h-64 rounded-full blur-3xl pointer-events-none bg-viola/40" }, null, -1 /* CACHED */)),
                   _createElementVNode("div", _hoisted_1157, _toDisplayString(_ctx.$t("Nuovo livello")), 1 /* TEXT */),
                   _createElementVNode("div", _hoisted_1158, [
                     _createElementVNode("span", _hoisted_1159, _toDisplayString(_ctx.$t("LIVELLO")), 1 /* TEXT */),
@@ -9483,7 +9534,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[190] || (_cache[190] = (...args) => (_ctx.closeTrophyDetail && _ctx.closeTrophyDetail(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[556] || (_cache[556] = [
+                    }, [...(_cache[557] || (_cache[557] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -9552,7 +9603,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[192] || (_cache[192] = $event => (_ctx.pastChecksModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[557] || (_cache[557] = [
+                    }, [...(_cache[558] || (_cache[558] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -9616,13 +9667,13 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1203, [
                   _createElementVNode("div", _hoisted_1204, [
                     _createElementVNode("div", _hoisted_1205, [
-                      _cache[558] || (_cache[558] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-xl border border-viola/20" }, "🛒", -1 /* CACHED */)),
+                      _cache[559] || (_cache[559] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-viola/10 flex items-center justify-center text-xl border border-viola/20" }, "🛒", -1 /* CACHED */)),
                       _createElementVNode("h3", _hoisted_1206, _toDisplayString(_ctx.$t("Checklist Spesa")), 1 /* TEXT */)
                     ]),
                     _createElementVNode("button", {
                       onClick: _cache[196] || (_cache[196] = $event => (_ctx.groceryModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite"
-                    }, [...(_cache[559] || (_cache[559] = [
+                    }, [...(_cache[560] || (_cache[560] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -9665,7 +9716,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[197] || (_cache[197] = (...args) => (_ctx.shareGroceryReady && _ctx.shareGroceryReady(...args))),
                           class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                         }, [
-                          _cache[560] || (_cache[560] = _createElementVNode("svg", {
+                          _cache[561] || (_cache[561] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
                             stroke: "currentColor",
@@ -9685,7 +9736,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[198] || (_cache[198] = (...args) => (_ctx.sharePendingGrocery && _ctx.sharePendingGrocery(...args))),
                           class: "w-full bg-viola text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-viola/90 transition-all active:scale-95 flex items-center justify-center gap-2"
                         }, [
-                          _cache[561] || (_cache[561] = _createElementVNode("svg", {
+                          _cache[562] || (_cache[562] = _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
                             stroke: "currentColor",
@@ -9719,7 +9770,7 @@ return function render(_ctx, _cache) {
                     onClick: _cache[200] || (_cache[200] = (...args) => (_ctx.closeGallery && _ctx.closeGallery(...args))),
                     class: "p-1 -ml-1 text-gray-500 hover:text-antracite",
                     "aria-label": _ctx.$t("Chiudi")
-                  }, [...(_cache[562] || (_cache[562] = [
+                  }, [...(_cache[563] || (_cache[563] = [
                     _createElementVNode("svg", {
                       class: "w-6 h-6",
                       fill: "none",
@@ -9773,7 +9824,7 @@ return function render(_ctx, _cache) {
                   : _createCommentVNode("v-if", true),
                 _createElementVNode("div", _hoisted_1220, [
                   (!_ctx.photosReady)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_1221, [...(_cache[563] || (_cache[563] = [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1221, [...(_cache[564] || (_cache[564] = [
                         _createElementVNode("div", { class: "w-7 h-7 border-4 border-salvia border-t-transparent rounded-full animate-spin" }, null, -1 /* CACHED */)
                       ]))]))
                     : (!_ctx.galleryPhotos.length)
@@ -9834,7 +9885,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[205] || (_cache[205] = (...args) => (_ctx.triggerPhotoInput && _ctx.triggerPhotoInput(...args))),
                         class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
                       }, [
-                        _cache[564] || (_cache[564] = _createElementVNode("svg", {
+                        _cache[565] || (_cache[565] = _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
                           stroke: "currentColor",
@@ -9862,7 +9913,7 @@ return function render(_ctx, _cache) {
                       disabled: _ctx.photoAdd.busy,
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[565] || (_cache[565] = [
+                    }, [...(_cache[566] || (_cache[566] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -9991,7 +10042,7 @@ return function render(_ctx, _cache) {
                     onClick: _cache[213] || (_cache[213] = (...args) => (_ctx.closePhotoViewer && _ctx.closePhotoViewer(...args))),
                     class: "p-2 -ml-2",
                     "aria-label": _ctx.$t("Chiudi")
-                  }, [...(_cache[566] || (_cache[566] = [
+                  }, [...(_cache[567] || (_cache[567] = [
                     _createElementVNode("svg", {
                       class: "w-6 h-6",
                       fill: "none",
@@ -10021,7 +10072,7 @@ return function render(_ctx, _cache) {
                     onClick: _cache[214] || (_cache[214] = $event => (_ctx.deletePhoto(_ctx.viewerPhoto))),
                     class: "p-2 -mr-2 text-white/70 hover:text-red-400",
                     "aria-label": _ctx.$t("Elimina")
-                  }, [...(_cache[567] || (_cache[567] = [
+                  }, [...(_cache[568] || (_cache[568] = [
                     _createElementVNode("svg", {
                       class: "w-5 h-5",
                       fill: "none",
@@ -10049,7 +10100,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[215] || (_cache[215] = $event => (_ctx.stepPhoto(-1))),
                         class: "absolute left-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center",
                         "aria-label": _ctx.$t("Più recente")
-                      }, [...(_cache[568] || (_cache[568] = [
+                      }, [...(_cache[569] || (_cache[569] = [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -10071,7 +10122,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[216] || (_cache[216] = $event => (_ctx.stepPhoto(1))),
                         class: "absolute right-2 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-black/40 text-white flex items-center justify-center",
                         "aria-label": _ctx.$t("Più vecchia")
-                      }, [...(_cache[569] || (_cache[569] = [
+                      }, [...(_cache[570] || (_cache[570] = [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -10142,7 +10193,7 @@ return function render(_ctx, _cache) {
                     onClick: _cache[222] || (_cache[222] = (...args) => (_ctx.closeCompare && _ctx.closeCompare(...args))),
                     class: "p-2 -ml-2",
                     "aria-label": _ctx.$t("Chiudi")
-                  }, [...(_cache[570] || (_cache[570] = [
+                  }, [...(_cache[571] || (_cache[571] = [
                     _createElementVNode("svg", {
                       class: "w-6 h-6",
                       fill: "none",
@@ -10205,7 +10256,7 @@ return function render(_ctx, _cache) {
                         _createElementVNode("div", {
                           class: "absolute top-0 bottom-0 w-0.5 bg-white shadow-[0_0_8px_rgba(0,0,0,0.6)] pointer-events-none",
                           style: _normalizeStyle({ left: _ctx.photoCompare.split + '%' })
-                        }, [...(_cache[571] || (_cache[571] = [
+                        }, [...(_cache[572] || (_cache[572] = [
                           _createElementVNode("div", { class: "absolute top-1/2 -translate-y-1/2 -translate-x-1/2 left-1/2 w-9 h-9 rounded-full bg-white text-antracite flex items-center justify-center shadow-lg" }, [
                             _createElementVNode("svg", {
                               class: "w-5 h-5",
@@ -10261,7 +10312,7 @@ return function render(_ctx, _cache) {
                     disabled: _ctx.photoCompare.busy,
                     class: "py-3 rounded-xl text-sm font-bold text-white cangiante-btn active:scale-95 transition-all disabled:opacity-60 flex items-center justify-center gap-1.5"
                   }, [
-                    _cache[572] || (_cache[572] = _createElementVNode("svg", {
+                    _cache[573] || (_cache[573] = _createElementVNode("svg", {
                       class: "w-4 h-4",
                       fill: "none",
                       stroke: "currentColor",
@@ -10296,7 +10347,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[229] || (_cache[229] = $event => (_ctx.homeSwap.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[573] || (_cache[573] = [
+                    }, [...(_cache[574] || (_cache[574] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -10337,7 +10388,7 @@ return function render(_ctx, _cache) {
                     disabled: !_ctx.homeDayPlan.count,
                     class: "w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
                   }, [
-                    _cache[574] || (_cache[574] = _createElementVNode("svg", {
+                    _cache[575] || (_cache[575] = _createElementVNode("svg", {
                       class: "w-5 h-5",
                       fill: "currentColor",
                       viewBox: "0 0 24 24"
@@ -10354,7 +10405,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1310, [
                   _createElementVNode("div", _hoisted_1311, [
                     _createElementVNode("div", _hoisted_1312, [
-                      _cache[575] || (_cache[575] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20" }, [
+                      _cache[576] || (_cache[576] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-salvia/10 flex items-center justify-center text-salvia border border-salvia/20" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -10377,7 +10428,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[232] || (_cache[232] = $event => (_ctx.measurementModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite"
-                    }, [...(_cache[576] || (_cache[576] = [
+                    }, [...(_cache[577] || (_cache[577] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -10492,7 +10543,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[240] || (_cache[240] = (...args) => (_ctx.saveMeasurement && _ctx.saveMeasurement(...args))),
                       class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 active:scale-95 transition-all flex items-center justify-center gap-2"
                     }, [
-                      _cache[577] || (_cache[577] = _createElementVNode("svg", {
+                      _cache[578] || (_cache[578] = _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
                         stroke: "currentColor",
@@ -10513,7 +10564,7 @@ return function render(_ctx, _cache) {
                           onClick: _cache[241] || (_cache[241] = (...args) => (_ctx.promptDeleteEditingMeasurement && _ctx.promptDeleteEditingMeasurement(...args))),
                           class: "w-full bg-white border border-red-200 text-red-500 font-bold py-3 rounded-2xl hover:bg-red-50 active:scale-95 transition-all flex items-center justify-center gap-2"
                         }, [
-                          _cache[578] || (_cache[578] = _createElementVNode("svg", {
+                          _cache[579] || (_cache[579] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -10547,7 +10598,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[242] || (_cache[242] = (...args) => (_ctx.closeHistory && _ctx.closeHistory(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite"
-                    }, [...(_cache[579] || (_cache[579] = [
+                    }, [...(_cache[580] || (_cache[580] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -10591,7 +10642,7 @@ return function render(_ctx, _cache) {
                                 onClick: _withModifiers($event => (_ctx.editMeasurement(row.entry)), ["stop"]),
                                 class: "p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-viola hover:border-viola/30 transition-colors",
                                 "aria-label": _ctx.$t("Modifica misurazione")
-                              }, [...(_cache[580] || (_cache[580] = [
+                              }, [...(_cache[581] || (_cache[581] = [
                                 _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
@@ -10610,7 +10661,7 @@ return function render(_ctx, _cache) {
                                 onClick: _withModifiers($event => (_ctx.confirmDeleteMeasurement(row.entry)), ["stop"]),
                                 class: "p-2 rounded-xl bg-white border border-gray-200 text-gray-500 hover:text-red-500 hover:border-red-200 transition-colors",
                                 "aria-label": _ctx.$t("Elimina misurazione")
-                              }, [...(_cache[581] || (_cache[581] = [
+                              }, [...(_cache[582] || (_cache[582] = [
                                 _createElementVNode("svg", {
                                   class: "w-4 h-4",
                                   fill: "none",
@@ -10634,7 +10685,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[243] || (_cache[243] = $event => {_ctx.closeHistory(); _ctx.openMeasurementModal()}),
                       class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-lg hover:bg-salvia/90 active:scale-95 transition-all flex items-center justify-center gap-2"
                     }, [
-                      _cache[582] || (_cache[582] = _createElementVNode("svg", {
+                      _cache[583] || (_cache[583] = _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
                         stroke: "currentColor",
@@ -10658,7 +10709,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1349, [
                   _createElementVNode("div", _hoisted_1350, [
                     _createElementVNode("div", _hoisted_1351, [
-                      _cache[583] || (_cache[583] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
+                      _cache[584] || (_cache[584] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -10681,7 +10732,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[244] || (_cache[244] = $event => (_ctx.exerciseHistoryModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[584] || (_cache[584] = [
+                    }, [...(_cache[585] || (_cache[585] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -10948,7 +10999,7 @@ return function render(_ctx, _cache) {
                               onClick: $event => (_ctx.deleteWorkoutLog(log)),
                               class: "p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0",
                               "aria-label": _ctx.$t("Elimina registrazione")
-                            }, [...(_cache[585] || (_cache[585] = [
+                            }, [...(_cache[586] || (_cache[586] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -10980,7 +11031,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1418, [
                   _createElementVNode("div", _hoisted_1419, [
                     _createElementVNode("div", _hoisted_1420, [
-                      _cache[586] || (_cache[586] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
+                      _cache[587] || (_cache[587] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -11003,7 +11054,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[249] || (_cache[249] = $event => (_ctx.sheetHistoryModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[587] || (_cache[587] = [
+                    }, [...(_cache[588] || (_cache[588] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -11037,11 +11088,11 @@ return function render(_ctx, _cache) {
                                 _createElementVNode("div", _hoisted_1432, _toDisplayString(_ctx.$tv(session.weekday)), 1 /* TEXT */),
                                 _createElementVNode("div", _hoisted_1433, [
                                   _createElementVNode("span", null, _toDisplayString(_ctx.$tv(session.logs.length)) + " " + _toDisplayString(_ctx.$tv(session.logs.length === 1 ? 'esercizio' : 'esercizi')), 1 /* TEXT */),
-                                  _cache[589] || (_cache[589] = _createElementVNode("span", { class: "w-1 h-1 rounded-full bg-gray-300" }, null, -1 /* CACHED */)),
+                                  _cache[590] || (_cache[590] = _createElementVNode("span", { class: "w-1 h-1 rounded-full bg-gray-300" }, null, -1 /* CACHED */)),
                                   _createElementVNode("span", null, _toDisplayString(_ctx.$t("{0} forza", [(session.strengthCount)])), 1 /* TEXT */),
                                   (session.cardioCount)
                                     ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                        _cache[588] || (_cache[588] = _createElementVNode("span", { class: "w-1 h-1 rounded-full bg-gray-300" }, null, -1 /* CACHED */)),
+                                        _cache[589] || (_cache[589] = _createElementVNode("span", { class: "w-1 h-1 rounded-full bg-gray-300" }, null, -1 /* CACHED */)),
                                         _createElementVNode("span", null, _toDisplayString(_ctx.$t("{0} cardio", [(session.cardioCount)])), 1 /* TEXT */)
                                       ], 64 /* STABLE_FRAGMENT */))
                                     : _createCommentVNode("v-if", true)
@@ -11057,7 +11108,7 @@ return function render(_ctx, _cache) {
                                 }, [
                                   _createElementVNode("div", _hoisted_1436, [
                                     _createElementVNode("span", _hoisted_1437, _toDisplayString(_ctx.$tv(dayGroup.name)), 1 /* TEXT */),
-                                    _cache[590] || (_cache[590] = _createElementVNode("span", { class: "h-px flex-1 bg-gray-100" }, null, -1 /* CACHED */))
+                                    _cache[591] || (_cache[591] = _createElementVNode("span", { class: "h-px flex-1 bg-gray-100" }, null, -1 /* CACHED */))
                                   ]),
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(dayGroup.logs, (log) => {
                                     return (_openBlock(), _createElementBlock("div", {
@@ -11068,7 +11119,7 @@ return function render(_ctx, _cache) {
                                         class: _normalizeClass(["w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 border", log.isCardio ? 'bg-sky-500/10 text-sky-600 border-sky-200' : (log.isPyramid ? 'bg-amber-100 text-amber-600 border-amber-200' : 'bg-arancione/10 text-arancione border-arancione/20')])
                                       }, [
                                         (log.isCardio)
-                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_1438, [...(_cache[591] || (_cache[591] = [
+                                          ? (_openBlock(), _createElementBlock("svg", _hoisted_1438, [...(_cache[592] || (_cache[592] = [
                                               _createElementVNode("path", {
                                                 "stroke-linecap": "round",
                                                 "stroke-linejoin": "round",
@@ -11076,14 +11127,14 @@ return function render(_ctx, _cache) {
                                               }, null, -1 /* CACHED */)
                                             ]))]))
                                           : (log.isPyramid)
-                                            ? (_openBlock(), _createElementBlock("svg", _hoisted_1439, [...(_cache[592] || (_cache[592] = [
+                                            ? (_openBlock(), _createElementBlock("svg", _hoisted_1439, [...(_cache[593] || (_cache[593] = [
                                                 _createElementVNode("path", {
                                                   "stroke-linecap": "round",
                                                   "stroke-linejoin": "round",
                                                   d: "M12 4l8 16H4L12 4zM12 12h.01"
                                                 }, null, -1 /* CACHED */)
                                               ]))]))
-                                            : (_openBlock(), _createElementBlock("svg", _hoisted_1440, [...(_cache[593] || (_cache[593] = [
+                                            : (_openBlock(), _createElementBlock("svg", _hoisted_1440, [...(_cache[594] || (_cache[594] = [
                                                 _createElementVNode("path", {
                                                   "stroke-linecap": "round",
                                                   "stroke-linejoin": "round",
@@ -11122,7 +11173,7 @@ return function render(_ctx, _cache) {
                                           (log.displayDelta !== null && log.displayDelta !== 0)
                                             ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                                                 _createElementVNode("span", _hoisted_1447, _toDisplayString(_ctx.$tv(_ctx.formatNumber(log.displayStart))), 1 /* TEXT */),
-                                                _cache[594] || (_cache[594] = _createElementVNode("span", { class: "text-gray-300" }, "→", -1 /* CACHED */)),
+                                                _cache[595] || (_cache[595] = _createElementVNode("span", { class: "text-gray-300" }, "→", -1 /* CACHED */)),
                                                 _createElementVNode("span", {
                                                   class: _normalizeClass(log.displayDelta > 0 ? 'text-salvia' : 'text-red-500')
                                                 }, _toDisplayString(_ctx.$tv(log.displayDelta > 0 ? '+' : '')) + _toDisplayString(_ctx.$tv(_ctx.formatNumber(log.displayDelta))), 3 /* TEXT, CLASS */)
@@ -11152,7 +11203,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1451, [
                   _createElementVNode("div", _hoisted_1452, [
                     _createElementVNode("div", _hoisted_1453, [
-                      _cache[595] || (_cache[595] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
+                      _cache[596] || (_cache[596] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "currentColor",
@@ -11169,7 +11220,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[251] || (_cache[251] = (...args) => (_ctx.closeSessionPreview && _ctx.closeSessionPreview(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[596] || (_cache[596] = [
+                    }, [...(_cache[597] || (_cache[597] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -11267,7 +11318,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[253] || (_cache[253] = (...args) => (_ctx.startGuidedWorkout && _ctx.startGuidedWorkout(...args))),
                         class: "flex-[2] bg-arancione text-white font-bold py-3 rounded-xl hover:bg-arancione/90 active:scale-95 transition-all flex items-center justify-center gap-1.5"
                       }, [
-                        _cache[597] || (_cache[597] = _createElementVNode("svg", {
+                        _cache[598] || (_cache[598] = _createElementVNode("svg", {
                           class: "w-4 h-4",
                           fill: "currentColor",
                           viewBox: "0 0 24 24"
@@ -11284,8 +11335,8 @@ return function render(_ctx, _cache) {
           (_ctx.shareStudio.isOpen)
             ? (_openBlock(), _createElementBlock("div", _hoisted_1478, [
                 _createElementVNode("div", _hoisted_1479, [
-                  _cache[606] || (_cache[606] = _createElementVNode("div", { class: "absolute -top-24 -left-20 w-72 h-72 bg-salvia/15 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
-                  _cache[607] || (_cache[607] = _createElementVNode("div", { class: "absolute -bottom-24 -right-20 w-72 h-72 bg-viola/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
+                  _cache[607] || (_cache[607] = _createElementVNode("div", { class: "absolute -top-24 -left-20 w-72 h-72 bg-salvia/15 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
+                  _cache[608] || (_cache[608] = _createElementVNode("div", { class: "absolute -bottom-24 -right-20 w-72 h-72 bg-viola/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
                   _createElementVNode("div", _hoisted_1480, [
                     _createElementVNode("div", null, [
                       _createElementVNode("p", _hoisted_1481, _toDisplayString(_ctx.$tv(_ctx.shareStudio.kind === 'recap' && _ctx.shareStudio.recapType === 'year' ? 'Il tuo anno' : _ctx.shareStudio.kind === 'recap' && _ctx.shareStudio.recapType === 'week' ? 'La tua settimana' : (({ workout: 'Allenamento', quote: 'Frase del giorno', recap: 'Il tuo mese', achievement: 'Traguardo', muscles: 'Muscoli della settimana' })[_ctx.shareStudio.kind] || 'Progressi'))), 1 /* TEXT */),
@@ -11296,7 +11347,7 @@ return function render(_ctx, _cache) {
                       disabled: _ctx.shareStudio.recording,
                       class: "p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors disabled:opacity-30",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[598] || (_cache[598] = [
+                    }, [...(_cache[599] || (_cache[599] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -11320,13 +11371,13 @@ return function render(_ctx, _cache) {
                       }, [
                         _createElementVNode("canvas", _hoisted_1486, null, 512 /* NEED_PATCH */),
                         (!_ctx.shareStudio.ready)
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_1487, [...(_cache[599] || (_cache[599] = [
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_1487, [...(_cache[600] || (_cache[600] = [
                               _createElementVNode("div", { class: "w-8 h-8 border-4 border-white/70 border-t-transparent rounded-full animate-spin" }, null, -1 /* CACHED */)
                             ]))]))
                           : _createCommentVNode("v-if", true),
                         (_ctx.shareStudio.recording)
                           ? (_openBlock(), _createElementBlock("div", _hoisted_1488, [
-                              _cache[600] || (_cache[600] = _createElementVNode("span", { class: "w-2 h-2 rounded-full bg-red-500 animate-pulse" }, null, -1 /* CACHED */)),
+                              _cache[601] || (_cache[601] = _createElementVNode("span", { class: "w-2 h-2 rounded-full bg-red-500 animate-pulse" }, null, -1 /* CACHED */)),
                               _createElementVNode("span", _hoisted_1489, _toDisplayString(_ctx.$t("REC {0}%", [(_ctx.shareStudio.recordProgress)])), 1 /* TEXT */)
                             ]))
                           : _createCommentVNode("v-if", true)
@@ -11503,7 +11554,7 @@ return function render(_ctx, _cache) {
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("div", _hoisted_1530, [
                       _createElementVNode("div", _hoisted_1531, [
-                        _cache[601] || (_cache[601] = _createElementVNode("span", { class: "text-base" }, "🔒", -1 /* CACHED */)),
+                        _cache[602] || (_cache[602] = _createElementVNode("span", { class: "text-base" }, "🔒", -1 /* CACHED */)),
                         _createElementVNode("div", _hoisted_1532, _toDisplayString(_ctx.$t("Privacy")), 1 /* TEXT */)
                       ]),
                       _createElementVNode("div", _hoisted_1533, [
@@ -11557,7 +11608,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("p", _hoisted_1549, [
                       _createTextVNode(_toDisplayString(_ctx.$t("🔗 Condividendo copio il link di STILL: su Instagram aggiungilo con lo sticker")) + " ", 1 /* TEXT */),
                       _createElementVNode("span", _hoisted_1550, _toDisplayString(_ctx.$t("Link")), 1 /* TEXT */),
-                      _cache[602] || (_cache[602] = _createTextVNode(".", -1 /* CACHED */))
+                      _cache[603] || (_cache[603] = _createTextVNode(".", -1 /* CACHED */))
                     ]),
                     _createElementVNode("div", _hoisted_1551, [
                       _createElementVNode("button", {
@@ -11565,7 +11616,7 @@ return function render(_ctx, _cache) {
                         disabled: !_ctx.shareStudio.ready || _ctx.shareStudio.busy,
                         class: "flex-1 bg-white/10 hover:bg-white/20 font-bold py-4 rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-40"
                       }, [
-                        _cache[603] || (_cache[603] = _createElementVNode("svg", {
+                        _cache[604] || (_cache[604] = _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
                           stroke: "currentColor",
@@ -11587,11 +11638,11 @@ return function render(_ctx, _cache) {
                       }, [
                         (_ctx.shareStudio.recording)
                           ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                              _cache[604] || (_cache[604] = _createElementVNode("div", { class: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" }, null, -1 /* CACHED */)),
+                              _cache[605] || (_cache[605] = _createElementVNode("div", { class: "w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" }, null, -1 /* CACHED */)),
                               _createTextVNode(" " + _toDisplayString(_ctx.$t("Creo il video… {0}%", [(_ctx.shareStudio.recordProgress)])) + " ", 1 /* TEXT */)
                             ], 64 /* STABLE_FRAGMENT */))
                           : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                              _cache[605] || (_cache[605] = _createElementVNode("svg", {
+                              _cache[606] || (_cache[606] = _createElementVNode("svg", {
                                 class: "w-5 h-5",
                                 fill: "none",
                                 stroke: "currentColor",
@@ -11615,8 +11666,8 @@ return function render(_ctx, _cache) {
           (_ctx.workoutPlayer.isOpen)
             ? (_openBlock(), _createElementBlock("div", _hoisted_1554, [
                 _createElementVNode("div", _hoisted_1555, [
-                  _cache[615] || (_cache[615] = _createElementVNode("div", { class: "absolute -top-20 -right-20 w-72 h-72 bg-arancione/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
-                  _cache[616] || (_cache[616] = _createElementVNode("div", { class: "absolute -bottom-24 -left-20 w-72 h-72 bg-viola/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
+                  _cache[616] || (_cache[616] = _createElementVNode("div", { class: "absolute -top-20 -right-20 w-72 h-72 bg-arancione/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
+                  _cache[617] || (_cache[617] = _createElementVNode("div", { class: "absolute -bottom-24 -left-20 w-72 h-72 bg-viola/20 rounded-full blur-[90px] pointer-events-none" }, null, -1 /* CACHED */)),
                   _createElementVNode("div", _hoisted_1556, [
                     _createElementVNode("div", _hoisted_1557, [
                       _createElementVNode("div", _hoisted_1558, [
@@ -11629,7 +11680,7 @@ return function render(_ctx, _cache) {
                         onClick: _cache[265] || (_cache[265] = (...args) => (_ctx.promptQuitGuidedWorkout && _ctx.promptQuitGuidedWorkout(...args))),
                         class: "p-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors",
                         "aria-label": _ctx.$t("Esci dall'allenamento")
-                      }, [...(_cache[608] || (_cache[608] = [
+                      }, [...(_cache[609] || (_cache[609] = [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -11664,7 +11715,7 @@ return function render(_ctx, _cache) {
                     : (_ctx.workoutPlayer.phase === 'done' && _ctx.workoutPlayer.summary)
                       ? (_openBlock(), _createElementBlock("div", _hoisted_1566, [
                           _createElementVNode("div", _hoisted_1567, [
-                            _cache[610] || (_cache[610] = _createElementVNode("div", { class: "w-24 h-24 shrink-0 rounded-full bg-arancione/20 border-2 border-arancione flex items-center justify-center text-5xl" }, "🏆", -1 /* CACHED */)),
+                            _cache[611] || (_cache[611] = _createElementVNode("div", { class: "w-24 h-24 shrink-0 rounded-full bg-arancione/20 border-2 border-arancione flex items-center justify-center text-5xl" }, "🏆", -1 /* CACHED */)),
                             _createElementVNode("div", _hoisted_1568, [
                               _createElementVNode("h2", _hoisted_1569, _toDisplayString(_ctx.$tv(_ctx.workoutPlayer.summary.quote.title)), 1 /* TEXT */),
                               _createElementVNode("p", _hoisted_1570, _toDisplayString(_ctx.$tv(_ctx.workoutPlayer.summary.quote.text)), 1 /* TEXT */)
@@ -11728,7 +11779,7 @@ return function render(_ctx, _cache) {
                                 onClick: _cache[267] || (_cache[267] = $event => (_ctx.openShareStudio('workout', _ctx.workoutPlayer.sessionId))),
                                 class: "w-full cangiante-btn text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2"
                               }, [
-                                _cache[609] || (_cache[609] = _createElementVNode("svg", {
+                                _cache[610] || (_cache[610] = _createElementVNode("svg", {
                                   class: "w-5 h-5",
                                   fill: "none",
                                   stroke: "currentColor",
@@ -11795,7 +11846,7 @@ return function render(_ctx, _cache) {
                                       _createElementVNode("div", _hoisted_1614, _toDisplayString(_ctx.$t("Recupero")), 1 /* TEXT */),
                                       _createElementVNode("div", _hoisted_1615, [
                                         _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.exerciseRest(_ctx.playerTargetExercise))), 1 /* TEXT */),
-                                        _cache[611] || (_cache[611] = _createElementVNode("span", { class: "text-white/40 text-sm" }, "s", -1 /* CACHED */))
+                                        _cache[612] || (_cache[612] = _createElementVNode("span", { class: "text-white/40 text-sm" }, "s", -1 /* CACHED */))
                                       ])
                                     ])
                                   ]))
@@ -11866,7 +11917,7 @@ return function render(_ctx, _cache) {
                                     onClick: _cache[275] || (_cache[275] = (...args) => (_ctx.playerStartSet && _ctx.playerStartSet(...args))),
                                     class: "w-full bg-arancione text-white font-extrabold py-5 rounded-2xl shadow-lg hover:bg-arancione/90 active:scale-95 transition-all flex items-center justify-center gap-2 text-lg"
                                   }, [
-                                    _cache[612] || (_cache[612] = _createElementVNode("svg", {
+                                    _cache[613] || (_cache[613] = _createElementVNode("svg", {
                                       class: "w-6 h-6",
                                       fill: "currentColor",
                                       viewBox: "0 0 24 24"
@@ -11894,7 +11945,7 @@ return function render(_ctx, _cache) {
                                       onClick: _cache[276] || (_cache[276] = (...args) => (_ctx.playerCompleteSet && _ctx.playerCompleteSet(...args))),
                                       class: "w-full bg-salvia text-white font-extrabold py-5 rounded-2xl shadow-lg hover:bg-salvia/90 active:scale-95 transition-all flex items-center justify-center gap-2 text-lg"
                                     }, [
-                                      _cache[613] || (_cache[613] = _createElementVNode("svg", {
+                                      _cache[614] || (_cache[614] = _createElementVNode("svg", {
                                         class: "w-6 h-6",
                                         fill: "none",
                                         stroke: "currentColor",
@@ -11920,7 +11971,7 @@ return function render(_ctx, _cache) {
                                         _createElementVNode("p", _hoisted_1643, _toDisplayString(_ctx.$t("Recupero")), 1 /* TEXT */),
                                         _createElementVNode("div", _hoisted_1644, [
                                           (_openBlock(), _createElementBlock("svg", _hoisted_1645, [
-                                            _cache[614] || (_cache[614] = _createElementVNode("circle", {
+                                            _cache[615] || (_cache[615] = _createElementVNode("circle", {
                                               cx: "50",
                                               cy: "50",
                                               r: "44",
@@ -11985,7 +12036,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1656, [
                   _createElementVNode("div", _hoisted_1657, [
                     _createElementVNode("div", _hoisted_1658, [
-                      _cache[617] || (_cache[617] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0" }, [
+                      _cache[618] || (_cache[618] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -12008,7 +12059,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[280] || (_cache[280] = $event => (_ctx.pyramidModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[618] || (_cache[618] = [
+                    }, [...(_cache[619] || (_cache[619] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -12059,7 +12110,7 @@ return function render(_ctx, _cache) {
                           disabled: _ctx.pyramidModal.sets.length <= 1,
                           class: "p-1.5 text-gray-400 hover:text-red-500 disabled:opacity-30 disabled:hover:text-gray-400 flex-shrink-0",
                           "aria-label": _ctx.$t("Rimuovi serie")
-                        }, [...(_cache[619] || (_cache[619] = [
+                        }, [...(_cache[620] || (_cache[620] = [
                           _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
@@ -12084,7 +12135,7 @@ return function render(_ctx, _cache) {
                     onClick: _cache[281] || (_cache[281] = (...args) => (_ctx.addPyramidSet && _ctx.addPyramidSet(...args))),
                     class: "w-full py-2.5 border-2 border-dashed border-amber-300 bg-amber-50 rounded-xl text-amber-700 font-bold text-xs hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5 shrink-0"
                   }, [
-                    _cache[620] || (_cache[620] = _createElementVNode("svg", {
+                    _cache[621] || (_cache[621] = _createElementVNode("svg", {
                       class: "w-3.5 h-3.5",
                       fill: "none",
                       stroke: "currentColor",
@@ -12117,7 +12168,7 @@ return function render(_ctx, _cache) {
                 _createElementVNode("div", _hoisted_1674, [
                   _createElementVNode("div", _hoisted_1675, [
                     _createElementVNode("div", _hoisted_1676, [
-                      _cache[621] || (_cache[621] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0" }, [
+                      _cache[622] || (_cache[622] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center text-amber-600 border border-amber-200 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -12140,7 +12191,7 @@ return function render(_ctx, _cache) {
                     _createElementVNode("button", {
                       onClick: _cache[284] || (_cache[284] = $event => (_ctx.pyramidLogModal.isOpen = false)),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[622] || (_cache[622] = [
+                    }, [...(_cache[623] || (_cache[623] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -12199,7 +12250,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[286] || (_cache[286] = (...args) => (_ctx.addPyramidLogSet && _ctx.addPyramidLogSet(...args))),
                       class: "w-full py-2 border-2 border-dashed border-amber-300 bg-amber-50 rounded-xl text-amber-700 font-bold text-[10px] hover:bg-amber-100 transition-colors flex items-center justify-center gap-1.5"
                     }, [
-                      _cache[623] || (_cache[623] = _createElementVNode("svg", {
+                      _cache[624] || (_cache[624] = _createElementVNode("svg", {
                         class: "w-3 h-3",
                         fill: "none",
                         stroke: "currentColor",
@@ -12238,7 +12289,7 @@ return function render(_ctx, _cache) {
           (_ctx.weightConfirmModal.isOpen)
             ? (_openBlock(), _createElementBlock("div", _hoisted_1694, [
                 _createElementVNode("div", _hoisted_1695, [
-                  _cache[626] || (_cache[626] = _createElementVNode("div", { class: "w-12 h-12 mx-auto rounded-2xl bg-arancione/10 border border-arancione/20 text-arancione flex items-center justify-center" }, [
+                  _cache[627] || (_cache[627] = _createElementVNode("div", { class: "w-12 h-12 mx-auto rounded-2xl bg-arancione/10 border border-arancione/20 text-arancione flex items-center justify-center" }, [
                     _createElementVNode("svg", {
                       class: "w-6 h-6",
                       fill: "none",
@@ -12258,9 +12309,9 @@ return function render(_ctx, _cache) {
                     _createElementVNode("p", _hoisted_1697, [
                       _createTextVNode(_toDisplayString(_ctx.$t("Sei sicuro di voler aggiornare")) + " ", 1 /* TEXT */),
                       _createElementVNode("b", _hoisted_1698, _toDisplayString(_ctx.$tv(_ctx.weightConfirmModal.exerciseName)), 1 /* TEXT */),
-                      _cache[624] || (_cache[624] = _createTextVNode(" a ", -1 /* CACHED */)),
+                      _cache[625] || (_cache[625] = _createTextVNode(" a ", -1 /* CACHED */)),
                       _createElementVNode("b", _hoisted_1699, _toDisplayString(_ctx.$tv(_ctx.formatNumber(_ctx.weightConfirmModal.value))) + " " + _toDisplayString(_ctx.$tv(_ctx.weightConfirmModal.unit)), 1 /* TEXT */),
-                      _cache[625] || (_cache[625] = _createTextVNode("? ", -1 /* CACHED */))
+                      _cache[626] || (_cache[626] = _createTextVNode("? ", -1 /* CACHED */))
                     ])
                   ]),
                   (!_ctx.weightConfirmModal.isCardio)
@@ -12298,8 +12349,8 @@ return function render(_ctx, _cache) {
                 class: "fixed inset-0 z-[80] text-white select-none overflow-hidden",
                 style: _normalizeStyle([{ background: _ctx.wrapped.idx < _ctx.wrapped.data.slides.length ? _ctx.wrapped.data.slides[_ctx.wrapped.idx].bg : 'linear-gradient(160deg, #7A4DF1 0%, #EC4899 55%, #F5A623 100%)' }, {"transition":"background 0.6s ease"}])
               }, [
-                _cache[628] || (_cache[628] = _createElementVNode("div", { class: "absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl wrap-float" }, null, -1 /* CACHED */)),
-                _cache[629] || (_cache[629] = _createElementVNode("div", {
+                _cache[629] || (_cache[629] = _createElementVNode("div", { class: "absolute -top-24 -left-24 w-72 h-72 rounded-full bg-white/10 blur-3xl wrap-float" }, null, -1 /* CACHED */)),
+                _cache[630] || (_cache[630] = _createElementVNode("div", {
                   class: "absolute -bottom-24 -right-16 w-80 h-80 rounded-full bg-black/20 blur-3xl wrap-float",
                   style: {"animation-delay":"-3s"}
                 }, null, -1 /* CACHED */)),
@@ -12323,7 +12374,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[291] || (_cache[291] = _withModifiers((...args) => (_ctx.closeWrapped && _ctx.closeWrapped(...args)), ["stop"])),
                       class: "w-9 h-9 rounded-full bg-black/20 flex items-center justify-center",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[627] || (_cache[627] = [
+                    }, [...(_cache[628] || (_cache[628] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -12493,7 +12544,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[295] || (_cache[295] = $event => (_ctx.eatSwap.isOpen = false)),
                       class: "p-1 text-gray-400",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[630] || (_cache[630] = [
+                    }, [...(_cache[631] || (_cache[631] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -12559,7 +12610,7 @@ return function render(_ctx, _cache) {
                       onClick: _cache[299] || (_cache[299] = $event => (_ctx.eatGuide.isOpen = false)),
                       class: "w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[631] || (_cache[631] = [
+                    }, [...(_cache[632] || (_cache[632] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -12636,46 +12687,108 @@ return function render(_ctx, _cache) {
                                 ? (_openBlock(), _createElementBlock("span", _hoisted_1782, " ⭐"))
                                 : _createCommentVNode("v-if", true)
                             ], 10 /* CLASS, PROPS */, _hoisted_1781))
-                          }), 128 /* KEYED_FRAGMENT */))
+                          }), 128 /* KEYED_FRAGMENT */)),
+                          _createElementVNode("button", {
+                            onClick: _cache[303] || (_cache[303] = $event => (_ctx.eatGuide.goal = 'sport')),
+                            class: _normalizeClass(["shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all", _ctx.eatGuide.goal === 'sport' ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'])
+                          }, [
+                            _createTextVNode(_toDisplayString(_ctx.$t("🏅 Per il tuo sport")), 1 /* TEXT */),
+                            (_ctx.suggestedEatGoal === 'sport')
+                              ? (_openBlock(), _createElementBlock("span", _hoisted_1783, " ⭐"))
+                              : _createCommentVNode("v-if", true)
+                          ], 2 /* CLASS */)
                         ]),
-                        _createElementVNode("div", _hoisted_1783, [
-                          _createElementVNode("div", _hoisted_1784, _toDisplayString(_ctx.$t("{0} · 3 giornate da alternare", [(_ctx.eatTarget ? 'Su misura per te · ≈ ' + _ctx.eatTarget + ' kcal al giorno' : _ctx.NUTRITION_GOALS.find(g => g.id === _ctx.eatGuide.goal).range)])), 1 /* TEXT */),
-                          _createElementVNode("p", _hoisted_1785, _toDisplayString(_ctx.$tv(_ctx.NUTRITION_GOALS.find(g => g.id === _ctx.eatGuide.goal).desc)), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_1784, [
+                          (_ctx.eatGuide.goal === 'sport')
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_1785, _toDisplayString(_ctx.$t("{0} · {1} · giornate secondo allenamenti e gare", [(_ctx.sportDietSport), (_ctx.eatTarget ? 'mantenimento ≈ ' + _ctx.eatTarget + ' kcal' : 'porzioni medie')])), 1 /* TEXT */))
+                            : (_openBlock(), _createElementBlock("div", _hoisted_1786, _toDisplayString(_ctx.$t("{0} · 3 giornate da alternare", [(_ctx.eatTarget ? 'Su misura per te · ≈ ' + _ctx.eatTarget + ' kcal al giorno' : _ctx.eatGoal.range)])), 1 /* TEXT */)),
+                          _createElementVNode("p", _hoisted_1787, _toDisplayString(_ctx.$tv(_ctx.eatGoal.desc)), 1 /* TEXT */),
                           (_ctx.bodyStats.energy)
-                            ? (_openBlock(), _createElementBlock("p", _hoisted_1786, _toDisplayString(_ctx.$t("Porzioni calcolate dal tuo fabbisogno (≈ {0} kcal per mantenerti, ≈ {1} per dimagrire, ≈ {2} per crescere). ⭐ = l'obiettivo che ti suggeriamo.", [(_ctx.bodyStats.energy.tdee), (_ctx.bodyStats.energy.lose), (_ctx.bodyStats.energy.gain)])), 1 /* TEXT */))
-                            : (_openBlock(), _createElementBlock("p", _hoisted_1787, _toDisplayString(_ctx.$t("Porzioni medie: completa il profilo (altezza, data di nascita, sesso) e pesati in Progressi, così le giornate si adattano a te.")), 1 /* TEXT */)),
+                            ? (_openBlock(), _createElementBlock("p", _hoisted_1788, _toDisplayString(_ctx.$t("Porzioni calcolate dal tuo fabbisogno (≈ {0} kcal per mantenerti, ≈ {1} per dimagrire, ≈ {2} per crescere). ⭐ = l'obiettivo che ti suggeriamo.", [(_ctx.bodyStats.energy.tdee), (_ctx.bodyStats.energy.lose), (_ctx.bodyStats.energy.gain)])), 1 /* TEXT */))
+                            : (_openBlock(), _createElementBlock("p", _hoisted_1789, _toDisplayString(_ctx.$t("Porzioni medie: completa il profilo (altezza, data di nascita, sesso) e pesati in Progressi, così le giornate si adattano a te.")), 1 /* TEXT */)),
                           (_ctx.eatTarget && (_ctx.eatFactor >= 1.4 || _ctx.eatFactor <= 0.75))
-                            ? (_openBlock(), _createElementBlock("p", _hoisted_1788, _toDisplayString(_ctx.$t("Il tuo fabbisogno è lontano dalla media: abbiamo adattato le porzioni fin dove ha senso, per numeri precisi chiedi a un nutrizionista.")), 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("p", _hoisted_1790, _toDisplayString(_ctx.$t("Il tuo fabbisogno è lontano dalla media: abbiamo adattato le porzioni fin dove ha senso, per numeri precisi chiedi a un nutrizionista.")), 1 /* TEXT */))
                             : _createCommentVNode("v-if", true)
                         ]),
-                        _createElementVNode("div", _hoisted_1789, [
+                        (_ctx.eatGuide.goal === 'sport')
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_1791, [
+                              _createElementVNode("div", _hoisted_1792, [
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.sportDietSports, (sp) => {
+                                  return (_openBlock(), _createElementBlock("button", {
+                                    key: 'dsp' + sp,
+                                    onClick: $event => (_ctx.setDietSport(sp)),
+                                    class: _normalizeClass(["shrink-0 px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all", _ctx.sportDietSport === sp ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'])
+                                  }, [
+                                    _createTextVNode(_toDisplayString(_ctx.$tv(sp)), 1 /* TEXT */),
+                                    (_ctx.userSports.includes(sp))
+                                      ? (_openBlock(), _createElementBlock("span", _hoisted_1794, " ⭐"))
+                                      : _createCommentVNode("v-if", true)
+                                  ], 10 /* CLASS, PROPS */, _hoisted_1793))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ]),
+                              _createElementVNode("div", null, [
+                                _createElementVNode("div", _hoisted_1795, _toDisplayString(_ctx.$t("🏆 Quando hai la gara?")), 1 /* TEXT */),
+                                _createElementVNode("p", _hoisted_1796, _toDisplayString(_ctx.$t("Il giorno prima diventa la vigilia, quello dopo il recupero. Gli allenamenti fissi li prendo dal calendario.")), 1 /* TEXT */)
+                              ]),
+                              _createElementVNode("div", _hoisted_1797, [
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.sportDietWeek, (d) => {
+                                  return (_openBlock(), _createElementBlock("button", {
+                                    key: 'dmd' + d.dow,
+                                    onClick: $event => (_ctx.toggleMatchDay(d.dow)),
+                                    class: _normalizeClass(["py-2 rounded-xl text-[10px] font-extrabold border transition-all active:scale-95", _ctx.sportMatchDays.includes(d.dow) ? 'bg-arancione text-white border-arancione' : 'bg-gray-50 text-gray-500 border-gray-100'])
+                                  }, _toDisplayString(_ctx.$tv(d.short)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1798))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ]),
+                              _createElementVNode("div", _hoisted_1799, [
+                                (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.sportDietWeek, (d) => {
+                                  return (_openBlock(), _createElementBlock("div", {
+                                    key: 'dwk' + d.dow,
+                                    class: "flex flex-col items-center gap-0.5 pt-2"
+                                  }, [
+                                    _createElementVNode("span", _hoisted_1800, _toDisplayString(_ctx.$tv(_ctx.sportDayType(d.type).icon)), 1 /* TEXT */),
+                                    _createElementVNode("span", {
+                                      class: _normalizeClass(["text-[8px] font-bold uppercase tracking-wide text-center leading-tight", d.today ? 'text-salvia' : 'text-gray-400'])
+                                    }, _toDisplayString(_ctx.$tv(_ctx.sportDayType(d.type).short)), 3 /* TEXT, CLASS */)
+                                  ]))
+                                }), 128 /* KEYED_FRAGMENT */))
+                              ]),
+                              (!_ctx.sportDietWeek.some(d => d.trains))
+                                ? (_openBlock(), _createElementBlock("p", _hoisted_1801, _toDisplayString(_ctx.$t("Non vedo allenamenti fissi nel calendario: aggiungili in Allenamento → Calendario e la settimana si sistema da sola.")), 1 /* TEXT */))
+                                : _createCommentVNode("v-if", true),
+                              (_ctx.sportDietKind.note)
+                                ? (_openBlock(), _createElementBlock("p", _hoisted_1802, "💡 " + _toDisplayString(_ctx.$tv(_ctx.sportDietKind.note)), 1 /* TEXT */))
+                                : _createCommentVNode("v-if", true),
+                              _createElementVNode("p", _hoisted_1803, _toDisplayString(_ctx.$t("📚 Carboidrati e proteine secondo la posizione ACSM e dietisti di USA e Canada su alimentazione e prestazione (2016) e le posizioni ISSN (2017).")), 1 /* TEXT */)
+                            ]))
+                          : _createCommentVNode("v-if", true),
+                        _createElementVNode("div", _hoisted_1804, [
                           _createElementVNode("div", null, [
-                            _createElementVNode("div", _hoisted_1790, _toDisplayString(_ctx.$t("😋 I tuoi gusti")), 1 /* TEXT */),
-                            _createElementVNode("p", _hoisted_1791, _toDisplayString(_ctx.$t("Tocca un alimento ⇄ per cambiarlo con un altro dello stesso tipo: la porzione si ricalcola. Quello che escludi qui viene sostituito da solo.")), 1 /* TEXT */)
+                            _createElementVNode("div", _hoisted_1805, _toDisplayString(_ctx.$t("😋 I tuoi gusti")), 1 /* TEXT */),
+                            _createElementVNode("p", _hoisted_1806, _toDisplayString(_ctx.$t("Tocca un alimento ⇄ per cambiarlo con un altro dello stesso tipo: la porzione si ricalcola. Quello che escludi qui viene sostituito da solo.")), 1 /* TEXT */)
                           ]),
-                          _createElementVNode("div", _hoisted_1792, [
+                          _createElementVNode("div", _hoisted_1807, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.EAT_EXCLUDES, (x) => {
                               return (_openBlock(), _createElementBlock("button", {
                                 key: 'ex' + x.id,
                                 onClick: $event => (_ctx.toggleEatExclude(x.id)),
                                 class: _normalizeClass(["px-2.5 py-1.5 rounded-full text-[11px] font-bold border transition-all", _ctx.eatPrefs.exclude.includes(x.id) ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'])
-                              }, _toDisplayString(_ctx.$tv(x.icon)) + " " + _toDisplayString(_ctx.$tv(x.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1793))
+                              }, _toDisplayString(_ctx.$tv(x.icon)) + " " + _toDisplayString(_ctx.$tv(x.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1808))
                             }), 128 /* KEYED_FRAGMENT */))
                           ]),
                           (_ctx.eatPrefs.dislikes.length)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_1794, [
-                                _createElementVNode("span", _hoisted_1795, _toDisplayString(_ctx.$t("Non ti piace:")), 1 /* TEXT */),
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_1809, [
+                                _createElementVNode("span", _hoisted_1810, _toDisplayString(_ctx.$t("Non ti piace:")), 1 /* TEXT */),
                                 (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.eatPrefs.dislikes, (d) => {
                                   return (_openBlock(), _createElementBlock("button", {
                                     key: 'dl' + d,
                                     onClick: $event => (_ctx.removeEatDislike(d)),
                                     class: "px-2 py-1 rounded-full text-[11px] font-bold bg-red-50 text-red-500 border border-red-100"
-                                  }, _toDisplayString(_ctx.$tv(d)) + " ✕", 9 /* TEXT, PROPS */, _hoisted_1796))
+                                  }, _toDisplayString(_ctx.$tv(d)) + " ✕", 9 /* TEXT, PROPS */, _hoisted_1811))
                                 }), 128 /* KEYED_FRAGMENT */))
                               ]))
                             : _createCommentVNode("v-if", true),
                           (_ctx.eatSwapCount)
-                            ? (_openBlock(), _createElementBlock("p", _hoisted_1797, _toDisplayString(_ctx.$t("{0} {1} secondo i tuoi gusti", [(_ctx.eatSwapCount), (_ctx.eatSwapCount === 1 ? 'alimento cambiato' : 'alimenti cambiati')])), 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("p", _hoisted_1812, _toDisplayString(_ctx.$t("{0} {1} secondo i tuoi gusti", [(_ctx.eatSwapCount), (_ctx.eatSwapCount === 1 ? 'alimento cambiato' : 'alimenti cambiati')])), 1 /* TEXT */))
                             : _createCommentVNode("v-if", true)
                         ]),
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.eatGoalDays, (day) => {
@@ -12683,23 +12796,29 @@ return function render(_ctx, _cache) {
                             key: 'ed' + day.name,
                             class: "bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
                           }, [
-                            _createElementVNode("div", _hoisted_1798, [
-                              _createElementVNode("span", _hoisted_1799, _toDisplayString(_ctx.$tv(day.name)), 1 /* TEXT */),
-                              _createElementVNode("span", _hoisted_1800, _toDisplayString(_ctx.$t("≈ {0} kcal · {1} g prot", [(day.kcal), (day.protein)])), 1 /* TEXT */)
+                            _createElementVNode("div", _hoisted_1813, [
+                              _createElementVNode("span", _hoisted_1814, _toDisplayString(_ctx.$tv(day.name)), 1 /* TEXT */),
+                              _createElementVNode("span", _hoisted_1815, _toDisplayString(_ctx.$t("≈ {0} kcal · {1} g prot", [(day.kcal), (day.protein)])), 1 /* TEXT */)
                             ]),
-                            _createElementVNode("div", _hoisted_1801, [
+                            (day.typeId)
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_1816, [
+                                  _createElementVNode("p", _hoisted_1817, _toDisplayString(_ctx.$tv(day.desc)), 1 /* TEXT */),
+                                  _createElementVNode("p", _hoisted_1818, _toDisplayString(_ctx.$tv(day.carbs)) + " · " + _toDisplayString(_ctx.$tv(day.count ? (day.count === 1 ? '1 giorno questa settimana' : day.count + ' giorni questa settimana') : 'non in questa settimana')), 1 /* TEXT */)
+                                ]))
+                              : _createCommentVNode("v-if", true),
+                            _createElementVNode("div", _hoisted_1819, [
                               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(day.meals, (m) => {
                                 return (_openBlock(), _createElementBlock("div", {
                                   key: day.name + m.type,
                                   class: "px-4 py-2.5 flex gap-3"
                                 }, [
-                                  _createElementVNode("span", _hoisted_1802, _toDisplayString(_ctx.$tv(m.icon)), 1 /* TEXT */),
-                                  _createElementVNode("div", _hoisted_1803, [
-                                    _createElementVNode("div", _hoisted_1804, [
-                                      _createElementVNode("span", _hoisted_1805, _toDisplayString(_ctx.$tv(m.label)), 1 /* TEXT */),
-                                      _createElementVNode("span", _hoisted_1806, _toDisplayString(_ctx.$t("≈ {0} kcal", [(m.kcal)])), 1 /* TEXT */)
+                                  _createElementVNode("span", _hoisted_1820, _toDisplayString(_ctx.$tv(m.icon)), 1 /* TEXT */),
+                                  _createElementVNode("div", _hoisted_1821, [
+                                    _createElementVNode("div", _hoisted_1822, [
+                                      _createElementVNode("span", _hoisted_1823, _toDisplayString(_ctx.$tv(m.label)), 1 /* TEXT */),
+                                      _createElementVNode("span", _hoisted_1824, _toDisplayString(_ctx.$t("≈ {0} kcal", [(m.kcal)])), 1 /* TEXT */)
                                     ]),
-                                    _createElementVNode("div", _hoisted_1807, [
+                                    _createElementVNode("div", _hoisted_1825, [
                                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(m.foods, (f) => {
                                         return (_openBlock(), _createElementBlock("button", {
                                           key: f.key,
@@ -12709,9 +12828,9 @@ return function render(_ctx, _cache) {
                                         }, [
                                           _createTextVNode(_toDisplayString(_ctx.$tv(f.text)), 1 /* TEXT */),
                                           (f.swappable)
-                                            ? (_openBlock(), _createElementBlock("span", _hoisted_1809, " ⇄"))
+                                            ? (_openBlock(), _createElementBlock("span", _hoisted_1827, " ⇄"))
                                             : _createCommentVNode("v-if", true)
-                                        ], 10 /* CLASS, PROPS */, _hoisted_1808))
+                                        ], 10 /* CLASS, PROPS */, _hoisted_1826))
                                       }), 128 /* KEYED_FRAGMENT */))
                                     ])
                                   ])
@@ -12721,10 +12840,10 @@ return function render(_ctx, _cache) {
                           ]))
                         }), 128 /* KEYED_FRAGMENT */)),
                         _createElementVNode("button", {
-                          onClick: _cache[303] || (_cache[303] = (...args) => (_ctx.createTrialPlan && _ctx.createTrialPlan(...args))),
+                          onClick: _cache[304] || (_cache[304] = (...args) => (_ctx.createTrialPlan && _ctx.createTrialPlan(...args))),
                           class: "w-full bg-salvia text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
-                        }, _toDisplayString(_ctx.$t("Prova per una settimana")), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_1810, _toDisplayString(_ctx.$t("Esempi generici, non una dieta personalizzata. Se hai patologie, allergie, sei in gravidanza o segui terapie, chiedi prima al medico. Per un piano su misura vai da un nutrizionista.")), 1 /* TEXT */)
+                        }, _toDisplayString(_ctx.$tv(_ctx.eatGuide.goal === 'sport' ? 'Prova questa settimana (giorno per giorno)' : 'Prova per una settimana')), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_1828, _toDisplayString(_ctx.$t("Esempi generici, non una dieta personalizzata. Se hai patologie, allergie, sei in gravidanza o segui terapie, chiedi prima al medico. Per un piano su misura vai da un nutrizionista.")), 1 /* TEXT */)
                       ], 64 /* STABLE_FRAGMENT */))
                 ])
               ]))
@@ -12733,22 +12852,22 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 32,
                 class: "fixed inset-0 z-[60] bg-antracite/50 backdrop-blur-sm flex items-end sm:items-center justify-center animate-fadeIn",
-                onClick: _cache[305] || (_cache[305] = _withModifiers($event => (_ctx.exerciseInfo.isOpen = false), ["self"]))
+                onClick: _cache[306] || (_cache[306] = _withModifiers($event => (_ctx.exerciseInfo.isOpen = false), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_1811, [
-                  _createElementVNode("div", _hoisted_1812, [
-                    _createElementVNode("div", _hoisted_1813, [
-                      _createElementVNode("div", _hoisted_1814, _toDisplayString(_ctx.$t("Come si fa")), 1 /* TEXT */),
-                      _createElementVNode("h3", _hoisted_1815, _toDisplayString(_ctx.$tv(_ctx.exerciseInfo.item.n)), 1 /* TEXT */),
+                _createElementVNode("div", _hoisted_1829, [
+                  _createElementVNode("div", _hoisted_1830, [
+                    _createElementVNode("div", _hoisted_1831, [
+                      _createElementVNode("div", _hoisted_1832, _toDisplayString(_ctx.$t("Come si fa")), 1 /* TEXT */),
+                      _createElementVNode("h3", _hoisted_1833, _toDisplayString(_ctx.$tv(_ctx.exerciseInfo.item.n)), 1 /* TEXT */),
                       _createElementVNode("div", {
                         class: _normalizeClass(["text-[11px] font-bold mt-0.5", _ctx.exerciseInfo.item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'])
                       }, _toDisplayString(_ctx.$tv(_ctx.guidePrescription(_ctx.exerciseInfo.item))) + " · " + _toDisplayString(_ctx.$tv(_ctx.exerciseInfo.item.w === 'gym' ? 'in palestra' : 'a casa')), 3 /* TEXT, CLASS */)
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[304] || (_cache[304] = $event => (_ctx.exerciseInfo.isOpen = false)),
+                      onClick: _cache[305] || (_cache[305] = $event => (_ctx.exerciseInfo.isOpen = false)),
                       class: "p-1 text-gray-400",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[632] || (_cache[632] = [
+                    }, [...(_cache[633] || (_cache[633] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -12762,20 +12881,20 @@ return function render(_ctx, _cache) {
                           d: "M6 18L18 6M6 6l12 12"
                         })
                       ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_1816)
+                    ]))], 8 /* PROPS */, _hoisted_1834)
                   ]),
                   (_ctx.exerciseInfo.photos)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_1817, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1835, [
                         _createElementVNode("img", {
                           src: _ctx.exerciseInfo.photos[0],
                           alt: _ctx.$t("Inizio del movimento"),
                           class: "absolute inset-0 w-full h-full object-cover"
-                        }, null, 8 /* PROPS */, _hoisted_1818),
+                        }, null, 8 /* PROPS */, _hoisted_1836),
                         _createElementVNode("img", {
                           src: _ctx.exerciseInfo.photos[1],
                           alt: _ctx.$t("Fine del movimento"),
                           class: "absolute inset-0 w-full h-full object-cover ex-frame2"
-                        }, null, 8 /* PROPS */, _hoisted_1819)
+                        }, null, 8 /* PROPS */, _hoisted_1837)
                       ]))
                     : _createCommentVNode("v-if", true),
                   _createElementVNode("div", {
@@ -12786,14 +12905,14 @@ return function render(_ctx, _cache) {
                           key: 0,
                           class: "rounded-2xl bg-gray-50 border border-gray-100 p-2 aspect-square",
                           innerHTML: _ctx.exerciseInfo.pose
-                        }, null, 8 /* PROPS */, _hoisted_1820))
+                        }, null, 8 /* PROPS */, _hoisted_1838))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("div", {
                       class: _normalizeClass(["rounded-2xl bg-gray-50 border border-gray-100 p-2 flex items-center", _ctx.exerciseInfo.photos ? 'w-36 h-32' : 'aspect-square']),
                       innerHTML: _ctx.exerciseInfo.map
-                    }, null, 10 /* CLASS, PROPS */, _hoisted_1821),
+                    }, null, 10 /* CLASS, PROPS */, _hoisted_1839),
                     (_ctx.exerciseInfo.photos)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_1822, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1840, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.exerciseInfo.primary, (m) => {
                             return (_openBlock(), _createElementBlock("span", {
                               key: 'mpp' + m,
@@ -12810,7 +12929,7 @@ return function render(_ctx, _cache) {
                       : _createCommentVNode("v-if", true)
                   ], 2 /* CLASS */),
                   (!_ctx.exerciseInfo.photos)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_1823, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1841, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.exerciseInfo.primary, (m) => {
                           return (_openBlock(), _createElementBlock("span", {
                             key: 'mp' + m,
@@ -12825,8 +12944,8 @@ return function render(_ctx, _cache) {
                         }), 128 /* KEYED_FRAGMENT */))
                       ]))
                     : _createCommentVNode("v-if", true),
-                  _createElementVNode("p", _hoisted_1824, "💡 " + _toDisplayString(_ctx.$tv(_ctx.exerciseInfo.item.tip)), 1 /* TEXT */),
-                  _createElementVNode("p", _hoisted_1825, _toDisplayString(_ctx.$t("{0} Arancione pieno: muscoli principali; chiaro: quelli che aiutano.", [(_ctx.exerciseInfo.photos ? 'Foto: Free Exercise DB (pubblico dominio).' : 'Disegno indicativo del movimento.')])), 1 /* TEXT */)
+                  _createElementVNode("p", _hoisted_1842, "💡 " + _toDisplayString(_ctx.$tv(_ctx.exerciseInfo.item.tip)), 1 /* TEXT */),
+                  _createElementVNode("p", _hoisted_1843, _toDisplayString(_ctx.$t("{0} Arancione pieno: muscoli principali; chiaro: quelli che aiutano.", [(_ctx.exerciseInfo.photos ? 'Foto: Free Exercise DB (pubblico dominio).' : 'Disegno indicativo del movimento.')])), 1 /* TEXT */)
                 ])
               ]))
             : _createCommentVNode("v-if", true),
@@ -12834,19 +12953,19 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 33,
                 class: "fixed inset-0 z-50 bg-black/40 flex items-end sm:items-center justify-center p-0 sm:p-4 animate-fadeIn",
-                onClick: _cache[310] || (_cache[310] = _withModifiers((...args) => (_ctx.closeWorkoutImport && _ctx.closeWorkoutImport(...args)), ["self"]))
+                onClick: _cache[311] || (_cache[311] = _withModifiers((...args) => (_ctx.closeWorkoutImport && _ctx.closeWorkoutImport(...args)), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_1826, [
-                  _createElementVNode("div", _hoisted_1827, [
+                _createElementVNode("div", _hoisted_1844, [
+                  _createElementVNode("div", _hoisted_1845, [
                     _createElementVNode("div", null, [
-                      _createElementVNode("div", _hoisted_1828, _toDisplayString(_ctx.$t("Importa")), 1 /* TEXT */),
-                      _createElementVNode("h3", _hoisted_1829, _toDisplayString(_ctx.$t("La tua scheda")), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_1846, _toDisplayString(_ctx.$t("Importa")), 1 /* TEXT */),
+                      _createElementVNode("h3", _hoisted_1847, _toDisplayString(_ctx.$t("La tua scheda")), 1 /* TEXT */)
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[306] || (_cache[306] = (...args) => (_ctx.closeWorkoutImport && _ctx.closeWorkoutImport(...args))),
+                      onClick: _cache[307] || (_cache[307] = (...args) => (_ctx.closeWorkoutImport && _ctx.closeWorkoutImport(...args))),
                       class: "w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[633] || (_cache[633] = [
+                    }, [...(_cache[634] || (_cache[634] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -12860,7 +12979,7 @@ return function render(_ctx, _cache) {
                           d: "M6 18L18 6M6 6l12 12"
                         })
                       ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_1830)
+                    ]))], 8 /* PROPS */, _hoisted_1848)
                   ]),
                   _createElementVNode("label", {
                     class: _normalizeClass(["w-full bg-arancione text-white font-bold py-3.5 rounded-2xl shadow-md flex items-center justify-center gap-2 active:scale-95 transition-all cursor-pointer", _ctx.workoutImport.busy ? 'opacity-60 pointer-events-none' : ''])
@@ -12869,9 +12988,9 @@ return function render(_ctx, _cache) {
                       type: "file",
                       class: "hidden",
                       accept: ".pdf,.docx,.doc,.txt,.md,.rtf,text/plain,application/pdf",
-                      onChange: _cache[307] || (_cache[307] = (...args) => (_ctx.importWorkoutFile && _ctx.importWorkoutFile(...args)))
+                      onChange: _cache[308] || (_cache[308] = (...args) => (_ctx.importWorkoutFile && _ctx.importWorkoutFile(...args)))
                     }, null, 32 /* NEED_HYDRATION */),
-                    _cache[634] || (_cache[634] = _createElementVNode("svg", {
+                    _cache[635] || (_cache[635] = _createElementVNode("svg", {
                       class: "w-5 h-5",
                       fill: "none",
                       stroke: "currentColor",
@@ -12886,19 +13005,19 @@ return function render(_ctx, _cache) {
                     ], -1 /* CACHED */)),
                     _createTextVNode(" " + _toDisplayString(_ctx.$tv(_ctx.workoutImport.busy ? 'Sto leggendo…' : 'Scegli un file (PDF, Word, testo)')), 1 /* TEXT */)
                   ], 2 /* CLASS */),
-                  _createElementVNode("div", _hoisted_1831, [
-                    _cache[635] || (_cache[635] = _createElementVNode("span", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */)),
+                  _createElementVNode("div", _hoisted_1849, [
+                    _cache[636] || (_cache[636] = _createElementVNode("span", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */)),
                     _createTextVNode(_toDisplayString(_ctx.$t("oppure incollala")), 1 /* TEXT */),
-                    _cache[636] || (_cache[636] = _createElementVNode("span", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */))
+                    _cache[637] || (_cache[637] = _createElementVNode("span", { class: "flex-1 h-px bg-gray-200" }, null, -1 /* CACHED */))
                   ]),
-                  _createElementVNode("div", _hoisted_1832, [
-                    _createElementVNode("p", _hoisted_1833, [
+                  _createElementVNode("div", _hoisted_1850, [
+                    _createElementVNode("p", _hoisted_1851, [
                       _createTextVNode(_toDisplayString(_ctx.$t("Dalle Note: apri la nota,")) + " ", 1 /* TEXT */),
                       _createElementVNode("b", null, _toDisplayString(_ctx.$t("Seleziona tutto → Copia")), 1 /* TEXT */),
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("e incolla qui. Un esercizio per riga; i giorni come titoli.")), 1 /* TEXT */)
                     ]),
                     _withDirectives(_createElementVNode("textarea", {
-                      "onUpdate:modelValue": _cache[308] || (_cache[308] = $event => ((_ctx.workoutImport.text) = $event)),
+                      "onUpdate:modelValue": _cache[309] || (_cache[309] = $event => ((_ctx.workoutImport.text) = $event)),
                       rows: "8",
                       class: "w-full rounded-2xl border border-gray-200 bg-white p-3 text-sm text-antracite font-medium focus:outline-none focus:border-arancione",
                       placeholder: "Giorno A - Petto e tricipiti\nPanca piana 4x8 60kg rec 90\nCroci ai cavi 3x12-15\nPushdown 3x12\n\nGiorno B - Schiena\nLat machine 4x10 50kg\nCurl bilanciere + curl martello 3x12"
@@ -12907,38 +13026,38 @@ return function render(_ctx, _cache) {
                     ])
                   ]),
                   (_ctx.workoutImport.error)
-                    ? (_openBlock(), _createElementBlock("p", _hoisted_1834, _toDisplayString(_ctx.$tv(_ctx.workoutImport.error)), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("p", _hoisted_1852, _toDisplayString(_ctx.$tv(_ctx.workoutImport.error)), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
                   _createElementVNode("button", {
-                    onClick: _cache[309] || (_cache[309] = (...args) => (_ctx.importWorkoutText && _ctx.importWorkoutText(...args))),
+                    onClick: _cache[310] || (_cache[310] = (...args) => (_ctx.importWorkoutText && _ctx.importWorkoutText(...args))),
                     disabled: !_ctx.workoutImport.text.trim(),
                     class: "w-full bg-antracite text-white font-bold py-3.5 rounded-2xl active:scale-95 transition-all disabled:opacity-40"
-                  }, _toDisplayString(_ctx.$t("Leggi scheda")), 9 /* TEXT, PROPS */, _hoisted_1835),
-                  _createElementVNode("p", _hoisted_1836, _toDisplayString(_ctx.$t("Riconosco serie e ripetizioni (4x8, 4 serie da 12, 12/10/8), carichi (60kg), recuperi (rec 90, 2 min) e superserie (A + B). Prima di salvare puoi correggere tutto.")), 1 /* TEXT */)
+                  }, _toDisplayString(_ctx.$t("Leggi scheda")), 9 /* TEXT, PROPS */, _hoisted_1853),
+                  _createElementVNode("p", _hoisted_1854, _toDisplayString(_ctx.$t("Riconosco serie e ripetizioni (4x8, 4 serie da 12, 12/10/8), carichi (60kg), recuperi (rec 90, 2 min) e superserie (A + B). Prima di salvare puoi correggere tutto.")), 1 /* TEXT */)
                 ])
               ]))
             : _createCommentVNode("v-if", true),
-          _createElementVNode("datalist", _hoisted_1837, [
+          _createElementVNode("datalist", _hoisted_1855, [
             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.EXERCISE_LIBRARY, (item) => {
               return (_openBlock(), _createElementBlock("option", {
                 key: 'dl' + item.id,
                 value: item.n
-              }, null, 8 /* PROPS */, _hoisted_1838))
+              }, null, 8 /* PROPS */, _hoisted_1856))
             }), 128 /* KEYED_FRAGMENT */))
           ]),
           (_ctx.guide.isOpen)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_1839, [
-                _createElementVNode("div", _hoisted_1840, [
-                  _createElementVNode("div", _hoisted_1841, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_1857, [
+                _createElementVNode("div", _hoisted_1858, [
+                  _createElementVNode("div", _hoisted_1859, [
                     _createElementVNode("div", null, [
-                      _createElementVNode("div", _hoisted_1842, _toDisplayString(_ctx.$t("Guida")), 1 /* TEXT */),
-                      _createElementVNode("h2", _hoisted_1843, _toDisplayString(_ctx.$t("Allenamenti consigliati")), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_1860, _toDisplayString(_ctx.$t("Guida")), 1 /* TEXT */),
+                      _createElementVNode("h2", _hoisted_1861, _toDisplayString(_ctx.$t("Allenamenti consigliati")), 1 /* TEXT */)
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[311] || (_cache[311] = (...args) => (_ctx.closeGuide && _ctx.closeGuide(...args))),
+                      onClick: _cache[312] || (_cache[312] = (...args) => (_ctx.closeGuide && _ctx.closeGuide(...args))),
                       class: "w-9 h-9 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[637] || (_cache[637] = [
+                    }, [...(_cache[638] || (_cache[638] = [
                       _createElementVNode("svg", {
                         class: "w-5 h-5",
                         fill: "none",
@@ -12952,35 +13071,35 @@ return function render(_ctx, _cache) {
                           d: "M6 18L18 6M6 6l12 12"
                         })
                       ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_1844)
+                    ]))], 8 /* PROPS */, _hoisted_1862)
                   ]),
-                  _createElementVNode("div", _hoisted_1845, [
+                  _createElementVNode("div", _hoisted_1863, [
                     (_openBlock(), _createElementBlock(_Fragment, null, _renderList([{ id: 'muscle', label: 'Per muscolo' }, { id: 'sport', label: 'Per sport' }, { id: 'programs', label: 'Programmi' }], (t) => {
                       return _createElementVNode("button", {
                         key: 'gt' + t.id,
                         onClick: $event => (_ctx.setGuideTab(t.id)),
                         class: _normalizeClass(["py-2 rounded-xl text-xs font-bold transition-all", _ctx.guide.tab === t.id ? 'bg-arancione text-white shadow-sm' : 'text-gray-500'])
-                      }, _toDisplayString(_ctx.$tv(t.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1846)
+                      }, _toDisplayString(_ctx.$tv(t.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1864)
                     }), 64 /* STABLE_FRAGMENT */))
                   ]),
                   (_ctx.guide.tab === 'muscle')
                     ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                        _createElementVNode("div", _hoisted_1847, [
+                        _createElementVNode("div", _hoisted_1865, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.MUSCLE_GROUPS, (m) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: 'gm' + m.id,
-                              onClick: $event => {_ctx.guide.muscle = m.id; _ctx.guide.selected = []},
+                              onClick: $event => {_ctx.guide.muscle = m.id; _ctx.guide.selected = []; _ctx.guide.session = ''},
                               class: _normalizeClass(["shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all", _ctx.guide.muscle === m.id ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'])
-                            }, _toDisplayString(_ctx.$tv(m.icon)) + " " + _toDisplayString(_ctx.$tv(m.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1848))
+                            }, _toDisplayString(_ctx.$tv(m.icon)) + " " + _toDisplayString(_ctx.$tv(m.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1866))
                           }), 128 /* KEYED_FRAGMENT */))
                         ]),
-                        _createElementVNode("div", _hoisted_1849, [
+                        _createElementVNode("div", _hoisted_1867, [
                           _createElementVNode("button", {
-                            onClick: _cache[312] || (_cache[312] = $event => {_ctx.guide.place = 'gym'; _ctx.guide.selected = []}),
+                            onClick: _cache[313] || (_cache[313] = $event => {_ctx.guide.place = 'gym'; _ctx.guide.selected = []; _ctx.guide.session = ''}),
                             class: _normalizeClass(["py-1.5 rounded-lg text-[11px] font-bold transition-all", _ctx.guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'])
                           }, _toDisplayString(_ctx.$t("🏋️ In palestra")), 3 /* TEXT, CLASS */),
                           _createElementVNode("button", {
-                            onClick: _cache[313] || (_cache[313] = $event => {_ctx.guide.place = 'home'; _ctx.guide.selected = []}),
+                            onClick: _cache[314] || (_cache[314] = $event => {_ctx.guide.place = 'home'; _ctx.guide.selected = []; _ctx.guide.session = ''}),
                             class: _normalizeClass(["py-1.5 rounded-lg text-[11px] font-bold transition-all", _ctx.guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'])
                           }, _toDisplayString(_ctx.$t("🏠 A casa")), 3 /* TEXT, CLASS */)
                         ])
@@ -12988,27 +13107,27 @@ return function render(_ctx, _cache) {
                     : _createCommentVNode("v-if", true),
                   (_ctx.guide.tab === 'sport')
                     ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                        _createElementVNode("div", _hoisted_1850, [
+                        _createElementVNode("div", _hoisted_1868, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.guideSports, (sp) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: 'gs' + sp,
-                              onClick: $event => {_ctx.guide.sport = sp; _ctx.guide.selected = []},
+                              onClick: $event => {_ctx.guide.sport = sp; _ctx.guide.selected = []; _ctx.guide.session = ''},
                               class: _normalizeClass(["shrink-0 px-3 py-1.5 rounded-full text-xs font-bold border transition-all", _ctx.guide.sport === sp ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'])
                             }, [
                               _createTextVNode(_toDisplayString(_ctx.$tv(sp)), 1 /* TEXT */),
                               (_ctx.userSports.includes(sp))
-                                ? (_openBlock(), _createElementBlock("span", _hoisted_1852, " ⭐"))
+                                ? (_openBlock(), _createElementBlock("span", _hoisted_1870, " ⭐"))
                                 : _createCommentVNode("v-if", true)
-                            ], 10 /* CLASS, PROPS */, _hoisted_1851))
+                            ], 10 /* CLASS, PROPS */, _hoisted_1869))
                           }), 128 /* KEYED_FRAGMENT */))
                         ]),
-                        _createElementVNode("div", _hoisted_1853, [
+                        _createElementVNode("div", _hoisted_1871, [
                           _createElementVNode("button", {
-                            onClick: _cache[314] || (_cache[314] = $event => {_ctx.guide.place = 'gym'; _ctx.guide.selected = []}),
+                            onClick: _cache[315] || (_cache[315] = $event => {_ctx.guide.place = 'gym'; _ctx.guide.selected = []; _ctx.guide.session = ''}),
                             class: _normalizeClass(["py-1.5 rounded-lg text-[11px] font-bold transition-all", _ctx.guide.place === 'gym' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'])
                           }, _toDisplayString(_ctx.$t("🏋️ In palestra")), 3 /* TEXT, CLASS */),
                           _createElementVNode("button", {
-                            onClick: _cache[315] || (_cache[315] = $event => {_ctx.guide.place = 'home'; _ctx.guide.selected = []}),
+                            onClick: _cache[316] || (_cache[316] = $event => {_ctx.guide.place = 'home'; _ctx.guide.selected = []; _ctx.guide.session = ''}),
                             class: _normalizeClass(["py-1.5 rounded-lg text-[11px] font-bold transition-all", _ctx.guide.place === 'home' ? 'bg-arancione/10 text-arancione' : 'text-gray-400'])
                           }, _toDisplayString(_ctx.$t("🏠 A casa")), 3 /* TEXT, CLASS */)
                         ])
@@ -13019,115 +13138,138 @@ return function render(_ctx, _cache) {
                   class: _normalizeClass(["flex-1 overflow-y-auto px-5 py-4 space-y-3", _ctx.guide.selected.length ? 'pb-28' : 'pb-8'])
                 }, [
                   (_ctx.guide.tab === 'sport' && _ctx.SPORT_PROGRAMS[_ctx.guide.sport])
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_1854, [
-                        _createElementVNode("div", _hoisted_1855, _toDisplayString(_ctx.$t("Per migliorare a {0}", [(_ctx.guide.sport)])), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_1856, _toDisplayString(_ctx.$tv(_ctx.SPORT_PROGRAMS[_ctx.guide.sport].focus)), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_1857, _toDisplayString(_ctx.$t("{0} · 2 volte a settimana, lontano dalla partita.", [(_ctx.guide.place === 'gym' ? 'In palestra, con pesi e macchine' : 'A casa, senza attrezzi o quasi')])), 1 /* TEXT */)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1872, [
+                        _createElementVNode("div", _hoisted_1873, _toDisplayString(_ctx.$t("Per migliorare a {0}", [(_ctx.guide.sport)])), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_1874, _toDisplayString(_ctx.$tv(_ctx.SPORT_PROGRAMS[_ctx.guide.sport].focus)), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_1875, _toDisplayString(_ctx.$t("{0} · 2 volte a settimana, lontano dalla partita.", [(_ctx.guide.place === 'gym' ? 'In palestra, con pesi e macchine' : 'A casa, senza attrezzi o quasi')])), 1 /* TEXT */),
+                        (_ctx.guide.place === 'gym' && _ctx.SPORT_PROGRAMS[_ctx.guide.sport].fonti)
+                          ? (_openBlock(), _createElementBlock("p", _hoisted_1876, "📚 " + _toDisplayString(_ctx.$tv(_ctx.SPORT_PROGRAMS[_ctx.guide.sport].fonti)), 1 /* TEXT */))
+                          : _createCommentVNode("v-if", true)
+                      ]))
+                    : _createCommentVNode("v-if", true),
+                  (_ctx.guide.tab === 'sport' && _ctx.guide.place === 'gym' && _ctx.guideExercises.length >= 12)
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_1877, [
+                        _createElementVNode("p", _hoisted_1878, _toDisplayString(_ctx.$t("Non serve farli tutti: scegli una seduta pronta e alternale nella settimana.")), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_1879, [
+                          (_openBlock(), _createElementBlock(_Fragment, null, _renderList(['A', 'B'], (L) => {
+                            return _createElementVNode("button", {
+                              key: 'gsa' + L,
+                              onClick: $event => (_ctx.selectGuideSession(L)),
+                              class: _normalizeClass(["py-2.5 rounded-xl text-xs font-extrabold border transition-all active:scale-95", _ctx.guide.session === L ? 'bg-arancione text-white border-arancione' : 'bg-arancione/10 text-arancione border-arancione/20'])
+                            }, _toDisplayString(_ctx.$t("Seduta {0} · {1} esercizi", [(L), (_ctx.guideSessionIds(L).length)])), 11 /* TEXT, CLASS, PROPS */, _hoisted_1880)
+                          }), 64 /* STABLE_FRAGMENT */))
+                        ])
                       ]))
                     : _createCommentVNode("v-if", true),
                   (_ctx.guide.tab !== 'programs')
-                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
-                        _createElementVNode("div", _hoisted_1858, [
-                          _createElementVNode("span", _hoisted_1859, _toDisplayString(_ctx.$t("{0} {1} · tocca per sceglierli", [(_ctx.guideExercises.length), ((_ctx.guideExercises.length) === 1 ? 'esercizio' : 'esercizi')])), 1 /* TEXT */),
+                    ? (_openBlock(), _createElementBlock(_Fragment, { key: 2 }, [
+                        _createElementVNode("div", _hoisted_1881, [
+                          _createElementVNode("span", _hoisted_1882, _toDisplayString(_ctx.$t("{0} {1} · tocca per sceglierli", [(_ctx.guideExercises.length), ((_ctx.guideExercises.length) === 1 ? 'esercizio' : 'esercizi')])), 1 /* TEXT */),
                           _createElementVNode("button", {
-                            onClick: _cache[316] || (_cache[316] = (...args) => (_ctx.selectAllGuide && _ctx.selectAllGuide(...args))),
+                            onClick: _cache[317] || (_cache[317] = (...args) => (_ctx.selectAllGuide && _ctx.selectAllGuide(...args))),
                             class: "text-[11px] font-bold text-arancione"
                           }, _toDisplayString(_ctx.$tv(_ctx.guide.selected.length === _ctx.guideExercises.length ? 'Nessuno' : 'Tutti')), 1 /* TEXT */)
                         ]),
-                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.guideExercises, (item) => {
-                          return (_openBlock(), _createElementBlock("button", {
-                            key: 'ge' + item.id,
-                            onClick: $event => (_ctx.toggleGuideSelect(item.id)),
-                            class: _normalizeClass(["w-full text-left bg-white rounded-2xl p-4 border shadow-sm flex gap-3 items-start transition-all", _ctx.guide.selected.includes(item.id) ? 'border-arancione ring-2 ring-arancione/20' : 'border-gray-100'])
+                        (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.guideExercises, (item, idx) => {
+                          return (_openBlock(), _createElementBlock(_Fragment, {
+                            key: 'ge' + item.id
                           }, [
-                            _createElementVNode("div", {
-                              class: _normalizeClass(["w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all", _ctx.guide.selected.includes(item.id) ? 'bg-arancione border-arancione text-white' : 'border-gray-300'])
+                            (_ctx.guide.tab === 'sport' && _ctx.guideBlockStart(idx) && _ctx.SPORT_BLOCKS[item.b])
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_1883, _toDisplayString(_ctx.$tv(_ctx.SPORT_BLOCKS[item.b].icon)) + " " + _toDisplayString(_ctx.$tv(_ctx.SPORT_BLOCKS[item.b].label)), 1 /* TEXT */))
+                              : _createCommentVNode("v-if", true),
+                            _createElementVNode("button", {
+                              onClick: $event => (_ctx.toggleGuideSelect(item.id)),
+                              class: _normalizeClass(["w-full text-left bg-white rounded-2xl p-4 border shadow-sm flex gap-3 items-start transition-all", _ctx.guide.selected.includes(item.id) ? 'border-arancione ring-2 ring-arancione/20' : 'border-gray-100'])
                             }, [
-                              (_ctx.guide.selected.includes(item.id))
-                                ? (_openBlock(), _createElementBlock("svg", _hoisted_1861, [...(_cache[638] || (_cache[638] = [
-                                    _createElementVNode("path", {
-                                      "stroke-linecap": "round",
-                                      "stroke-linejoin": "round",
-                                      d: "M5 13l4 4L19 7"
-                                    }, null, -1 /* CACHED */)
-                                  ]))]))
-                                : _createCommentVNode("v-if", true)
-                            ], 2 /* CLASS */),
-                            _createElementVNode("div", _hoisted_1862, [
-                              _createElementVNode("div", _hoisted_1863, [
-                                _createElementVNode("span", _hoisted_1864, _toDisplayString(_ctx.$tv(item.n)), 1 /* TEXT */)
-                              ]),
                               _createElementVNode("div", {
-                                class: _normalizeClass(["text-[11px] font-bold mt-0.5", item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'])
-                              }, _toDisplayString(_ctx.$tv(_ctx.guidePrescription(item))), 3 /* TEXT, CLASS */),
-                              (item.why)
-                                ? (_openBlock(), _createElementBlock("p", _hoisted_1865, "🎯 " + _toDisplayString(_ctx.$tv(item.why)), 1 /* TEXT */))
-                                : _createCommentVNode("v-if", true),
-                              _createElementVNode("p", _hoisted_1866, _toDisplayString(_ctx.$tv(item.tip)), 1 /* TEXT */)
-                            ]),
-                            (_ctx.exerciseThumb(item))
-                              ? (_openBlock(), _createElementBlock("span", {
-                                  key: 0,
-                                  onClick: _withModifiers($event => (_ctx.openExerciseInfo(item)), ["stop"]),
-                                  role: "button",
-                                  "aria-label": _ctx.$t("Come si fa"),
-                                  class: "w-16 shrink-0 rounded-xl bg-gray-50 border border-gray-100 p-1 flex flex-col items-center active:scale-95 transition-transform"
-                                }, [
-                                  (_ctx.exercisePhoto(item))
-                                    ? (_openBlock(), _createElementBlock("img", {
-                                        key: 0,
-                                        src: _ctx.exercisePhoto(item),
-                                        alt: "",
-                                        loading: "lazy",
-                                        class: "block w-full aspect-square object-cover rounded-lg"
-                                      }, null, 8 /* PROPS */, _hoisted_1868))
-                                    : (_openBlock(), _createElementBlock("span", {
-                                        key: 1,
-                                        class: "block w-full aspect-square",
-                                        innerHTML: _ctx.exerciseThumb(item)
-                                      }, null, 8 /* PROPS */, _hoisted_1869)),
-                                  _createElementVNode("span", _hoisted_1870, _toDisplayString(_ctx.$t("Come si fa")), 1 /* TEXT */)
-                                ], 8 /* PROPS */, _hoisted_1867))
-                              : _createCommentVNode("v-if", true)
-                          ], 10 /* CLASS, PROPS */, _hoisted_1860))
+                                class: _normalizeClass(["w-6 h-6 mt-0.5 rounded-lg border-2 flex items-center justify-center flex-shrink-0 transition-all", _ctx.guide.selected.includes(item.id) ? 'bg-arancione border-arancione text-white' : 'border-gray-300'])
+                              }, [
+                                (_ctx.guide.selected.includes(item.id))
+                                  ? (_openBlock(), _createElementBlock("svg", _hoisted_1885, [...(_cache[639] || (_cache[639] = [
+                                      _createElementVNode("path", {
+                                        "stroke-linecap": "round",
+                                        "stroke-linejoin": "round",
+                                        d: "M5 13l4 4L19 7"
+                                      }, null, -1 /* CACHED */)
+                                    ]))]))
+                                  : _createCommentVNode("v-if", true)
+                              ], 2 /* CLASS */),
+                              _createElementVNode("div", _hoisted_1886, [
+                                _createElementVNode("div", _hoisted_1887, [
+                                  _createElementVNode("span", _hoisted_1888, _toDisplayString(_ctx.$tv(item.n)), 1 /* TEXT */)
+                                ]),
+                                _createElementVNode("div", {
+                                  class: _normalizeClass(["text-[11px] font-bold mt-0.5", item.t === 'cardio' ? 'text-sky-600' : 'text-arancione'])
+                                }, _toDisplayString(_ctx.$tv(_ctx.guidePrescription(item))), 3 /* TEXT, CLASS */),
+                                (item.why)
+                                  ? (_openBlock(), _createElementBlock("p", _hoisted_1889, "🎯 " + _toDisplayString(_ctx.$tv(item.why)), 1 /* TEXT */))
+                                  : _createCommentVNode("v-if", true),
+                                _createElementVNode("p", _hoisted_1890, _toDisplayString(_ctx.$tv(item.tip)), 1 /* TEXT */)
+                              ]),
+                              (_ctx.exerciseThumb(item))
+                                ? (_openBlock(), _createElementBlock("span", {
+                                    key: 0,
+                                    onClick: _withModifiers($event => (_ctx.openExerciseInfo(item)), ["stop"]),
+                                    role: "button",
+                                    "aria-label": _ctx.$t("Come si fa"),
+                                    class: "w-16 shrink-0 rounded-xl bg-gray-50 border border-gray-100 p-1 flex flex-col items-center active:scale-95 transition-transform"
+                                  }, [
+                                    (_ctx.exercisePhoto(item))
+                                      ? (_openBlock(), _createElementBlock("img", {
+                                          key: 0,
+                                          src: _ctx.exercisePhoto(item),
+                                          alt: "",
+                                          loading: "lazy",
+                                          class: "block w-full aspect-square object-cover rounded-lg"
+                                        }, null, 8 /* PROPS */, _hoisted_1892))
+                                      : (_openBlock(), _createElementBlock("span", {
+                                          key: 1,
+                                          class: "block w-full aspect-square",
+                                          innerHTML: _ctx.exerciseThumb(item)
+                                        }, null, 8 /* PROPS */, _hoisted_1893)),
+                                    _createElementVNode("span", _hoisted_1894, _toDisplayString(_ctx.$t("Come si fa")), 1 /* TEXT */)
+                                  ], 8 /* PROPS */, _hoisted_1891))
+                                : _createCommentVNode("v-if", true)
+                            ], 10 /* CLASS, PROPS */, _hoisted_1884)
+                          ], 64 /* STABLE_FRAGMENT */))
                         }), 128 /* KEYED_FRAGMENT */))
                       ], 64 /* STABLE_FRAGMENT */))
-                    : (_openBlock(true), _createElementBlock(_Fragment, { key: 2 }, _renderList(_ctx.WORKOUT_PROGRAMS, (program) => {
+                    : (_openBlock(true), _createElementBlock(_Fragment, { key: 3 }, _renderList(_ctx.WORKOUT_PROGRAMS, (program) => {
                         return (_openBlock(), _createElementBlock("div", {
                           key: 'gp' + program.id,
                           class: "bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3"
                         }, [
-                          _createElementVNode("div", _hoisted_1871, [
-                            _createElementVNode("div", _hoisted_1872, _toDisplayString(_ctx.$tv(program.icon)), 1 /* TEXT */),
-                            _createElementVNode("div", _hoisted_1873, [
-                              _createElementVNode("div", _hoisted_1874, _toDisplayString(_ctx.$tv(program.name)), 1 /* TEXT */),
-                              _createElementVNode("div", _hoisted_1875, _toDisplayString(_ctx.$tv(program.level)) + " · " + _toDisplayString(_ctx.$tv(program.place === 'home' ? 'A casa' : 'In palestra')) + " · " + _toDisplayString(_ctx.$tv(program.days.length)) + " " + _toDisplayString(_ctx.$tv(program.days.length === 1 ? 'giorno' : 'giorni')), 1 /* TEXT */),
-                              _createElementVNode("p", _hoisted_1876, _toDisplayString(_ctx.$tv(program.desc)), 1 /* TEXT */)
+                          _createElementVNode("div", _hoisted_1895, [
+                            _createElementVNode("div", _hoisted_1896, _toDisplayString(_ctx.$tv(program.icon)), 1 /* TEXT */),
+                            _createElementVNode("div", _hoisted_1897, [
+                              _createElementVNode("div", _hoisted_1898, _toDisplayString(_ctx.$tv(program.name)), 1 /* TEXT */),
+                              _createElementVNode("div", _hoisted_1899, _toDisplayString(_ctx.$tv(program.level)) + " · " + _toDisplayString(_ctx.$tv(program.place === 'home' ? 'A casa' : 'In palestra')) + " · " + _toDisplayString(_ctx.$tv(program.days.length)) + " " + _toDisplayString(_ctx.$tv(program.days.length === 1 ? 'giorno' : 'giorni')), 1 /* TEXT */),
+                              _createElementVNode("p", _hoisted_1900, _toDisplayString(_ctx.$tv(program.desc)), 1 /* TEXT */)
                             ])
                           ]),
-                          _createElementVNode("div", _hoisted_1877, [
+                          _createElementVNode("div", _hoisted_1901, [
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(program.days, (day) => {
                               return (_openBlock(), _createElementBlock("div", {
                                 key: program.id + day.name,
                                 class: "bg-gray-50 rounded-xl px-3 py-2"
                               }, [
-                                _createElementVNode("div", _hoisted_1878, _toDisplayString(_ctx.$tv(day.name)), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_1879, _toDisplayString(_ctx.$tv(_ctx.programExerciseNames(day))), 1 /* TEXT */)
+                                _createElementVNode("div", _hoisted_1902, _toDisplayString(_ctx.$tv(day.name)), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_1903, _toDisplayString(_ctx.$tv(_ctx.programExerciseNames(day))), 1 /* TEXT */)
                               ]))
                             }), 128 /* KEYED_FRAGMENT */))
                           ]),
                           _createElementVNode("button", {
                             onClick: $event => (_ctx.createProgramSheet(program)),
                             class: "w-full bg-arancione text-white font-bold py-3 rounded-xl text-sm active:scale-95 transition-all"
-                          }, _toDisplayString(_ctx.$t("Crea questa scheda")), 9 /* TEXT, PROPS */, _hoisted_1880)
+                          }, _toDisplayString(_ctx.$t("Crea questa scheda")), 9 /* TEXT, PROPS */, _hoisted_1904)
                         ]))
                       }), 128 /* KEYED_FRAGMENT */)),
-                  _createElementVNode("p", _hoisted_1881, _toDisplayString(_ctx.$t("Consigli generali per chi si allena da solo. Se hai dolori, infortuni o problemi di salute, chiedi prima a un medico o a un personal trainer.")), 1 /* TEXT */)
+                  _createElementVNode("p", _hoisted_1905, _toDisplayString(_ctx.$t("Consigli generali per chi si allena da solo. Se hai dolori, infortuni o problemi di salute, chiedi prima a un medico o a un personal trainer.")), 1 /* TEXT */)
                 ], 2 /* CLASS */),
                 (_ctx.guide.selected.length && !_ctx.guide.picker)
-                  ? (_openBlock(), _createElementBlock("div", _hoisted_1882, [
+                  ? (_openBlock(), _createElementBlock("div", _hoisted_1906, [
                       _createElementVNode("button", {
-                        onClick: _cache[317] || (_cache[317] = (...args) => (_ctx.openGuidePicker && _ctx.openGuidePicker(...args))),
+                        onClick: _cache[318] || (_cache[318] = (...args) => (_ctx.openGuidePicker && _ctx.openGuidePicker(...args))),
                         class: "w-full bg-arancione text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
                       }, _toDisplayString(_ctx.$t("Aggiungi {0} {1} alla scheda", [(_ctx.guide.selected.length), (_ctx.guide.selected.length === 1 ? 'esercizio' : 'esercizi')])) + " ", 1 /* TEXT */)
                     ]))
@@ -13136,16 +13278,16 @@ return function render(_ctx, _cache) {
                   ? (_openBlock(), _createElementBlock("div", {
                       key: 1,
                       class: "absolute inset-0 bg-antracite/40 backdrop-blur-sm flex items-end",
-                      onClick: _cache[323] || (_cache[323] = _withModifiers($event => (_ctx.guide.picker = false), ["self"]))
+                      onClick: _cache[324] || (_cache[324] = _withModifiers($event => (_ctx.guide.picker = false), ["self"]))
                     }, [
-                      _createElementVNode("div", _hoisted_1883, [
-                        _createElementVNode("div", _hoisted_1884, [
-                          _createElementVNode("h3", _hoisted_1885, _toDisplayString(_ctx.$t("Dove li aggiungo?")), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_1907, [
+                        _createElementVNode("div", _hoisted_1908, [
+                          _createElementVNode("h3", _hoisted_1909, _toDisplayString(_ctx.$t("Dove li aggiungo?")), 1 /* TEXT */),
                           _createElementVNode("button", {
-                            onClick: _cache[318] || (_cache[318] = $event => (_ctx.guide.picker = false)),
+                            onClick: _cache[319] || (_cache[319] = $event => (_ctx.guide.picker = false)),
                             class: "p-1 text-gray-400",
                             "aria-label": _ctx.$t("Chiudi")
-                          }, [...(_cache[639] || (_cache[639] = [
+                          }, [...(_cache[640] || (_cache[640] = [
                             _createElementVNode("svg", {
                               class: "w-6 h-6",
                               fill: "none",
@@ -13159,52 +13301,52 @@ return function render(_ctx, _cache) {
                                 d: "M6 18L18 6M6 6l12 12"
                               })
                             ], -1 /* CACHED */)
-                          ]))], 8 /* PROPS */, _hoisted_1886)
+                          ]))], 8 /* PROPS */, _hoisted_1910)
                         ]),
-                        _createElementVNode("div", _hoisted_1887, [
+                        _createElementVNode("div", _hoisted_1911, [
                           (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.workoutSheets, (sheet) => {
                             return (_openBlock(), _createElementBlock("button", {
                               key: 'gps' + sheet.id,
                               onClick: $event => {_ctx.guide.sheetId = sheet.id; _ctx.guide.dayIdx = 0},
                               class: _normalizeClass(["w-full text-left px-4 py-3 rounded-2xl border text-sm font-bold transition-all", _ctx.guide.sheetId === sheet.id ? 'border-arancione bg-arancione/10 text-antracite' : 'border-gray-200 text-gray-600'])
-                            }, _toDisplayString(_ctx.$tv(sheet.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1888))
+                            }, _toDisplayString(_ctx.$tv(sheet.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1912))
                           }), 128 /* KEYED_FRAGMENT */)),
                           _createElementVNode("button", {
-                            onClick: _cache[319] || (_cache[319] = $event => (_ctx.guide.sheetId = 'new')),
+                            onClick: _cache[320] || (_cache[320] = $event => (_ctx.guide.sheetId = 'new')),
                             class: _normalizeClass(["w-full text-left px-4 py-3 rounded-2xl border text-sm font-bold transition-all", _ctx.guide.sheetId === 'new' ? 'border-arancione bg-arancione/10 text-antracite' : 'border-gray-200 text-gray-600'])
                           }, _toDisplayString(_ctx.$t("＋ Nuova scheda")), 3 /* TEXT, CLASS */)
                         ]),
                         (_ctx.guide.sheetId === 'new')
-                          ? (_openBlock(), _createElementBlock("div", _hoisted_1889, [
-                              _createElementVNode("label", _hoisted_1890, _toDisplayString(_ctx.$t("Nome della scheda")), 1 /* TEXT */),
+                          ? (_openBlock(), _createElementBlock("div", _hoisted_1913, [
+                              _createElementVNode("label", _hoisted_1914, _toDisplayString(_ctx.$t("Nome della scheda")), 1 /* TEXT */),
                               _withDirectives(_createElementVNode("input", {
                                 type: "text",
-                                "onUpdate:modelValue": _cache[320] || (_cache[320] = $event => ((_ctx.guide.newName) = $event)),
+                                "onUpdate:modelValue": _cache[321] || (_cache[321] = $event => ((_ctx.guide.newName) = $event)),
                                 class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-3 text-sm font-bold text-antracite outline-none"
                               }, null, 512 /* NEED_PATCH */), [
                                 [_vModelText, _ctx.guide.newName]
                               ])
                             ]))
                           : (_ctx.guidePickerSheet)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_1891, [
-                                _createElementVNode("div", _hoisted_1892, _toDisplayString(_ctx.$t("In quale giorno?")), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_1893, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_1915, [
+                                _createElementVNode("div", _hoisted_1916, _toDisplayString(_ctx.$t("In quale giorno?")), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_1917, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.guidePickerSheet.days, (day, i) => {
                                     return (_openBlock(), _createElementBlock("button", {
                                       key: 'gpd' + i,
                                       onClick: $event => (_ctx.guide.dayIdx = i),
                                       class: _normalizeClass(["px-3 py-1.5 rounded-full text-xs font-bold border transition-all", _ctx.guide.dayIdx === i ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'])
-                                    }, _toDisplayString(_ctx.$tv(day.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1894))
+                                    }, _toDisplayString(_ctx.$tv(day.name)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1918))
                                   }), 128 /* KEYED_FRAGMENT */)),
                                   _createElementVNode("button", {
-                                    onClick: _cache[321] || (_cache[321] = $event => (_ctx.guide.dayIdx = 'new')),
+                                    onClick: _cache[322] || (_cache[322] = $event => (_ctx.guide.dayIdx = 'new')),
                                     class: _normalizeClass(["px-3 py-1.5 rounded-full text-xs font-bold border transition-all", _ctx.guide.dayIdx === 'new' ? 'bg-antracite text-white border-antracite' : 'bg-white text-gray-500 border-gray-200'])
                                   }, _toDisplayString(_ctx.$t("＋ Nuovo giorno")), 3 /* TEXT, CLASS */)
                                 ])
                               ]))
                             : _createCommentVNode("v-if", true),
                         _createElementVNode("button", {
-                          onClick: _cache[322] || (_cache[322] = (...args) => (_ctx.confirmGuideAdd && _ctx.confirmGuideAdd(...args))),
+                          onClick: _cache[323] || (_cache[323] = (...args) => (_ctx.confirmGuideAdd && _ctx.confirmGuideAdd(...args))),
                           class: "w-full bg-arancione text-white font-extrabold py-4 rounded-2xl shadow-lg active:scale-95 transition-all"
                         }, _toDisplayString(_ctx.$t("Aggiungi")), 1 /* TEXT */)
                       ])
@@ -13216,19 +13358,19 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 35,
                 class: "fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-antracite/40 backdrop-blur-sm animate-fadeIn",
-                onClick: _cache[327] || (_cache[327] = _withModifiers($event => (_ctx.petModal.isOpen = false), ["self"]))
+                onClick: _cache[328] || (_cache[328] = _withModifiers($event => (_ctx.petModal.isOpen = false), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_1895, [
+                _createElementVNode("div", _hoisted_1919, [
                   _createElementVNode("div", {
                     class: "relative px-6 pt-6 pb-5 text-center",
                     style: _normalizeStyle({ background: 'linear-gradient(160deg, ' + _ctx.petState.color + '33, transparent 75%)' })
                   }, [
                     _createElementVNode("button", {
-                      onClick: _cache[324] || (_cache[324] = $event => (_ctx.petModal.isOpen = false)),
+                      onClick: _cache[325] || (_cache[325] = $event => (_ctx.petModal.isOpen = false)),
                       class: "absolute top-4 right-4 w-8 h-8 rounded-full bg-white/70 text-gray-500 flex items-center justify-center text-lg font-bold"
                     }, "×"),
                     _createElementVNode("button", {
-                      onClick: _cache[325] || (_cache[325] = (...args) => (_ctx.petDance && _ctx.petDance(...args))),
+                      onClick: _cache[326] || (_cache[326] = (...args) => (_ctx.petDance && _ctx.petDance(...args))),
                       class: "block w-36 h-36 mx-auto",
                       "aria-label": _ctx.$t("Fai ballare il compagno")
                     }, [
@@ -13236,16 +13378,16 @@ return function render(_ctx, _cache) {
                         ref: "petMainBox",
                         class: _normalizeClass(["w-full h-full", _ctx.petDanceClass || ('pet-bob' + (_ctx.petState.mood === 'sleepy' ? ' pet-sleep' : ''))]),
                         innerHTML: _ctx.petMainSvg
-                      }, null, 10 /* CLASS, PROPS */, _hoisted_1897)
-                    ], 8 /* PROPS */, _hoisted_1896),
-                    _createElementVNode("p", _hoisted_1898, [
+                      }, null, 10 /* CLASS, PROPS */, _hoisted_1921)
+                    ], 8 /* PROPS */, _hoisted_1920),
+                    _createElementVNode("p", _hoisted_1922, [
                       _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.petState.speciesName)), 1 /* TEXT */),
                       (_ctx.petState.legendary)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1899, _toDisplayString(_ctx.$t("· leggendario ✨")), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1923, _toDisplayString(_ctx.$t("· leggendario ✨")), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]),
-                    _createElementVNode("h3", _hoisted_1900, _toDisplayString(_ctx.$tv(_ctx.petState.name)), 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_1901, [
+                    _createElementVNode("h3", _hoisted_1924, _toDisplayString(_ctx.$tv(_ctx.petState.name)), 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_1925, [
                       (_ctx.petState.stage === 0)
                         ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                             _createTextVNode(_toDisplayString(_ctx.$t("Fai qualcosa oggi (un allenamento o un pasto) e l'uovo si schiude. Chissà chi c'è dentro…")), 1 /* TEXT */)
@@ -13260,7 +13402,7 @@ return function render(_ctx, _cache) {
                             ], 64 /* STABLE_FRAGMENT */))
                     ]),
                     (_ctx.petState.nextIn)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_1902, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1926, [
                           _createElementVNode("div", {
                             class: "h-full rounded-full transition-all",
                             style: _normalizeStyle({ width: _ctx.petState.progress + '%', background: _ctx.petState.color })
@@ -13268,13 +13410,13 @@ return function render(_ctx, _cache) {
                         ]))
                       : _createCommentVNode("v-if", true),
                     (_ctx.petState.mood === 'worried')
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_1903, _toDisplayString(_ctx.$t("Ha un po' di ansia: oggi non hai ancora fatto niente 😬")), 1 /* TEXT */))
-                      : (_openBlock(), _createElementBlock("p", _hoisted_1904, _toDisplayString(_ctx.$t("Toccalo per farlo ballare 💃")), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_1927, _toDisplayString(_ctx.$t("Ha un po' di ansia: oggi non hai ancora fatto niente 😬")), 1 /* TEXT */))
+                      : (_openBlock(), _createElementBlock("p", _hoisted_1928, _toDisplayString(_ctx.$t("Toccalo per farlo ballare 💃")), 1 /* TEXT */))
                   ], 4 /* STYLE */),
-                  _createElementVNode("div", _hoisted_1905, [
+                  _createElementVNode("div", _hoisted_1929, [
                     _createElementVNode("div", null, [
-                      _createElementVNode("h4", _hoisted_1906, _toDisplayString(_ctx.$t("Evoluzioni")), 1 /* TEXT */),
-                      _createElementVNode("div", _hoisted_1907, [
+                      _createElementVNode("h4", _hoisted_1930, _toDisplayString(_ctx.$t("Evoluzioni")), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_1931, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.petEvolutionPath, (e) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: 'pe' + e.stage,
@@ -13283,27 +13425,27 @@ return function render(_ctx, _cache) {
                             _createElementVNode("div", {
                               class: _normalizeClass(["w-[72px] h-[72px] rounded-2xl p-1 border-2", e.current ? 'border-arancione bg-arancione/10' : (e.reached ? 'border-transparent bg-gray-50' : 'border-transparent bg-gray-100')]),
                               innerHTML: e.svg
-                            }, null, 10 /* CLASS, PROPS */, _hoisted_1908),
+                            }, null, 10 /* CLASS, PROPS */, _hoisted_1932),
                             _createElementVNode("div", {
                               class: _normalizeClass(["text-[9px] font-extrabold mt-1 leading-tight", e.reached ? 'text-antracite' : 'text-gray-400'])
                             }, _toDisplayString(_ctx.$tv(e.name)), 3 /* TEXT, CLASS */),
-                            _createElementVNode("div", _hoisted_1909, _toDisplayString(_ctx.$tv(e.days === 0 ? 'inizio' : e.days + (e.days === 1 ? ' giorno' : ' gg'))), 1 /* TEXT */)
+                            _createElementVNode("div", _hoisted_1933, _toDisplayString(_ctx.$tv(e.days === 0 ? 'inizio' : e.days + (e.days === 1 ? ' giorno' : ' gg'))), 1 /* TEXT */)
                           ]))
                         }), 128 /* KEYED_FRAGMENT */))
                       ])
                     ]),
                     _createElementVNode("div", null, [
-                      _createElementVNode("h4", _hoisted_1910, _toDisplayString(_ctx.$t("Guardaroba")), 1 /* TEXT */),
-                      _createElementVNode("div", _hoisted_1911, [
+                      _createElementVNode("h4", _hoisted_1934, _toDisplayString(_ctx.$t("Guardaroba")), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_1935, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.PET_SLOTS, (slot) => {
                           return (_openBlock(), _createElementBlock("button", {
                             key: 'ps' + slot.id,
                             onClick: $event => (_ctx.petModal.tab = slot.id),
                             class: _normalizeClass(["flex-1 py-2 rounded-xl text-xs font-extrabold transition-colors", _ctx.petModal.tab === slot.id ? 'bg-antracite text-white' : 'bg-gray-100 text-gray-500'])
-                          }, _toDisplayString(_ctx.$tv(slot.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1912))
+                          }, _toDisplayString(_ctx.$tv(slot.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_1936))
                         }), 128 /* KEYED_FRAGMENT */))
                       ]),
-                      _createElementVNode("div", _hoisted_1913, [
+                      _createElementVNode("div", _hoisted_1937, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.petItems.filter(i => i.slot === _ctx.petModal.tab), (item) => {
                           return (_openBlock(), _createElementBlock("button", {
                             key: 'pi' + item.id,
@@ -13313,21 +13455,21 @@ return function render(_ctx, _cache) {
                             _createElementVNode("div", {
                               class: _normalizeClass(["w-full aspect-square", item.unlocked ? '' : 'opacity-30 grayscale']),
                               innerHTML: _ctx.petItemPreview(item)
-                            }, null, 10 /* CLASS, PROPS */, _hoisted_1915),
+                            }, null, 10 /* CLASS, PROPS */, _hoisted_1939),
                             _createElementVNode("div", {
                               class: _normalizeClass(["text-[9px] font-extrabold leading-tight pb-1", item.unlocked ? 'text-antracite' : 'text-gray-400'])
                             }, _toDisplayString(_ctx.$tv(item.name)), 3 /* TEXT, CLASS */),
                             (!item.unlocked)
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_1916, "🔒 " + _toDisplayString(_ctx.$tv(item.unlock)) + "g", 1 /* TEXT */))
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_1940, "🔒 " + _toDisplayString(_ctx.$tv(item.unlock)) + "g", 1 /* TEXT */))
                               : _createCommentVNode("v-if", true)
-                          ], 10 /* CLASS, PROPS */, _hoisted_1914))
+                          ], 10 /* CLASS, PROPS */, _hoisted_1938))
                         }), 128 /* KEYED_FRAGMENT */))
                       ]),
-                      _createElementVNode("p", _hoisted_1917, _toDisplayString(_ctx.$t("I vestiti si sbloccano con la tua serie migliore e restano tuoi per sempre.")), 1 /* TEXT */)
+                      _createElementVNode("p", _hoisted_1941, _toDisplayString(_ctx.$t("I vestiti si sbloccano con la tua serie migliore e restano tuoi per sempre.")), 1 /* TEXT */)
                     ]),
                     _createElementVNode("div", null, [
-                      _createElementVNode("h4", _hoisted_1918, _toDisplayString(_ctx.$t("Album dei compagni · {0} su {1}", [(_ctx.petAlbumFound), (_ctx.petAlbum.length)])), 1 /* TEXT */),
-                      _createElementVNode("div", _hoisted_1919, [
+                      _createElementVNode("h4", _hoisted_1942, _toDisplayString(_ctx.$t("Album dei compagni · {0} su {1}", [(_ctx.petAlbumFound), (_ctx.petAlbum.length)])), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_1943, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.petAlbum, (a) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: 'pa' + a.id,
@@ -13336,9 +13478,9 @@ return function render(_ctx, _cache) {
                             _createElementVNode("div", {
                               class: _normalizeClass(["w-full aspect-square rounded-2xl bg-gray-50 p-1", a.locked ? 'opacity-60' : '']),
                               innerHTML: a.svg
-                            }, null, 10 /* CLASS, PROPS */, _hoisted_1920),
+                            }, null, 10 /* CLASS, PROPS */, _hoisted_1944),
                             (a.locked)
-                              ? (_openBlock(), _createElementBlock("div", _hoisted_1921, "🔒"))
+                              ? (_openBlock(), _createElementBlock("div", _hoisted_1945, "🔒"))
                               : _createCommentVNode("v-if", true),
                             _createElementVNode("div", {
                               class: _normalizeClass(["text-[9px] font-extrabold mt-1", a.max ? 'text-antracite' : 'text-gray-400'])
@@ -13346,15 +13488,15 @@ return function render(_ctx, _cache) {
                           ]))
                         }), 128 /* KEYED_FRAGMENT */))
                       ]),
-                      _createElementVNode("p", _hoisted_1922, _toDisplayString(_ctx.$t("Ogni nuova serie fa nascere un compagno a sorpresa. Porta un compagno alla forma finale (60 giorni di fila) e ne sblocchi uno nuovo.")), 1 /* TEXT */)
+                      _createElementVNode("p", _hoisted_1946, _toDisplayString(_ctx.$t("Ogni nuova serie fa nascere un compagno a sorpresa. Porta un compagno alla forma finale (60 giorni di fila) e ne sblocchi uno nuovo.")), 1 /* TEXT */)
                     ]),
                     (_ctx.petState.stage > 0)
                       ? (_openBlock(), _createElementBlock("button", {
                           key: 0,
-                          onClick: _cache[326] || (_cache[326] = (...args) => (_ctx.sharePet && _ctx.sharePet(...args))),
+                          onClick: _cache[327] || (_cache[327] = (...args) => (_ctx.sharePet && _ctx.sharePet(...args))),
                           class: "w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
                         }, [
-                          _cache[640] || (_cache[640] = _createElementVNode("svg", {
+                          _cache[641] || (_cache[641] = _createElementVNode("svg", {
                             class: "w-4 h-4",
                             fill: "none",
                             stroke: "currentColor",
@@ -13378,9 +13520,9 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 36,
                 class: "fixed inset-0 z-[68] flex items-center justify-center p-4 bg-antracite/50 backdrop-blur-sm animate-fadeIn",
-                onClick: _cache[329] || (_cache[329] = _withModifiers($event => (_ctx.petUnlockModal.isOpen = false), ["self"]))
+                onClick: _cache[330] || (_cache[330] = _withModifiers($event => (_ctx.petUnlockModal.isOpen = false), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_1923, [
+                _createElementVNode("div", _hoisted_1947, [
                   _createElementVNode("div", {
                     class: "px-6 pt-8 pb-5",
                     style: _normalizeStyle({ background: 'radial-gradient(circle at 50% 45%, ' + _ctx.PET_SPECIES[_ctx.petUnlockModal.species].color + '55, transparent 70%)' })
@@ -13388,14 +13530,14 @@ return function render(_ctx, _cache) {
                     _createElementVNode("div", {
                       class: "pet-pop w-36 h-36 mx-auto",
                       innerHTML: _ctx.petUnlockSvg
-                    }, null, 8 /* PROPS */, _hoisted_1924),
-                    _createElementVNode("p", _hoisted_1925, _toDisplayString(_ctx.$t("Nuovo compagno sbloccato!")), 1 /* TEXT */),
-                    _createElementVNode("h3", _hoisted_1926, _toDisplayString(_ctx.$tv(_ctx.PET_SPECIES[_ctx.petUnlockModal.species].name)), 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_1927, _toDisplayString(_ctx.$t("Hai portato {0} alla forma finale. Da ora {1} può uscire dalle tue prossime uova.", [(_ctx.petState.speciesName), (_ctx.PET_SPECIES[_ctx.petUnlockModal.species].name)])), 1 /* TEXT */)
+                    }, null, 8 /* PROPS */, _hoisted_1948),
+                    _createElementVNode("p", _hoisted_1949, _toDisplayString(_ctx.$t("Nuovo compagno sbloccato!")), 1 /* TEXT */),
+                    _createElementVNode("h3", _hoisted_1950, _toDisplayString(_ctx.$tv(_ctx.PET_SPECIES[_ctx.petUnlockModal.species].name)), 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_1951, _toDisplayString(_ctx.$t("Hai portato {0} alla forma finale. Da ora {1} può uscire dalle tue prossime uova.", [(_ctx.petState.speciesName), (_ctx.PET_SPECIES[_ctx.petUnlockModal.species].name)])), 1 /* TEXT */)
                   ], 4 /* STYLE */),
-                  _createElementVNode("div", _hoisted_1928, [
+                  _createElementVNode("div", _hoisted_1952, [
                     _createElementVNode("button", {
-                      onClick: _cache[328] || (_cache[328] = $event => (_ctx.petUnlockModal.isOpen = false)),
+                      onClick: _cache[329] || (_cache[329] = $event => (_ctx.petUnlockModal.isOpen = false)),
                       class: "w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm"
                     }, _toDisplayString(_ctx.$t("Fantastico!")), 1 /* TEXT */)
                   ])
@@ -13406,9 +13548,9 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 37,
                 class: "fixed inset-0 z-[68] flex items-center justify-center p-4 bg-antracite/50 backdrop-blur-sm animate-fadeIn",
-                onClick: _cache[332] || (_cache[332] = _withModifiers($event => (_ctx.petEvolveModal.isOpen = false), ["self"]))
+                onClick: _cache[333] || (_cache[333] = _withModifiers($event => (_ctx.petEvolveModal.isOpen = false), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_1929, [
+                _createElementVNode("div", _hoisted_1953, [
                   _createElementVNode("div", {
                     class: "px-6 pt-8 pb-5 pet-glow",
                     style: _normalizeStyle({ background: 'radial-gradient(circle at 50% 45%, ' + _ctx.petState.color + '55, transparent 70%)' })
@@ -13416,24 +13558,24 @@ return function render(_ctx, _cache) {
                     _createElementVNode("div", {
                       class: "pet-pop w-40 h-40 mx-auto",
                       innerHTML: _ctx.petMainSvg
-                    }, null, 8 /* PROPS */, _hoisted_1930),
-                    _createElementVNode("p", _hoisted_1931, _toDisplayString(_ctx.$tv(_ctx.petEvolveModal.hatched ? 'L\'uovo si è schiuso!' : 'Evoluzione!')), 1 /* TEXT */),
-                    _createElementVNode("h3", _hoisted_1932, _toDisplayString(_ctx.$tv(_ctx.petEvolveModal.hatched ? _ctx.$t('È nato {0}', [_ctx.petState.name]) : _ctx.$t('È diventato {0}', [_ctx.petState.name]))), 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_1933, [
+                    }, null, 8 /* PROPS */, _hoisted_1954),
+                    _createElementVNode("p", _hoisted_1955, _toDisplayString(_ctx.$tv(_ctx.petEvolveModal.hatched ? 'L\'uovo si è schiuso!' : 'Evoluzione!')), 1 /* TEXT */),
+                    _createElementVNode("h3", _hoisted_1956, _toDisplayString(_ctx.$tv(_ctx.petEvolveModal.hatched ? _ctx.$t('È nato {0}', [_ctx.petState.name]) : _ctx.$t('È diventato {0}', [_ctx.petState.name]))), 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_1957, [
                       _createTextVNode(_toDisplayString(_ctx.$t("{0} {1} di fila", [(_ctx.streakInfo.current), (_ctx.streakInfo.current === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */),
                       (_ctx.petState.nextIn)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1934, _toDisplayString(_ctx.$t(". Prossima forma tra {0} {1}", [(_ctx.petState.nextIn), (_ctx.petState.nextIn === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1958, _toDisplayString(_ctx.$t(". Prossima forma tra {0} {1}", [(_ctx.petState.nextIn), (_ctx.petState.nextIn === 1 ? 'giorno' : 'giorni')])), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true),
-                      _cache[641] || (_cache[641] = _createTextVNode(".", -1 /* CACHED */))
+                      _cache[642] || (_cache[642] = _createTextVNode(".", -1 /* CACHED */))
                     ])
                   ], 4 /* STYLE */),
-                  _createElementVNode("div", _hoisted_1935, [
+                  _createElementVNode("div", _hoisted_1959, [
                     _createElementVNode("button", {
-                      onClick: _cache[330] || (_cache[330] = (...args) => (_ctx.sharePetEvolution && _ctx.sharePetEvolution(...args))),
+                      onClick: _cache[331] || (_cache[331] = (...args) => (_ctx.sharePetEvolution && _ctx.sharePetEvolution(...args))),
                       class: "w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm shadow-sm"
                     }, _toDisplayString(_ctx.$t("Condividi l'evoluzione")), 1 /* TEXT */),
                     _createElementVNode("button", {
-                      onClick: _cache[331] || (_cache[331] = $event => (_ctx.petEvolveModal.isOpen = false)),
+                      onClick: _cache[332] || (_cache[332] = $event => (_ctx.petEvolveModal.isOpen = false)),
                       class: "w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl active:scale-95 transition-all text-sm"
                     }, _toDisplayString(_ctx.$t("Evvai!")), 1 /* TEXT */)
                   ])
@@ -13441,21 +13583,21 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.welcomeModal.isOpen)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_1936, [
-                _createElementVNode("div", _hoisted_1937, [
-                  _createElementVNode("div", _hoisted_1938, [
-                    _cache[642] || (_cache[642] = _createElementVNode("div", { class: "w-20 h-20 mx-auto rounded-full bg-white shadow-soft flex items-center justify-center text-4xl border-4 border-salvia/30" }, "🌱", -1 /* CACHED */)),
-                    _createElementVNode("p", _hoisted_1939, _toDisplayString(_ctx.$t("Giorno 1")), 1 /* TEXT */),
-                    _createElementVNode("h3", _hoisted_1940, _toDisplayString(_ctx.$t("Ciao {0}, il tuo percorso inizia oggi", [(_ctx.profile && _ctx.profile.firstName)])), 1 /* TEXT */)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_1960, [
+                _createElementVNode("div", _hoisted_1961, [
+                  _createElementVNode("div", _hoisted_1962, [
+                    _cache[643] || (_cache[643] = _createElementVNode("div", { class: "w-20 h-20 mx-auto rounded-full bg-white shadow-soft flex items-center justify-center text-4xl border-4 border-salvia/30" }, "🌱", -1 /* CACHED */)),
+                    _createElementVNode("p", _hoisted_1963, _toDisplayString(_ctx.$t("Giorno 1")), 1 /* TEXT */),
+                    _createElementVNode("h3", _hoisted_1964, _toDisplayString(_ctx.$t("Ciao {0}, il tuo percorso inizia oggi", [(_ctx.profile && _ctx.profile.firstName)])), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_1941, [
-                    _createElementVNode("p", _hoisted_1942, _toDisplayString(_ctx.$t("Ti diamo il benvenuto su STILL. Non serve essere perfetti, serve esserci: un allenamento, un pasto, un giorno alla volta.")) + " ", 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_1943, _toDisplayString(_ctx.$t("Rendilo ufficiale: condividi l'inizio nelle tue storie e fatti tenere d'occhio da chi ti segue.")), 1 /* TEXT */),
+                  _createElementVNode("div", _hoisted_1965, [
+                    _createElementVNode("p", _hoisted_1966, _toDisplayString(_ctx.$t("Ti diamo il benvenuto su STILL. Non serve essere perfetti, serve esserci: un allenamento, un pasto, un giorno alla volta.")) + " ", 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_1967, _toDisplayString(_ctx.$t("Rendilo ufficiale: condividi l'inizio nelle tue storie e fatti tenere d'occhio da chi ti segue.")), 1 /* TEXT */),
                     _createElementVNode("button", {
-                      onClick: _cache[333] || (_cache[333] = (...args) => (_ctx.shareWelcome && _ctx.shareWelcome(...args))),
+                      onClick: _cache[334] || (_cache[334] = (...args) => (_ctx.shareWelcome && _ctx.shareWelcome(...args))),
                       class: "w-full bg-gradient-to-r from-salvia via-arancione to-viola text-white font-bold py-3.5 rounded-xl active:scale-95 transition-all text-sm flex items-center justify-center gap-2 shadow-sm"
                     }, [
-                      _cache[643] || (_cache[643] = _createElementVNode("svg", {
+                      _cache[644] || (_cache[644] = _createElementVNode("svg", {
                         class: "w-4 h-4",
                         fill: "none",
                         stroke: "currentColor",
@@ -13471,7 +13613,7 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Condividi nelle storie")) + " ", 1 /* TEXT */)
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[334] || (_cache[334] = (...args) => (_ctx.closeWelcome && _ctx.closeWelcome(...args))),
+                      onClick: _cache[335] || (_cache[335] = (...args) => (_ctx.closeWelcome && _ctx.closeWelcome(...args))),
                       class: "w-full bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all text-sm"
                     }, _toDisplayString(_ctx.$t("Inizia subito")), 1 /* TEXT */)
                   ])
@@ -13479,30 +13621,30 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.resumeModal.isOpen && _ctx.resumeInfo)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_1944, [
-                _createElementVNode("div", _hoisted_1945, [
-                  _createElementVNode("div", _hoisted_1946, [
-                    _cache[644] || (_cache[644] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-arancione/10 flex items-center justify-center text-xl border border-arancione/20 flex-shrink-0" }, "⏸️", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_1947, [
-                      _createElementVNode("h3", _hoisted_1948, _toDisplayString(_ctx.$t("Allenamento in corso")), 1 /* TEXT */),
-                      _createElementVNode("p", _hoisted_1949, _toDisplayString(_ctx.$tv(_ctx.resumeInfo.title)), 1 /* TEXT */)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_1968, [
+                _createElementVNode("div", _hoisted_1969, [
+                  _createElementVNode("div", _hoisted_1970, [
+                    _cache[645] || (_cache[645] = _createElementVNode("div", { class: "w-11 h-11 rounded-xl bg-arancione/10 flex items-center justify-center text-xl border border-arancione/20 flex-shrink-0" }, "⏸️", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_1971, [
+                      _createElementVNode("h3", _hoisted_1972, _toDisplayString(_ctx.$t("Allenamento in corso")), 1 /* TEXT */),
+                      _createElementVNode("p", _hoisted_1973, _toDisplayString(_ctx.$tv(_ctx.resumeInfo.title)), 1 /* TEXT */)
                     ])
                   ]),
-                  _createElementVNode("p", _hoisted_1950, [
+                  _createElementVNode("p", _hoisted_1974, [
                     _createTextVNode(_toDisplayString(_ctx.$t("Hai lasciato un allenamento a metà, iniziato {0}. Hai completato", [(_ctx.resumeInfo.when)])) + " ", 1 /* TEXT */),
-                    _createElementVNode("b", _hoisted_1951, _toDisplayString(_ctx.$t("{0} serie su {1}", [(_ctx.resumeInfo.done), (_ctx.resumeInfo.total)])), 1 /* TEXT */),
-                    _cache[645] || (_cache[645] = _createTextVNode(". ", -1 /* CACHED */))
+                    _createElementVNode("b", _hoisted_1975, _toDisplayString(_ctx.$t("{0} serie su {1}", [(_ctx.resumeInfo.done), (_ctx.resumeInfo.total)])), 1 /* TEXT */),
+                    _cache[646] || (_cache[646] = _createTextVNode(". ", -1 /* CACHED */))
                   ]),
-                  _createElementVNode("div", _hoisted_1952, [
+                  _createElementVNode("div", _hoisted_1976, [
                     _createElementVNode("button", {
-                      onClick: _cache[335] || (_cache[335] = (...args) => (_ctx.discardSavedWorkout && _ctx.discardSavedWorkout(...args))),
+                      onClick: _cache[336] || (_cache[336] = (...args) => (_ctx.discardSavedWorkout && _ctx.discardSavedWorkout(...args))),
                       class: "flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all text-sm"
                     }, _toDisplayString(_ctx.$t("Termina qui")), 1 /* TEXT */),
                     _createElementVNode("button", {
-                      onClick: _cache[336] || (_cache[336] = (...args) => (_ctx.resumeSavedWorkout && _ctx.resumeSavedWorkout(...args))),
+                      onClick: _cache[337] || (_cache[337] = (...args) => (_ctx.resumeSavedWorkout && _ctx.resumeSavedWorkout(...args))),
                       class: "flex-[1.4] bg-arancione text-white font-bold py-3 rounded-xl hover:bg-arancione/90 active:scale-95 transition-all text-sm flex items-center justify-center gap-1.5"
                     }, [
-                      _cache[646] || (_cache[646] = _createElementVNode("svg", {
+                      _cache[647] || (_cache[647] = _createElementVNode("svg", {
                         class: "w-4 h-4",
                         fill: "currentColor",
                         viewBox: "0 0 24 24"
@@ -13512,26 +13654,26 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Riprendi")) + " ", 1 /* TEXT */)
                     ])
                   ]),
-                  _createElementVNode("p", _hoisted_1953, _toDisplayString(_ctx.$t("\"Termina qui\" salva le statistiche delle serie già fatte.")), 1 /* TEXT */)
+                  _createElementVNode("p", _hoisted_1977, _toDisplayString(_ctx.$t("\"Termina qui\" salva le statistiche delle serie già fatte.")), 1 /* TEXT */)
                 ])
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.sessionStatsModal.isOpen && _ctx.sessionStats)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_1954, [
-                _createElementVNode("div", _hoisted_1955, [
-                  _createElementVNode("div", _hoisted_1956, [
-                    _createElementVNode("div", _hoisted_1957, [
-                      _cache[647] || (_cache[647] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-xl border border-arancione/20 flex-shrink-0" }, "📊", -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_1958, [
-                        _createElementVNode("h3", _hoisted_1959, _toDisplayString(_ctx.$tv(_ctx.sessionStats.session.sheetName || 'Allenamento')), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_1960, _toDisplayString(_ctx.$tv(_ctx.sessionStats.session.dayName ? _ctx.sessionStats.session.dayName + ' · ' : '')) + _toDisplayString(_ctx.$tv(_ctx.sessionStats.dateLabel)), 1 /* TEXT */)
+            ? (_openBlock(), _createElementBlock("div", _hoisted_1978, [
+                _createElementVNode("div", _hoisted_1979, [
+                  _createElementVNode("div", _hoisted_1980, [
+                    _createElementVNode("div", _hoisted_1981, [
+                      _cache[648] || (_cache[648] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-xl border border-arancione/20 flex-shrink-0" }, "📊", -1 /* CACHED */)),
+                      _createElementVNode("div", _hoisted_1982, [
+                        _createElementVNode("h3", _hoisted_1983, _toDisplayString(_ctx.$tv(_ctx.sessionStats.session.sheetName || 'Allenamento')), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_1984, _toDisplayString(_ctx.$tv(_ctx.sessionStats.session.dayName ? _ctx.sessionStats.session.dayName + ' · ' : '')) + _toDisplayString(_ctx.$tv(_ctx.sessionStats.dateLabel)), 1 /* TEXT */)
                       ])
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[337] || (_cache[337] = (...args) => (_ctx.closeSessionStats && _ctx.closeSessionStats(...args))),
+                      onClick: _cache[338] || (_cache[338] = (...args) => (_ctx.closeSessionStats && _ctx.closeSessionStats(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[648] || (_cache[648] = [
+                    }, [...(_cache[649] || (_cache[649] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -13545,25 +13687,25 @@ return function render(_ctx, _cache) {
                           d: "M6 18L18 6M6 6l12 12"
                         })
                       ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_1961)
+                    ]))], 8 /* PROPS */, _hoisted_1985)
                   ]),
-                  _createElementVNode("div", _hoisted_1962, [
-                    _createElementVNode("div", _hoisted_1963, [
+                  _createElementVNode("div", _hoisted_1986, [
+                    _createElementVNode("div", _hoisted_1987, [
                       (_ctx.sessionStats.status === 'completed')
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1964, _toDisplayString(_ctx.$t("✓ Completato")), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1988, _toDisplayString(_ctx.$t("✓ Completato")), 1 /* TEXT */))
                         : (_ctx.sessionStats.status === 'stopped')
-                          ? (_openBlock(), _createElementBlock("span", _hoisted_1965, _toDisplayString(_ctx.$t("Interrotto")), 1 /* TEXT */))
+                          ? (_openBlock(), _createElementBlock("span", _hoisted_1989, _toDisplayString(_ctx.$t("Interrotto")), 1 /* TEXT */))
                           : (_ctx.sessionStats.status === 'logs')
-                            ? (_openBlock(), _createElementBlock("span", _hoisted_1966, _toDisplayString(_ctx.$t("Pesi registrati")), 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("span", _hoisted_1990, _toDisplayString(_ctx.$t("Pesi registrati")), 1 /* TEXT */))
                             : (_ctx.sessionStats.status === 'planned')
-                              ? (_openBlock(), _createElementBlock("span", _hoisted_1967, _toDisplayString(_ctx.$t("In programma")), 1 /* TEXT */))
-                              : (_openBlock(), _createElementBlock("span", _hoisted_1968, _toDisplayString(_ctx.$t("Nessun dato")), 1 /* TEXT */)),
+                              ? (_openBlock(), _createElementBlock("span", _hoisted_1991, _toDisplayString(_ctx.$t("In programma")), 1 /* TEXT */))
+                              : (_openBlock(), _createElementBlock("span", _hoisted_1992, _toDisplayString(_ctx.$t("Nessun dato")), 1 /* TEXT */)),
                       (_ctx.sessionStats.session.time)
-                        ? (_openBlock(), _createElementBlock("span", _hoisted_1969, _toDisplayString(_ctx.$t("ore {0}", [(_ctx.sessionTimeLabel(_ctx.sessionStats.session))])), 1 /* TEXT */))
+                        ? (_openBlock(), _createElementBlock("span", _hoisted_1993, _toDisplayString(_ctx.$t("ore {0}", [(_ctx.sessionTimeLabel(_ctx.sessionStats.session))])), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
                     ]),
                     (!_ctx.sessionStats.exercises.length)
-                      ? (_openBlock(), _createElementBlock("div", _hoisted_1970, [
+                      ? (_openBlock(), _createElementBlock("div", _hoisted_1994, [
                           (_ctx.sessionStats.status === 'planned')
                             ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                                 _createTextVNode(_toDisplayString(_ctx.$t("Questo allenamento non è ancora stato svolto. Le statistiche compariranno qui dopo la sessione guidata.")), 1 /* TEXT */)
@@ -13574,29 +13716,29 @@ return function render(_ctx, _cache) {
                         ]))
                       : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                           (_ctx.sessionStats.totalSeconds !== undefined)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_1971, [
-                                _createElementVNode("div", _hoisted_1972, [
-                                  _createElementVNode("div", _hoisted_1973, _toDisplayString(_ctx.$t("Durata")), 1 /* TEXT */),
-                                  _createElementVNode("div", _hoisted_1974, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.sessionStats.totalSeconds))), 1 /* TEXT */)
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_1995, [
+                                _createElementVNode("div", _hoisted_1996, [
+                                  _createElementVNode("div", _hoisted_1997, _toDisplayString(_ctx.$t("Durata")), 1 /* TEXT */),
+                                  _createElementVNode("div", _hoisted_1998, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.sessionStats.totalSeconds))), 1 /* TEXT */)
                                 ]),
-                                _createElementVNode("div", _hoisted_1975, [
-                                  _createElementVNode("div", _hoisted_1976, _toDisplayString(_ctx.$t("Sotto sforzo")), 1 /* TEXT */),
-                                  _createElementVNode("div", _hoisted_1977, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.sessionStats.workSeconds))), 1 /* TEXT */)
+                                _createElementVNode("div", _hoisted_1999, [
+                                  _createElementVNode("div", _hoisted_2000, _toDisplayString(_ctx.$t("Sotto sforzo")), 1 /* TEXT */),
+                                  _createElementVNode("div", _hoisted_2001, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.sessionStats.workSeconds))), 1 /* TEXT */)
                                 ]),
-                                _createElementVNode("div", _hoisted_1978, [
-                                  _createElementVNode("div", _hoisted_1979, _toDisplayString(_ctx.$t("Serie")), 1 /* TEXT */),
-                                  _createElementVNode("div", _hoisted_1980, [
+                                _createElementVNode("div", _hoisted_2002, [
+                                  _createElementVNode("div", _hoisted_2003, _toDisplayString(_ctx.$t("Serie")), 1 /* TEXT */),
+                                  _createElementVNode("div", _hoisted_2004, [
                                     _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.sessionStats.sets)), 1 /* TEXT */),
-                                    _createElementVNode("span", _hoisted_1981, "/" + _toDisplayString(_ctx.$tv(_ctx.sessionStats.setsPlanned)), 1 /* TEXT */)
+                                    _createElementVNode("span", _hoisted_2005, "/" + _toDisplayString(_ctx.$tv(_ctx.sessionStats.setsPlanned)), 1 /* TEXT */)
                                   ])
                                 ]),
-                                _createElementVNode("div", _hoisted_1982, [
-                                  _createElementVNode("div", _hoisted_1983, _toDisplayString(_ctx.$tv(_ctx.sessionStats.volume ? 'Volume' : 'Esercizi')), 1 /* TEXT */),
-                                  _createElementVNode("div", _hoisted_1984, [
+                                _createElementVNode("div", _hoisted_2006, [
+                                  _createElementVNode("div", _hoisted_2007, _toDisplayString(_ctx.$tv(_ctx.sessionStats.volume ? 'Volume' : 'Esercizi')), 1 /* TEXT */),
+                                  _createElementVNode("div", _hoisted_2008, [
                                     (_ctx.sessionStats.volume)
                                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                                           _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatNumber(_ctx.sessionStats.volume))), 1 /* TEXT */),
-                                          _createElementVNode("span", _hoisted_1985, _toDisplayString(_ctx.$t("kg")), 1 /* TEXT */)
+                                          _createElementVNode("span", _hoisted_2009, _toDisplayString(_ctx.$t("kg")), 1 /* TEXT */)
                                         ], 64 /* STABLE_FRAGMENT */))
                                       : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                                           _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.sessionStats.exercises.length)), 1 /* TEXT */)
@@ -13606,50 +13748,50 @@ return function render(_ctx, _cache) {
                               ]))
                             : _createCommentVNode("v-if", true),
                           (_ctx.statsImproved > 0)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_1986, _toDisplayString(_ctx.$t("📈 Hai aumentato il carico in {0} {1} rispetto alla volta precedente.", [(_ctx.statsImproved), (_ctx.statsImproved === 1 ? 'esercizio' : 'esercizi')])) + " ", 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_2010, _toDisplayString(_ctx.$t("📈 Hai aumentato il carico in {0} {1} rispetto alla volta precedente.", [(_ctx.statsImproved), (_ctx.statsImproved === 1 ? 'esercizio' : 'esercizi')])) + " ", 1 /* TEXT */))
                             : _createCommentVNode("v-if", true),
-                          _createElementVNode("div", _hoisted_1987, [
-                            _createElementVNode("h4", _hoisted_1988, _toDisplayString(_ctx.$t("Esercizi")), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_2011, [
+                            _createElementVNode("h4", _hoisted_2012, _toDisplayString(_ctx.$t("Esercizi")), 1 /* TEXT */),
                             (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.sessionStats.exercises, (ex) => {
                               return (_openBlock(), _createElementBlock("div", {
                                 key: 'st-' + ex.id,
                                 class: "bg-gray-50 border border-gray-100 rounded-2xl p-3.5 space-y-2"
                               }, [
-                                _createElementVNode("div", _hoisted_1989, [
-                                  _createElementVNode("div", _hoisted_1990, [
-                                    _createElementVNode("div", _hoisted_1991, [
-                                      _createElementVNode("span", _hoisted_1992, _toDisplayString(_ctx.$tv(ex.name)), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_2013, [
+                                  _createElementVNode("div", _hoisted_2014, [
+                                    _createElementVNode("div", _hoisted_2015, [
+                                      _createElementVNode("span", _hoisted_2016, _toDisplayString(_ctx.$tv(ex.name)), 1 /* TEXT */),
                                       _createElementVNode("span", {
                                         class: _normalizeClass(["text-[9px] font-bold uppercase px-1.5 py-0.5 rounded-md", ex.type === 'cardio' ? 'bg-sky-500/10 text-sky-600' : 'bg-arancione/10 text-arancione'])
                                       }, _toDisplayString(_ctx.$tv(ex.type === 'cardio' ? 'Cardio' : (ex.pyramid ? 'Piramidale' : 'Forza'))), 3 /* TEXT, CLASS */),
                                       (ex.superset)
-                                        ? (_openBlock(), _createElementBlock("span", _hoisted_1993, _toDisplayString(_ctx.$t("SS")), 1 /* TEXT */))
+                                        ? (_openBlock(), _createElementBlock("span", _hoisted_2017, _toDisplayString(_ctx.$t("SS")), 1 /* TEXT */))
                                         : _createCommentVNode("v-if", true)
                                     ]),
                                     (ex.setsPlanned)
-                                      ? (_openBlock(), _createElementBlock("p", _hoisted_1994, [
+                                      ? (_openBlock(), _createElementBlock("p", _hoisted_2018, [
                                           _createTextVNode(_toDisplayString(_ctx.$tv(ex.setsDone)) + "/" + _toDisplayString(_ctx.$tv(ex.setsPlanned)) + " " + _toDisplayString(_ctx.$tv(ex.type === 'cardio' ? 'completato' : 'serie')), 1 /* TEXT */),
                                           (_ctx.statsRepsLabel(ex))
-                                            ? (_openBlock(), _createElementBlock("span", _hoisted_1995, _toDisplayString(_ctx.$t("• {0} rip.", [(_ctx.statsRepsLabel(ex))])), 1 /* TEXT */))
+                                            ? (_openBlock(), _createElementBlock("span", _hoisted_2019, _toDisplayString(_ctx.$t("• {0} rip.", [(_ctx.statsRepsLabel(ex))])), 1 /* TEXT */))
                                             : _createCommentVNode("v-if", true),
                                           (ex.type === 'cardio' && ex.intensity)
-                                            ? (_openBlock(), _createElementBlock("span", _hoisted_1996, " • " + _toDisplayString(_ctx.$tv(ex.intensity)), 1 /* TEXT */))
+                                            ? (_openBlock(), _createElementBlock("span", _hoisted_2020, " • " + _toDisplayString(_ctx.$tv(ex.intensity)), 1 /* TEXT */))
                                             : _createCommentVNode("v-if", true)
                                         ]))
                                       : (ex.type === 'cardio' && ex.intensity)
-                                        ? (_openBlock(), _createElementBlock("p", _hoisted_1997, _toDisplayString(_ctx.$tv(ex.intensity)), 1 /* TEXT */))
+                                        ? (_openBlock(), _createElementBlock("p", _hoisted_2021, _toDisplayString(_ctx.$tv(ex.intensity)), 1 /* TEXT */))
                                         : _createCommentVNode("v-if", true)
                                   ]),
                                   (ex.setsPlanned && ex.setsDone < ex.setsPlanned)
-                                    ? (_openBlock(), _createElementBlock("span", _hoisted_1998, _toDisplayString(_ctx.$t("incompleto")), 1 /* TEXT */))
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_2022, _toDisplayString(_ctx.$t("incompleto")), 1 /* TEXT */))
                                     : _createCommentVNode("v-if", true)
                                 ]),
-                                _createElementVNode("div", _hoisted_1999, [
-                                  _createElementVNode("div", _hoisted_2000, [
+                                _createElementVNode("div", _hoisted_2023, [
+                                  _createElementVNode("div", _hoisted_2024, [
                                     (!ex.firstTime && _ctx.statsDelta(ex) !== null && _ctx.statsDelta(ex) !== 0)
                                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
-                                          _createElementVNode("span", _hoisted_2001, _toDisplayString(_ctx.$tv(_ctx.formatNumber(ex.startValue))), 1 /* TEXT */),
-                                          _cache[649] || (_cache[649] = _createElementVNode("span", { class: "text-[10px] text-gray-400" }, "→", -1 /* CACHED */))
+                                          _createElementVNode("span", _hoisted_2025, _toDisplayString(_ctx.$tv(_ctx.formatNumber(ex.startValue))), 1 /* TEXT */),
+                                          _cache[650] || (_cache[650] = _createElementVNode("span", { class: "text-[10px] text-gray-400" }, "→", -1 /* CACHED */))
                                         ], 64 /* STABLE_FRAGMENT */))
                                       : _createCommentVNode("v-if", true),
                                     _createElementVNode("span", {
@@ -13657,19 +13799,19 @@ return function render(_ctx, _cache) {
                                     }, _toDisplayString(_ctx.$tv(ex.endValue !== null && ex.endValue !== undefined ? _ctx.formatNumber(ex.endValue) : '—')) + " " + _toDisplayString(_ctx.$tv(ex.unit)), 3 /* TEXT, CLASS */)
                                   ]),
                                   (ex.firstTime)
-                                    ? (_openBlock(), _createElementBlock("span", _hoisted_2002, _toDisplayString(_ctx.$t("prima volta")), 1 /* TEXT */))
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_2026, _toDisplayString(_ctx.$t("prima volta")), 1 /* TEXT */))
                                     : (_ctx.statsDelta(ex) !== null)
                                       ? (_openBlock(), _createElementBlock("span", {
                                           key: 1,
                                           class: _normalizeClass(["text-[10px] font-black px-2 py-0.5 rounded-md flex-shrink-0", _ctx.statsDelta(ex) > 0 ? 'bg-salvia/10 text-salvia' : (_ctx.statsDelta(ex) < 0 ? 'bg-red-50 text-red-500' : 'bg-gray-100 text-gray-400')])
                                         }, _toDisplayString(_ctx.$tv(_ctx.statsDelta(ex) > 0 ? '+' : '')) + _toDisplayString(_ctx.$tv(_ctx.statsDelta(ex) === 0 ? 'invariato' : _ctx.formatNumber(_ctx.statsDelta(ex)) + ' ' + ex.unit)), 3 /* TEXT, CLASS */))
-                                      : (_openBlock(), _createElementBlock("span", _hoisted_2003, _toDisplayString(_ctx.$t("prima volta")), 1 /* TEXT */))
+                                      : (_openBlock(), _createElementBlock("span", _hoisted_2027, _toDisplayString(_ctx.$t("prima volta")), 1 /* TEXT */))
                                 ]),
                                 (ex.setsWeights && ex.setsWeights.length)
-                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2004, _toDisplayString(_ctx.$t("Serie: {0} kg", [(ex.setsWeights.map(w => (w === null || w === undefined) ? '—' : _ctx.formatNumber(w)).join(' · '))])) + " ", 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2028, _toDisplayString(_ctx.$t("Serie: {0} kg", [(ex.setsWeights.map(w => (w === null || w === undefined) ? '—' : _ctx.formatNumber(w)).join(' · '))])) + " ", 1 /* TEXT */))
                                   : _createCommentVNode("v-if", true),
                                 (_ctx.statsBaseDelta(ex) !== null && _ctx.statsBaseDelta(ex) !== 0)
-                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2005, [
+                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2029, [
                                       _createTextVNode(_toDisplayString(_ctx.$t("Dalla partenza della scheda:")) + " ", 1 /* TEXT */),
                                       _createElementVNode("span", {
                                         class: _normalizeClass(["font-bold", _ctx.statsBaseDelta(ex) > 0 ? 'text-salvia' : 'text-red-500'])
@@ -13677,11 +13819,11 @@ return function render(_ctx, _cache) {
                                     ]))
                                   : _createCommentVNode("v-if", true),
                                 (ex.setDurations && ex.setDurations.length)
-                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2006, [
+                                  ? (_openBlock(), _createElementBlock("p", _hoisted_2030, [
                                       _createTextVNode(" ⏱️ " + _toDisplayString(_ctx.$tv(ex.type === 'cardio' ? 'Tempo' : 'Tempo medio serie')) + " ", 1 /* TEXT */),
-                                      _createElementVNode("span", _hoisted_2007, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.statsAvgSet(ex)))), 1 /* TEXT */),
+                                      _createElementVNode("span", _hoisted_2031, _toDisplayString(_ctx.$tv(_ctx.formatClock(_ctx.statsAvgSet(ex)))), 1 /* TEXT */),
                                       (ex.setDurations.length > 1)
-                                        ? (_openBlock(), _createElementBlock("span", _hoisted_2008, " (" + _toDisplayString(_ctx.$tv(ex.setDurations.map(sec => _ctx.formatClock(sec)).join(' · '))) + ")", 1 /* TEXT */))
+                                        ? (_openBlock(), _createElementBlock("span", _hoisted_2032, " (" + _toDisplayString(_ctx.$tv(ex.setDurations.map(sec => _ctx.formatClock(sec)).join(' · '))) + ")", 1 /* TEXT */))
                                         : _createCommentVNode("v-if", true)
                                     ]))
                                   : _createCommentVNode("v-if", true)
@@ -13689,22 +13831,22 @@ return function render(_ctx, _cache) {
                             }), 128 /* KEYED_FRAGMENT */))
                           ]),
                           (_ctx.sessionStats.status === 'logs')
-                            ? (_openBlock(), _createElementBlock("p", _hoisted_2009, _toDisplayString(_ctx.$t("Questo allenamento è stato registrato prima della sessione guidata: sono disponibili solo i pesi.")), 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("p", _hoisted_2033, _toDisplayString(_ctx.$t("Questo allenamento è stato registrato prima della sessione guidata: sono disponibili solo i pesi.")), 1 /* TEXT */))
                             : _createCommentVNode("v-if", true)
                         ], 64 /* STABLE_FRAGMENT */))
                   ]),
-                  _createElementVNode("div", _hoisted_2010, [
+                  _createElementVNode("div", _hoisted_2034, [
                     _createElementVNode("button", {
-                      onClick: _cache[338] || (_cache[338] = (...args) => (_ctx.openSheetFromStats && _ctx.openSheetFromStats(...args))),
+                      onClick: _cache[339] || (_cache[339] = (...args) => (_ctx.openSheetFromStats && _ctx.openSheetFromStats(...args))),
                       class: "flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all text-sm"
                     }, _toDisplayString(_ctx.$t("Apri scheda")), 1 /* TEXT */),
                     (_ctx.sessionStats.session.report && _ctx.sessionStats.session.date === _ctx.sessionStats.dateKey)
                       ? (_openBlock(), _createElementBlock("button", {
                           key: 0,
-                          onClick: _cache[339] || (_cache[339] = $event => (_ctx.openShareStudio('workout', _ctx.sessionStats.session.id))),
+                          onClick: _cache[340] || (_cache[340] = $event => (_ctx.openShareStudio('workout', _ctx.sessionStats.session.id))),
                           class: "w-12 flex-shrink-0 cangiante-btn text-white rounded-xl active:scale-95 transition-all flex items-center justify-center",
                           "aria-label": _ctx.$t("Condividi allenamento")
-                        }, [...(_cache[650] || (_cache[650] = [
+                        }, [...(_cache[651] || (_cache[651] = [
                           _createElementVNode("svg", {
                             class: "w-5 h-5",
                             fill: "none",
@@ -13718,10 +13860,10 @@ return function render(_ctx, _cache) {
                               d: "M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z"
                             })
                           ], -1 /* CACHED */)
-                        ]))], 8 /* PROPS */, _hoisted_2011))
+                        ]))], 8 /* PROPS */, _hoisted_2035))
                       : _createCommentVNode("v-if", true),
                     _createElementVNode("button", {
-                      onClick: _cache[340] || (_cache[340] = (...args) => (_ctx.closeSessionStats && _ctx.closeSessionStats(...args))),
+                      onClick: _cache[341] || (_cache[341] = (...args) => (_ctx.closeSessionStats && _ctx.closeSessionStats(...args))),
                       class: "flex-1 bg-arancione text-white font-bold py-3 rounded-xl hover:bg-arancione/90 active:scale-95 transition-all text-sm"
                     }, _toDisplayString(_ctx.$t("Chiudi")), 1 /* TEXT */)
                   ])
@@ -13729,11 +13871,11 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.trainingDayModal.isOpen)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_2012, [
-                _createElementVNode("div", _hoisted_2013, [
-                  _createElementVNode("div", _hoisted_2014, [
-                    _createElementVNode("div", _hoisted_2015, [
-                      _cache[651] || (_cache[651] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_2036, [
+                _createElementVNode("div", _hoisted_2037, [
+                  _createElementVNode("div", _hoisted_2038, [
+                    _createElementVNode("div", _hoisted_2039, [
+                      _cache[652] || (_cache[652] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -13748,15 +13890,15 @@ return function render(_ctx, _cache) {
                           })
                         ])
                       ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_2016, [
-                        _createElementVNode("h3", _hoisted_2017, _toDisplayString(_ctx.$t("Allenamenti")), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_2018, _toDisplayString(_ctx.$tv(_ctx.trainingDayModal.dateLabel)), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_2040, [
+                        _createElementVNode("h3", _hoisted_2041, _toDisplayString(_ctx.$t("Allenamenti")), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_2042, _toDisplayString(_ctx.$tv(_ctx.trainingDayModal.dateLabel)), 1 /* TEXT */)
                       ])
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[341] || (_cache[341] = (...args) => (_ctx.closeTrainingDay && _ctx.closeTrainingDay(...args))),
+                      onClick: _cache[342] || (_cache[342] = (...args) => (_ctx.closeTrainingDay && _ctx.closeTrainingDay(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[652] || (_cache[652] = [
+                    }, [...(_cache[653] || (_cache[653] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -13772,10 +13914,10 @@ return function render(_ctx, _cache) {
                       ], -1 /* CACHED */)
                     ]))])
                   ]),
-                  _createElementVNode("p", _hoisted_2019, _toDisplayString(_ctx.$tv(_ctx.trainingDaySessions.length)) + " " + _toDisplayString(_ctx.$tv(_ctx.trainingDaySessions.length === 1 ? 'allenamento' : 'allenamenti')), 1 /* TEXT */),
+                  _createElementVNode("p", _hoisted_2043, _toDisplayString(_ctx.$tv(_ctx.trainingDaySessions.length)) + " " + _toDisplayString(_ctx.$tv(_ctx.trainingDaySessions.length === 1 ? 'allenamento' : 'allenamenti')), 1 /* TEXT */),
                   (_ctx.trainingDaySessions.length === 0)
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_2020, _toDisplayString(_ctx.$t("Nessun allenamento in questo giorno.")) + " ", 1 /* TEXT */))
-                    : (_openBlock(), _createElementBlock("div", _hoisted_2021, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_2044, _toDisplayString(_ctx.$t("Nessun allenamento in questo giorno.")) + " ", 1 /* TEXT */))
+                    : (_openBlock(), _createElementBlock("div", _hoisted_2045, [
                         (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.trainingDaySessions, (session) => {
                           return (_openBlock(), _createElementBlock("div", {
                             key: session.id,
@@ -13785,14 +13927,14 @@ return function render(_ctx, _cache) {
                               class: _normalizeClass(["w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 border", session.kind === 'gym' ? 'bg-arancione/10 text-arancione border-arancione/20' : 'bg-sky-500/10 text-sky-600 border-sky-200'])
                             }, [
                               (session.kind === 'gym')
-                                ? (_openBlock(), _createElementBlock("svg", _hoisted_2022, [...(_cache[653] || (_cache[653] = [
+                                ? (_openBlock(), _createElementBlock("svg", _hoisted_2046, [...(_cache[654] || (_cache[654] = [
                                     _createElementVNode("path", {
                                       "stroke-linecap": "round",
                                       "stroke-linejoin": "round",
                                       d: "M6 7v10M18 7v10M3 10v4M21 10v4M6 12h12"
                                     }, null, -1 /* CACHED */)
                                   ]))]))
-                                : (_openBlock(), _createElementBlock("svg", _hoisted_2023, [...(_cache[654] || (_cache[654] = [
+                                : (_openBlock(), _createElementBlock("svg", _hoisted_2047, [...(_cache[655] || (_cache[655] = [
                                     _createElementVNode("path", {
                                       "stroke-linecap": "round",
                                       "stroke-linejoin": "round",
@@ -13804,32 +13946,32 @@ return function render(_ctx, _cache) {
                               class: _normalizeClass(["min-w-0 flex-1", session.kind === 'gym' || _ctx.sportCanCheck(session, _ctx.trainingDayModal.dateKey) ? 'cursor-pointer' : '']),
                               onClick: $event => (_ctx.openTrainingSessionItem(session, _ctx.trainingDayModal.dateKey))
                             }, [
-                              _createElementVNode("div", _hoisted_2025, _toDisplayString(_ctx.$tv(_ctx.trainingSessionLabel(session))), 1 /* TEXT */),
-                              _createElementVNode("div", _hoisted_2026, [
+                              _createElementVNode("div", _hoisted_2049, _toDisplayString(_ctx.$tv(_ctx.trainingSessionLabel(session))), 1 /* TEXT */),
+                              _createElementVNode("div", _hoisted_2050, [
                                 (session.time)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2027, _toDisplayString(_ctx.$tv(_ctx.sessionTimeLabel(session))) + " • ", 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2051, _toDisplayString(_ctx.$tv(_ctx.sessionTimeLabel(session))) + " • ", 1 /* TEXT */))
                                   : _createCommentVNode("v-if", true),
                                 _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.trainingSessionSubtitle(session))), 1 /* TEXT */),
                                 (session.kind === 'gym' && session.report)
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2028, " • " + _toDisplayString(_ctx.$tv(session.completed ? '✓ completato' : 'interrotto')), 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2052, " • " + _toDisplayString(_ctx.$tv(session.completed ? '✓ completato' : 'interrotto')), 1 /* TEXT */))
                                   : _createCommentVNode("v-if", true),
                                 (_ctx.sportStatus(session, _ctx.trainingDayModal.dateKey) === 'done')
-                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2029, _toDisplayString(_ctx.$t("• ✓ fatto")), 1 /* TEXT */))
+                                  ? (_openBlock(), _createElementBlock("span", _hoisted_2053, _toDisplayString(_ctx.$t("• ✓ fatto")), 1 /* TEXT */))
                                   : (_ctx.sportStatus(session, _ctx.trainingDayModal.dateKey) === 'skipped')
-                                    ? (_openBlock(), _createElementBlock("span", _hoisted_2030, _toDisplayString(_ctx.$t("• ✗ non fatto")), 1 /* TEXT */))
+                                    ? (_openBlock(), _createElementBlock("span", _hoisted_2054, _toDisplayString(_ctx.$t("• ✗ non fatto")), 1 /* TEXT */))
                                     : (_ctx.sportCanCheck(session, _ctx.trainingDayModal.dateKey))
-                                      ? (_openBlock(), _createElementBlock("span", _hoisted_2031, _toDisplayString(_ctx.$t("• fatto? ›")), 1 /* TEXT */))
+                                      ? (_openBlock(), _createElementBlock("span", _hoisted_2055, _toDisplayString(_ctx.$t("• fatto? ›")), 1 /* TEXT */))
                                       : _createCommentVNode("v-if", true)
                               ]),
                               (session.note)
-                                ? (_openBlock(), _createElementBlock("div", _hoisted_2032, "📝 " + _toDisplayString(_ctx.$tv(session.note)), 1 /* TEXT */))
+                                ? (_openBlock(), _createElementBlock("div", _hoisted_2056, "📝 " + _toDisplayString(_ctx.$tv(session.note)), 1 /* TEXT */))
                                 : _createCommentVNode("v-if", true)
-                            ], 10 /* CLASS, PROPS */, _hoisted_2024),
+                            ], 10 /* CLASS, PROPS */, _hoisted_2048),
                             _createElementVNode("button", {
                               onClick: $event => (_ctx.editTrainingSession(session, _ctx.trainingDayModal.dateKey)),
                               class: "p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-arancione hover:border-arancione/30 transition-colors flex-shrink-0",
                               "aria-label": _ctx.$t("Modifica allenamento")
-                            }, [...(_cache[655] || (_cache[655] = [
+                            }, [...(_cache[656] || (_cache[656] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -13843,12 +13985,12 @@ return function render(_ctx, _cache) {
                                   d: "M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
                                 })
                               ], -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_2033),
+                            ]))], 8 /* PROPS */, _hoisted_2057),
                             _createElementVNode("button", {
                               onClick: $event => (_ctx.removeTrainingSession(session)),
                               class: "p-2 rounded-xl bg-white border border-gray-200 text-gray-400 hover:text-red-500 hover:border-red-200 transition-colors flex-shrink-0",
                               "aria-label": _ctx.$t("Elimina allenamento")
-                            }, [...(_cache[656] || (_cache[656] = [
+                            }, [...(_cache[657] || (_cache[657] = [
                               _createElementVNode("svg", {
                                 class: "w-4 h-4",
                                 fill: "none",
@@ -13862,15 +14004,15 @@ return function render(_ctx, _cache) {
                                   d: "M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
                                 })
                               ], -1 /* CACHED */)
-                            ]))], 8 /* PROPS */, _hoisted_2034)
+                            ]))], 8 /* PROPS */, _hoisted_2058)
                           ]))
                         }), 128 /* KEYED_FRAGMENT */))
                       ])),
                   _createElementVNode("button", {
-                    onClick: _cache[342] || (_cache[342] = $event => (_ctx.openTrainingForm(_ctx.trainingDayModal.dateKey))),
+                    onClick: _cache[343] || (_cache[343] = $event => (_ctx.openTrainingForm(_ctx.trainingDayModal.dateKey))),
                     class: "w-full py-2.5 border-2 border-dashed border-arancione/40 bg-arancione/5 rounded-xl text-arancione font-bold text-xs hover:bg-arancione/10 transition-colors flex items-center justify-center gap-1.5 shrink-0"
                   }, [
-                    _cache[657] || (_cache[657] = _createElementVNode("svg", {
+                    _cache[658] || (_cache[658] = _createElementVNode("svg", {
                       class: "w-4 h-4",
                       fill: "none",
                       stroke: "currentColor",
@@ -13885,9 +14027,9 @@ return function render(_ctx, _cache) {
                     ], -1 /* CACHED */)),
                     _createTextVNode(" " + _toDisplayString(_ctx.$t("Aggiungi allenamento")) + " ", 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_2035, [
+                  _createElementVNode("div", _hoisted_2059, [
                     _createElementVNode("button", {
-                      onClick: _cache[343] || (_cache[343] = (...args) => (_ctx.closeTrainingDay && _ctx.closeTrainingDay(...args))),
+                      onClick: _cache[344] || (_cache[344] = (...args) => (_ctx.closeTrainingDay && _ctx.closeTrainingDay(...args))),
                       class: "w-full bg-antracite text-white font-bold py-3 rounded-xl hover:bg-antracite/90 active:scale-95 transition-all"
                     }, _toDisplayString(_ctx.$t("Chiudi")), 1 /* TEXT */)
                   ])
@@ -13895,26 +14037,26 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.sportCheckModal.isOpen && _ctx.sportCheckSession)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_2036, [
-                _createElementVNode("div", _hoisted_2037, [
-                  _createElementVNode("div", _hoisted_2038, [
-                    _createElementVNode("div", _hoisted_2039, [
-                      _createElementVNode("div", _hoisted_2040, _toDisplayString(_ctx.$tv(_ctx.sportCheckSession.kind === 'gym' ? '💪' : '🏅')), 1 /* TEXT */),
-                      _createElementVNode("div", _hoisted_2041, [
-                        _createElementVNode("h3", _hoisted_2042, _toDisplayString(_ctx.$tv(_ctx.trainingSessionLabel(_ctx.sportCheckSession))), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_2043, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_2060, [
+                _createElementVNode("div", _hoisted_2061, [
+                  _createElementVNode("div", _hoisted_2062, [
+                    _createElementVNode("div", _hoisted_2063, [
+                      _createElementVNode("div", _hoisted_2064, _toDisplayString(_ctx.$tv(_ctx.sportCheckSession.kind === 'gym' ? '💪' : '🏅')), 1 /* TEXT */),
+                      _createElementVNode("div", _hoisted_2065, [
+                        _createElementVNode("h3", _hoisted_2066, _toDisplayString(_ctx.$tv(_ctx.trainingSessionLabel(_ctx.sportCheckSession))), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_2067, [
                           _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatDateLong(_ctx.sportCheckModal.dateKey))), 1 /* TEXT */),
                           (_ctx.sportCheckSession.time)
-                            ? (_openBlock(), _createElementBlock("span", _hoisted_2044, " • " + _toDisplayString(_ctx.$tv(_ctx.sessionTimeLabel(_ctx.sportCheckSession))), 1 /* TEXT */))
+                            ? (_openBlock(), _createElementBlock("span", _hoisted_2068, " • " + _toDisplayString(_ctx.$tv(_ctx.sessionTimeLabel(_ctx.sportCheckSession))), 1 /* TEXT */))
                             : _createCommentVNode("v-if", true)
                         ])
                       ])
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[344] || (_cache[344] = (...args) => (_ctx.closeSportCheck && _ctx.closeSportCheck(...args))),
+                      onClick: _cache[345] || (_cache[345] = (...args) => (_ctx.closeSportCheck && _ctx.closeSportCheck(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0",
                       "aria-label": _ctx.$t("Chiudi")
-                    }, [...(_cache[658] || (_cache[658] = [
+                    }, [...(_cache[659] || (_cache[659] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -13928,21 +14070,21 @@ return function render(_ctx, _cache) {
                           d: "M6 18L18 6M6 6l12 12"
                         })
                       ], -1 /* CACHED */)
-                    ]))], 8 /* PROPS */, _hoisted_2045)
+                    ]))], 8 /* PROPS */, _hoisted_2069)
                   ]),
-                  _createElementVNode("div", _hoisted_2046, [
-                    _createElementVNode("p", _hoisted_2047, _toDisplayString(_ctx.$t("Ti sei allenato?")), 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_2048, _toDisplayString(_ctx.$t("Solo gli allenamenti fatti contano nei tuoi progressi e nella serie.")), 1 /* TEXT */),
+                  _createElementVNode("div", _hoisted_2070, [
+                    _createElementVNode("p", _hoisted_2071, _toDisplayString(_ctx.$t("Ti sei allenato?")), 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_2072, _toDisplayString(_ctx.$t("Solo gli allenamenti fatti contano nei tuoi progressi e nella serie.")), 1 /* TEXT */),
                     (_ctx.sportCheckModal.total > 1)
-                      ? (_openBlock(), _createElementBlock("p", _hoisted_2049, _toDisplayString(_ctx.$t("{0} di {1}", [(_ctx.sportCheckModal.index), (_ctx.sportCheckModal.total)])), 1 /* TEXT */))
+                      ? (_openBlock(), _createElementBlock("p", _hoisted_2073, _toDisplayString(_ctx.$t("{0} di {1}", [(_ctx.sportCheckModal.index), (_ctx.sportCheckModal.total)])), 1 /* TEXT */))
                       : _createCommentVNode("v-if", true)
                   ]),
-                  _createElementVNode("div", _hoisted_2050, [
+                  _createElementVNode("div", _hoisted_2074, [
                     _createElementVNode("button", {
-                      onClick: _cache[345] || (_cache[345] = $event => (_ctx.setSportStatus('done'))),
+                      onClick: _cache[346] || (_cache[346] = $event => (_ctx.setSportStatus('done'))),
                       class: _normalizeClass(["py-4 rounded-2xl font-extrabold text-sm flex flex-col items-center gap-1.5 border-2 transition-all active:scale-95", _ctx.sportStatus(_ctx.sportCheckSession, _ctx.sportCheckModal.dateKey) === 'done' ? 'bg-salvia text-white border-salvia shadow-lg' : 'bg-salvia/10 text-salvia border-salvia/30 hover:bg-salvia/15'])
                     }, [
-                      _cache[659] || (_cache[659] = _createElementVNode("svg", {
+                      _cache[660] || (_cache[660] = _createElementVNode("svg", {
                         class: "w-7 h-7",
                         fill: "none",
                         stroke: "currentColor",
@@ -13958,10 +14100,10 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Fatto")) + " ", 1 /* TEXT */)
                     ], 2 /* CLASS */),
                     _createElementVNode("button", {
-                      onClick: _cache[346] || (_cache[346] = $event => (_ctx.setSportStatus('skipped'))),
+                      onClick: _cache[347] || (_cache[347] = $event => (_ctx.setSportStatus('skipped'))),
                       class: _normalizeClass(["py-4 rounded-2xl font-extrabold text-sm flex flex-col items-center gap-1.5 border-2 transition-all active:scale-95", _ctx.sportStatus(_ctx.sportCheckSession, _ctx.sportCheckModal.dateKey) === 'skipped' ? 'bg-red-500 text-white border-red-500 shadow-lg' : 'bg-gray-50 text-gray-500 border-gray-200 hover:border-red-200 hover:text-red-500'])
                     }, [
-                      _cache[660] || (_cache[660] = _createElementVNode("svg", {
+                      _cache[661] || (_cache[661] = _createElementVNode("svg", {
                         class: "w-7 h-7",
                         fill: "none",
                         stroke: "currentColor",
@@ -13977,16 +14119,16 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Non fatto")) + " ", 1 /* TEXT */)
                     ], 2 /* CLASS */)
                   ]),
-                  _createElementVNode("div", _hoisted_2051, [
-                    _createElementVNode("div", _hoisted_2052, [
+                  _createElementVNode("div", _hoisted_2075, [
+                    _createElementVNode("div", _hoisted_2076, [
                       _createElementVNode("button", {
-                        onClick: _cache[347] || (_cache[347] = (...args) => (_ctx.editFromSportCheck && _ctx.editFromSportCheck(...args))),
+                        onClick: _cache[348] || (_cache[348] = (...args) => (_ctx.editFromSportCheck && _ctx.editFromSportCheck(...args))),
                         class: "text-[11px] font-bold text-gray-400 hover:text-arancione py-2"
                       }, _toDisplayString(_ctx.$t("Modifica sessione")), 1 /* TEXT */),
                       (_ctx.sportCheckSession && _ctx.sportCheckSession.recurring)
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 0,
-                            onClick: _cache[348] || (_cache[348] = (...args) => (_ctx.openPastFromCheck && _ctx.openPastFromCheck(...args))),
+                            onClick: _cache[349] || (_cache[349] = (...args) => (_ctx.openPastFromCheck && _ctx.openPastFromCheck(...args))),
                             class: "text-[11px] font-bold text-sky-600 hover:text-sky-700 py-2"
                           }, _toDisplayString(_ctx.$t("🗓️ Giorni passati")), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
@@ -13994,13 +14136,13 @@ return function render(_ctx, _cache) {
                     (_ctx.sportStatus(_ctx.sportCheckSession, _ctx.sportCheckModal.dateKey))
                       ? (_openBlock(), _createElementBlock("button", {
                           key: 0,
-                          onClick: _cache[349] || (_cache[349] = $event => (_ctx.setSportStatus(null))),
+                          onClick: _cache[350] || (_cache[350] = $event => (_ctx.setSportStatus(null))),
                           class: "text-[11px] font-bold text-gray-400 hover:text-antracite py-2"
                         }, _toDisplayString(_ctx.$t("Annulla scelta")), 1 /* TEXT */))
                       : (_ctx.sportCheckModal.total > 1)
                         ? (_openBlock(), _createElementBlock("button", {
                             key: 1,
-                            onClick: _cache[350] || (_cache[350] = (...args) => (_ctx.snoozeSportChecks && _ctx.snoozeSportChecks(...args))),
+                            onClick: _cache[351] || (_cache[351] = (...args) => (_ctx.snoozeSportChecks && _ctx.snoozeSportChecks(...args))),
                             class: "text-[11px] font-bold text-gray-400 hover:text-antracite py-2"
                           }, _toDisplayString(_ctx.$t("Più tardi")), 1 /* TEXT */))
                         : _createCommentVNode("v-if", true)
@@ -14009,11 +14151,11 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.trainingFormModal.isOpen)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_2053, [
-                _createElementVNode("div", _hoisted_2054, [
-                  _createElementVNode("div", _hoisted_2055, [
-                    _createElementVNode("div", _hoisted_2056, [
-                      _cache[661] || (_cache[661] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_2077, [
+                _createElementVNode("div", _hoisted_2078, [
+                  _createElementVNode("div", _hoisted_2079, [
+                    _createElementVNode("div", _hoisted_2080, [
+                      _cache[662] || (_cache[662] = _createElementVNode("div", { class: "w-10 h-10 rounded-xl bg-arancione/10 flex items-center justify-center text-arancione border border-arancione/20 flex-shrink-0" }, [
                         _createElementVNode("svg", {
                           class: "w-5 h-5",
                           fill: "none",
@@ -14028,15 +14170,15 @@ return function render(_ctx, _cache) {
                           })
                         ])
                       ], -1 /* CACHED */)),
-                      _createElementVNode("div", _hoisted_2057, [
-                        _createElementVNode("h3", _hoisted_2058, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.editingId ? 'Modifica allenamento' : 'Nuovo allenamento')), 1 /* TEXT */),
-                        _createElementVNode("p", _hoisted_2059, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.editingId ? 'Aggiorna i dettagli' : 'Sport o palestra')), 1 /* TEXT */)
+                      _createElementVNode("div", _hoisted_2081, [
+                        _createElementVNode("h3", _hoisted_2082, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.editingId ? 'Modifica allenamento' : 'Nuovo allenamento')), 1 /* TEXT */),
+                        _createElementVNode("p", _hoisted_2083, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.editingId ? 'Aggiorna i dettagli' : 'Sport o palestra')), 1 /* TEXT */)
                       ])
                     ]),
                     _createElementVNode("button", {
-                      onClick: _cache[351] || (_cache[351] = (...args) => (_ctx.closeTrainingForm && _ctx.closeTrainingForm(...args))),
+                      onClick: _cache[352] || (_cache[352] = (...args) => (_ctx.closeTrainingForm && _ctx.closeTrainingForm(...args))),
                       class: "p-1 text-gray-400 hover:text-antracite flex-shrink-0"
-                    }, [...(_cache[662] || (_cache[662] = [
+                    }, [...(_cache[663] || (_cache[663] = [
                       _createElementVNode("svg", {
                         class: "w-6 h-6",
                         fill: "none",
@@ -14052,33 +14194,33 @@ return function render(_ctx, _cache) {
                       ], -1 /* CACHED */)
                     ]))])
                   ]),
-                  _createElementVNode("div", _hoisted_2060, [
+                  _createElementVNode("div", _hoisted_2084, [
                     _createElementVNode("div", null, [
-                      _createElementVNode("label", _hoisted_2061, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.kind === 'sport' && _ctx.trainingFormModal.recurring ? 'Dal' : 'Data')), 1 /* TEXT */),
+                      _createElementVNode("label", _hoisted_2085, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.kind === 'sport' && _ctx.trainingFormModal.recurring ? 'Dal' : 'Data')), 1 /* TEXT */),
                       _withDirectives(_createElementVNode("input", {
                         type: "date",
-                        "onUpdate:modelValue": _cache[352] || (_cache[352] = $event => ((_ctx.trainingFormModal.date) = $event)),
+                        "onUpdate:modelValue": _cache[353] || (_cache[353] = $event => ((_ctx.trainingFormModal.date) = $event)),
                         class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-2.5 text-xs font-bold text-antracite outline-none transition-all"
                       }, null, 512 /* NEED_PATCH */), [
                         [_vModelText, _ctx.trainingFormModal.date]
                       ])
                     ]),
-                    _createElementVNode("div", _hoisted_2062, [
+                    _createElementVNode("div", _hoisted_2086, [
                       _createElementVNode("div", null, [
-                        _createElementVNode("label", _hoisted_2063, _toDisplayString(_ctx.$t("Inizio")), 1 /* TEXT */),
+                        _createElementVNode("label", _hoisted_2087, _toDisplayString(_ctx.$t("Inizio")), 1 /* TEXT */),
                         _withDirectives(_createElementVNode("input", {
                           type: "time",
-                          "onUpdate:modelValue": _cache[353] || (_cache[353] = $event => ((_ctx.trainingFormModal.time) = $event)),
+                          "onUpdate:modelValue": _cache[354] || (_cache[354] = $event => ((_ctx.trainingFormModal.time) = $event)),
                           class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl px-1.5 py-2.5 text-xs font-bold text-antracite outline-none transition-all"
                         }, null, 512 /* NEED_PATCH */), [
                           [_vModelText, _ctx.trainingFormModal.time]
                         ])
                       ]),
                       _createElementVNode("div", null, [
-                        _createElementVNode("label", _hoisted_2064, _toDisplayString(_ctx.$t("Fine")), 1 /* TEXT */),
+                        _createElementVNode("label", _hoisted_2088, _toDisplayString(_ctx.$t("Fine")), 1 /* TEXT */),
                         _withDirectives(_createElementVNode("input", {
                           type: "time",
-                          "onUpdate:modelValue": _cache[354] || (_cache[354] = $event => ((_ctx.trainingFormModal.endTime) = $event)),
+                          "onUpdate:modelValue": _cache[355] || (_cache[355] = $event => ((_ctx.trainingFormModal.endTime) = $event)),
                           class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl px-1.5 py-2.5 text-xs font-bold text-antracite outline-none transition-all"
                         }, null, 512 /* NEED_PATCH */), [
                           [_vModelText, _ctx.trainingFormModal.endTime]
@@ -14086,42 +14228,42 @@ return function render(_ctx, _cache) {
                       ])
                     ])
                   ]),
-                  _createElementVNode("p", _hoisted_2065, "⏱️ " + _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.kind === 'sport' ? 'Il tempo si aggiunge alle tue ore di allenamento quando segni lo sport come fatto.' : "Se usi l'allenamento guidato la durata si misura da sola; altrimenti contano inizio e fine.")), 1 /* TEXT */),
+                  _createElementVNode("p", _hoisted_2089, "⏱️ " + _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.kind === 'sport' ? 'Il tempo si aggiunge alle tue ore di allenamento quando segni lo sport come fatto.' : "Se usi l'allenamento guidato la durata si misura da sola; altrimenti contano inizio e fine.")), 1 /* TEXT */),
                   (!(_ctx.trainingFormModal.kind === 'sport' && _ctx.trainingFormModal.recurring) && _ctx.trainingFormModal.date && _ctx.trainingFormModal.date <= _ctx.todayDateKey && !(_ctx.trainingFormModal.date === _ctx.todayDateKey && _ctx.timeIsAhead(_ctx.trainingFormModal.time)))
-                    ? (_openBlock(), _createElementBlock("div", _hoisted_2066, [
-                        _createElementVNode("label", _hoisted_2067, _toDisplayString(_ctx.$t("Com'è andata?")), 1 /* TEXT */),
-                        _createElementVNode("div", _hoisted_2068, [
+                    ? (_openBlock(), _createElementBlock("div", _hoisted_2090, [
+                        _createElementVNode("label", _hoisted_2091, _toDisplayString(_ctx.$t("Com'è andata?")), 1 /* TEXT */),
+                        _createElementVNode("div", _hoisted_2092, [
                           _createElementVNode("button", {
-                            onClick: _cache[355] || (_cache[355] = $event => (_ctx.trainingFormModal.pastStatus = _ctx.trainingFormModal.pastStatus === 'done' ? '' : 'done')),
+                            onClick: _cache[356] || (_cache[356] = $event => (_ctx.trainingFormModal.pastStatus = _ctx.trainingFormModal.pastStatus === 'done' ? '' : 'done')),
                             class: _normalizeClass(["py-2 rounded-xl text-xs font-bold border transition-colors", _ctx.trainingFormModal.pastStatus === 'done' ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-200'])
                           }, _toDisplayString(_ctx.$t("✓ Fatto")), 3 /* TEXT, CLASS */),
                           _createElementVNode("button", {
-                            onClick: _cache[356] || (_cache[356] = $event => (_ctx.trainingFormModal.pastStatus = _ctx.trainingFormModal.pastStatus === 'skipped' ? '' : 'skipped')),
+                            onClick: _cache[357] || (_cache[357] = $event => (_ctx.trainingFormModal.pastStatus = _ctx.trainingFormModal.pastStatus === 'skipped' ? '' : 'skipped')),
                             class: _normalizeClass(["py-2 rounded-xl text-xs font-bold border transition-colors", _ctx.trainingFormModal.pastStatus === 'skipped' ? 'bg-red-500 text-white border-red-500' : 'bg-gray-50 text-gray-500 border-gray-200'])
                           }, _toDisplayString(_ctx.$t("✗ Non fatto")), 3 /* TEXT, CLASS */)
                         ])
                       ]))
                     : _createCommentVNode("v-if", true),
                   (_ctx.trainingFormModal.kind === 'sport' && _ctx.trainingFormModal.recurring && _ctx.trainingFormModal.date && _ctx.trainingFormModal.date < _ctx.todayDateKey && !_ctx.trainingFormModal.editingId)
-                    ? (_openBlock(), _createElementBlock("p", _hoisted_2069, _toDisplayString(_ctx.$t("🗓️ Parte nel passato: dopo il salvataggio potrai segnare i giorni già trascorsi come fatti o non fatti.")) + " ", 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("p", _hoisted_2093, _toDisplayString(_ctx.$t("🗓️ Parte nel passato: dopo il salvataggio potrai segnare i giorni già trascorsi come fatti o non fatti.")) + " ", 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
                   (_ctx.trainingFormModal.editingId && _ctx.trainingFormModal.kind === 'sport' && _ctx.trainingFormModal.recurring && (_ctx.trainingFormModal.date < _ctx.todayDateKey || _ctx.trainingFormModal.fromDate > _ctx.trainingFormModal.date))
-                    ? (_openBlock(), _createElementBlock("p", _hoisted_2070, [
+                    ? (_openBlock(), _createElementBlock("p", _hoisted_2094, [
                         _createTextVNode(_toDisplayString(_ctx.$t("Se cambi giorni o orari, le modifiche valgono")) + " ", 1 /* TEXT */),
-                        _createElementVNode("span", _hoisted_2071, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.fromDate > _ctx.todayDateKey ? 'dal ' + _ctx.formatDate(_ctx.trainingFormModal.fromDate) : 'da oggi')), 1 /* TEXT */),
+                        _createElementVNode("span", _hoisted_2095, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.fromDate > _ctx.todayDateKey ? 'dal ' + _ctx.formatDate(_ctx.trainingFormModal.fromDate) : 'da oggi')), 1 /* TEXT */),
                         _createTextVNode(_toDisplayString(_ctx.$t(": i giorni prima restano come sono.")) + " ", 1 /* TEXT */),
                         _createElementVNode("button", {
-                          onClick: _cache[357] || (_cache[357] = (...args) => (_ctx.openPastFromForm && _ctx.openPastFromForm(...args))),
+                          onClick: _cache[358] || (_cache[358] = (...args) => (_ctx.openPastFromForm && _ctx.openPastFromForm(...args))),
                           class: "block mt-1 font-bold text-sky-600"
                         }, _toDisplayString(_ctx.$t("🗓️ Segna i giorni passati ›")), 1 /* TEXT */)
                       ]))
                     : _createCommentVNode("v-if", true),
-                  _createElementVNode("div", _hoisted_2072, [
+                  _createElementVNode("div", _hoisted_2096, [
                     _createElementVNode("button", {
-                      onClick: _cache[358] || (_cache[358] = $event => (_ctx.setTrainingKind('gym'))),
+                      onClick: _cache[359] || (_cache[359] = $event => (_ctx.setTrainingKind('gym'))),
                       class: _normalizeClass(["flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.trainingFormModal.kind === 'gym' ? 'bg-white text-arancione shadow-sm' : 'text-gray-500'])
                     }, [
-                      _cache[663] || (_cache[663] = _createElementVNode("svg", {
+                      _cache[664] || (_cache[664] = _createElementVNode("svg", {
                         class: "w-4 h-4",
                         fill: "none",
                         stroke: "currentColor",
@@ -14137,10 +14279,10 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Palestra")) + " ", 1 /* TEXT */)
                     ], 2 /* CLASS */),
                     _createElementVNode("button", {
-                      onClick: _cache[359] || (_cache[359] = $event => (_ctx.setTrainingKind('sport'))),
+                      onClick: _cache[360] || (_cache[360] = $event => (_ctx.setTrainingKind('sport'))),
                       class: _normalizeClass(["flex-1 py-2 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-1.5", _ctx.trainingFormModal.kind === 'sport' ? 'bg-white text-sky-600 shadow-sm' : 'text-gray-500'])
                     }, [
-                      _cache[664] || (_cache[664] = _createElementVNode("svg", {
+                      _cache[665] || (_cache[665] = _createElementVNode("svg", {
                         class: "w-4 h-4",
                         fill: "none",
                         stroke: "currentColor",
@@ -14156,66 +14298,66 @@ return function render(_ctx, _cache) {
                       _createTextVNode(" " + _toDisplayString(_ctx.$t("Sport")) + " ", 1 /* TEXT */)
                     ], 2 /* CLASS */)
                   ]),
-                  _createElementVNode("div", _hoisted_2073, [
+                  _createElementVNode("div", _hoisted_2097, [
                     (_ctx.trainingFormModal.kind === 'gym')
                       ? (_openBlock(), _createElementBlock(_Fragment, { key: 0 }, [
                           _createElementVNode("div", null, [
-                            _createElementVNode("label", _hoisted_2074, _toDisplayString(_ctx.$t("Scheda")), 1 /* TEXT */),
+                            _createElementVNode("label", _hoisted_2098, _toDisplayString(_ctx.$t("Scheda")), 1 /* TEXT */),
                             (_ctx.workoutSheets.length)
                               ? _withDirectives((_openBlock(), _createElementBlock("select", {
                                   key: 0,
-                                  "onUpdate:modelValue": _cache[360] || (_cache[360] = $event => ((_ctx.trainingFormModal.sheetId) = $event)),
+                                  "onUpdate:modelValue": _cache[361] || (_cache[361] = $event => ((_ctx.trainingFormModal.sheetId) = $event)),
                                   class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-3 text-xs font-bold text-antracite outline-none transition-all"
                                 }, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.workoutSheets, (sheet) => {
                                     return (_openBlock(), _createElementBlock("option", {
                                       key: sheet.id,
                                       value: sheet.id
-                                    }, _toDisplayString(_ctx.$tv(sheet.name)), 9 /* TEXT, PROPS */, _hoisted_2075))
+                                    }, _toDisplayString(_ctx.$tv(sheet.name)), 9 /* TEXT, PROPS */, _hoisted_2099))
                                   }), 128 /* KEYED_FRAGMENT */))
                                 ], 512 /* NEED_PATCH */)), [
                                   [_vModelSelect, _ctx.trainingFormModal.sheetId]
                                 ])
-                              : (_openBlock(), _createElementBlock("div", _hoisted_2076, _toDisplayString(_ctx.$t("Nessuna scheda disponibile. Creane una nella sezione Schede per registrare la palestra.")) + " ", 1 /* TEXT */))
+                              : (_openBlock(), _createElementBlock("div", _hoisted_2100, _toDisplayString(_ctx.$t("Nessuna scheda disponibile. Creane una nella sezione Schede per registrare la palestra.")) + " ", 1 /* TEXT */))
                           ]),
                           (_ctx.trainingFormSheetDays.length > 1)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_2077, [
-                                _createElementVNode("label", _hoisted_2078, _toDisplayString(_ctx.$t("Giorno della scheda")), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_2079, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_2101, [
+                                _createElementVNode("label", _hoisted_2102, _toDisplayString(_ctx.$t("Giorno della scheda")), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_2103, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.trainingFormSheetDays, (d) => {
                                     return (_openBlock(), _createElementBlock("button", {
                                       key: 'tfd-' + d,
                                       type: "button",
                                       onClick: $event => (_ctx.trainingFormModal.dayName = d),
                                       class: _normalizeClass(["px-3 py-2 rounded-xl text-xs font-bold border transition-colors", _ctx.trainingFormModal.dayName === d ? 'bg-arancione text-white border-arancione' : 'bg-gray-50 text-gray-500 border-gray-200'])
-                                    }, _toDisplayString(_ctx.$tv(d)), 11 /* TEXT, CLASS, PROPS */, _hoisted_2080))
+                                    }, _toDisplayString(_ctx.$tv(d)), 11 /* TEXT, CLASS, PROPS */, _hoisted_2104))
                                   }), 128 /* KEYED_FRAGMENT */))
                                 ])
                               ]))
                             : _createCommentVNode("v-if", true),
-                          _createElementVNode("p", _hoisted_2081, _toDisplayString(_ctx.$t("La palestra è variabile: aggiungi la singola sessione ogni volta, senza giorni fissi.")), 1 /* TEXT */)
+                          _createElementVNode("p", _hoisted_2105, _toDisplayString(_ctx.$t("La palestra è variabile: aggiungi la singola sessione ogni volta, senza giorni fissi.")), 1 /* TEXT */)
                         ], 64 /* STABLE_FRAGMENT */))
                       : (_openBlock(), _createElementBlock(_Fragment, { key: 1 }, [
                           _createElementVNode("div", null, [
-                            _createElementVNode("label", _hoisted_2082, _toDisplayString(_ctx.$t("Sport")), 1 /* TEXT */),
+                            _createElementVNode("label", _hoisted_2106, _toDisplayString(_ctx.$t("Sport")), 1 /* TEXT */),
                             _withDirectives(_createElementVNode("select", {
-                              "onUpdate:modelValue": _cache[361] || (_cache[361] = $event => ((_ctx.trainingFormModal.sport) = $event)),
+                              "onUpdate:modelValue": _cache[362] || (_cache[362] = $event => ((_ctx.trainingFormModal.sport) = $event)),
                               class: "w-full bg-gray-50 border border-gray-200 focus:border-sky-400 rounded-xl p-3 text-xs font-bold text-antracite outline-none transition-all"
                             }, [
                               (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.trainingSports, (sport) => {
                                 return (_openBlock(), _createElementBlock("option", {
                                   key: sport,
                                   value: sport
-                                }, _toDisplayString(_ctx.$tv(sport)), 9 /* TEXT, PROPS */, _hoisted_2083))
+                                }, _toDisplayString(_ctx.$tv(sport)), 9 /* TEXT, PROPS */, _hoisted_2107))
                               }), 128 /* KEYED_FRAGMENT */))
                             ], 512 /* NEED_PATCH */), [
                               [_vModelSelect, _ctx.trainingFormModal.sport]
                             ])
                           ]),
-                          _createElementVNode("div", _hoisted_2084, [
-                            _createElementVNode("span", _hoisted_2085, _toDisplayString(_ctx.$t("Ripeti ogni settimana")), 1 /* TEXT */),
+                          _createElementVNode("div", _hoisted_2108, [
+                            _createElementVNode("span", _hoisted_2109, _toDisplayString(_ctx.$t("Ripeti ogni settimana")), 1 /* TEXT */),
                             _createElementVNode("button", {
-                              onClick: _cache[362] || (_cache[362] = $event => (_ctx.trainingFormModal.recurring = !_ctx.trainingFormModal.recurring)),
+                              onClick: _cache[363] || (_cache[363] = $event => (_ctx.trainingFormModal.recurring = !_ctx.trainingFormModal.recurring)),
                               class: _normalizeClass(["w-10 h-5 rounded-full relative transition-colors flex-shrink-0", _ctx.trainingFormModal.recurring ? 'bg-sky-500' : 'bg-gray-300'])
                             }, [
                               _createElementVNode("div", {
@@ -14224,24 +14366,24 @@ return function render(_ctx, _cache) {
                             ], 2 /* CLASS */)
                           ]),
                           (_ctx.trainingFormModal.recurring)
-                            ? (_openBlock(), _createElementBlock("div", _hoisted_2086, [
-                                _createElementVNode("label", _hoisted_2087, _toDisplayString(_ctx.$t("Giorni")), 1 /* TEXT */),
-                                _createElementVNode("div", _hoisted_2088, [
+                            ? (_openBlock(), _createElementBlock("div", _hoisted_2110, [
+                                _createElementVNode("label", _hoisted_2111, _toDisplayString(_ctx.$t("Giorni")), 1 /* TEXT */),
+                                _createElementVNode("div", _hoisted_2112, [
                                   (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.trainingWeekdays, (wd) => {
                                     return (_openBlock(), _createElementBlock("button", {
                                       key: 'wd-' + wd.value,
                                       onClick: $event => (_ctx.toggleTrainingWeekday(wd.value)),
                                       class: _normalizeClass(["flex-1 py-2 rounded-lg text-xs font-bold transition-colors", _ctx.trainingFormModal.weekdays.includes(wd.value) ? 'bg-sky-500 text-white' : 'bg-gray-100 text-gray-500'])
-                                    }, _toDisplayString(_ctx.$tv(wd.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_2089))
+                                    }, _toDisplayString(_ctx.$tv(wd.label)), 11 /* TEXT, CLASS, PROPS */, _hoisted_2113))
                                   }), 128 /* KEYED_FRAGMENT */))
                                 ])
                               ]))
                             : _createCommentVNode("v-if", true)
                         ], 64 /* STABLE_FRAGMENT */)),
                     _createElementVNode("div", null, [
-                      _createElementVNode("label", _hoisted_2090, _toDisplayString(_ctx.$t("Note")), 1 /* TEXT */),
+                      _createElementVNode("label", _hoisted_2114, _toDisplayString(_ctx.$t("Note")), 1 /* TEXT */),
                       _withDirectives(_createElementVNode("textarea", {
-                        "onUpdate:modelValue": _cache[363] || (_cache[363] = $event => ((_ctx.trainingFormModal.note) = $event)),
+                        "onUpdate:modelValue": _cache[364] || (_cache[364] = $event => ((_ctx.trainingFormModal.note) = $event)),
                         rows: "2",
                         placeholder: "Es. Palestra comunale, campo 2...",
                         class: "w-full bg-gray-50 border border-gray-200 focus:border-arancione rounded-xl p-3 text-xs text-antracite outline-none resize-none transition-all"
@@ -14251,15 +14393,15 @@ return function render(_ctx, _cache) {
                     ])
                   ]),
                   (_ctx.trainingFormModal.error)
-                    ? (_openBlock(), _createElementBlock("p", _hoisted_2091, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.error)), 1 /* TEXT */))
+                    ? (_openBlock(), _createElementBlock("p", _hoisted_2115, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.error)), 1 /* TEXT */))
                     : _createCommentVNode("v-if", true),
-                  _createElementVNode("div", _hoisted_2092, [
+                  _createElementVNode("div", _hoisted_2116, [
                     _createElementVNode("button", {
-                      onClick: _cache[364] || (_cache[364] = (...args) => (_ctx.closeTrainingForm && _ctx.closeTrainingForm(...args))),
+                      onClick: _cache[365] || (_cache[365] = (...args) => (_ctx.closeTrainingForm && _ctx.closeTrainingForm(...args))),
                       class: "flex-1 bg-gray-100 text-gray-600 font-bold py-3 rounded-xl hover:bg-gray-200 active:scale-95 transition-all"
                     }, _toDisplayString(_ctx.$t("Annulla")), 1 /* TEXT */),
                     _createElementVNode("button", {
-                      onClick: _cache[365] || (_cache[365] = (...args) => (_ctx.saveTrainingSession && _ctx.saveTrainingSession(...args))),
+                      onClick: _cache[366] || (_cache[366] = (...args) => (_ctx.saveTrainingSession && _ctx.saveTrainingSession(...args))),
                       class: "flex-1 bg-arancione text-white font-bold py-3 rounded-xl shadow-md hover:bg-arancione/90 active:scale-95 transition-all"
                     }, _toDisplayString(_ctx.$tv(_ctx.trainingFormModal.editingId ? 'Aggiorna' : 'Salva')), 1 /* TEXT */)
                   ])
@@ -14270,55 +14412,55 @@ return function render(_ctx, _cache) {
             ? (_openBlock(), _createElementBlock("div", {
                 key: 44,
                 class: "fixed inset-0 z-[70] flex items-end sm:items-center justify-center p-4 bg-antracite/40 backdrop-blur-sm animate-fadeIn",
-                onClick: _cache[369] || (_cache[369] = _withModifiers($event => (_ctx.lightDayModal.isOpen = false), ["self"]))
+                onClick: _cache[370] || (_cache[370] = _withModifiers($event => (_ctx.lightDayModal.isOpen = false), ["self"]))
               }, [
-                _createElementVNode("div", _hoisted_2093, [
-                  _createElementVNode("div", _hoisted_2094, [
-                    _cache[665] || (_cache[665] = _createElementVNode("div", { class: "text-4xl" }, "🌱", -1 /* CACHED */)),
-                    _createElementVNode("h3", _hoisted_2095, _toDisplayString(_ctx.$t("Anche i giorni piccoli contano")), 1 /* TEXT */),
-                    _createElementVNode("p", _hoisted_2096, _toDisplayString(_ctx.$t("Oggi non è giornata? Bastano 10 minuti di movimento per tenere viva la serie. Niente sensi di colpa.")), 1 /* TEXT */)
+                _createElementVNode("div", _hoisted_2117, [
+                  _createElementVNode("div", _hoisted_2118, [
+                    _cache[666] || (_cache[666] = _createElementVNode("div", { class: "text-4xl" }, "🌱", -1 /* CACHED */)),
+                    _createElementVNode("h3", _hoisted_2119, _toDisplayString(_ctx.$t("Anche i giorni piccoli contano")), 1 /* TEXT */),
+                    _createElementVNode("p", _hoisted_2120, _toDisplayString(_ctx.$t("Oggi non è giornata? Bastano 10 minuti di movimento per tenere viva la serie. Niente sensi di colpa.")), 1 /* TEXT */)
                   ]),
-                  _createElementVNode("div", _hoisted_2097, [
-                    _createElementVNode("div", _hoisted_2098, _toDisplayString(_ctx.$t("Cosa hai fatto")), 1 /* TEXT */),
-                    _createElementVNode("div", _hoisted_2099, [
+                  _createElementVNode("div", _hoisted_2121, [
+                    _createElementVNode("div", _hoisted_2122, _toDisplayString(_ctx.$t("Cosa hai fatto")), 1 /* TEXT */),
+                    _createElementVNode("div", _hoisted_2123, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.LIGHT_ACTIVITIES, (a) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: 'la' + a.id,
                           onClick: $event => (_ctx.lightDayModal.type = a.id),
                           class: _normalizeClass(["rounded-2xl py-2.5 px-1 flex flex-col items-center gap-1 border transition-all active:scale-95", _ctx.lightDayModal.type === a.id ? 'bg-salvia/10 border-salvia text-antracite' : 'bg-gray-50 border-gray-100 text-gray-500'])
                         }, [
-                          _createElementVNode("span", _hoisted_2101, _toDisplayString(_ctx.$tv(a.icon)), 1 /* TEXT */),
-                          _createElementVNode("span", _hoisted_2102, _toDisplayString(_ctx.$tv(a.label)), 1 /* TEXT */)
-                        ], 10 /* CLASS, PROPS */, _hoisted_2100))
+                          _createElementVNode("span", _hoisted_2125, _toDisplayString(_ctx.$tv(a.icon)), 1 /* TEXT */),
+                          _createElementVNode("span", _hoisted_2126, _toDisplayString(_ctx.$tv(a.label)), 1 /* TEXT */)
+                        ], 10 /* CLASS, PROPS */, _hoisted_2124))
                       }), 128 /* KEYED_FRAGMENT */))
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_2103, [
-                    _createElementVNode("div", _hoisted_2104, _toDisplayString(_ctx.$t("Per quanto")), 1 /* TEXT */),
-                    _createElementVNode("div", _hoisted_2105, [
+                  _createElementVNode("div", _hoisted_2127, [
+                    _createElementVNode("div", _hoisted_2128, _toDisplayString(_ctx.$t("Per quanto")), 1 /* TEXT */),
+                    _createElementVNode("div", _hoisted_2129, [
                       (_openBlock(true), _createElementBlock(_Fragment, null, _renderList(_ctx.LIGHT_MINUTES, (m) => {
                         return (_openBlock(), _createElementBlock("button", {
                           key: 'lm' + m,
                           onClick: $event => (_ctx.lightDayModal.min = m),
                           class: _normalizeClass(["py-2 rounded-xl text-xs font-bold border transition-all", _ctx.lightDayModal.min === m ? 'bg-salvia text-white border-salvia' : 'bg-gray-50 text-gray-500 border-gray-100'])
-                        }, _toDisplayString(_ctx.$tv(m)) + "'", 11 /* TEXT, CLASS, PROPS */, _hoisted_2106))
+                        }, _toDisplayString(_ctx.$tv(m)) + "'", 11 /* TEXT, CLASS, PROPS */, _hoisted_2130))
                       }), 128 /* KEYED_FRAGMENT */))
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_2107, [
+                  _createElementVNode("div", _hoisted_2131, [
                     _createElementVNode("button", {
-                      onClick: _cache[366] || (_cache[366] = (...args) => (_ctx.saveLightDay && _ctx.saveLightDay(...args))),
+                      onClick: _cache[367] || (_cache[367] = (...args) => (_ctx.saveLightDay && _ctx.saveLightDay(...args))),
                       class: "w-full bg-salvia text-white font-bold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all"
                     }, _toDisplayString(_ctx.$t("Segna come fatto")), 1 /* TEXT */),
                     (_ctx.lightToday)
                       ? (_openBlock(), _createElementBlock("button", {
                           key: 0,
-                          onClick: _cache[367] || (_cache[367] = (...args) => (_ctx.removeLightDay && _ctx.removeLightDay(...args))),
+                          onClick: _cache[368] || (_cache[368] = (...args) => (_ctx.removeLightDay && _ctx.removeLightDay(...args))),
                           class: "w-full text-xs font-bold text-red-500 py-2"
                         }, _toDisplayString(_ctx.$t("Togli la giornata leggera")), 1 /* TEXT */))
                       : (_openBlock(), _createElementBlock("button", {
                           key: 1,
-                          onClick: _cache[368] || (_cache[368] = $event => (_ctx.lightDayModal.isOpen = false)),
+                          onClick: _cache[369] || (_cache[369] = $event => (_ctx.lightDayModal.isOpen = false)),
                           class: "w-full text-xs font-bold text-gray-400 py-2"
                         }, _toDisplayString(_ctx.$t("Non ora")), 1 /* TEXT */))
                   ])
@@ -14326,49 +14468,49 @@ return function render(_ctx, _cache) {
               ]))
             : _createCommentVNode("v-if", true),
           (_ctx.recordModal.isOpen && _ctx.recordModal.record)
-            ? (_openBlock(), _createElementBlock("div", _hoisted_2108, [
-                _createElementVNode("div", _hoisted_2109, [
-                  _createElementVNode("div", _hoisted_2110, [
+            ? (_openBlock(), _createElementBlock("div", _hoisted_2132, [
+                _createElementVNode("div", _hoisted_2133, [
+                  _createElementVNode("div", _hoisted_2134, [
                     (_openBlock(), _createElementBlock(_Fragment, null, _renderList(18, (n) => {
                       return _createElementVNode("i", {
                         key: 'rc' + n
                       })
                     }), 64 /* STABLE_FRAGMENT */))
                   ]),
-                  _createElementVNode("div", _hoisted_2111, [
-                    _cache[666] || (_cache[666] = _createElementVNode("div", { class: "w-20 h-20 mx-auto rounded-full bg-arancione/15 border-4 border-arancione/40 flex items-center justify-center text-4xl record-medal" }, "🏆", -1 /* CACHED */)),
-                    _createElementVNode("div", _hoisted_2112, _toDisplayString(_ctx.$t("Nuovo record personale")), 1 /* TEXT */),
-                    _createElementVNode("h3", _hoisted_2113, _toDisplayString(_ctx.$tv(_ctx.recordModal.record.name)), 1 /* TEXT */),
-                    _createElementVNode("div", _hoisted_2114, [
+                  _createElementVNode("div", _hoisted_2135, [
+                    _cache[667] || (_cache[667] = _createElementVNode("div", { class: "w-20 h-20 mx-auto rounded-full bg-arancione/15 border-4 border-arancione/40 flex items-center justify-center text-4xl record-medal" }, "🏆", -1 /* CACHED */)),
+                    _createElementVNode("div", _hoisted_2136, _toDisplayString(_ctx.$t("Nuovo record personale")), 1 /* TEXT */),
+                    _createElementVNode("h3", _hoisted_2137, _toDisplayString(_ctx.$tv(_ctx.recordModal.record.name)), 1 /* TEXT */),
+                    _createElementVNode("div", _hoisted_2138, [
                       _createTextVNode(_toDisplayString(_ctx.$tv(_ctx.formatNumber(_ctx.recordModal.record.value))) + " ", 1 /* TEXT */),
-                      _createElementVNode("span", _hoisted_2115, _toDisplayString(_ctx.$t("kg")), 1 /* TEXT */)
+                      _createElementVNode("span", _hoisted_2139, _toDisplayString(_ctx.$t("kg")), 1 /* TEXT */)
                     ]),
-                    _createElementVNode("p", _hoisted_2116, [
+                    _createElementVNode("p", _hoisted_2140, [
                       _createTextVNode(_toDisplayString(_ctx.$t("Prima {0} kg ·", [(_ctx.formatNumber(_ctx.recordModal.record.prev))])) + " ", 1 /* TEXT */),
-                      _createElementVNode("b", _hoisted_2117, _toDisplayString(_ctx.$t("+{0} kg", [(_ctx.formatNumber(Math.round((_ctx.recordModal.record.value - _ctx.recordModal.record.prev) * 10) / 10))])), 1 /* TEXT */)
+                      _createElementVNode("b", _hoisted_2141, _toDisplayString(_ctx.$t("+{0} kg", [(_ctx.formatNumber(Math.round((_ctx.recordModal.record.value - _ctx.recordModal.record.prev) * 10) / 10))])), 1 /* TEXT */)
                     ])
                   ]),
-                  _createElementVNode("div", _hoisted_2118, [
+                  _createElementVNode("div", _hoisted_2142, [
                     _createElementVNode("button", {
-                      onClick: _cache[370] || (_cache[370] = (...args) => (_ctx.shareRecordFromModal && _ctx.shareRecordFromModal(...args))),
+                      onClick: _cache[371] || (_cache[371] = (...args) => (_ctx.shareRecordFromModal && _ctx.shareRecordFromModal(...args))),
                       class: "w-full cangiante-btn text-white font-extrabold py-3.5 rounded-2xl shadow-md active:scale-95 transition-all"
                     }, _toDisplayString(_ctx.$t("📸 Condividi nella storia")), 1 /* TEXT */),
                     _createElementVNode("button", {
-                      onClick: _cache[371] || (_cache[371] = $event => (_ctx.recordModal.isOpen = false)),
+                      onClick: _cache[372] || (_cache[372] = $event => (_ctx.recordModal.isOpen = false)),
                       class: "w-full text-xs font-bold text-gray-400 py-2"
                     }, _toDisplayString(_ctx.$t("Continua")), 1 /* TEXT */)
                   ])
                 ])
               ]))
             : _createCommentVNode("v-if", true),
-          _createElementVNode("nav", _hoisted_2119, [
+          _createElementVNode("nav", _hoisted_2143, [
             _createElementVNode("button", {
-              onClick: _cache[372] || (_cache[372] = $event => (_ctx.activeTab = 'dashboard')),
+              onClick: _cache[373] || (_cache[373] = $event => (_ctx.activeTab = 'dashboard')),
               class: _normalizeClass([_ctx.activeTab === 'dashboard' ? 'text-viola' : 'text-gray-400 hover:text-gray-500', "flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group"])
             }, [
               _createElementVNode("div", {
                 class: _normalizeClass([_ctx.activeTab === 'dashboard' ? 'bg-viola/10 text-viola' : 'group-hover:bg-gray-100', "p-1.5 rounded-xl transition-colors"])
-              }, [...(_cache[667] || (_cache[667] = [
+              }, [...(_cache[668] || (_cache[668] = [
                 _createElementVNode("svg", {
                   class: "w-6 h-6",
                   stroke: "currentColor",
@@ -14383,18 +14525,18 @@ return function render(_ctx, _cache) {
                   })
                 ], -1 /* CACHED */)
               ]))], 2 /* CLASS */),
-              _createElementVNode("span", _hoisted_2120, _toDisplayString(_ctx.$t("Dashboard")), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_2144, _toDisplayString(_ctx.$t("Dashboard")), 1 /* TEXT */),
               (_ctx.activeTab === 'dashboard')
-                ? (_openBlock(), _createElementBlock("span", _hoisted_2121))
+                ? (_openBlock(), _createElementBlock("span", _hoisted_2145))
                 : _createCommentVNode("v-if", true)
             ], 2 /* CLASS */),
             _createElementVNode("button", {
-              onClick: _cache[373] || (_cache[373] = $event => (_ctx.activeTab = 'allenamento')),
+              onClick: _cache[374] || (_cache[374] = $event => (_ctx.activeTab = 'allenamento')),
               class: _normalizeClass([_ctx.activeTab === 'allenamento' ? 'text-arancione' : 'text-gray-400 hover:text-gray-500', "flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group"])
             }, [
               _createElementVNode("div", {
                 class: _normalizeClass([_ctx.activeTab === 'allenamento' ? 'bg-arancione/10 text-arancione' : 'group-hover:bg-gray-100', "p-1.5 rounded-xl transition-colors"])
-              }, [...(_cache[668] || (_cache[668] = [
+              }, [...(_cache[669] || (_cache[669] = [
                 _createElementVNode("svg", {
                   class: "w-6 h-6",
                   stroke: "currentColor",
@@ -14409,18 +14551,18 @@ return function render(_ctx, _cache) {
                   })
                 ], -1 /* CACHED */)
               ]))], 2 /* CLASS */),
-              _createElementVNode("span", _hoisted_2122, _toDisplayString(_ctx.$t("Allenamento")), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_2146, _toDisplayString(_ctx.$t("Allenamento")), 1 /* TEXT */),
               (_ctx.activeTab === 'allenamento')
-                ? (_openBlock(), _createElementBlock("span", _hoisted_2123))
+                ? (_openBlock(), _createElementBlock("span", _hoisted_2147))
                 : _createCommentVNode("v-if", true)
             ], 2 /* CLASS */),
             _createElementVNode("button", {
-              onClick: _cache[374] || (_cache[374] = $event => (_ctx.activeTab = 'nutrition')),
+              onClick: _cache[375] || (_cache[375] = $event => (_ctx.activeTab = 'nutrition')),
               class: _normalizeClass([_ctx.activeTab === 'nutrition' ? 'text-salvia' : 'text-gray-400 hover:text-gray-500', "flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group"])
             }, [
               _createElementVNode("div", {
                 class: _normalizeClass([_ctx.activeTab === 'nutrition' ? 'bg-salvia/10 text-salvia' : 'group-hover:bg-gray-100', "p-1.5 rounded-xl transition-colors"])
-              }, [...(_cache[669] || (_cache[669] = [
+              }, [...(_cache[670] || (_cache[670] = [
                 _createElementVNode("svg", {
                   class: "w-6 h-6",
                   stroke: "currentColor",
@@ -14435,18 +14577,18 @@ return function render(_ctx, _cache) {
                   })
                 ], -1 /* CACHED */)
               ]))], 2 /* CLASS */),
-              _createElementVNode("span", _hoisted_2124, _toDisplayString(_ctx.$t("Nutrizione")), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_2148, _toDisplayString(_ctx.$t("Nutrizione")), 1 /* TEXT */),
               (_ctx.activeTab === 'nutrition')
-                ? (_openBlock(), _createElementBlock("span", _hoisted_2125))
+                ? (_openBlock(), _createElementBlock("span", _hoisted_2149))
                 : _createCommentVNode("v-if", true)
             ], 2 /* CLASS */),
             _createElementVNode("button", {
-              onClick: _cache[375] || (_cache[375] = $event => (_ctx.activeTab = 'progress')),
+              onClick: _cache[376] || (_cache[376] = $event => (_ctx.activeTab = 'progress')),
               class: _normalizeClass([_ctx.activeTab === 'progress' ? 'text-viola' : 'text-gray-400 hover:text-gray-500', "flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group"])
             }, [
               _createElementVNode("div", {
                 class: _normalizeClass([_ctx.activeTab === 'progress' ? 'bg-viola/10 text-viola' : 'group-hover:bg-gray-100', "p-1.5 rounded-xl transition-colors"])
-              }, [...(_cache[670] || (_cache[670] = [
+              }, [...(_cache[671] || (_cache[671] = [
                 _createElementVNode("svg", {
                   class: "w-6 h-6",
                   stroke: "currentColor",
@@ -14461,18 +14603,18 @@ return function render(_ctx, _cache) {
                   })
                 ], -1 /* CACHED */)
               ]))], 2 /* CLASS */),
-              _createElementVNode("span", _hoisted_2126, _toDisplayString(_ctx.$t("Progressi")), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_2150, _toDisplayString(_ctx.$t("Progressi")), 1 /* TEXT */),
               (_ctx.activeTab === 'progress')
-                ? (_openBlock(), _createElementBlock("span", _hoisted_2127))
+                ? (_openBlock(), _createElementBlock("span", _hoisted_2151))
                 : _createCommentVNode("v-if", true)
             ], 2 /* CLASS */),
             _createElementVNode("button", {
-              onClick: _cache[376] || (_cache[376] = $event => (_ctx.activeTab = 'trophies')),
+              onClick: _cache[377] || (_cache[377] = $event => (_ctx.activeTab = 'trophies')),
               class: _normalizeClass([_ctx.activeTab === 'trophies' ? 'text-arancione' : 'text-gray-400 hover:text-gray-500', "flex flex-col items-center gap-1 transition-all p-2 relative flex-1 group"])
             }, [
               _createElementVNode("div", {
                 class: _normalizeClass([_ctx.activeTab === 'trophies' ? 'bg-arancione/10 text-arancione' : 'group-hover:bg-gray-100', "p-1.5 rounded-xl transition-colors"])
-              }, [...(_cache[671] || (_cache[671] = [
+              }, [...(_cache[672] || (_cache[672] = [
                 _createElementVNode("svg", {
                   class: "w-6 h-6",
                   stroke: "currentColor",
@@ -14487,9 +14629,9 @@ return function render(_ctx, _cache) {
                   })
                 ], -1 /* CACHED */)
               ]))], 2 /* CLASS */),
-              _createElementVNode("span", _hoisted_2128, _toDisplayString(_ctx.$t("Trofei")), 1 /* TEXT */),
+              _createElementVNode("span", _hoisted_2152, _toDisplayString(_ctx.$t("Trofei")), 1 /* TEXT */),
               (_ctx.activeTab === 'trophies')
-                ? (_openBlock(), _createElementBlock("span", _hoisted_2129))
+                ? (_openBlock(), _createElementBlock("span", _hoisted_2153))
                 : _createCommentVNode("v-if", true)
             ], 2 /* CLASS */)
           ])
