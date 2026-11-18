@@ -2137,5 +2137,16 @@ I18N_DICTS.en = {
   "Potenza ed esplosività": "Power and explosiveness",
   "Prevenzione infortuni": "Injury prevention",
   "Prova questa settimana (giorno per giorno)": "Try this week (day by day)",
-  "Seduta {0} · {1} esercizi": "Session {0} · {1} exercises"
+  "Seduta {0} · {1} esercizi": "Session {0} · {1} exercises",
+  "📅 La tua settimana tipo": "📅 Your typical week",
+  "Scegli i giorni in 3 passaggi. Il giorno prima della gara diventa la vigilia, quello dopo il recupero.": "Pick your days in 3 steps. The day before a game becomes the eve, the day after becomes recovery.",
+  "In che giorni ti alleni di solito?": "Which days do you usually train?",
+  "In che giorni riposi di solito?": "Which days do you usually rest?",
+  "In che giorni hai le partite o le gare?": "Which days do you have games or competitions?",
+  "Avanti →": "Next →",
+  "I giorni che non scegli contano come riposo.": "Days you don't pick count as rest days.",
+  "Riposo": "Day off",
+  "Vigilia": "Eve",
+  "Gara": "Game",
+  "Gare": "Games"
 };

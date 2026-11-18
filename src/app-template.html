@@ -4488,7 +4488,7 @@
           <p v-if="eatTarget && (eatFactor >= 1.4 || eatFactor <= 0.75)" class="text-[11px] font-medium text-gray-500 mt-1">Il tuo fabbisogno è lontano dalla media: abbiamo adattato le porzioni fin dove ha senso, per numeri precisi chiedi a un nutrizionista.</p>
         </div>
 
-        <!-- Per il tuo sport: sport, giorni di gara e la settimana che ne viene fuori -->
+        <!-- Per il tuo sport: lo sport, poi in 3 fasi allenamenti, riposi e gare, e la settimana che ne viene fuori -->
         <div v-if="eatGuide.goal === 'sport'" class="bg-white rounded-2xl p-4 border border-gray-100 shadow-sm space-y-3">
           <div class="flex gap-1.5 overflow-x-auto hide-scrollbar -mx-4 px-4">
             <button v-for="sp in sportDietSports" :key="'dsp' + sp" @click="setDietSport(sp)"
@@ -4496,21 +4496,55 @@
                     :class="sportDietSport === sp ? 'bg-salvia text-white border-salvia' : 'bg-white text-gray-500 border-gray-200'">{{ sp }}<span v-if="userSports.includes(sp)"> ⭐</span></button>
           </div>
           <div>
-            <div class="text-sm font-extrabold text-antracite">🏆 Quando hai la gara?</div>
-            <p class="text-[11px] font-medium text-gray-500 leading-snug">Il giorno prima diventa la vigilia, quello dopo il recupero. Gli allenamenti fissi li prendo dal calendario.</p>
+            <div class="text-sm font-extrabold text-antracite">📅 La tua settimana tipo</div>
+            <p class="text-[11px] font-medium text-gray-500 leading-snug">Scegli i giorni in 3 passaggi. Il giorno prima della gara diventa la vigilia, quello dopo il recupero.</p>
+          </div>
+          <!-- Le 3 fasi -->
+          <div class="grid grid-cols-3 gap-1 bg-gray-100 p-1 rounded-xl">
+            <button @click="sportDayStep = 'train'" class="py-1.5 rounded-lg flex flex-col items-center leading-tight transition-all"
+                    :class="sportDayStep === 'train' ? 'bg-salvia text-white shadow-sm' : 'text-gray-500'">
+              <span class="text-sm">1 · 🏋️</span><span class="text-[10px] font-bold">Allenamenti</span>
+            </button>
+            <button @click="sportDayStep = 'rest'" class="py-1.5 rounded-lg flex flex-col items-center leading-tight transition-all"
+                    :class="sportDayStep === 'rest' ? 'bg-viola text-white shadow-sm' : 'text-gray-500'">
+              <span class="text-sm">2 · 😴</span><span class="text-[10px] font-bold">Riposo</span>
+            </button>
+            <button @click="sportDayStep = 'match'" class="py-1.5 rounded-lg flex flex-col items-center leading-tight transition-all"
+                    :class="sportDayStep === 'match' ? 'bg-arancione text-white shadow-sm' : 'text-gray-500'">
+              <span class="text-sm">3 · 🏆</span><span class="text-[10px] font-bold">Gare</span>
+            </button>
+          </div>
+          <div class="text-[12px] font-extrabold text-antracite">
+            <span v-if="sportDayStep === 'train'">In che giorni ti alleni di solito?</span>
+            <span v-else-if="sportDayStep === 'rest'">In che giorni riposi di solito?</span>
+            <span v-else>In che giorni hai le partite o le gare?</span>
           </div>
           <div class="grid grid-cols-7 gap-1">
-            <button v-for="d in sportDietWeek" :key="'dmd' + d.dow" @click="toggleMatchDay(d.dow)"
-                    class="py-2 rounded-xl text-[10px] font-extrabold border transition-all active:scale-95"
-                    :class="sportMatchDays.includes(d.dow) ? 'bg-arancione text-white border-arancione' : 'bg-gray-50 text-gray-500 border-gray-100'">{{ d.short }}</button>
+            <button v-for="d in sportDietWeek" :key="'dsd' + d.dow" @click="toggleSportDay(sportDayStep, d.dow)"
+                    class="py-1.5 rounded-xl border flex flex-col items-center gap-0.5 transition-all active:scale-95"
+                    :class="d.choice === sportDayStep
+                      ? (sportDayStep === 'train' ? 'bg-salvia text-white border-salvia' : sportDayStep === 'rest' ? 'bg-viola text-white border-viola' : 'bg-arancione text-white border-arancione')
+                      : 'bg-gray-50 text-gray-500 border-gray-100'">
+              <span class="text-[10px] font-extrabold">{{ d.short }}</span>
+              <span class="text-sm leading-none" :class="d.choice && d.choice !== sportDayStep ? 'opacity-50' : ''">{{ d.choice ? sportDayType(d.choice).icon : '·' }}</span>
+            </button>
           </div>
-          <div class="grid grid-cols-7 gap-1 pt-1 border-t border-gray-100">
-            <div v-for="d in sportDietWeek" :key="'dwk' + d.dow" class="flex flex-col items-center gap-0.5 pt-2">
-              <span class="text-lg leading-none">{{ sportDayType(d.type).icon }}</span>
-              <span class="text-[8px] font-bold uppercase tracking-wide text-center leading-tight" :class="d.today ? 'text-salvia' : 'text-gray-400'">{{ sportDayType(d.type).short }}</span>
+          <button v-if="sportDayStep !== 'match'" @click="sportDayStep = sportDayStep === 'train' ? 'rest' : 'match'"
+                  class="w-full py-2 rounded-xl text-[11px] font-bold text-salvia bg-salvia/10 active:scale-95 transition-all">Avanti →</button>
+          <!-- La settimana che ne viene fuori: solo emoji, con la legenda sotto -->
+          <div class="pt-2 border-t border-gray-100 space-y-2">
+            <div class="text-[11px] font-extrabold text-antracite">La tua settimana</div>
+            <div class="grid grid-cols-7 gap-1">
+              <div v-for="d in sportDietWeek" :key="'dwk' + d.dow" class="flex flex-col items-center gap-1">
+                <span class="text-[10px] font-bold" :class="d.today ? 'text-salvia' : 'text-gray-400'">{{ d.short }}</span>
+                <span class="text-lg leading-none">{{ sportDayType(d.type).icon }}</span>
+              </div>
             </div>
+            <div class="flex flex-wrap gap-x-3 gap-y-1 text-[10px] font-medium text-gray-500">
+              <span v-for="t in SPORT_DIET_DAYS" :key="'dlg' + t.id">{{ t.icon }} {{ $tv(t.short) }}</span>
+            </div>
+            <p class="text-[10px] font-medium text-gray-400 leading-snug">I giorni che non scegli contano come riposo.</p>
           </div>
-          <p v-if="!sportDietWeek.some(d => d.trains)" class="text-[11px] font-bold text-arancione leading-snug">Non vedo allenamenti fissi nel calendario: aggiungili in Allenamento → Calendario e la settimana si sistema da sola.</p>
           <p v-if="sportDietKind.note" class="text-[11px] font-medium text-gray-600 bg-salvia/10 rounded-xl p-2.5 leading-snug">💡 {{ sportDietKind.note }}</p>
           <p class="text-[10px] font-medium text-gray-400 leading-snug">📚 Carboidrati e proteine secondo la posizione ACSM e dietisti di USA e Canada su alimentazione e prestazione (2016) e le posizioni ISSN (2017).</p>
         </div>

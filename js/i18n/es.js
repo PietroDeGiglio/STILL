@@ -2138,5 +2138,16 @@ I18N_DICTS.es = {
   "Potenza ed esplosività": "Potencia y explosividad",
   "Prevenzione infortuni": "Prevención de lesiones",
   "Prova questa settimana (giorno per giorno)": "Prueba esta semana (día a día)",
-  "Seduta {0} · {1} esercizi": "Sesión {0} · {1} ejercicios"
+  "Seduta {0} · {1} esercizi": "Sesión {0} · {1} ejercicios",
+  "📅 La tua settimana tipo": "📅 Tu semana tipo",
+  "Scegli i giorni in 3 passaggi. Il giorno prima della gara diventa la vigilia, quello dopo il recupero.": "Elige tus días en 3 pasos. El día antes del partido es la víspera, el día después la recuperación.",
+  "In che giorni ti alleni di solito?": "¿Qué días sueles entrenar?",
+  "In che giorni riposi di solito?": "¿Qué días sueles descansar?",
+  "In che giorni hai le partite o le gare?": "¿Qué días tienes partidos o competiciones?",
+  "Avanti →": "Siguiente →",
+  "I giorni che non scegli contano come riposo.": "Los días que no elijas cuentan como descanso.",
+  "Riposo": "Día libre",
+  "Vigilia": "Víspera",
+  "Gara": "Partido",
+  "Gare": "Partidos"
 };

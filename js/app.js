@@ -5447,35 +5447,41 @@ const stillApp = createApp({
 
     const MEAL_ORDER = ['colazione', 'spuntino_mattina', 'pranzo', 'spuntino_pomeriggio', 'post_workout', 'cena'];
     // --- Per chi fa sport (js/data/nutrition.js, SPORT_DIET_DAYS): ogni giorno della settimana ha il suo tipo ---
-    // riposo, allenamento, vigilia, gara, recupero. Gli allenamenti fissi vengono dal calendario, le gare le scegli tu.
+    // riposo, allenamento, vigilia, gara, recupero. Allenamenti, riposi e gare li sceglie l'utente in 3 fasi.
     const sportDietSports = computed(() => {
       const all = Object.values(SPORT_DIET_KINDS).flatMap(k => k.sports);
       return [...userSports.value.filter(sp => all.includes(sp)), ...all.filter(sp => !userSports.value.includes(sp))];
     });
     const sportDietSport = computed(() => (settings.value.eatPrefs || {}).sport || sportDietSports.value[0]);
     const sportDietKind = computed(() => Object.values(SPORT_DIET_KINDS).find(k => k.sports.includes(sportDietSport.value)) || SPORT_DIET_KINDS.squadra);
-    const sportMatchDays = computed(() => (settings.value.eatPrefs || {}).matchDays || []);
     const setDietSport = (sport) => { ensureEatPrefs().sport = sport; };
-    const toggleMatchDay = (dow) => {
+    // I giorni scelti dall'utente (0 = domenica … 6 = sabato). Un giorno sta in una sola lista.
+    const SPORT_DAY_KEYS = { train: 'trainDays', rest: 'restDays', match: 'matchDays' };
+    const sportDayStep = ref('train');
+    const sportDaysOf = (kind) => (settings.value.eatPrefs || {})[SPORT_DAY_KEYS[kind]] || [];
+    const sportDayChoice = (dow) => Object.keys(SPORT_DAY_KEYS).find(kind => sportDaysOf(kind).includes(dow)) || null;
+    const toggleSportDay = (kind, dow) => {
       const prefs = ensureEatPrefs();
-      const list = prefs.matchDays || [];
-      prefs.matchDays = list.includes(dow) ? list.filter(d => d !== dow) : [...list, dow];
+      const had = sportDayChoice(dow) === kind;
+      Object.values(SPORT_DAY_KEYS).forEach(k => { prefs[k] = (prefs[k] || []).filter(d => d !== dow); });
+      if (!had) prefs[SPORT_DAY_KEYS[kind]].push(dow);
     };
-    // La settimana in corso, da lunedì: gara > vigilia > allenamento > recupero (giorno dopo la gara) > riposo
+    // La settimana in corso, da lunedì: gara > vigilia > allenamento > recupero (giorno dopo la gara) > riposo.
+    // I giorni non scelti contano come riposo.
     const sportDietWeek = computed(() => {
       const monday = nowDate(); monday.setHours(12, 0, 0, 0);
       monday.setDate(monday.getDate() - ((monday.getDay() + 6) % 7));
-      const match = new Set(sportMatchDays.value);
+      const match = new Set(sportDaysOf('match'));
+      const train = new Set(sportDaysOf('train'));
       return weekDays.map((name, i) => {
         const d = new Date(monday); d.setDate(monday.getDate() + i);
         const dow = d.getDay();
-        const trains = trainingSessionsOnDateKey(toISODate(d)).length > 0;
         let type = 'rest';
         if (match.has(dow)) type = 'match';
         else if (match.has((dow + 1) % 7)) type = 'eve';
-        else if (trains) type = 'train';
+        else if (train.has(dow)) type = 'train';
         else if (match.has((dow + 6) % 7)) type = 'after';
-        return { name, short: d.toLocaleDateString(i18nIntl(), { weekday: 'short' }).replace('.', ''), dow, type, trains, today: toISODate(d) === toISODate() };
+        return { name, short: d.toLocaleDateString(i18nIntl(), { weekday: 'short' }).replace('.', ''), dow, type, choice: sportDayChoice(dow), today: toISODate(d) === toISODate() };
       });
     });
     const sportDayType = (id) => SPORT_DIET_DAYS.find(t => t.id === id) || SPORT_DIET_DAYS[0];
@@ -8560,7 +8566,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, SPORT_DIET_DAYS, sportDietSports, sportDietSport, sportDietKind, sportMatchDays, setDietSport, toggleMatchDay, sportDietWeek, sportDayType, eatGoal, SPORT_BLOCKS, guideBlockStart, selectGuideSession, guideSessionIds, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, SPORT_DIET_DAYS, sportDietSports, sportDietSport, sportDietKind, setDietSport, sportDayStep, sportDaysOf, toggleSportDay, sportDietWeek, sportDayType, eatGoal, SPORT_BLOCKS, guideBlockStart, selectGuideSession, guideSessionIds, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale
