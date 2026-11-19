@@ -4121,6 +4121,9 @@
             <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
             {{ playerExercise.type === 'cardio' ? 'Inizia cardio' : (playerStep.setIdx === 0 ? 'Inizia esercizio' : (workoutPlayer.restJustEnded ? 'Ho iniziato la serie' : 'Inizia serie')) }}
           </button>
+          <button v-if="playerUpcomingGroups.length > 1" @click="openPlayerOrder" class="w-full bg-white/10 text-white/80 font-bold py-3 rounded-2xl hover:bg-white/20 active:scale-95 transition-all text-sm">
+            ⇅ Cambia ordine degli esercizi
+          </button>
         </div>
 
         <!-- Fase: in esecuzione -->
@@ -4170,6 +4173,37 @@
           <div class="flex gap-2">
             <button @click="playerAddRest(15)" class="flex-1 bg-white/10 hover:bg-white/20 font-bold py-3.5 rounded-2xl active:scale-95 transition-all">+15s</button>
             <button @click="playerSkipRest" class="flex-1 bg-viola hover:bg-viola/90 font-bold py-3.5 rounded-2xl active:scale-95 transition-all">Salta recupero</button>
+          </div>
+          <button v-if="playerUpcomingGroups.length > 1" @click="openPlayerOrder" class="w-full bg-white/10 text-white/80 font-bold py-3 rounded-2xl hover:bg-white/20 active:scale-95 transition-all text-sm">
+            ⇅ Cambia il prossimo esercizio
+          </button>
+        </div>
+      </div>
+
+      <!-- Cambia ordine: scegli cosa fare adesso tra gli esercizi che mancano -->
+      <div v-if="playerOrderOpen" class="absolute inset-0 z-20 flex items-end bg-black/60 backdrop-blur-sm animate-fadeIn" @click.self="playerOrderOpen = false">
+        <div class="w-full bg-antracite border-t border-white/10 rounded-t-3xl p-5 space-y-3 max-h-[80%] flex flex-col">
+          <div class="flex items-start justify-between gap-3 shrink-0">
+            <div>
+              <h3 class="text-lg font-black">Cambia ordine</h3>
+              <p v-if="workoutPlayer.phase === 'rest'" class="text-[11px] font-medium text-white/60 leading-snug">Macchinario occupato? Scegli cosa fare dopo il recupero. Gli altri esercizi restano in coda.</p>
+              <p v-else class="text-[11px] font-medium text-white/60 leading-snug">Macchinario occupato? Scegli cosa fare adesso. Gli altri esercizi restano in coda.</p>
+            </div>
+            <button @click="playerOrderOpen = false" class="w-9 h-9 shrink-0 rounded-xl bg-white/10 hover:bg-white/20 font-bold" aria-label="Chiudi">✕</button>
+          </div>
+          <div class="overflow-y-auto space-y-2 -mx-1 px-1">
+            <button v-for="(g, i) in playerUpcomingGroups" :key="'og' + g.group" @click="playerDoGroupNow(g.group)" :disabled="i === 0"
+                    class="w-full flex items-center gap-3 text-left rounded-2xl px-4 py-3 transition-all active:scale-[0.98]"
+                    :class="i === 0 ? 'bg-white/5 opacity-70' : 'bg-white/10 hover:bg-white/20'">
+              <span class="w-7 h-7 shrink-0 rounded-lg bg-white/10 flex items-center justify-center text-xs font-black">{{ i + 1 }}</span>
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-extrabold break-words">{{ g.names.join(' + ') }}</span>
+                <span class="block text-[10px] font-bold text-white/50 uppercase tracking-widest">{{ g.superset ? 'Superserie · ' : '' }}{{ g.sets }} serie</span>
+              </span>
+              <span v-if="i === 0 && workoutPlayer.phase !== 'rest' && playerStep && playerStep.group === g.group" class="shrink-0 text-[10px] font-black uppercase tracking-widest text-white/60">Adesso</span>
+              <span v-else-if="i === 0" class="shrink-0 text-[10px] font-black uppercase tracking-widest text-white/60">Prossimo</span>
+              <span v-else class="shrink-0 text-[11px] font-extrabold bg-arancione text-white px-3 py-1.5 rounded-lg">Fai adesso</span>
+            </button>
           </div>
         </div>
       </div>

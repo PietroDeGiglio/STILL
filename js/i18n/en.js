@@ -2148,5 +2148,12 @@ I18N_DICTS.en = {
   "Riposo": "Day off",
   "Vigilia": "Eve",
   "Gara": "Game",
-  "Gare": "Games"
+  "Gare": "Games",
+  "{0}{1} serie": "{0}{1} sets",
+  "⇅ Cambia il prossimo esercizio": "⇅ Change the next exercise",
+  "⇅ Cambia ordine degli esercizi": "⇅ Change exercise order",
+  "Cambia ordine": "Change order",
+  "Fai adesso": "Do it now",
+  "Macchinario occupato? Scegli cosa fare adesso. Gli altri esercizi restano in coda.": "Machine taken? Pick what to do now. The other exercises stay in the queue.",
+  "Macchinario occupato? Scegli cosa fare dopo il recupero. Gli altri esercizi restano in coda.": "Machine taken? Pick what to do after the rest. The other exercises stay in the queue."
 };

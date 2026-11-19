@@ -103,6 +103,32 @@ const SHARE_THEMES = {
   sticker: { text: '#FFFFFF', sub: 'rgba(255,255,255,0.88)', tile: 'rgba(0,0,0,0)', border: 'rgba(0,0,0,0)', faint: 'rgba(255,255,255,0.35)', accent: '#FFFFFF', accent2: 'rgba(255,255,255,0.7)', meal: 'rgba(255,255,255,0.7)', good: '#FFFFFF', bad: '#FFFFFF', glow: 'rgba(255,255,255,0.5)', brand: false, shadow: true }
 };
 
+// Foto dello sfondo: quelle del telefono sono 3000-4000 px. Rimpicciolirle in un colpo solo sul canvas
+// (interpolazione veloce del browser) le rende sgranate; qui si dimezzano a passi con qualità alta
+// fino a poco più del necessario per coprire la storia 1080x1920 (con il margine per lo zoom del video).
+const prepareSharePhoto = (img) => {
+  const iw = img.naturalWidth || img.width, ih = img.naturalHeight || img.height;
+  if (!iw || !ih) return img;
+  const target = Math.max(1080 / iw, 1920 / ih) * 1.08;
+  if (target >= 0.75) return img;   // già piccola: si usa così
+  let src = img, w = iw, h = ih;
+  const tw = Math.round(iw * target), th = Math.round(ih * target);
+  while (w / 2 >= tw && h / 2 >= th) {
+    const c = document.createElement('canvas');
+    c.width = Math.round(w / 2); c.height = Math.round(h / 2);
+    const cx = c.getContext('2d');
+    cx.imageSmoothingEnabled = true; cx.imageSmoothingQuality = 'high';
+    cx.drawImage(src, 0, 0, c.width, c.height);
+    src = c; w = c.width; h = c.height;
+  }
+  const out = document.createElement('canvas');
+  out.width = tw; out.height = th;
+  const ox = out.getContext('2d');
+  ox.imageSmoothingEnabled = true; ox.imageSmoothingQuality = 'high';
+  ox.drawImage(src, 0, 0, tw, th);
+  return out;
+};
+
 // time: secondi dall'inizio (Infinity = fotogramma finale statico)
 const drawShareBackground = (ctx, W, H, theme, time) => {
   const live = isFinite(time);
@@ -123,6 +149,8 @@ const drawShareBackground = (ctx, W, H, theme, time) => {
     const ih = sharePhoto.naturalHeight || sharePhoto.height;
     const zoom = 1 + (live ? 0.06 * clamp01(t / VIDEO_TOTAL) : 0);
     const scale = Math.max(W / iw, H / ih) * zoom;
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
     ctx.drawImage(sharePhoto, (W - iw * scale) / 2, (H - ih * scale) / 2, iw * scale, ih * scale);
     const shade = ctx.createLinearGradient(0, 0, 0, H);
     shade.addColorStop(0, 'rgba(0,0,0,0.55)'); shade.addColorStop(0.28, 'rgba(0,0,0,0.10)');

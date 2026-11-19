@@ -2149,5 +2149,12 @@ I18N_DICTS.es = {
   "Riposo": "Día libre",
   "Vigilia": "Víspera",
   "Gara": "Partido",
-  "Gare": "Partidos"
+  "Gare": "Partidos",
+  "{0}{1} serie": "{0}{1} series",
+  "⇅ Cambia il prossimo esercizio": "⇅ Cambia el próximo ejercicio",
+  "⇅ Cambia ordine degli esercizi": "⇅ Cambiar el orden de los ejercicios",
+  "Cambia ordine": "Cambiar orden",
+  "Fai adesso": "Hacer ahora",
+  "Macchinario occupato? Scegli cosa fare adesso. Gli altri esercizi restano in coda.": "¿Máquina ocupada? Elige qué hacer ahora. Los demás ejercicios quedan en la cola.",
+  "Macchinario occupato? Scegli cosa fare dopo il recupero. Gli altri esercizi restano in coda.": "¿Máquina ocupada? Elige qué hacer después del descanso. Los demás ejercicios quedan en la cola."
 };

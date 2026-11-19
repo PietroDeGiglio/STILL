@@ -3576,7 +3576,7 @@ const stillApp = createApp({
     // Le superserie alternano gli esercizi della coppia: A1 → B1 → recupero → A2 → B2 ...
     const buildWorkoutSteps = () => {
       const steps = [];
-      selectedDayGroups.value.forEach(group => {
+      selectedDayGroups.value.forEach((group, gi) => {
         const exercises = group.exercises;
         const rounds = Math.max(...exercises.map(exerciseSetCount));
         for (let s = 0; s < rounds; s++) {
@@ -3589,10 +3589,20 @@ const stillApp = createApp({
               setsTotal: exerciseSetCount(ex),
               reps: stepReps(ex, s),
               superset: !!group.label,
-              restAfter: isRoundEnd ? Math.max(...round.map(exerciseRest)) : 0
+              group: gi,
+              roundEnd: isRoundEnd,
+              restBase: isRoundEnd ? Math.max(...round.map(exerciseRest)) : 0,
+              restAfter: 0
             });
           });
         }
+      });
+      return refreshStepsMeta(steps);
+    };
+    // Recuperi e "ultima serie dell'esercizio" dipendono dall'ordine: si ricalcolano dopo ogni cambio
+    const refreshStepsMeta = (steps) => {
+      steps.forEach(step => {
+        if (step.roundEnd !== undefined) step.restAfter = step.roundEnd ? step.restBase : 0;
       });
       if (steps.length) steps[steps.length - 1].restAfter = 0;
       steps.forEach((step, idx) => {
@@ -3851,6 +3861,57 @@ const stillApp = createApp({
       p.restJustEnded = false;
       p.stepIdx += 1;
       setPlayerPhase('ready');
+    };
+
+    // --- Cambia ordine: scegli quale esercizio (o superserie) fare adesso tra quelli che mancano ---
+    // Si sposta sempre un blocco intero mai iniziato; quello in corso si finisce prima.
+    const playerOrderOpen = ref(false);
+    const playerReorderPoint = computed(() => {
+      const p = workoutPlayer.value;
+      const steps = p.steps;
+      if (!steps.length || steps.some(step => step.group === undefined)) return null;   // sessione salvata da una versione vecchia
+      let idx;
+      if (p.phase === 'ready' || p.phase === 'countdown') {
+        idx = p.stepIdx;
+        // Blocco già iniziato (una serie fatta): il prossimo cambio è alla sua fine
+        if (idx > 0 && steps[idx - 1].group === steps[idx].group) {
+          while (idx < steps.length && steps[idx].group === steps[p.stepIdx].group) idx++;
+        }
+      } else if (p.phase === 'rest') {
+        idx = p.stepIdx + 1;
+        while (idx < steps.length && steps[idx].group === steps[p.stepIdx].group) idx++;
+      } else return null;
+      return idx < steps.length ? idx : null;
+    });
+    const playerUpcomingGroups = computed(() => {
+      const at = playerReorderPoint.value;
+      if (at === null) return [];
+      const steps = workoutPlayer.value.steps;
+      const groups = [];
+      steps.slice(at).forEach(step => {
+        let g = groups.find(item => item.group === step.group);
+        if (!g) { g = { group: step.group, exIds: [], sets: 0, superset: step.superset }; groups.push(g); }
+        if (!g.exIds.includes(step.exId)) g.exIds.push(step.exId);
+        g.sets = Math.max(g.sets, step.setsTotal || 1);
+      });
+      return groups.map(g => ({
+        ...g,
+        names: g.exIds.map(id => (findSelectedExerciseById(id) || {}).name).filter(Boolean)
+      }));
+    });
+    const openPlayerOrder = () => { if (playerUpcomingGroups.value.length > 1) playerOrderOpen.value = true; };
+    const playerDoGroupNow = (group) => {
+      const p = workoutPlayer.value;
+      const at = playerReorderPoint.value;
+      playerOrderOpen.value = false;
+      if (at === null) return;
+      const moving = p.steps.filter((step, i) => i >= at && step.group === group);
+      if (!moving.length || p.steps[at] === moving[0]) return;
+      const others = p.steps.filter(step => !moving.includes(step));
+      others.splice(at, 0, ...moving);
+      p.steps = refreshStepsMeta(others);
+      // Se cambia l'esercizio mostrato adesso, il campo del peso deve seguire
+      playerValueDraft.value = playerCurrentValue.value === null ? '' : String(playerCurrentValue.value);
     };
 
     const motivationalQuotes = [
@@ -6260,7 +6321,7 @@ const stillApp = createApp({
       if (!file) return;
       const img = new Image();
       img.onload = () => {
-        sharePhoto = img;
+        sharePhoto = prepareSharePhoto(img);
         shareStudio.value.theme = 'photo';
         shareStudio.value.hasPhoto = !shareStudio.value.hasPhoto;   // forza il ridisegno
       };
@@ -6325,7 +6386,7 @@ const stillApp = createApp({
       const stream = canvas.captureStream(30);
       let recorder;
       try {
-        recorder = new MediaRecorder(stream, { mimeType: videoMime, videoBitsPerSecond: 8000000 });
+        recorder = new MediaRecorder(stream, { mimeType: videoMime, videoBitsPerSecond: 16000000 });
       } catch (e) {
         st.recording = false; return reject(e);
       }
@@ -6787,7 +6848,7 @@ const stillApp = createApp({
     const snoozeBackup = () => { settings.value.backupSnoozeUntil = new Date(Date.now() + 3 * DAY_MS).toISOString(); };
 
     // Versione mostrata nel profilo e nelle segnalazioni (aggiornarla insieme a VERSION in sw.js)
-    const APP_VERSION = 'beta 23';
+    const APP_VERSION = 'beta 24';
     // Segnalazione: messaggio pronto da mandare in chat a chi ha fatto provare l'app (nessun contatto nell'app)
     const sendFeedback = async () => {
       const ua = navigator.userAgent;
@@ -8566,7 +8627,7 @@ const stillApp = createApp({
       photoCompare, togglePhotoSelect, startCompareSelect, cancelCompareSelect, confirmCompareSelect, quickCompare, openQuickCompare,
       compareBefore, compareAfter, compareStats, dragCompare, closeCompare, shareCompare, exportPhotos,
       photoDue, snoozePhoto, photoStory, photoStoryPair, sharePhotoStory, viewPhotoStory,
-selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, SPORT_DIET_DAYS, sportDietSports, sportDietSport, sportDietKind, setDietSport, sportDayStep, sportDaysOf, toggleSportDay, sportDietWeek, sportDayType, eatGoal, SPORT_BLOCKS, guideBlockStart, selectGuideSession, guideSessionIds, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
+selectedPlanDayMacros, selectedPlanDaySummary, todayMenuCounters, playerCancelSet, openWorkoutRecap, playerOrderOpen, playerUpcomingGroups, openPlayerOrder, playerDoGroupNow, SPORT_DIET_DAYS, sportDietSports, sportDietSport, sportDietKind, setDietSport, sportDayStep, sportDaysOf, toggleSportDay, sportDietWeek, sportDayType, eatGoal, SPORT_BLOCKS, guideBlockStart, selectGuideSession, guideSessionIds, mealInfo, openMealInfo, closeMealInfo, mealInfoData, diaryFavorites, diaryIsFav, toggleDiaryFav,
       deload, startDeload, snoozeDeload, endDeload, exerciseOneRm, exerciseHistoryPlan,
       shareSheet, sharedSheet, acceptSharedSheet,
       LOCALES, i18nLocale, setLocale

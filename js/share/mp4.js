@@ -80,7 +80,9 @@ const pickMp4Config = async (width, height, fps, bitrate) => {
   return null;
 };
 
-const encodeCanvasMp4 = async ({ width, height, fps = 30, duration, draw, onProgress, bitrate = 8000000 }) => {
+// 16 Mbit/s: con 8 gli sfondi sfumati in movimento e le foto facevano blocchi e scalini di colore
+// (il video poi viene ricompresso da Instagram/TikTok, quindi deve partire pulito)
+const encodeCanvasMp4 = async ({ width, height, fps = 30, duration, draw, onProgress, bitrate = 16000000 }) => {
   if (!mp4Supported()) return null;
   const config = await pickMp4Config(width, height, fps, bitrate);
   if (!config) return null;
